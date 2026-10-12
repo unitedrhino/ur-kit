@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+import "google/protobuf/wrappers.proto";
+
+message ConfigEmpty {
+}
+
+message ConfigWithID {
+  int64 ID = 1;
+}
+
+message ConfigInfo {
+  int64 ID = 1;
+  string tenantCode = 2;
+  string type = 3;
+  string name = 4;
+  string configID = 5;
+  string jsonData = 7;
+  string modelType = 13;
+  string inputModalities = 15;
+  string outputModalities = 16;
+  int64 contextLength = 17;  // 上下文窗口长度（token 数），默认 262144 (256k)
+  bool enabled = 8;
+  bool isDefault = 9;
+  int64 createdTime = 10;
+  int64 updatedTime = 11;
+}
+
+message ConfigInfoGetOneReq {
+  string tenantCode = 1;
+  int64 ID = 2;
+}
+
+message ConfigInfoGetListReq {
+  PageInfo page = 1;
+  string tenantCode = 2;
+  string type = 3;
+  string name = 4;
+  string configID = 5;
+  google.protobuf.BoolValue enabled = 7;
+}
+
+message ConfigInfoGetListResp {
+  repeated ConfigInfo list = 1;
+  int64 total = 2;
+}
+
+message ConfigDefaultGetOneReq {
+  string tenantCode = 1;
+  string type = 2;
+}
+
+message ConfigInfoListByTypeReq {
+  string tenantCode = 1;
+  string type = 2;
+  bool onlyEnabled = 3;
+}
+
+message ConfigInfoListByTypeResp {
+  repeated ConfigInfo list = 1;
+}
+
+service Config {
+  rpc ConfigInfoGetList(ConfigInfoGetListReq) returns (ConfigInfoGetListResp);
+  rpc ConfigInfoGetOne(ConfigInfoGetOneReq) returns (ConfigInfo);
+  rpc ConfigInfoCreate(ConfigInfo) returns (ConfigWithID);
+  rpc ConfigInfoUpdate(ConfigInfo) returns (ConfigEmpty);
+  rpc ConfigInfoDelete(ConfigInfoGetOneReq) returns (ConfigEmpty);
+  rpc ConfigDefaultSet(ConfigInfoGetOneReq) returns (ConfigEmpty);
+  rpc ConfigDefaultGetOne(ConfigDefaultGetOneReq) returns (ConfigInfo);
+  rpc ConfigInfoListByType(ConfigInfoListByTypeReq) returns (ConfigInfoListByTypeResp);
+}

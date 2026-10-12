@@ -1,0 +1,86 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// CloneGroupEmpty CloneGroup 服务通用空响应。
+message CloneGroupEmpty {
+}
+
+// CloneGroupWithID CloneGroup 服务通用 ID 响应。
+message CloneGroupWithID {
+  int64 ID = 1;
+}
+
+// CloneGroupInfo Clone 组信息（ai_clone_groups）。
+message CloneGroupInfo {
+  int64 ID = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // agentGroupID 关联 AgentGroup ID
+  int64 agentGroupID = 3;
+  // thirdID 第三方业务ID（如 projectID）
+  string thirdID = 4;
+  // code Clone 组编码（租户内唯一）
+  string code = 5;
+  // name Clone 组名称
+  string name = 6;
+  // description 描述
+  string description = 7;
+  // ttsConfigID 组级 TTS 配置 ID
+  string ttsConfigID = 8;
+  // voiceParams 组级语音参数（JSON 字符串）
+  string voiceParams = 9;
+  // isDefault 是否默认组 1-是 2-否
+  int64 isDefault = 10;
+  // status 状态 1-启用 2-禁用
+  int64 status = 11;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 12;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 13;
+  // 权限类型及关联组展示名。
+  string authType = 14;
+  string agentGroupName = 15;
+}
+
+// CloneGroupGetOneReq 读取单个 Clone 组请求。
+message CloneGroupGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Clone 组 ID
+  int64 ID = 2;
+}
+
+// CloneGroupGetListReq Clone 组列表查询请求。
+message CloneGroupGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // agentGroupID 关联 AgentGroup ID（0 表示不筛）
+  int64 agentGroupID = 3;
+  // thirdID 第三方业务ID（如 projectID）
+  string thirdID = 4;
+  // name 名称模糊筛选
+  string name = 5;
+  // status 状态筛选（0 表示不筛）
+  int64 status = 6;
+}
+
+// CloneGroupGetListResp Clone 组列表查询响应。
+message CloneGroupGetListResp {
+  repeated CloneGroupInfo list = 1;
+  int64 total = 2;
+}
+
+// CloneGroup Clone 组服务（一个 proto 一个 service）。
+service CloneGroup {
+  rpc CloneGroupCreate(CloneGroupInfo) returns(CloneGroupWithID);
+  rpc CloneGroupUpdate(CloneGroupInfo) returns(CloneGroupEmpty);
+  rpc CloneGroupDelete(CloneGroupGetOneReq) returns(CloneGroupEmpty);
+  rpc CloneGroupGetOne(CloneGroupGetOneReq) returns(CloneGroupInfo);
+  rpc CloneGroupGetList(CloneGroupGetListReq) returns(CloneGroupGetListResp);
+}

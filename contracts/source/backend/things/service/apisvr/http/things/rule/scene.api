@@ -1,0 +1,111 @@
+info(
+    title: "场景联动信息模块"
+    desc: "场景联动信息模块"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/rule/scene/info
+    prefix: /api/v1/things/rule/scene/info
+    accessCodePrefix: "thingsRuleScene"
+    accessNamePrefix: "场景联动"
+    accessGroup: "规则引擎"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "新增场景(弃用)"
+        description: "业务说明：创建场景联动规则（已弃用，请使用新版规则引擎接口）。场景联动用于定义设备状态变化触发执行动作的自动化规则，如温度传感器超过阈值触发空调开启。包含触发条件（设备属性、定时、外部事件）和执行动作（设备控制、消息通知、场景触发）。创建后可手动触发或自动执行。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (SceneInfo) returns (WithID)
+    @doc(
+        summary: "更新场景(弃用)"
+        description: "业务说明：修改场景联动规则配置（已弃用）。可调整触发条件、执行动作、规则名称、描述等。注意：更新后正在执行的场景不受影响，新触发按更新后规则执行。适用于：调整自动化逻辑、优化触发阈值、增加执行动作。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (SceneInfo) returns ()
+    @doc(
+        summary: "删除场景(弃用)"
+        description: "业务说明：删除场景联动规则（已弃用）。删除后规则不再执行，历史执行日志保留。适用于：清理废弃规则、简化自动化配置。注意：删除操作不可恢复，需确认无依赖场景后再删除。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+    @doc(
+        summary: "获取场景信息列表(弃用)"
+        description: "业务说明：查询场景联动规则列表（已弃用）。返回规则基本信息（名称、触发类型、执行状态、创建时间等），支持分页查询。用于管理界面展示自动化规则清单、规则执行状态监控。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (SceneInfoGetListReq) returns (SceneInfoGetListResp)
+    @doc(
+        summary: "获取场景信息详情(弃用)"
+        description: "业务说明：获取单个场景联动规则的完整配置（已弃用）。包括触发条件定义（设备属性条件、定时触发、外部事件触发）、执行动作列表（设备控制动作、消息通知动作、联动触发动作）、规则执行状态等。用于规则详情查看、复制规则配置、规则调试分析。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (SceneInfo)
+    @doc(
+        summary: "手动触发场景(弃用)"
+        description: "业务说明：人工触发场景联动规则执行（已弃用）。不等待触发条件满足，立即执行场景定义的所有动作。适用于：测试规则执行效果、紧急情况下手动执行自动化逻辑、临时触发批量设备操作。触发后场景执行日志会记录为手动触发类型。"
+        authType: "admin"
+        group: "things/rule/scene/info"
+        resource: "things/rule/scene/info"
+        action: "trigger"
+        recordLogMode: "1"
+    )
+    @handler ManuallyTrigger
+    post /manually-trigger (WithID) returns ()
+}
+
+@server(
+    group: things/rule/scene/log
+    prefix: /api/v1/things/rule/scene/log
+    accessCodePrefix: "thingsRuleScene"
+    accessNamePrefix: "场景联动"
+    accessGroup: "规则引擎"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "获取场景日志列表(弃用)"
+        description: "业务说明：查询场景联动规则的执行日志（已弃用）。记录每次场景触发的详情（触发时间、触发类型自动/手动、执行结果、执行动作列表及各动作执行状态）。用于自动化执行分析、规则调试、执行异常排查。支持按场景ID、时间范围过滤。"
+        authType: "admin"
+        group: "things/rule/scene/log"
+        resource: "things/rule/scene/log"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (SceneLogGetListReq) returns (SceneLogGetListResp)
+}
+

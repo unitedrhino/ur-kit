@@ -1,0 +1,572 @@
+//--------------------告警 V2 服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "dmShare.proto";
+import "google/protobuf/wrappers.proto";
+
+// 告警 V2 对外服务
+service Alarm {
+  // ---------------- 告警规则 ----------------
+  rpc alarmInfoCreate(AlarmInfoCreateReq) returns (AlarmInfoWithID);
+  rpc alarmInfoUpdate(AlarmInfoUpdateReq) returns (ShareEmpty);
+  rpc alarmInfoDelete(AlarmInfoWithID) returns (ShareEmpty);
+  rpc alarmInfoGetOne(AlarmInfoWithID) returns (AlarmInfo);
+  rpc alarmInfoGetList(AlarmInfoGetListReq) returns (AlarmInfoGetListResp);
+  rpc alarmInfoStatusUpdate(AlarmInfoStatusUpdateReq) returns (ShareEmpty);
+  rpc alarmCapabilityGetOne(ShareEmpty) returns (AlarmCapability);
+
+  // ---------------- 触发条件模板 ----------------
+  rpc alarmConditionTemplateCreate(AlarmConditionTemplateCreateReq) returns (AlarmInfoWithID);
+  rpc alarmConditionTemplateUpdate(AlarmConditionTemplateUpdateReq) returns (ShareEmpty);
+  rpc alarmConditionTemplateDelete(AlarmInfoWithID) returns (ShareEmpty);
+  rpc alarmConditionTemplateGetOne(AlarmInfoWithID) returns (AlarmConditionTemplate);
+  rpc alarmConditionTemplateGetList(AlarmConditionTemplateGetListReq) returns (AlarmConditionTemplateGetListResp);
+
+  // ---------------- 通知内容模板 ----------------
+  rpc alarmNotifyTemplateCreate(AlarmNotifyTemplateCreateReq) returns (AlarmInfoWithID);
+  rpc alarmNotifyTemplateUpdate(AlarmNotifyTemplateUpdateReq) returns (ShareEmpty);
+  rpc alarmNotifyTemplateDelete(AlarmInfoWithID) returns (ShareEmpty);
+  rpc alarmNotifyTemplateGetOne(AlarmInfoWithID) returns (AlarmNotifyTemplate);
+  rpc alarmNotifyTemplateGetList(AlarmNotifyTemplateGetListReq) returns (AlarmNotifyTemplateGetListResp);
+  rpc alarmNotifyTemplateTestSend(AlarmNotifyTemplateTestSendReq) returns (ShareEmpty);
+
+  // ---------------- 告警事件 ----------------
+  rpc alarmEventGetList(AlarmEventGetListReq) returns (AlarmEventGetListResp);
+  rpc alarmEventGetOne(AlarmEventWithID) returns (AlarmEventDetail);
+  rpc alarmEventDeal(AlarmEventDealReq) returns (ShareEmpty);
+  rpc alarmEventFalseAlarm(AlarmEventFalseAlarmReq) returns (ShareEmpty);
+
+  // ---------------- 通知记录 ----------------
+  rpc alarmNotifyRecordGetList(AlarmNotifyRecordGetListReq) returns (AlarmNotifyRecordGetListResp);
+  rpc alarmNotifyRecordResend(AlarmNotifyRecordResendReq) returns (ShareEmpty);
+
+  // ---------------- 告警统计 ----------------
+  rpc alarmEventStat(AlarmEventStatReq) returns (AlarmEventStatResp);
+
+  // ---------------- 内部评估触发 ----------------
+  rpc alarmEvaluateTrigger(AlarmEvaluateTriggerReq) returns (ShareEmpty);
+
+  // ---------------- 告警工具开发 ----------------
+  rpc alarmToolDevSession(AlarmToolDevSessionReq) returns (AlarmToolDevSessionResp);
+}
+
+// ---------------- 公共结构 ----------------
+
+// 告警能力矩阵
+message AlarmCapability {
+  string version = 1;
+  repeated AlarmSourceCapability sources = 2;
+  repeated AlarmCriterionCapability criteria = 3;
+  repeated string targets = 4;
+  AlarmNotifyCapability notify = 5;
+}
+
+message AlarmSourceCapability {
+  string sourceType = 1;
+  repeated string dataTypes = 2;
+  repeated string compareTypes = 3;
+  bool supportsFilters = 4;
+  repeated AlarmAggregateCapability aggregates = 5;
+}
+
+message AlarmAggregateCapability {
+  string dataType = 1;
+  repeated string values = 2;
+  map<string, AlarmCompareCapability> compares = 3;
+}
+
+message AlarmCompareCapability {
+  repeated string values = 1;
+}
+
+message AlarmCriterionCapability {
+  string type = 1;
+  repeated string allowedChildren = 2;
+}
+
+message AlarmNotifyCapability {
+  repeated string channels = 1;
+  repeated string timings = 2;
+  repeated string callbackMethods = 3;
+  repeated string callbackAuthTypes = 4;
+}
+
+// 告警目标
+message AlarmTarget {
+  string selectType = 1;                 // all / fixed / area / areaWithChildren / group
+  string categoryID = 2;                 // 产品品类 ID；选择品类级目标时填写
+  string productID = 3;                  // 产品 ID；选择产品级目标时填写
+  repeated AlarmTargetDevice devices = 4; // 指定设备列表（fixed 时用）
+  repeated int64 areas = 5;              // 区域 ID 列表
+  repeated int64 groups = 6;             // 分组 ID 列表
+}
+
+message AlarmTargetDevice {
+  string productID = 1;
+  string name = 2;                       // 设备名
+  string alias = 3;                      // 设备别名（只读）
+}
+
+// 触发条件
+message AlarmIf {
+  repeated AlarmTrigger triggers = 1;
+}
+
+message AlarmTrigger {
+  int64 id = 1;                          // 前端稳定标识
+  string type = 2;                       // and / or
+  string level = 3;                      // remind / minor / major / critical
+  int64 templateID = 4;                  // 关联的触发条件模板 ID；非空时 criteria 从模板实时加载
+  string templateName = 5;               // 模板名称（只读展示）
+  repeated AlarmCriterion criteria = 6;  // 自定义条件；templateID 为空时使用
+}
+
+message AlarmCriterion {
+  int64 id = 1;                          // 前端稳定标识
+  string type = 2;                       // plain / duration / kOfN / rollingAggregate / frequency
+  int64 order = 3;
+  AlarmPlainCriterion plain = 4;
+  AlarmDurationCriterion duration = 5;
+  AlarmKOfNCriterion kOfN = 6;
+  AlarmRollingAggregateCriterion rollingAggregate = 7;
+  AlarmFrequencyCriterion frequency = 8;
+}
+
+message AlarmLeafCondition {
+  string sourceType = 1;                 // property / event / online / action
+  string dataID = 2;                     // 物模型参数标识
+  AlarmCompare compare = 3;
+  int64 period = 4;                      // 统计周期（秒），默认 60
+  string aggregateMethod = 5;            // last / average / max / min / sum / count，默认 last
+  int64 continuePeriod = 6;              // 持续周期数，默认 1
+  int64 id = 7;                          // 叶子稳定标识，用于连续周期状态隔离
+  repeated AlarmFieldFilter filters = 8; // 事件或行为参数过滤，内部固定 AND
+}
+
+message AlarmFieldFilter {
+  string column = 1;                     // 参数成员路径
+  string cmpType = 2;                    // eq / not / btw / gt / gte / lt / lte / in
+  repeated string values = 3;            // 比较值
+}
+
+message AlarmCompare {
+  string cmpType = 1;                    // eq / not / btw / gt / gte / lt / lte / in / all
+  repeated string values = 2;
+}
+
+message AlarmPlainCriterion {
+  repeated AlarmLeafCondition leaves = 1;
+}
+
+message AlarmDurationCriterion {
+  int64 durationSeconds = 1;             // 持续满足条件的秒数
+  AlarmCriterion child = 2;
+}
+
+message AlarmKOfNCriterion {
+  int64 k = 1;                           // 至少需要命中多少个子条件
+  int64 n = 2;                           // 子条件总数，由 children 长度决定，校验时 k ≤ n
+  repeated AlarmCriterion children = 3;
+}
+
+message AlarmRollingAggregateCriterion {
+  int64 windowSeconds = 1;
+  string aggregate = 2;                  // max / min / avg
+  double threshold = 3;
+  string cmp = 4;                        // gt / gte / lt / lte
+  AlarmCriterion child = 5;
+}
+
+message AlarmFrequencyCriterion {
+  int64 windowSeconds = 1;
+  int64 times = 2;
+  AlarmCriterion child = 3;
+}
+
+// 通知目标
+message AlarmNotifyTargets {
+  repeated int64 userIDs = 1;            // 首期仅支持用户 ID
+  repeated int64 groupIDs = 2;           // 用户组 ID（首期不使用）
+  repeated int64 roleIDs = 3;            // 角色 ID（首期不使用）
+  repeated string phones = 4;            // 直接填写的手机号列表（仅短信渠道生效）
+  repeated string emails = 5;            // 直接填写的邮箱列表（仅邮件渠道生效）
+}
+
+// 接口回调
+message AlarmCallbackConfig {
+  string name = 1;
+  string method = 2;                     // GET / POST
+  string url = 3;
+  map<string, string> headers = 4;
+  string bodyTemplate = 5;
+  string authType = 6;                   // none / basic / bearer
+  string authToken = 7;                  // basic: user:pass base64 / bearer: token
+  int64 timeoutSeconds = 8;              // 默认 10
+  int64 retryTimes = 9;                  // 默认 0
+  string notifyCycle = 10;               // all / workday / weekend
+  string notifyStartTime = 11;           // HH:mm:ss
+  string notifyEndTime = 12;             // HH:mm:ss
+}
+
+// 通知阶梯
+message AlarmNotifyLadder {
+  int64 order = 1;
+  string timing = 2;                     // trigger / recovery / both
+  repeated string levels = 3;            // 绑定的告警级别
+  repeated string channels = 4;          // 选择的渠道
+  map<string, int64> channelTemplates = 5; // channel -> notifyTemplateID
+  int64 delaySeconds = 6;
+  int64 repeatIntervalSeconds = 9;         // 未处理重复提醒间隔秒数，0=不重复
+  int64 repeatMaxCount = 10;               // 重复提醒最大次数，0=不限
+  AlarmNotifyTargets targets = 7;
+  repeated AlarmCallbackConfig callbacks = 8;
+}
+
+// ---------------- 告警规则 ----------------
+
+// AlarmAiConfig 告警 AI 判断配置（规则级）
+// 告警触发后、真正发送通知前，按此配置调用绑定的 AI 工具进行判断，决定是否通知。
+message AlarmAiConfig {
+  bool enable = 1;    // 是否启用 AI 判断
+  int64 toolID = 2;   // 绑定的 AI 工具 ID（数字分身页 ai/digital-clone/1?tab=tools）
+  string prompt = 3;  // 用户提示词，拼装进工具入参，指导判断口径
+  int64 timeout = 4;  // 等待工具出参的超时秒数，默认 10，上限 30
+}
+
+message AlarmInfo {
+  int64 id = 1;
+  int64 projectID = 2;
+  string name = 3;
+  string desc = 4;
+  AlarmTarget target = 5;
+  string targetName = 6;                 // 目标展示名快照
+  AlarmIf if = 7;                        // 触发条件
+  repeated AlarmNotifyLadder ladders = 8;
+  int64 evalPeriod = 9;                  // 评估周期（分钟），必须 ≥ 1
+  int64 status = 10;                     // 1 启用，2 停用
+  int64 version = 11;
+  int64 createdTime = 12;
+  int64 updatedTime = 13;
+  AlarmAiConfig aiConfig = 14;           // AI 判断配置，为空表示不启用
+}
+
+message AlarmInfoCreateReq {
+  string name = 1;
+  string desc = 2;
+  AlarmTarget target = 3;
+  AlarmIf if = 4;
+  repeated AlarmNotifyLadder ladders = 5;
+  int64 evalPeriod = 6;
+  AlarmAiConfig aiConfig = 7;            // AI 判断配置，为空表示不启用
+}
+
+message AlarmInfoUpdateReq {
+  int64 id = 1;
+  string name = 2;
+  string desc = 3;
+  AlarmTarget target = 4;
+  AlarmIf if = 5;
+  repeated AlarmNotifyLadder ladders = 6;
+  int64 evalPeriod = 7;
+  AlarmAiConfig aiConfig = 8;            // AI 判断配置，为空表示不启用
+}
+
+message AlarmInfoWithID {
+  int64 id = 1;
+}
+
+message AlarmInfoStatusUpdateReq {
+  int64 id = 1;
+  int64 status = 2;
+}
+
+message AlarmInfoGetListReq {
+  PageInfo page = 1;
+  string keyword = 2;                    // 名称模糊搜索
+  int64 status = 3;                      // 1 启用，2 停用
+  string productID = 4;                  // 按目标产品过滤
+  repeated string levels = 5;            // 按触发条件级别过滤
+  TimeRange createdTimeRange = 6;
+}
+
+message AlarmInfoGetListResp {
+  repeated AlarmInfo list = 1;
+  int64 total = 2;
+}
+
+// ---------------- 触发条件模板 ----------------
+
+message AlarmConditionTemplate {
+  int64 id = 1;
+  string name = 2;
+  string desc = 3;
+  string productID = 4;
+  string productCategoryID = 5;
+  AlarmIf if = 6;
+  int64 refCount = 7;
+  int64 status = 8;                      // 1 启用，2 停用
+  int64 createdTime = 9;
+  int64 updatedTime = 10;
+}
+
+message AlarmConditionTemplateCreateReq {
+  string name = 1;
+  string desc = 2;
+  string productID = 3;
+  string productCategoryID = 4;
+  AlarmIf if = 5;
+}
+
+message AlarmConditionTemplateUpdateReq {
+  int64 id = 1;
+  string name = 2;
+  string desc = 3;
+  string productID = 4;
+  string productCategoryID = 5;
+  AlarmIf if = 6;
+  int64 status = 7;
+}
+
+message AlarmConditionTemplateGetListReq {
+  PageInfo page = 1;
+  string keyword = 2;
+  string productID = 3;
+  string productCategoryID = 4;
+  int64 status = 5;
+}
+
+message AlarmConditionTemplateGetListResp {
+  repeated AlarmConditionTemplate list = 1;
+  int64 total = 2;
+}
+
+// ---------------- 通知内容模板 ----------------
+
+message AlarmNotifyTemplate {
+  int64 id = 1;
+  string name = 2;
+  string desc = 3;
+  string channel = 4;                    // sms / email / phone / wechat / wechatWork / wechatWorkBot / dingTalkBot / feishuBot
+  string subject = 5;
+  string triggerBody = 6;
+  string recoveryBody = 7;
+  map<string, string> headers = 8;
+  int64 refCount = 9;
+  int64 status = 10;                     // 1 启用，2 停用
+  int64 createdTime = 11;
+  int64 updatedTime = 12;
+}
+
+message AlarmNotifyTemplateCreateReq {
+  string name = 1;
+  string desc = 2;
+  string channel = 3;
+  string subject = 4;
+  string triggerBody = 5;
+  string recoveryBody = 6;
+  map<string, string> headers = 7;
+}
+
+message AlarmNotifyTemplateUpdateReq {
+  int64 id = 1;
+  string name = 2;
+  string desc = 3;
+  string channel = 4;
+  string subject = 5;
+  string triggerBody = 6;
+  string recoveryBody = 7;
+  map<string, string> headers = 8;
+  int64 status = 9;
+}
+
+message AlarmNotifyTemplateGetListReq {
+  PageInfo page = 1;
+  string keyword = 2;
+  string channel = 3;
+  int64 status = 4;
+}
+
+message AlarmNotifyTemplateGetListResp {
+  repeated AlarmNotifyTemplate list = 1;
+  int64 total = 2;
+}
+
+message AlarmNotifyTemplateTestSendReq {
+  int64 id = 1;
+  string timing = 2;                     // trigger / recovery
+  AlarmNotifyTargets targets = 3;
+}
+
+// ---------------- 告警事件 ----------------
+
+message AlarmEvent {
+  int64 id = 1;
+  int64 alarmID = 2;
+  string alarmName = 3;
+  AlarmTarget target = 4;
+  string targetName = 5;
+  string productID = 6;
+  string deviceName = 7;
+  string level = 8;
+  string status = 9;
+  string triggerValue = 10;
+  string triggerContent = 11;
+  int64 firstTriggerTime = 12;
+  int64 lastTriggerTime = 13;
+  int64 triggerCount = 14;
+  int64 recoveryTime = 15;
+  bool falseAlarm = 16;
+  string falseAlarmReason = 17;
+  string falseAlarmReasonType = 18;      // configurationError / dataError / drill / other
+  int64 createdTime = 19;
+  int64 updatedTime = 20;
+  string deviceID = 21;                  // 设备记录 ID（dm_device_info.id），列表展示「设备名称(设备ID)」
+}
+
+message AlarmEventGetListReq {
+  PageInfo page = 1;
+  string keyword = 2;
+  repeated string status = 3;            // normal / alarmActive / acked / recovering / shielded
+  repeated string level = 4;             // remind / minor / major / critical
+  int64 alarmID = 5;
+  string productID = 6;
+  string deviceName = 7;
+  TimeRange triggerTimeRange = 8;
+  google.protobuf.BoolValue isRecovered = 9;
+  google.protobuf.BoolValue isFalseAlarm = 10;
+}
+
+message AlarmEventGetListResp {
+  repeated AlarmEvent list = 1;
+  int64 total = 2;
+}
+
+message AlarmEventWithID {
+  int64 id = 1;
+}
+
+message AlarmEventDetail {
+  AlarmEvent event = 1;
+  repeated AlarmDealRecord dealRecords = 2;
+  repeated AlarmNotifyRecord notifyRecords = 3;
+}
+
+message AlarmDealRecord {
+  int64 id = 1;
+  int64 eventID = 2;
+  string action = 3;
+  string fromStatus = 4;
+  string toStatus = 5;
+  int64 operatorID = 6;
+  string operatorName = 7;
+  string remark = 8;
+  int64 createdTime = 9;
+}
+
+message AlarmEventDealReq {
+  int64 eventID = 1;
+  string action = 2;                     // ack / shield / unshield
+  string remark = 3;
+}
+
+message AlarmEventFalseAlarmReq {
+  int64 eventID = 1;
+  string reason = 2;
+  string reasonType = 3;                 // configurationError / dataError / drill / other
+}
+
+// ---------------- 通知记录 ----------------
+
+message AlarmNotifyRecord {
+  int64 id = 1;
+  int64 eventID = 2;
+  int64 alarmID = 3;
+  string timing = 4;
+  int64 ladderOrder = 5;
+  string channel = 6;
+  int64 templateID = 7;
+  AlarmNotifyTargets targets = 8;
+  string content = 9;
+  string status = 10;
+  int64 retryTimes = 11;
+  string externalResp = 12;
+  string failReason = 13;
+  int64 createdTime = 14;
+  int64 sentTime = 15;
+  string alarmName = 16;
+  string targetName = 17;
+}
+
+message AlarmNotifyRecordGetListReq {
+  PageInfo page = 1;
+  int64 eventID = 2;
+  int64 alarmID = 3;
+  repeated string status = 4;            // pending / success / fail / canceled
+  string timing = 5;                     // trigger / recovery
+  repeated string channel = 6;
+  TimeRange createdTimeRange = 7;
+  string alarmName = 8;                 // 规则名称模糊查询
+  string targetName = 9;                // 告警对象模糊查询
+}
+
+message AlarmNotifyRecordGetListResp {
+  repeated AlarmNotifyRecord list = 1;
+  int64 total = 2;
+}
+
+message AlarmNotifyRecordResendReq {
+  int64 id = 1;
+}
+
+// ---------------- 告警统计 ----------------
+
+message AlarmEventStatReq {
+  string groupBy = 1;                    // level / status / alarm / date / product
+  TimeRange triggerTimeRange = 2;
+  repeated string status = 3;
+  repeated string level = 4;
+}
+
+message AlarmEventStatResp {
+  repeated AlarmEventStatItem list = 1;
+}
+
+message AlarmEventStatItem {
+  string key = 1;
+  string name = 2;
+  int64 total = 3;
+  int64 unRecovered = 4;
+  int64 recovered = 5;
+}
+
+// ---------------- 内部评估触发 ----------------
+
+message AlarmEvaluateTriggerReq {
+  repeated int64 alarmIDs = 1;           // 为空表示全量扫描
+}
+
+// ---------------- 告警工具开发 ----------------
+
+// AlarmToolDevSessionReq 告警 AI 判断工具开发会话初始化请求
+// 用于为项目幂等初始化一个项目级告警工具开发 clone（含场景化 persona 提示词），
+// 前端拿到 cloneID 后即可在 aisvr tool-dev 会话中开发/调试告警 AI 判断工具。
+message AlarmToolDevSessionReq {
+  int64 toolID = 1;         // 绑定的告警 AI 工具 ID（必填）
+  int64 cloneGroupID = 2;   // 项目 cloneGroup ID（必填），clone 挂载与记忆归属的分组
+  string ruleName = 3;      // 告警规则名称（场景提示词变量）
+  string sourceLabel = 4;   // 告警来源描述，如「设备属性上报」（场景提示词变量）
+  string productID = 5;     // 产品 ID（场景提示词变量）
+  string productName = 6;   // 产品名称（场景提示词变量）
+  string categoryName = 7;  // 产品品类名称（场景提示词变量）
+  string scopeLabel = 8;    // 设备范围描述，如「A 区全部温湿度传感器」（场景提示词变量）
+  string evalPeriod = 9;    // 评估周期描述，如「5 分钟」（场景提示词变量）
+  int64 projectID = 10;     // 项目 ID（场景上下文）
+  string triggerCondition = 11; // 触发条件可读摘要，如「同时满足：Ua的60秒内的最新值>200」（场景提示词变量）
+}
+
+// AlarmToolDevSessionResp 告警工具开发会话初始化响应
+message AlarmToolDevSessionResp {
+  int64 cloneID = 1;        // 告警工具开发 clone ID，供 tool-dev 会话指定
+}

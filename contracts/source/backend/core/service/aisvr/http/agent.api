@@ -1,0 +1,155 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-助手管理"
+	desc:    "AI Agent Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 助手类型定义 ----
+
+type AgentInfo {
+	voicePipeline *string `json:"voicePipeline,optional"` // 语音链路 cascade/realtime；未传不修改，空值继承分组
+	realtimeConfigID *string `json:"realtimeConfigID,optional"` // 实时模型业务ID；未传不修改，空值继承分组
+	interactionMode *string `json:"interactionMode,optional"` // 交互策略 auto/halfDuplex/fullDuplex；空值继承分组
+	ID             int64    `json:"id,optional"`             // 助手ID
+	tenantCode     string   `json:"tenantCode,optional"`    // 租户编码
+	userID         int64    `json:"userID,optional"`        // 用户ID
+	groupID        int64    `json:"groupID,optional"`       // 所属助手组ID
+	code           string   `json:"code,optional"`          // 助手编码（租户内唯一）
+	name           string   `json:"name"`                   // 助手名称
+	customPrompt   string   `json:"customPrompt,optional"` // 自定义提示词（旧版，兼容保留）
+	llmConfigID    string   `json:"llmConfigID,optional"`  // LLM配置ID
+	llmModelType   string   `json:"llmModelType,optional"` // LLM模型级别
+	ttsConfigID    string   `json:"ttsConfigID,optional"`  // TTS配置ID
+	asrSpeed       string   `json:"asrSpeed,optional"`     // ASR语速（旧版，兼容保留）
+	avatar         string   `json:"avatar,optional"`       // 助手头像URL
+	description    string   `json:"description,optional"`  // 助手描述
+	systemPrompt   string   `json:"systemPrompt,optional"` // 系统提示词
+	welcomeMessage string   `json:"welcomeMessage,optional"` // 欢迎语
+	asrConfigID    string   `json:"asrConfigID,optional"`  // ASR配置ID
+	visionConfigID string   `json:"visionConfigID,optional"` // 视觉配置ID
+	capabilities   []string `json:"capabilities,optional"` // 能力列表
+	llmParams      string   `json:"llmParams,optional"`    // LLM参数（JSON字符串）
+	voiceParams    string   `json:"voiceParams,optional"`  // 语音参数（JSON字符串）
+	mcpServiceIds  string   `json:"mcpServiceIds,optional"` // MCP服务ID列表（JSON字符串）
+	skillIds       string   `json:"skillIds,optional"`      // Skill ID列表（JSON字符串）
+	knowledgeBaseIds string `json:"knowledgeBaseIds,optional"` // 知识库ID列表（JSON字符串）
+	isAllSkill     int64    `json:"isAllSkill,optional"`   // 是否使用全部Skills 1-是 2-否
+	isAllMcp       int64    `json:"isAllMcp,optional"`     // 是否使用全部MCP 1-是 2-否
+	isAllKb        int64    `json:"isAllKb,optional"`      // 是否使用全部知识库 1-是 2-否
+	isPublic       int64    `json:"isPublic,optional"`     // 是否公开 1-是 2-否
+	sort           int64    `json:"sort,optional"`         // 排序权重
+	status         int64    `json:"status,string,optional"`      // 助手状态 1-启用 2-禁用
+}
+
+// 智能体列表允许排序的字段和方向。
+type AgentOrderBy {
+	field string `json:"field"` // 排序字段：name 名称，status 状态
+	sort  int64  `json:"sort"`  // 排序方向：1 升序，2 降序
+}
+
+// 智能体列表的分页与排序参数。
+type AgentPageInfo {
+	page     int64          `json:"page,optional"`     // 页码（从1开始）
+	pageSize int64          `json:"pageSize,optional"` // 每页大小
+	orders   []AgentOrderBy `json:"orders,optional"`   // 排序条件
+}
+
+type AgentGetListReq {
+		isGetAll   bool     `json:"isGetAll,optional"`   // 是否返回所有（管理员看全租户，默认 false=个人视图）
+	page       AgentPageInfo `json:"page,optional"`       // 分页信息
+	tenantCode string   `json:"tenantCode,optional"` // 租户编码过滤
+	name       string   `json:"name,optional"`       // 名称模糊搜索
+	groupID    int64    `json:"groupID,optional"`    // 按助手组ID过滤
+	status     string   `json:"status,optional"`     // 状态过滤
+}
+
+type AgentGetListResp {
+	list  []AgentInfo `json:"list"`  // 助手列表
+	total int64       `json:"total"` // 总数
+}
+
+type AgentGetOneReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // 助手ID
+}
+
+type AgentDeleteReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // 助手ID
+}
+
+// ---- 助手管理服务定义 ----
+
+@server (
+	group:            ai/agent/info
+	prefix:           /api/v1/ai/agent/info
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiAgentManage"
+	accessNamePrefix: "助手管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建助手"
+		description: "业务说明：创建新的AI助手实例，配置其基础信息、LLM/TTS/ASR配置、系统提示词、MCP服务关联等。助手是用户与AI交互的核心实体，需要绑定到助手组后才能被用户访问。"
+		authType: "admin"
+		resource: "ai/agent"
+		action: "create"
+		group: "ai/agent"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (AgentInfo) returns (WithID)
+
+	@doc(
+		summary: "更新助手"
+		description: "业务说明：修改已存在的AI助手配置，包括名称、提示词、头像、各模态配置ID（LLM/TTS/ASR/Vision）、能力列表、MCP服务绑定等。部分更新支持，空值字段不会被修改。"
+		authType: "admin"
+		resource: "agent"
+		action: "update"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (AgentInfo)
+
+	@doc(
+		summary: "删除助手"
+		description: "业务说明：删除指定的AI助手记录。删除前需确保该助手没有活跃的会话或分身关联，否则可能导致业务中断。删除操作不可恢复。"
+		authType: "admin"
+		resource: "agent"
+		action: "delete"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (AgentDeleteReq)
+
+	@doc(
+		summary: "获取助手详情"
+		description: "业务说明：根据助手ID查询完整的助手配置信息，包括所有字段配置。用于编辑助手时的数据回显、详情查看等场景。返回的configID可用于查询对应配置的具体参数。"
+		authType: "admin"
+		resource: "agent"
+		action: "view"
+		group: "AI中台"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (AgentGetOneReq) returns (AgentInfo)
+
+	@doc(
+		summary: "获取助手列表"
+		description: "业务说明：分页查询助手列表，支持按租户、名称、助手组ID、状态等条件过滤，并支持按名称或状态排序。未指定排序时按ID倒序排列。用于助手管理页面的列表展示、助手选择器等场景。"
+		authType: "admin"
+		resource: "agent"
+		action: "view"
+		group: "AI中台"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (AgentGetListReq) returns (AgentGetListResp)
+}

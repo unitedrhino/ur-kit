@@ -1,0 +1,80 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡上游资费组"
+    desc: "物联卡上游接口返回资费组信息查询"
+    version: "v1"
+)
+
+type (
+    CardApiOfferingInfo {
+        ID           int64  `json:"id,string"`
+        RouteCode    string `json:"routeCode"`
+        OfferingID   string `json:"offeringId"`
+        OfferingName string `json:"offeringName"`
+        ApnName      string `json:"apnName,optional"`
+        Type         int64  `json:"type"`
+        // FactType 区分基础资费事实 rating 与事件资费事实 event。
+        FactType     string `json:"factType"`
+        // SourceIccid 是查询可用事件资费时使用的显式 ICCID 上下文。
+        SourceIccid  string `json:"sourceIccid,optional"`
+        // EventVersion 是上游事件计划版本。
+        EventVersion int64 `json:"eventVersion,optional"`
+        // TermMinutes 是事件有效期，单位分钟；空值表示上游未知。
+        TermMinutes *float64 `json:"termMinutes,optional"`
+        // Price 是事件价格；空值表示上游未知，零值表示明确免费。
+        Price *float64 `json:"price,optional"`
+        // IncludedData 是事件包含流量，单位 MB。
+        IncludedData *float64 `json:"includedData,optional"`
+        // DataOverageRate 是上游返回的事件流量超额费率，计费单位以运营商合同为准。
+        DataOverageRate *float64 `json:"dataOverageRate,optional"`
+        CreateDate   string `json:"createDate"`
+        UpdateDate   string `json:"updateDate"`
+    }
+
+    CardApiOfferingInfoGetListReq {
+        PageInfo
+        RouteCode    string `json:"routeCode,optional"`
+        OfferingID   string `json:"offeringId,optional"`
+        OfferingName string `json:"offeringName,optional"`
+        // SourceIccid 按显式 ICCID 筛选设备上下文中的可用事件资费。
+        SourceIccid  string `json:"sourceIccid,optional"`
+    }
+
+    CardApiOfferingInfoGetListResp {
+        PageResp
+        List []*CardApiOfferingInfo `json:"list"`
+    }
+)
+
+@server(
+    group: card/offeringInfo
+    prefix: /api/v1/things/card/offering-info
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取上游资费组列表"
+        description: "业务说明：按通道编码等条件分页查询上游资费组"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardApiOfferingInfoGetListReq) returns (CardApiOfferingInfoGetListResp)
+
+    @doc(
+        summary: "获取上游资费组详情"
+        description: "业务说明：按租户和主键查询单条上游资费组快照"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardApiOfferingInfo)
+}

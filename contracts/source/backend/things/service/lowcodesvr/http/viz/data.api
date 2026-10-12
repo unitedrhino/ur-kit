@@ -1,0 +1,75 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+
+@server (
+    group:      lowcode/viz/dataPoint
+    prefix:     /api/v1/lowcode/viz/data-point
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+    @doc(
+        summary: "数据点读取"
+        description: "业务说明：数据点读取"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (VizDataPointGetListReq) returns (VizDataPointGetListResp)
+    @doc(
+        summary: "数据点读取"
+        description: "业务说明：数据点读取"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler getListGet
+    get /get-list (VizDataPointGetListGetReq) returns (VizDataPointGetListResp)
+    @doc(
+        summary: "批量调用设备属性"
+        description: "业务说明：批量调用设备属性"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler controlBatchSend
+    post /control-batch-send (VizDataPointBatchSendPropertyReq) returns ()
+}
+
+
+type VizDataPointBatchSendPropertyReq  {
+    VizID int64 `json:"vizID,string"`//分组的标识符
+    Datas []*DataInfo `json:"datas"` //需要控制是的数据列表
+}
+
+type (
+    // VizGroup 定义可视化
+    VizDataPointGetListReq  {
+        VizID int64 `json:"vizID,string,optional"`//分组的标识符
+    }
+    VizDataPointGetListGetReq  {
+        VizID int64 `form:"vizID,string,optional"`//分组的标识符
+    }
+    VizDataPointGetListResp{
+       List []*DataInfo `json:"list"`
+    }
+    DataInfo {
+        Timestamp int64 `json:"timestamp,string"`//发生时间戳(毫秒时间戳) 只读
+        DataPoint string `json:"dataPoint"` //组成的格式为:  productID/deviceName/dataID
+        Value string `json:"value"`//获取到的值
+    }
+)

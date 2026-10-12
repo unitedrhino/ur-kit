@@ -1,0 +1,90 @@
+info(
+	title: "应用分组管理模块"
+	desc: "应用分组管理"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: system/app/group
+	prefix: /api/v1/system/app/group
+    accessCodePrefix: "systemAppManage"
+    accessNamePrefix: "应用管理"
+    accessGroup: "应用管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+	middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "创建应用分组"
+        description: "业务说明：创建新的应用分组，包括分组名称、图标、描述、排序。应用分组用于把相关应用按业务场景归类，应用最多属于一个分组，未分组应用 group_id=2。"
+        authType: "platform"
+        group: "system/app/group"
+        resource: "system/app/group"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (AppGroupInfo) returns (WithID)
+
+    @doc(
+        summary: "获取应用分组列表"
+        description: "业务说明：查询应用分组列表，支持按名称模糊筛选。所有登录用户可读，用于控制台首页按组展示、租户/角色授权界面按组展示。"
+        authType: "all"
+        group: "system/app/group"
+        resource: "system/app/group"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (AppGroupInfoGetListReq) returns (AppGroupInfoGetListResp)
+
+    @doc(
+        summary: "更新应用分组"
+        description: "业务说明：修改应用分组信息，包括名称、图标、描述、排序，支持部分更新。默认组(全部应用,ID=2)不允许删除但可调整展示字段。"
+        authType: "platform"
+        group: "system/app/group"
+        resource: "system/app/group"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (AppGroupInfo) returns ()
+
+    @doc(
+        summary: "删除应用分组"
+        description: "业务说明：删除指定应用分组，删除后组内应用自动回置未分组(group_id=2)，不删除应用本身。默认组(ID=2,全部应用)不允许删除。"
+        authType: "platform"
+        group: "system/app/group"
+        resource: "system/app/group"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+}
+
+type (
+    AppGroupInfo  {
+        ID int64 `json:"id,string,optional"` // 分组ID
+        TenantCode string `json:"tenantCode,optional"` // 所属租户,默认common
+        Name string `json:"name"` // 分组名称
+        Icon string `json:"icon,optional"` // 分组图标
+        Desc string `json:"desc,optional"` // 分组描述
+        Sort int64 `json:"sort,optional"` // 排序,不能小于等于0
+        CreatedTime int64 `json:"createdTime,string,optional"` // 创建时间
+    }
+
+    AppGroupInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"` // 分页信息
+        Name string `json:"name,optional"` // 分组名称(模糊匹配)
+    }
+
+    AppGroupInfoGetListResp  {
+        List []*AppGroupInfo `json:"list"` // 分组列表
+        PageResp
+    }
+)

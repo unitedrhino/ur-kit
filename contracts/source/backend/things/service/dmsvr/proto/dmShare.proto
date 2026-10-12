@@ -1,0 +1,158 @@
+//--------------------共享消息类型--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+
+// ShareEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message ShareEmpty {
+}
+
+// TimeRange 时间范围
+// 定义时间戳范围（毫秒级）
+message TimeRange{
+  int64 start = 1; // 开始时间戳（毫秒）
+  int64 end = 2;   // 结束时间戳（毫秒）
+}
+
+// PageInfo 分页信息
+// 定义分页查询的参数
+message PageInfo{
+  int64 page = 1; // 页码（从1开始）
+  int64 size = 2; // 每页条数
+  // 排序信息
+  repeated OrderBy orders = 3; // 排序规则列表
+  message OrderBy {
+    // 排序的字段名
+    string field = 1; // 排序字段名
+    // 排序方式：1 从小到大, 2 从大到小
+    int64 sort = 2; // 排序方式（1:升序，2:降序）
+  }
+}
+
+// Compare 比较条件
+// 定义查询条件的比较操作
+message Compare{
+  string CmpType =1;// 比较类型："=":相等 "!=":不相等 ">":大于 ">=":大于等于 "<":小于 "<=":小于等于 "like":模糊查询
+  string value =2; // 比较值
+  string castTo =3; // 参数的类型转换（填写了会进行数据类型的转换）: int float string
+}
+
+// CompareString 字符串比较条件
+// 定义字符串类型的比较条件
+message CompareString{
+  string CmpType =1;// 比较类型："=":相等 "!=":不相等 ">":大于 ">=":大于等于 "<":小于 "<=":小于等于 "like":模糊查询
+  string value =2; // 比较值
+}
+
+// CompareInt64 整数比较条件
+// 定义整数类型的比较条件
+message CompareInt64{
+  string CmpType =1;// 比较类型："=":相等 "!=":不相等 ">":大于 ">=":大于等于 "<":小于 "<=":小于等于 "like":模糊查询
+  int64 value =2; // 比较值
+}
+
+// FileCore 文件核心信息
+// 定义文件的基本信息
+message FileCore{
+  string path =1; // 文件的路径
+  bool isUpdate=2; // 如果要更新该文件,则需要将该参数置为true
+}
+
+// SendOption 发送选项配置
+// 定义消息发送时的超时、重试等控制参数
+message SendOption {
+  int64  timeoutToFail = 1; // 超时失败时间（毫秒）
+  int64  requestTimeout = 2; // 请求超时时间（毫秒）,超时后会进行重试
+  int64  retryInterval = 3; // 重试间隔时间（毫秒）
+}
+
+// ShareShareWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message ShareWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+// ShareWithID 带ID的消息
+// 定义只包含ID的消息类型
+message ShareWithID{
+  int64 id = 1; // ID值
+}
+
+// ShareWithIDChildren 带ID和是否包含子节点标识的消息
+// 定义包含ID和是否包含子节点标识的消息类型
+message  ShareWithIDChildren{
+  int64 id =1;         // ID值
+  bool withChildren =2; // 是否包含子节点
+}
+
+// IDPath ID路径
+// 定义ID和路径信息
+message IDPath{
+  int64 id =1; // ID值
+  string idPath=2; // ID路径
+  int64 noParentID =3; // 父节点ID
+}
+
+// IDsInfo ID集合信息
+// 定义ID和ID路径的集合
+message IDsInfo{
+  repeated int64 ids=1; // ID集合
+  repeated string  idPaths=2; // ID路径集合
+}
+
+// IDPathWithUpdate 带更新时间的ID路径
+// 定义包含ID、路径和更新时间的消息类型
+message IDPathWithUpdate{
+  int64 id =1; // ID值
+  string idPath=2; // ID路径
+  int64 updatedTime =3; // 更新时间（毫秒时间戳）
+}
+
+// DeviceCore 设备核心信息
+// 定义设备的基本标识信息
+message DeviceCore{
+  string   productID = 1; //产品id
+  string  deviceName = 2; //设备名称
+}
+
+// PublishMsg 发布消息结构体
+// 定义发布到消息队列的消息结构
+message   PublishMsg  {
+  string handle =1; // 对应 mqtt topic的第一个 thing ota config 等等
+  string  type =2;   // 操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+  bytes payload =3; // 消息载荷
+  int64 timestamp =4; // 时间戳（毫秒）
+  string  productID =5; // 产品ID
+  string  deviceName =6; // 设备名称
+  string  explain =7; // 内部使用的拓展字段
+  string  protocolCode =8; // 协议编码（如果有该字段则回复的时候也会带上该字段）
+}
+
+// ImportResp 导入响应（通用版）
+message ImportResp{
+  int64 total =1;      //导入总接口数
+  int64  errCount =2; //失败数
+  int64  ignoreCount =3; //忽略数
+  int64  succCount =4; //成功数
+}
+
+// Point 地理位置坐标
+// 定义地理位置的经纬度坐标
+message Point{
+  double  longitude = 1;//经度
+  double  latitude = 2;//纬度
+}
+
+// Attachment 附件信息
+// 定义文件附件的基本信息
+message Attachment{
+  int64 id = 1; // 附件ID，前端自己生成，不重复即可
+  string fileName = 3; // 文件名（只读）
+  string fileUrl = 5; // 访问URL（只读）
+  string filePath = 6;//文件路径，更新时传递
+  string useBy =7;//用途说明（选填）
+}

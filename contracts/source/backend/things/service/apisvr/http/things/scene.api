@@ -1,0 +1,254 @@
+info (
+	title:   "场景联动信息模块"
+	desc:    "场景联动信息模块"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+@server (
+	group:            things/scene/info
+	prefix:           /api/v1/things/scene/info
+	accessCodePrefix: "thingsRuleScene"
+	accessNamePrefix: "场景联动"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "新增场景"
+	    description: "创建场景联动规则，定义触发条件（if）、触发时机（when）和执行动作（then）。场景用于实现设备自动化控制逻辑，如温度超阈值自动开启空调。支持绑定区域和设置标签。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler create
+	post /create (SceneInfo) returns (WithID)
+
+	@doc(
+	    summary: "更新场景"
+	    description: "修改场景的触发条件、执行动作或基本信息。场景修改后立即生效，正在执行的场景不受影响。异常状态（status=3）的场景修复后需手动重置状态。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler update
+	post /update (SceneInfo)
+
+	@doc(
+	    summary: "删除场景"
+	    description: "删除场景规则，删除后不再响应触发事件。正在执行的场景会完成当前执行周期后停止。场景日志记录保留不受影响。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+	    summary: "获取场景信息列表"
+	    description: "查询场景列表，支持按名称、标签、区域、触发类型、状态等过滤。可按设备模式过滤触发或执行相关场景。返回场景基本信息，isOnlyCore=true时不返回详细规则。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (SceneInfoGetListReq) returns (SceneInfoGetListResp)
+
+	@doc(
+	    summary: "获取场景信息详情"
+	    description: "查询单个场景的完整定义，包括if触发条件、when触发时机、then执行动作的详细配置。用于场景编辑或查看完整规则逻辑。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (SceneInfo)
+
+	@doc(
+	    summary: "手动触发场景"
+	    description: "手动触发场景立即执行，无视触发条件直接执行then动作。用于测试场景执行效果或紧急情况下的手动控制。触发类型记录为manual。"
+	    authType: "admin"
+	    group: "things/scene/info"
+	    resource: "things/scene/info"
+	    action: "trigger"
+	    recordLogMode: "1"
+	)
+	@handler ManuallyTrigger
+	post /manually-trigger (WithID)
+}
+
+@server (
+	group:            things/scene/log
+	prefix:           /api/v1/things/scene/log
+	accessCodePrefix: "thingsRuleScene"
+	accessNamePrefix: "场景联动"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "获取场景日志列表"
+	    description: "查询场景执行日志，包括触发时间、触发类型（设备触发/定时触发/手动触发）、执行动作、执行状态（成功/失败）、错误信息等。用于场景执行监控和问题排查。"
+	    authType: "admin"
+	    group: "things/scene/log"
+	    resource: "things/scene/log"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (SceneLogGetListReq) returns (SceneLogGetListResp)
+}
+
+type (
+	SceneInfoCreateReq {
+		SceneInfo
+	}
+	SceneInfoUpdateReq {
+		SceneInfo
+	}
+	SceneInfoGetListReq {
+		Page             *PageInfo `json:"page,optional"` //分页信息 只获取一个则不填
+		Name             string    `json:"name,optional"` //场景名模糊查询
+		Tag              string    `json:"tag,optional"` //标签 admin: 管理员 normal: 普通
+		AreaID           int64     `json:"areaID,optional,string"`
+		SceneIDs         []int64   `json:"sceneIDs,optional"` //根据场景ID来过滤
+		Type             string    `json:"type,optional"` //触发类型 auto manual:手动触发
+		Status           int64     `json:"status,optional"` //状态（1启用 2禁用 3异常）
+		AlarmID          int64     `json:"alarmID,string,optional"` //告警id
+		DeviceMode       string    `json:"deviceMode,optional"` //设备模式
+		ProductID        string    `json:"productID,optional"` //产品id
+		DeviceName       string    `json:"deviceName,optional"` //设备名
+		DeviceFilterMode int64     `json:"deviceFilterMode,optional"` //设备过滤模式: 1,过滤触发或执行(默认) 2,过滤触发 3,过滤执行
+		HasActionType    string    `json:"hasActionType,optional"` //过滤有某个执行类型
+		IsCommon         int64     `json:"isCommon,optional"` //是否是常用的
+		IsOnlyCore       int64     `json:"isOnlyCore,optional"` //不返回if,when和then
+	}
+	SceneInfoGetListResp {
+		List []*SceneInfo `json:"list"` //场景信息
+		PageResp
+	}
+)
+
+type (
+	SceneFlowInfo {
+		Type    string `json:"type"` //流程类型 then
+		SubType string `json:"subType"` //子类型 设备执行
+		Info    string `json:"info,omitempty"` //设备执行类型为产品id
+	}
+	SceneCore {
+		ID     int64  `json:"id,string,optional"`
+		Name   string `json:"name,optional"`
+		Status int64  `json:"status,optional"` //状态: 状态（1启用 2禁用 3异常）
+		Desc   string `json:"desc,optional"`
+	}
+	SceneInfo {
+		ID          int64            `json:"id,string,optional"`
+		Name        string           `json:"name,optional"`
+		AreaID      int64            `json:"areaID,string,optional"` //项目区域id 只读
+		Status      int64            `json:"status,optional"` //状态: 状态（1启用 2禁用 3异常）
+		Reason      string           `json:"reason,optional"` //异常情况的描述说明
+		Tag         string           `json:"tag,optional"` //标签 admin: 管理员 normal: 普通
+		IsCommon    int64            `json:"isCommon,optional"` //是否是常用的
+		Type        string           `json:"type,optional"`
+		FlowPath    []*SceneFlowInfo `json:"flowPath,optional"` //执行路径
+		Desc        string           `json:"desc,optional"`
+		CreatedTime int64            `json:"createdTime,string,optional"`
+		If          string           `json:"if,optional"`
+		When        string           `json:"when,optional"`
+		Then        string           `json:"then,optional"`
+		Avatar      string           `json:"avatar,optional"` // 头像
+		Logo        string           `json:"logo,optional"`
+		LastRunTime int64            `json:"lastRunTime,optional"`
+		ProductID   string           `json:"productID,omitempty,optional"`
+		DeviceName  string           `json:"deviceName,omitempty,optional"`
+		DeviceAlias string           `json:"deviceAlias,omitempty,optional"` //只读
+		DeviceMode  string           `json:"deviceMode,optional"` //设备模式 single:单设备 multi:多设备
+		Body        string           `json:"body,optional"` //自定义字段
+		UpdatedTime int64            `json:"updatedTime,optional"`
+	}
+)
+
+type (
+	SceneLogGetListReq {
+		Page      *PageInfo  `json:"page,optional"` // 分页信息 只获取一个则不填
+		SceneID   int64      `json:"sceneID,string,optional,omitempty"` //场景id
+		SceneName string     `json:"sceneName,optional,omitempty"` //场景名称
+		Status    int64      `json:"status,optional,omitempty"` // 状态（1成功 2失败）
+		TimeRange *TimeRange `json:"timeRange,optional"` // 时间范围
+	}
+	SceneLogGetListResp {
+		List []*SceneLog `json:"list,omitempty"` //告警信息
+		PageResp
+	}
+	SceneLog {
+		SceneID     int64             `json:"sceneID,string,omitempty"` //场景id
+		SceneName   string            `json:"sceneName,omitempty"` //场景名称
+		AreaID      int64             `json:"areaID,string,omitempty"` //区域id
+		CreatedTime int64             `json:"createdTime,omitempty"` //创建时间 秒级时间戳 只读
+		Status      int64             `json:"status,omitempty"` // 状态（1成功 2失败）
+		Type        string            `json:"type,omitempty"` //"manual":手动触发场景  "auto":自动化
+		Trigger     *SceneLogTrigger  `json:"trigger,omitempty"` //触发
+		Actions     []*SceneLogAction `json:"actions,omitempty"`
+	}
+	SceneLogAction {
+		Type     string                `json:"type,omitempty"` //执行类型  notify: 通知 delay:延迟  device:设备输出  alarm: 告警 scene:执行另一个场景
+		Status   int64                 `json:"status,omitempty"` // 状态（1成功 2失败）
+		Code     int64                 `json:"code,omitempty"` //错误码
+		Msg      string                `json:"msg,omitempty"` //错误信息
+		MsgToken string                `json:"msgToken,omitempty"` //调用id
+		Delay    int64                 `json:"delay,omitempty"` //延时秒数
+		Device   *SceneLogActionDevice `json:"device,omitempty"`
+		Alarm    *SceneLogActionAlarm  `json:"alarm,omitempty"`
+		Scene    *LogActionScene       `json:"scene,omitempty"`
+	}
+	LogActionScene {
+		sceneID   int64  `json:"sceneID,string"`
+		sceneName string `json:"sceneName"`
+	}
+	SceneLogActionAlarm {
+		Mode string `json:"mode,omitempty"` //告警模式  trigger: 触发告警  relieve: 解除告警
+	}
+	SceneLogActionDevice {
+		Type        string                       `json:"type,omitempty"` //设备执行的类型 propertyControl:属性控制(默认)  action:执行动作
+		ProductID   string                       `json:"productID,omitempty"` //产品ID
+		ProductName string                       `json:"productName,omitempty"` //产品名称
+		DeviceName  string                       `json:"deviceName,omitempty"` //设备id
+		DeviceAlias string                       `json:"deviceAlias,omitempty"` //设备昵称
+		Values      []*SceneLogActionDeviceValue `json:"values,omitempty"` //执行的值
+	}
+	SceneLogActionDeviceValue {
+		DataID   string `json:"dataID,omitempty"` //触发的id
+		DataName string `json:"dataName,omitempty"` //触发id的名字
+		Value    string `json:"value,omitempty"` //执行的值
+	}
+	SceneLogTrigger {
+		Type   string                 `json:"type,omitempty"` //触发类型  device:设备触发  timer:定时触发 weather:天气触发  manual:手动触发 scene: 场景触发
+		Time   int64                  `json:"time"` ////触发时间,秒时间戳
+		Device *SceneLogTriggerDevice `json:"device,omitempty"` //设备触发类型:触发设备
+	}
+	SceneLogTriggerDevice {
+		Type        string `json:"type,omitempty"` ////触发类型  connected:上线 disConnected:下线 reportProperty:属性上报 reportEvent: 事件上报
+		ProductID   string `json:"productID,omitempty"` //设备触发
+		DeviceName  string `json:"deviceName,omitempty"` //设备触发
+		DeviceAlias string `json:"deviceAlias,omitempty"` //设备昵称
+		DataID      string `json:"dataID,omitempty"` //触发的id
+		DataName    string `json:"dataName,omitempty"` //触发id的名字
+		Value       string `json:"value,omitempty"` //触发的值
+	}
+)
+

@@ -1,0 +1,149 @@
+{
+  "globalStyle": {
+    "navigationBarTextStyle": "black",
+    "navigationStyle": "custom",
+    "navigationBarTitleText": "联犀Iot",
+    "backgroundColor": "__MOBILE_UNIAPP_THEME_COLOR_PAGE_BACKGROUND__"
+  },
+  "pages": [
+    {
+      "path": "pages/home/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/device/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/scene/index",
+      "style": {
+        "navigationStyle": "custom"
+      }
+    },
+    {
+      "path": "pages/mine/index",
+      "style": { "navigationStyle": "custom" }
+    }
+  ],
+  "subPackages": [
+    {
+      "root": "packageDevice",
+      "pages": [
+        { "path": "pages/detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/history/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/logs/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/bind/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/share/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/action-invoke/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/settings/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/device-info/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/edit-name/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/edit-area/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/edit-location/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/clone-memory/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/clone-session-detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/digital-life/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/digital-life/speaker-record", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "packageScene",
+      "pages": [
+        { "path": "pages/detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/create/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/log/index", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "packageUser",
+      "pages": [
+        { "path": "pages/login/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/bind-phone/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/org-id-not-found/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/tenant-manage/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/settings/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/profile/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/account-security/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/bind-email/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/change-password/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/forgot-password/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/alarm-list/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/group/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/notify-settings/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/voiceprint-agreement/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/family-manage/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/family-edit/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/room-manage/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/room-edit/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/legal/index", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "packageBluetooth",
+      "pages": [
+        { "path": "pages/prepare/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/wifi/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/progress/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/result/index", "style": { "navigationStyle": "custom" } }
+      ]
+    },
+    {
+      "root": "packageOTA",
+      "pages": [
+        { "path": "pages/firmware-list/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/job-create/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/job-detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/device-version/index", "style": { "navigationStyle": "custom" } }
+      ]
+    }
+  ],
+  "preloadRule": {
+    "pages/device/index": {
+      "network": "all",
+      "packages": ["packageDevice", "packageBluetooth"]
+    },
+    "pages/scene/index": {
+      "network": "all",
+      "packages": ["packageScene"]
+    },
+    "pages/mine/index": {
+      "network": "all",
+      "packages": ["packageUser", "packageDevice", "packageOTA"]
+    }
+  },
+  "tabBar": {
+    "color": "__MOBILE_UNIAPP_THEME_COLOR_TEXT_PLACEHOLDER__",
+    "selectedColor": "__MOBILE_UNIAPP_THEME_COLOR_PRIMARY__",
+    "backgroundColor": "__MOBILE_UNIAPP_THEME_COLOR_SURFACE__",
+    "list": [
+      {
+        "pagePath": "pages/home/index",
+        "text": "首页",
+        "iconPath": "static/icons/tab-home.png",
+        "selectedIconPath": "static/icons/tab-home-active.png"
+      },
+      {
+        "pagePath": "pages/device/index",
+        "text": "设备",
+        "iconPath": "static/icons/tab-device.png",
+        "selectedIconPath": "static/icons/tab-device-active.png"
+      },
+      {
+        "pagePath": "pages/scene/index",
+        "text": "场景",
+        "iconPath": "static/icons/tab-scene.png",
+        "selectedIconPath": "static/icons/tab-scene-active.png"
+      },
+      {
+        "pagePath": "pages/mine/index",
+        "text": "我的",
+        "iconPath": "static/icons/tab-mine.png",
+        "selectedIconPath": "static/icons/tab-mine-active.png"
+      }
+    ]
+  }
+}

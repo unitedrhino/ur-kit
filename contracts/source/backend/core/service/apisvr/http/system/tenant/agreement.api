@@ -1,0 +1,87 @@
+info (
+	title:   "租户协议管理"
+	desc:    "租户协议的增删改查"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/agreement
+	prefix:           /api/v1/system/tenant/agreement
+	accessNamePrefix: "租户协议"
+	accessGroup:      "租户协议"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:    "添加协议"
+		description: "创建新的租户协议，如用户协议、隐私政策等，协议内容支持富文本格式"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/agreement"
+		resource: "system/tenant/agreement"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (TenantAgreement) returns (WithID)
+
+	@doc(
+	    summary: "获取协议列表"
+	    description: "获取租户协议列表，支持按类型筛选，返回协议基本信息（不含完整内容）"
+	    authType: "admin"
+	    group: "system/tenant/agreement"
+	    resource: "system/tenant/agreement"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantAgreementGetListReq) returns (TenantAgreementGetListResp)
+
+	@doc (
+		summary:    "更新协议"
+		description: "更新租户协议内容和配置，支持更新名称、内容、状态等字段"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/agreement"
+		resource: "system/tenant/agreement"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (TenantAgreement)
+
+	@doc (
+		summary:    "删除协议"
+		description: "删除指定的租户协议，删除后不可恢复"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/agreement"
+		resource: "system/tenant/agreement"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+}
+
+@server (
+	group:            system/tenant/agreement
+	prefix:           /api/v1/system/tenant/agreement
+	defaultAuthType:  "public"
+	middleware:       InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取协议详情"
+	    description: "根据ID或协议代码获取协议完整内容，用于用户注册/登录时展示用户协议、隐私政策等，无需登录即可调用"
+	    authType: "public"
+	    group: "system/tenant/agreement"
+	    resource: "system/tenant/agreement"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithIDOrCode) returns (TenantAgreement)
+}

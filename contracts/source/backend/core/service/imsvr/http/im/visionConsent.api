@@ -1,0 +1,84 @@
+// 本人摄像头到AI的独立同意；不接受来源身份自报、图片引用或隐式媒体共享。
+type (
+	ImVisionConsentCreateReq {
+		MsgToken string `json:"msgToken"` // 原本人签发幂等键，重放不刷新截止。
+		SourceSessionId string `json:"sourceSessionId"` // 原活aiVision会话。
+		CameraId string `json:"cameraId"` // 本人选择，须核平台原摄像头。
+		TrackId string `json:"trackId"` // 平台原选视频轨，不接受任意附件。
+		ExpectedMediaRevision uint64 `json:"expectedMediaRevision"` // 原媒体代次，不是Consent修订。
+		ExpiresAt int64 `json:"expiresAt"` // 本人明确UTC毫秒截止，不超过原会话。
+	}
+	ImVisionConsentGetReq {
+		ConsentId string `json:"consentId"` // 原本人同意引用。
+	}
+	ImVisionConsentRevokeReq {
+		ConsentId string `json:"consentId"` // 本人原同意，不支持管理员代撤销。
+		ExpectedRevision uint64 `json:"expectedRevision"` // 原独立Consent修订。
+	}
+	ImVisionConsentMetadata {
+		ConsentId string `json:"consentId"` // 不透明同意引用，不赋予读帧权限。
+		Scope string `json:"scope"` // 固定cameraAI，不授权IPC/录像/人工分享。
+		SourceSessionId string `json:"sourceSessionId"` // 原aiVision会话。
+		CameraId string `json:"cameraId"` // 原已选摄像头。
+		TrackId string `json:"trackId"` // 原已选视频轨。
+		MediaRevision uint64 `json:"mediaRevision"` // 原媒体代次。
+		ExpiresAt int64 `json:"expiresAt"` // 首次本人截止，重放不续期。
+		GrantedAt int64 `json:"grantedAt"` // 首次持久签发UTC毫秒时点。
+		Revision uint64 `json:"revision"` // 独立同意CAS水位。
+		RevokedAt int64 `json:"revokedAt"` // 零仅表示未撤销，不代表仍有效。
+	}
+	ImVisionConsentCreateResp {
+		Consent ImVisionConsentMetadata `json:"consent"` // 只返回本人公开元数据，不返回Source。
+		Replay bool `json:"replay"` // 原参数重放，不刷新授权或期限。
+	}
+	ImVisionConsentGetResp {
+		Consent ImVisionConsentMetadata `json:"consent"` // 失联后仍可本人查询，不赋予媒体权限。
+	}
+	ImVisionConsentRevokeResp {
+		Consent ImVisionConsentMetadata `json:"consent"` // 原持久撤销，不声称回收已消费画面。
+	}
+)
+
+@server (
+	group: im/visionconsent
+	prefix: /api/v1/im/vision-consents
+	accessCodePrefix: "imVisionConsent"
+	accessNamePrefix: "IM视觉同意"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary: "签发本人摄像头到AI同意"
+		description: "本人明确原会话、摄像头、轨和截止；活Owner复核本人、原连接、能力、隐私及选择后保存独立cameraAI同意。未装配可信Authority时拒绝，不接受图片引用或管理员代签。"
+		authType: "all"
+		group: "im/visionconsent"
+		resource: "im/visionconsent"
+		action: "create"
+		recordLogMode: "3"
+	)
+	@handler create
+	post /create (ImVisionConsentCreateReq) returns (ImVisionConsentCreateResp)
+	@doc (
+		summary: "查询本人视觉同意"
+		description: "只查询本人原公开元数据；源失联或功能关闭不影响查询，不返回画面或内部来源。"
+		authType: "all"
+		group: "im/visionconsent"
+		resource: "im/visionconsent"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler get
+	post /get-one (ImVisionConsentGetReq) returns (ImVisionConsentGetResp)
+	@doc (
+		summary: "撤销本人视觉同意"
+		description: "本人按独立Consent修订撤销，原请求重放保持首次结果；不依赖活Owner，后继取帧和模型消费须拒绝被撤销同意。"
+		authType: "all"
+		group: "im/visionconsent"
+		resource: "im/visionconsent"
+		action: "update"
+		recordLogMode: "3"
+	)
+	@handler revoke
+	post /revoke (ImVisionConsentRevokeReq) returns (ImVisionConsentRevokeResp)
+}

@@ -1,0 +1,12 @@
+export { default as CodeLogin } from './code-login.vue';
+export { default as ForgetPassword } from './forget-password.vue';
+export { default as InviteAccept } from './invite.vue';
+export { default as Login } from './login.vue';
+export { default as QrCodeLoginSuccess } from './qrcode-login-success.vue';
+export { default as QrCodeLogin } from './qrcode-login.vue';
+export { default as RegisterStep2 } from './register-step2.vue';
+export { default as RegisterStep3 } from './register-step3.vue';
+export { default as Register } from './register.vue';
+export { default as ResetPassword } from './reset-password.vue';
+export { default as ThirdLoginCallback } from './third-login-callback.vue';
+export { default as ThirdLoginComplete } from './third-login-complete.vue';

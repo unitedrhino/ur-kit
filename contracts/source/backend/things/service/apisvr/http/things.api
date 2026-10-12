@@ -1,0 +1,33 @@
+info (
+	title:   "web端网关"
+	desc:    "负责http协议的网关"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+import "common.api" //公共结构体定义
+import "things/protocol.api" //协议相关功能接口
+import "things/product.api" //产品相关功能接口
+import "things/device.api" //设备相关功能接口
+import "things/group.api" //设备分组相关功能接口
+import "things/ota.api" //ota相关功能接口
+import "things/schema/common.api" //物模型相关接口
+import "things/user/device.api"
+import "things/user/area.api" //用户区域权限申请
+import "things/hook.api" //Hook扩展
+import "things/rule.api" //规则引擎相关功能接口
+import "things/ai.api"
+import "things/ruleEngine/aiTask.api"
+import "things/scene.api"
+import "things/alarm/info.api"
+import "things/alarm/ai.api"
+import "things/alarm/capability.api"
+import "things/alarm/conditionTemplate.api"
+import "things/alarm/notifyTemplate.api"
+import "things/alarm/event.api"
+import "things/alarm/notifyRecord.api"
+import "things/area.api" //区域管理（从syssvr迁移）
+import "things/project.api" //项目管理（从syssvr迁移）
+import "things/data.api" //数据权限管理（从syssvr迁移）
+import "things/config.api" //物联网全局配置

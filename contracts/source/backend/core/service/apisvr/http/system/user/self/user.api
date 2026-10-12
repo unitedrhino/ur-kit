@@ -1,0 +1,103 @@
+info (
+	title:   "用户信息管理"
+	desc:    "用户信息相关接口，包括获取、更新、注销、密码修改、登出、绑定账号"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:           system/user/self
+	prefix:          /api/v1/system/user/self
+	accessCode:      "systemUserSelf"
+	accessName:      "用户基础操作"
+	accessGroup:     "用户管理"
+	defaultAuthType: "all"
+	defaultNeedAuth: "false"
+	middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取用户信息"
+	    description: "业务说明：获取当前登录用户的详细信息，包括用户基本信息、所属租户列表、绑定的第三方账号等。可指定是否同时返回租户详情。用于个人中心、用户资料展示等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (UserSelfGetOneReq) returns (UserInfo)
+
+	@doc(
+	    summary: "更新用户基本数据"
+	    description: "业务说明：当前用户更新自己的个人信息，包括昵称、性别、头像等非敏感字段。用户名、邮箱、手机号等敏感字段需管理员修改。支持部分更新，未传字段保持原值。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler update
+	post /update (UserSelfUpdateReq)
+
+	@doc(
+	    summary: "注销用户"
+	    description: "业务说明：当前用户注销自己的账号。注销后账号永久删除，无法恢复，相关数据同步清理。需用户确认后执行，用于用户主动注销账号等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler cancel
+	post /cancel
+
+	@doc(
+	    summary: "更新用户密码"
+	    description: "业务说明：当前用户修改登录密码，支持多种验证方式：原密码验证、手机验证码验证、邮箱验证码验证。需提供验证凭证和新密码。用于用户修改密码、安全设置等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler changePwd
+	post /change-pwd (UserChangePwdReq)
+
+	@doc(
+	    summary: "用户登出"
+	    description: "业务说明：当前用户退出登录状态。登出后token失效，需重新登录才能访问需要认证的接口。用于用户主动退出登录、切换账号等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "logout"
+	    recordLogMode: "3"
+	)
+	@handler logout
+	post /logout
+
+	@doc(
+	    summary: "绑定账号"
+	    description: "业务说明：当前用户绑定第三方账号（微信、钉钉等）或绑定手机号、邮箱。支持多种绑定方式：手机号验证码、邮箱验证码、微信开放平台、微信小程序、钉钉等。用于账号绑定、多渠道登录设置等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "bind"
+	    recordLogMode: "3"
+	)
+	@handler bindAccount
+	post /bind-account (UserBindAccountReq)
+
+	@doc(
+	    summary: "精准搜索用户"
+	    description: "业务说明：根据账号（用户名/手机号/邮箱）精准搜索用户，返回用户基本信息包括用户ID、用户名、昵称、头像、状态等。用于添加好友、查找用户、用户选择器等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler userSearch
+	post /user/search (UserSearchReq) returns (UserSearchResp)
+}

@@ -1,0 +1,134 @@
+syntax = "proto3";
+
+package timed;
+option go_package="pb/timed";
+
+// 公共类型
+message PageInfo {
+  int64 page = 1; // 页码，从 1 开始
+  int64 size = 2; // 每页条数
+}
+
+// ==================== 任务分组管理 ====================
+service TaskGroupManage {
+  rpc TaskGroupCreate(TaskGroup) returns (TaskGroupWithID);       // 创建分组
+  rpc TaskGroupUpdate(TaskGroup) returns (TaskGroupEmpty);        // 更新分组
+  rpc TaskGroupDelete(TaskGroupWithID) returns (TaskGroupEmpty);  // 删除分组
+  rpc TaskGroupRead(TaskGroupWithID) returns (TaskGroup);         // 查询分组详情
+  rpc TaskGroupIndex(TaskGroupIndexReq) returns (TaskGroupIndexResp); // 查询分组列表
+}
+
+// ==================== 任务实例管理 ====================
+service TaskInfoManage {
+  rpc TaskInfoCreate(TaskInfo) returns (TaskInfoWithID);          // 创建任务
+  rpc TaskInfoUpdate(TaskInfo) returns (TaskInfoEmpty);           // 更新任务
+  rpc TaskInfoDelete(TaskInfoWithID) returns (TaskInfoEmpty);     // 删除任务（标记 WaitDelete）
+  rpc TaskInfoRead(TaskInfoWithID) returns (TaskInfo);            // 查询任务详情
+  rpc TaskInfoIndex(TaskInfoIndexReq) returns (TaskInfoIndexResp);// 查询任务列表
+  rpc TaskInfoStart(TaskInfoWithID) returns (TaskInfoEmpty);      // 启动任务（Stopped -> WaitRun）
+  rpc TaskInfoStop(TaskInfoWithID) returns (TaskInfoEmpty);       // 停止任务（Running -> WaitStop）
+}
+
+// ==================== 任务发送（延时任务入口） ====================
+service TaskSendManage {
+  rpc TaskSend(TaskSendReq) returns (TaskSendEmpty);             // 发送延时任务（立即或指定延时）
+  rpc TaskCancel(TaskCancelReq) returns (TaskSendEmpty);         // 取消延时任务（按 groupCode+taskCode 精确匹配）
+}
+
+// ========== TaskGroup 消息（纯分组） ==========
+message TaskGroupWithID {
+  int64 id = 1; // 分组ID
+}
+message TaskGroupEmpty {}
+
+message TaskGroup {
+  int64  id          = 1;  // 分组ID
+  string tenantCode  = 2;  // 租户编码
+  int64  projectID   = 3;  // 项目ID
+  string code        = 4;  // 分组编码（如 core、things）
+  string name        = 5;  // 分组名称
+  int64  status      = 6;  // 状态 1:启用 2:禁用
+  string desc        = 7;  // 描述
+  int64  createdTime = 8;  // 创建时间（Unix 毫秒）
+}
+
+message TaskGroupIndexReq {
+  PageInfo page       = 1;  // 分页
+  string   tenantCode = 2;  // 租户编码
+  int64    projectID  = 3;  // 项目ID
+  string   name       = 4;  // 名称模糊搜索
+  int64    status     = 5;  // 状态过滤
+}
+
+message TaskGroupIndexResp {
+  repeated TaskGroup list  = 1; // 分组列表
+  int64              total = 2; // 总数
+}
+
+// ========== TaskInfo 消息（配置载体） ==========
+message TaskInfoWithID {
+  int64 id = 1; // 任务ID
+}
+message TaskInfoEmpty {}
+
+message RetryPolicy {
+  int64  maxRetry   = 1;  // 最大重试次数，默认 3
+  int64  retryDelay = 2;  // 重试间隔基数（秒），默认 10
+  string backoff    = 3;  // 退避策略：fixed / exponential
+}
+
+message TaskInfo {
+  int64  id           = 1;  // 任务ID
+  string tenantCode   = 2;  // 租户编码
+  int64  projectID    = 3;  // 项目ID
+  string groupCode    = 4;  // 关联分组编码
+  string code         = 5;  // 任务编码
+  string name         = 6;  // 任务名称
+  int64  type         = 7;  // 类型 1:定时(Cron) 2:延时(Delay)
+  string cronExpr     = 8;  // Cron 表达式（type=1）
+  int64  executeAt    = 9;  // 执行时间 Unix 毫秒（type=2）
+  string params       = 10; // 任务参数（JSON 字符串）
+  RetryPolicy retryPolicy = 11; // 重试策略
+  int64  priority     = 12; // 优先级 1-10
+  int64  status       = 13; // 状态 1:WaitRun 2:Running 3:WaitStop 4:Stopped 5:WaitDelete
+  int64  lastRunTime  = 14; // 上次执行时间 Unix 毫秒
+  int64  retriedCount = 15; // 已重试次数
+  string desc         = 16; // 描述
+  int64  createdTime  = 17; // 创建时间（Unix 毫秒）
+}
+
+message TaskInfoIndexReq {
+  PageInfo page       = 1;  // 分页
+  string   tenantCode = 2;  // 租户编码
+  int64    projectID  = 3;  // 项目ID
+  string   groupCode  = 4;  // 按分组过滤
+  int64    type       = 5;  // 按类型过滤
+  int64    status     = 6;  // 按状态过滤
+  string   name       = 7;  // 名称模糊搜索
+}
+
+message TaskInfoIndexResp {
+  repeated TaskInfo list  = 1; // 任务列表
+  int64             total = 2; // 总数
+}
+
+// ========== TaskSend 消息 ==========
+message TaskSendEmpty {}
+
+message TaskSendReq {
+  string groupCode = 1;  // 分组编码（必填）
+  string taskCode  = 2;  // 任务编码（必填：已有任务直接使用；不存在则自动创建延时任务）
+  string params    = 3;  // 参数（JSON，与 TaskInfo.params 合并，传入优先）
+  TaskSendOption option = 4;  // 延时选项（nil 表示立即发布）
+}
+
+message TaskSendOption {
+  int64 processIn = 1;  // 延迟秒数（>0 有效，与 processAt 同时传入时 processAt 优先）
+  int64 processAt = 2;  // 执行时间 Unix 毫秒（>0 有效，优先级高于 processIn）
+}
+
+// ========== TaskCancel 消息 ==========
+message TaskCancelReq {
+  string groupCode = 1;  // 分组编码（可选，为空则不过滤）
+  string taskCode  = 2;  // 任务编码（必填，精确匹配）
+}

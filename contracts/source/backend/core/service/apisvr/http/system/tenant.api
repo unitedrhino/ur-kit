@@ -1,0 +1,16 @@
+info(
+	title: "租户管理模块"
+	desc: "租户管理"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+import "tenant/agreement.api"   // 租户协议管理
+import "tenant/app.api"         // 租户应用管理
+import "tenant/config.api"      // 租户配置管理
+import "tenant/core.api"        // 租户核心信息
+import "tenant/info.api"        // 租户信息管理
+import "tenant/renewal.api"     // 租户续期管理
+import "tenant/role.api"        // 租户角色管理
+import "tenant/types.api"       // 租户公共类型定义
+import "tenant/user.api"        // 租户用户管理

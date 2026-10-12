@@ -1,0 +1,140 @@
+syntax = "v1"
+
+info(
+    title: "应用角色管理"
+    desc: "应用自定义角色管理"
+    author: "L"
+    email: "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+// 应用角色的应用关联信息
+type AppRoleApp {
+    ID      int64  `json:"id,string,optional"`     //关联记录编号
+    AppID   int64  `json:"appID,string"`           //应用编号
+    RoleID  int64  `json:"roleID,string,optional"` //复制到角色表生成的角色编号(查询返回)
+    AppName string `json:"appName,optional"`       //应用名称(查询返回)
+}
+
+// 应用自定义角色(平台级模板,仅平台管理员可读写)
+type AppRoleInfo {
+    ID          int64         `json:"id,string"`                   //角色编号
+    Name        string        `json:"name,optional"`               //角色名称(全局唯一)
+    Code        string        `json:"code,optional"`               //角色编码(全局唯一,创建必填)
+    Desc        *string       `json:"desc,optional"`               //备注
+    IsFullAuth  int64         `json:"isFullAuth,optional"`         //是否完全授权 1:是 2:否
+    CreatedTime int64         `json:"createdTime,string,optional"` //创建时间
+    Apps        []*AppRoleApp `json:"apps,optional"`               //关联的应用列表(create/update 传 appID 全量)
+}
+
+type AppRoleInfoGetListReq {
+    Page  *PageInfo `json:"page,optional"`         //分页信息,只获取一个则不填
+    AppID int64     `json:"appID,string,optional"` //按关联应用编号过滤
+    Name  string    `json:"name,optional"`         //按名称查找角色
+    Code  string    `json:"code,optional"`         //按编码查找角色
+}
+
+type AppRoleInfoGetListResp {
+    List []*AppRoleInfo `json:"list"` //角色列表数据
+    PageResp
+}
+
+type AppRoleMenuGetListReq {
+    ID    int64 `json:"id,string"`    //应用角色编号
+    AppID int64 `json:"appID,string"` //应用编号(须为该角色已关联的应用)
+}
+
+type AppRoleMenuGetListResp {
+    MenuIDs []int64 `json:"menuIDs,string"` //菜单编号列表
+}
+
+type AppRoleMenuBatchUpdateReq {
+    ID      int64   `json:"id,string"`      //应用角色编号
+    AppID   int64   `json:"appID,string"`   //应用编号(须为该角色已关联的应用)
+    MenuIDs []int64 `json:"menuIDs,string"` //菜单编号列表(全量替换)
+}
+
+@server (
+    group: system/app/role
+    prefix: /api/v1/system/app/role
+    accessCodePrefix: "systemAppManage"
+    accessNamePrefix: "应用管理"
+    accessGroup: "应用管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加应用角色"
+        description: "业务说明:创建应用自定义角色并绑定关联应用(apps,可多选),角色名称与编码全局唯一;绑定应用时自动复制角色记录到角色表(Scope=app)接入既有角色链路。仅平台管理员可操作。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (AppRoleInfo) returns (WithID)
+
+    @doc(
+        summary: "获取应用角色列表"
+        description: "业务说明:分页查询应用自定义角色,支持按关联应用、名称、编码过滤。仅平台管理员可查看。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (AppRoleInfoGetListReq) returns (AppRoleInfoGetListResp)
+
+    @doc(
+        summary: "更新应用角色"
+        description: "业务说明:修改应用角色的名称、编码、描述、完全授权标记,并全量调整关联应用(新增关联自动复制角色记录,移除关联级联清理)。仅平台管理员可操作。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (AppRoleInfo) returns ()
+
+    @doc(
+        summary: "删除应用角色"
+        description: "业务说明:删除应用自定义角色,并级联清理其复制到角色表的记录、关联应用与菜单权限。仅平台管理员可操作。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取应用角色菜单权限"
+        description: "业务说明:查询应用角色在某关联应用下已授权的菜单ID列表。仅平台管理员可查看。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler menuGetList
+    post /menu/get-list (AppRoleMenuGetListReq) returns (AppRoleMenuGetListResp)
+
+    @doc(
+        summary: "批量更新应用角色菜单权限"
+        description: "业务说明:全量替换应用角色在某关联应用下的菜单权限(落角色菜单关联表)。仅平台管理员可操作。"
+        authType: "platform"
+        group: "system/app/role"
+        resource: "system/app/role"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler menuBatchUpdate
+    post /menu/batch-update (AppRoleMenuBatchUpdateReq) returns ()
+}

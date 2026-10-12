@@ -1,0 +1,260 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+// AgentAudioInit 音频会话初始化（流的首条消息）
+// imsvr 作为纯通道转发设备音频到 agent 端点，agent 自包含完成 ASR/LLM/TTS
+message AgentAudioInit {
+  // session_key 会话标识（imsvr 侧唯一，通常为设备语音 sessionID 的 hex）
+  string session_key = 1;
+  // tenant_code 租户编码
+  string tenant_code = 2;
+  // channel_type 渠道类型（device / ...）
+  string channel_type = 3;
+  // channel_id 渠道标识（device 为 {productID}:{deviceName}）
+  string channel_id = 4;
+  // channel_name 渠道展示名（设备名称）
+  string channel_name = 5;
+  // owner_user_id 端点归属用户（设备绑定 owner；转写/回复文本落库路由用）
+  int64 owner_user_id = 6;
+  // agent_id 指定 Agent（0 = 由 aisvr 按租户默认设备 agent 解析）
+  int64 agent_id = 7;
+  // clone_id 指定 Clone（0 = 由 aisvr 解析）
+  int64 clone_id = 8;
+  // signaling 新信令专用可选配置；省略时保持旧流自动启动行为。
+  AgentAudioSignaling signaling = 9;
+}
+
+// AgentAudioSignaling 由内部已鉴权入口传入，不能由设备直接指定模型身份。
+message AgentAudioSignaling {
+  int32 sample_rate = 1; // Opus 采样率：16000/24000/48000。
+  int32 channels = 2; // 当前固定 1。
+  int32 frame_duration = 3; // 帧时长：20/60ms。
+  repeated string supported_interaction_modes = 4; // halfDuplex/fullDuplex。
+  string aec_mode = 5; // device/none。
+  string transport = 6; // none表示无媒体；旧空值保留原音频装配。
+  repeated string input_modalities = 7; // none必须显式仅text，不推断音频能力。
+  repeated string output_modalities = 8; // none必须显式仅text，不创建TTS。
+  repeated AgentFrontendToolCapability frontend_tools = 9; // 空列表表示旧端不支持客户端工具。
+  int64 connection_epoch = 10; // IM 从已鉴权设备连接传入的原代次；0 为旧入口未知，不得据此授权附件。
+  AgentCameraBinding camera_binding = 11; // 原aiVision摄像头绑定；缺省不允许摄像头消费，不借附件权限。
+  bool udp_reply_start_receipt = 12; // 仅原已核UDP安装链装配为true，旧缺省不等待。
+  AgentReplyOutputBinding reply_output_binding = 13; // 仅明确选定时携原已鉴权物理实例，不借模型nonce。
+}
+
+// AgentCameraBinding 固定原唯一摄像头视频轨和两种能力代次，不承载用户或授予取帧同意。
+message AgentCameraBinding {
+  string camera_id = 1; // 原设备物理摄像头选择。
+  string track_id = 2; // 原统一信令上行视频轨，不是SDP MID或浏览器轨ID。
+  uint64 media_revision = 3; // 原媒体代次，重协商不得复用旧取帧范围。
+  uint64 capability_revision = 4; // 原设备能力快照代次。
+}
+
+// AgentCameraFrameIdentity 在分析与停止中逐字段相同；身份来自内部RPC上下文而非消息。
+message AgentCameraFrameIdentity {
+  string session_key = 1; // 原已初始化模型会话，不能创建第二个模型会话。
+  AgentCameraBinding camera_binding = 2; // 必须与该原会话的已确认摄像头完全一致。
+  string consent_id = 3; // IM独立取帧同意ID，不是附件许可。
+  uint64 consent_revision = 4; // 同意代次，撤回后迟到帧不得重签。
+  string frame_id = 5; // 原Sampler单帧票据标识。
+  string input_id = 6; // 本轮回复关联，不借当前音频采集ID。
+  string request_id = 7; // 内部幂等请求；同token改图像或tuple明确冲突。
+}
+
+// AgentCameraFrameRequest 仅传经IM独立核权的真实JPEG；不接受附件引用、URL或自报用户。
+message AgentCameraFrameRequest {
+  AgentCameraFrameIdentity identity = 1; // 原帧完整关联。
+  bytes jpeg = 2; // 完整可解码JPEG，至多256KiB及640x480，不能持久化或记录日志。
+  string input_text = 3; // 原inputSend本轮文字问题，与本帧同一次模型调用；旧内部调用省略沿原描述语义。
+  repeated string output_modalities = 4; // 原text/audio输出选择，不能超过原模型会话声明。
+  string response_id = 5; // 原平台预分配的本轮回复；实际模型和模型前失败复用此关联，旧内部采样省略保持原语义。
+}
+
+// AgentCameraFrameResponse 仅在该轮模型及回复生产者实际退出后返回，不把入队当完成。
+message AgentCameraFrameResponse {
+  AgentCameraFrameIdentity identity = 1; // 原样精确回执。
+  string response_id = 2; // 原实际回复生产者ID。
+  bool completed = 3; // 真实模型/回复正常完成；错误不能默认成功。
+}
+
+// AgentCameraFrameStopRequest 只停止同tuple已有工作；取消Analyze的RPC不等于远端模型已退出。
+message AgentCameraFrameStopRequest {
+  AgentCameraFrameIdentity identity = 1; // 原关联，包含同意/摄像头/轨/媒体/能力及请求代次。
+}
+
+// AgentCameraFrameStopResponse 是跨进程停止屏障；未知工作或超时不能伪装已停止。
+message AgentCameraFrameStopResponse {
+  AgentCameraFrameIdentity identity = 1; // 与原停止请求精确一致。
+  bool stopped = 2; // 已有原工作真正退出；有界墓碑可重复回读，不重启模型。
+}
+
+// AgentFrontendToolCapability 仅声明name/type/revision，平台registry独立校验schema及授权。
+message AgentFrontendToolCapability {
+  string name = 1; // 平台登记的工具名。
+  string interaction_type = 2; // 已登记的交互类型。
+  uint64 schema_revision = 3; // 精确能力修订，不传递自由schema。
+}
+
+// AgentClientToolResult 由IM验证原端及幂等关联后提交；不携带设备Topic或执行凭据。
+message AgentClientToolResult {
+  string request_id = 1; // 原IM幂等关联。
+  string response_id = 2; // 原模型回复身份。
+  string tool_call_id = 3; // 原工具调用身份。
+  string status = 4; // 仅succeeded/failed/unknown。
+  bytes result_json = 5; // 已审核schema的结果对象。
+}
+
+// AgentAudioControl 为单会话有序内部控制；不包含设备鉴权信息。
+message AgentAudioControl {
+  string request_id = 1; // 内部请求关联键，调用者已做持久幂等。
+  string method = 2; // audioStart/audioStop/respCancel。
+  string response_id = 3; // respCancel 必填，其他命令必须为空。
+  string input_id = 4; // audioStart/audioStop 必填，固定采集段；respCancel 必须为空。
+}
+
+// AgentContentPart 仅传文字或已经登记的原件引用，原件字节由 AISVR 私有存储回读，不传 URL 或鉴权身份。
+message AgentContentPart {
+  string type = 1; // 本轮 text/image/file；其余模态明确拒绝。
+  string text = 2; // 仅 text 使用。
+  string content_ref = 3; // image/file 的服务端登记引用，不是对象键或 URL。
+  string mime_type = 4; // 必须与实际原件 MIME 一致。
+}
+
+// AgentContentInput 传递已经由会话层授权的离散内容，不携带设备Topic、URL或鉴权凭据。
+// 文字输入与连续Opus分开；texts 保留旧调用者语义，与 parts 互斥，不改变旧字段编号。
+message AgentContentInput {
+  string request_id = 1; // 内部幂等请求键，不使用供应商返回值替换。
+  string input_id = 2; // 会话内离散输入业务键，回复必须原样关联。
+  repeated string texts = 3; // 有序文字段，1至16段，总体积受64KiB限制。
+  repeated string output_modalities = 4; // 当前实现仅text/audio，不能超过协商结果。
+  repeated AgentContentPart parts = 5; // 有序 1 至 16 段；仅引用不传内嵌媒体，总信令仍受 64KiB 限制。
+}
+
+// AgentAudioEvent 为模型事实或内部控制回执；imsvr 负责映射设备契约及分配序号。
+message AgentAudioEvent {
+  string method = 1; // 既有 AI 事件名，或内部 controlAck。
+  string request_id = 2; // 控制回执关联键，模型事件可为空。
+  bytes data_json = 3; // 事件数据对象，不含设备 Topic/企业权限。
+  AgentReplyOutputGate reply_output_gate = 4; // 仅新选定流respAudioStart可携源首次门元数据，不进入设备JSON。
+}
+
+// AgentResponseAudio 为单帧 Opus 附加固定回复身份，不改变设备 UDP 包格式。
+message AgentResponseAudio {
+  string response_id = 1;
+  bytes audio = 2;
+}
+
+// AgentAudioNegotiated 为模型装配成功后的最终选择；尚未启动输入。
+message AgentAudioNegotiated {
+  string interaction_mode = 1;
+  string pipeline = 2;
+  repeated string supported_interaction_modes = 3;
+  repeated string input_modalities = 4; // 新模型流显式输入能力；旧实现省略时不得推断文字受理。
+  repeated string output_modalities = 5; // 明确输出模态；能力不替代权限。
+  AgentCameraBinding camera_binding = 6; // 仅实际串联图像模型确认的原视觉绑定，不广告普通附件输入。
+  bool udp_reply_start_receipt = 7; // 精确回显实际装配，忽略新能力不得视为协商成功。
+}
+
+// AgentAudioUp agent 端点音频流上行消息（imsvr → agent）
+message AgentAudioUp {
+  oneof body {
+    // init 首条：会话初始化
+    AgentAudioInit init = 1;
+    // audio 后续：Opus 音频帧（16kHz 单声道 60ms，与设备侧一致）
+    bytes audio = 2;
+    // control 仅新信令流允许；旧流保留原有上行格式。
+    AgentAudioControl control = 3;
+    // content_input 新信令离散文字；旧调用者不发送，音频字段编号保持不变。
+    AgentContentInput content_input = 4;
+    AgentClientToolResult client_tool_result = 5; // 独立工具回执，旧字段编号不变。
+    AgentModelControlBinding control_binding = 6; // 原模型有序控制范围CAS；不重写init或切换Provider。
+    AgentReplyOutputAdmission reply_output_admission = 7; // 独立原回复门决定，不作为输入控制或设备请求。
+  }
+}
+
+// AgentAudioDown agent 端点音频流下行消息（agent → imsvr → 设备）
+message AgentAudioDown {
+  oneof body {
+    // audio Opus 音频帧（回设备播放）
+    bytes audio = 1;
+    // error 会话级错误（agent 不可用等），imsvr 据此降级
+    string error = 2;
+    // ready 会话就绪通知（agent 解析完成，audio 开始流动）
+    bool ready = 3;
+    // event 与 response_audio 在同一有序流发送，避免跨 RPC 乱序。
+    AgentAudioEvent event = 4;
+    AgentResponseAudio response_audio = 5;
+    AgentAudioNegotiated negotiated = 6;
+    AgentModelControlBindingAck control_binding_ack = 7; // 已核IM当前提交/DMS并持久CAS后的精确回执。
+    AgentReplyOutputAdmission reply_output_admission_ack = 8; // 原关联逐字段回显，仅确认源实际收录决定。
+    AgentReplyOutputGate reply_output_gate_expired = 9; // 原固定安装期限实际到期；取消或scope退休不得伪作超时。
+  }
+}
+
+// AgentModelControlBinding 只由原IM Owner发送；AISVR仍回查正式IM授权，不能信任流自报权限。
+message AgentModelControlBinding {
+  string request_id = 1; // 原固定操作关联，不确定提交不得换token。
+  int64 expected_connection_epoch = 2; // AISVR当前控制范围的预期物理代次。
+  uint64 expected_endpoint_epoch = 3; // 当前公开控制代次，初次为1。
+  int64 connection_epoch = 4; // 已提交的新物理代次，原init代次永久不变。
+  uint64 endpoint_epoch = 5; // 已提交的新公开控制代次，严格前代加1。
+  string connection_instance = 6; // 新当前socket实例，仅用于正式DMS旁证，不作为附件nonce。
+  string subject = 7; // 跨端接续的目标设备；三字段全有才进入独立handoff授权，省略时仍限原主体。
+  string handoff_id = 8; // 原IM持久接续操作，不得借sameSubject恢复替代跨设备权限。
+  string endpoint_session_id = 9; // 目标公开腿；原模型sessionKey和Provider保持不变。
+}
+
+// AgentModelControlBindingAck 不携带nonce或媒体凭据；原流有序ACK后才允许新范围进入模型。
+message AgentModelControlBindingAck {
+  string request_id = 1; // 精确原操作。
+  int64 connection_epoch = 2; // 已提交新物理代次。
+  uint64 endpoint_epoch = 3; // 已提交新公开控制代次。
+  string subject = 4; // 精确回显目标设备，不替换原模型anchor。
+  string handoff_id = 5; // 精确回显原接续操作；普通恢复必须为空。
+  string endpoint_session_id = 6; // 精确回显目标公开腿；普通恢复必须为空。
+}
+
+
+// AgentReplyOutputBinding 是原DMS已核物理来源，不是模型ConnectionNonce或设备自报身份。
+message AgentReplyOutputBinding {
+  string subject = 1; // 原已鉴权设备主体。
+  int64 connection_epoch = 2; // 原实际native建立时间。
+  string connection_instance = 3; // 原实际32位小写hex实例。
+  uint64 endpoint_epoch = 4; // 原模型范围公开代次。
+  string endpoint_session_id = 5; // 本次公开腿，初建为原模型会话。
+  string handoff_id = 6; // 初建/同设备恢复为空，跨设备为原已提交意图。
+}
+
+// AgentReplyOutputGate 由源首次等待前固定，不含公共UDP凭据或媒体字节。
+message AgentReplyOutputGate {
+  string gate_id = 1; // 原回复唯一安装门。
+  string response_id = 2; // 原真实回复。
+  int64 expires_at = 3; // 源首次至多两秒的固定截止，不因重投续期。
+  AgentReplyOutputBinding binding = 4; // 当前实际模型范围ACK后的来源。
+}
+
+// AgentReplyOutputAdmission 来自原IM同CAS安装事实；ACK原样回显，不是第二次授予媒体。
+message AgentReplyOutputAdmission {
+  string gate_id = 1; // 原门，不创建或替换源门。
+  string response_id = 2; // 原回复，不沿用当前新回复猜测。
+  int64 expires_at = 3; // 只可收紧原源截止，重复保持首次值。
+  AgentReplyOutputBinding binding = 4; // 逐字段一致的原门来源。
+  string start_token = 5; // 原已持久下行Start的token。
+  string track_id = 6; // 原公开扬声器轨。
+  uint64 media_revision = 7; // 原回复媒体代次。
+  uint64 start_event_seq = 8; // 原公开投影水位，不是模型canonical水位。
+  string install_operation_id = 9; // 原唯一持久安装操作，不接设备自报。
+  string decision = 10; // 仅installed/retired，退休不开放原门。
+}
+
+// AgentAudio 自包含 agent 端点的双向音频流服务
+// imsvr 只做转发：设备 UDP Opus 帧 ⇄ 本服务 ⇄ agent 内部 ASR/LLM/TTS 管线
+service AgentAudio {
+  // Stream 双向流式音频会话：首条上行必须为 init，之后为音频帧
+  rpc Stream(stream AgentAudioUp) returns (stream AgentAudioDown);
+  // AnalyzeCameraFrame 同步提交原模型会话摄像头帧，至实际该轮退出；默认旧流无此权限。
+  rpc AnalyzeCameraFrame(AgentCameraFrameRequest) returns (AgentCameraFrameResponse);
+  // StopCameraFrame 取消并等待原帧工作退出；调用方须保留原本人身份另用有限停止预算。
+  rpc StopCameraFrame(AgentCameraFrameStopRequest) returns (AgentCameraFrameStopResponse);
+}

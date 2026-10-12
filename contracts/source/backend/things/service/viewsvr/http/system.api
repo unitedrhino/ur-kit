@@ -1,0 +1,88 @@
+import "common.api"
+
+@server(
+	group: view/system
+	prefix: /api/v1/view/system
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "获取平台运行时间"
+	    authType: "admin"
+	    description: "业务说明：查询可视化服务运行时长。用于系统运行状态展示。"
+	    resource: "viewSystem"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler uptime
+	post /uptime (Empty) returns (SystemUptimeResp)
+
+	@doc(
+	    summary: "获取能源大屏顶部统计"
+	    authType: "admin"
+	    description: "业务说明：查询能源大屏顶部统计数据，返回实时功率、今日用电、平均功率、最小功率和最大功率。用于系统内置能源大屏数据集消费。"
+	    resource: "viewSystem"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler energyOverview
+	post /energy/dashboard/overview (EnergyDashboardQueryReq) returns (EnergyOverviewResp)
+
+	@doc(
+	    summary: "获取能源大屏设备状态统计"
+	    authType: "admin"
+	    description: "业务说明：查询能源大屏设备状态统计，返回在线、离线、未激活和总数，并输出可直接绑定环图的数据集结构。用于系统内置能源大屏数据集消费。"
+	    resource: "viewSystem"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler energyDeviceStatus
+	post /energy/dashboard/device-status (EnergyDashboardQueryReq) returns (EnergyDeviceStatusResp)
+}
+
+type (
+	EnergyDashboardQueryReq {
+		ProjectID string   `json:"projectID,optional"` // 项目ID
+		AreaIDs   []string `json:"areaIDs,optional"`   // 区域ID列表
+		TimeRange string   `json:"timeRange,optional"` // 预设时间范围
+		TimeStart string   `json:"timeStart,optional"` // 自定义开始时间毫秒时间戳
+		TimeEnd   string   `json:"timeEnd,optional"`   // 自定义结束时间毫秒时间戳
+		Limit     int64    `json:"limit,optional"`     // 返回条数限制
+	}
+
+	EnergyOverviewResp {
+		TotalPower  float64 `json:"totalPower,optional"`  // 实时功率
+		TodayEnergy float64 `json:"todayEnergy,optional"` // 今日用电
+		AvgPower    float64 `json:"avgPower,optional"`    // 平均功率
+		MinPower    float64 `json:"minPower,optional"`    // 最小功率
+		MaxPower    float64 `json:"maxPower,optional"`    // 最大功率
+	}
+
+	EnergyChartDataset {
+		Dimensions []string `json:"dimensions,optional"` // 字段定义
+		Source     string   `json:"source,optional"`     // dataset.source JSON 字符串
+	}
+
+	EnergyDeviceStatusSummary {
+		Total    int64 `json:"total,optional"`    // 总数
+		Online   int64 `json:"online,optional"`   // 在线数
+		Offline  int64 `json:"offline,optional"`  // 离线数
+		Inactive int64 `json:"inactive,optional"` // 未激活数
+		Fault    int64 `json:"fault,optional"`    // 异常数
+	}
+
+	EnergyDeviceStatusResp {
+		Dataset *EnergyChartDataset       `json:"dataset,optional"` // 环图数据集
+		Summary *EnergyDeviceStatusSummary `json:"summary,optional"` // 汇总统计
+	}
+
+	SystemUptimeResp {
+		StartTime     int64 `json:"startTime,string,optional"` // 服务启动时间
+		UptimeSeconds int64 `json:"uptimeSeconds,optional"`    // 运行秒数
+		Days          int64 `json:"days,optional"`             // 运行天数
+		Hours         int64 `json:"hours,optional"`            // 剩余小时
+	}
+)

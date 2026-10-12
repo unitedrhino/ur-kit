@@ -1,0 +1,51 @@
+//--------------------网关路由管理服务--------------------
+// 网关反向代理路由的动态管理：各后端服务启动时经 routeInfoBatchUpsert 自注册路由，
+// apisvr 从数据库加载并与配置文件路由合并生效；变更经 NATS 事件广播触发热重载。
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message RouteWithID{
+  int64 id = 1; //路由ID
+}
+message RouteEmpty{
+}
+
+service RouteManage{
+  rpc routeInfoBatchUpsert(RouteInfoBatchUpsertReq) returns(RouteEmpty); //服务自注册:批量upsert路由并清理该服务本次未上报的陈旧路由(幂等)
+  rpc routeInfoCreate(RouteInfo) returns(RouteWithID); //创建路由(预留,当前管理端未开放)
+  rpc routeInfoUpdate(RouteInfo) returns(RouteEmpty); //更新路由(管理端仅允许改status/desc/sort)
+  rpc routeInfoDelete(RouteWithID) returns(RouteEmpty); //删除路由
+  rpc routeInfoGetList(RouteInfoGetListReq) returns(RouteInfoGetListResp); //获取路由列表(支持分页和过滤)
+}
+
+message RouteInfo{
+  int64 id = 1; //路由ID
+  string serviceCode = 2; //所属服务标识,如 things/ai/data/view/sale
+  string name = 3; //路由名称
+  google.protobuf.StringValue desc = 4; //路由描述
+  string location = 5; //匹配路径,同 ProxyConf.Location 语义
+  string proxy = 6; //完整代理配置JSON(proxy.ProxyConf 序列化)
+  string source = 7; //来源 service:服务自注册 manual:手工
+  int64 status = 8; //状态 1:启用 2:停用
+  int64 sort = 9; //排序
+  int64 createdTime = 10; //创建时间
+  int64 updatedTime = 11; //更新时间
+}
+message RouteInfoBatchUpsertReq{
+  string serviceCode = 1; //所属服务标识
+  repeated RouteInfo list = 2; //该服务全量路由清单
+}
+message RouteInfoGetListReq{
+  PageInfo page = 1; //分页信息
+  string serviceCode = 2; //按服务标识过滤
+  string source = 3; //按来源过滤
+  int64 status = 4; //按状态过滤
+  string location = 5; //按匹配路径模糊过滤
+}
+message RouteInfoGetListResp{
+  repeated RouteInfo list = 1;
+  int64 total = 2;
+}

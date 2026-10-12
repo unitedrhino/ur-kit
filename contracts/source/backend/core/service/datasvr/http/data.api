@@ -1,0 +1,312 @@
+syntax = "v1"
+
+// ==================== 通用类型 ====================
+type (
+	PageInfo {
+		Page   int64      `json:"page,optional" form:"page,optional"` // 页码
+		Size   int64      `json:"size,optional" form:"size,optional"` // 每页大小
+		Orders []*OrderBy `json:"orders,optional"` // 排序
+	}
+	PageResp {
+		Page     int64 `json:"page,optional"` // 页码
+		PageSize int64 `json:"pageSize,optional"` // 每页大小
+		Total    int64 `json:"total"` // 总数
+	}
+	WithID {
+		ID int64 `json:"id,string,optional"` // id
+	}
+	OrderBy {
+		Field string `json:"field,optional"` // 排序的字段名
+		Sort  int64  `json:"sort,optional"` // 排序方式：0 从小到大, 1 从大到小
+	}
+)
+
+// ==================== 数据源管理 ====================
+type (
+	DataSourceManage {
+		ID           int64             `json:"id,string,optional"` // 编号
+		Code         string            `json:"code"` // 数据源标识
+		Name         string            `json:"name"` // 名称
+		DBType       string            `json:"dbType"` // 数据库类型 mysql|pgsql|sqlite|tdengine
+		Driver       string            `json:"driver,optional"` // 驱动类型（TDengine用）taosWS|taosRestful|taosSql
+		DSN          string            `json:"dsn"` // 连接字符串
+		MaxIdleConns int               `json:"maxIdleConns,optional"` // 最大空闲连接数
+		MaxOpenConns int               `json:"maxOpenConns,optional"` // 最大打开连接数
+		FuncMap      map[string]string `json:"funcMap,optional"` // 自定义函数模板，覆盖内置模板
+		Status       int64             `json:"status,optional"` // 状态 1:启用 2:禁用
+		Desc         string            `json:"desc,optional"` // 描述
+	}
+	DataSourceGetListReq {
+		Page   *PageInfo `json:"page,optional"` // 分页信息
+		Code   string    `json:"code,optional"` // 数据源标识
+		Name   string    `json:"name,optional"` // 名称模糊搜索
+		DBType string    `json:"dbType,optional"` // 数据库类型过滤
+		Status int64     `json:"status,optional"` // 状态过滤
+	}
+	DataSourceGetListResp {
+		List []*DataSourceManage `json:"list"` // 列表数据
+		PageResp
+	}
+	DataSourcePingReq {
+		Code string `json:"code"` // 数据源标识
+	}
+)
+
+// ==================== 查询配置管理 ====================
+type (
+	PreFilter {
+		Column string `json:"column"` // 列名，如 "tenant_code"
+		Value  string `json:"value"` // 固定值，如 "common"
+	}
+	PermHook {
+		SubCode string            `json:"subCode"` // 过滤场景，如 "projectScope"、"deviceScope"
+		Headers map[string]string `json:"headers,optional"` // key=传给hook的参数名, value=HTTP header key名称（运行时动态读取）
+	}
+	PermConfig {
+		IsFilterTenant   int64        `json:"isFilterTenant,optional"` // 租户过滤 1:按tenant_code过滤，超管无租户header时查所有
+		PreFilters       []*PreFilter `json:"preFilters,optional"` // 固定 WHERE 条件（无条件注入）
+		Hooks            []*PermHook  `json:"hooks,optional"` // Hook 列表（code 固定 "dataFilter"，SubCode 区分场景）
+		SoftDeleteColumn string       `json:"softDeleteColumn,optional"` // 软删除列名，空=不过滤
+		FilterRoles      string       `json:"filterRoles,optional"` // 角色过滤（逗号分隔）
+	}
+	FilterKeywords {
+		Sql    string `json:"sql"` // SQL模板
+		ValNum int64  `json:"valNum"` // 占位符数量
+		Type   string `json:"type"` // 值类型 date:日期字符串 array:逗号分隔数组
+	}
+	QueryConfigManage {
+		ID             int64                     `json:"id,string,optional"` // 编号
+		Code           string                    `json:"code"` // 查询标识
+		Name           string                    `json:"name,optional"` // 名称
+		DataSourceCode string                    `json:"dataSourceCode"` // 关联数据源code，空则使用默认数据源
+		Type           string                    `json:"type"` // 查询类别 sql:SQL模板查询 table:直接查表
+		Table          string                    `json:"table,optional"` // 表名（type=table时使用）
+		Sql            string                    `json:"sql,optional"` // SQL模板（type=sql时使用）
+		Columns        string                    `json:"columns,optional"` // 默认查询列
+		Omits          string                    `json:"omits,optional"` // 排除字段列表
+		OrderBy        string                    `json:"orderBy,optional"` // 默认排序
+		IsToHump       int64                     `json:"isToHump,optional"` // 是否驼峰转换 1:是 2:否
+		Filter         map[string]FilterKeywords `json:"filter,optional"` // 预定义过滤器
+		PermConfig     *PermConfig               `json:"permConfig,optional"` // 权限配置
+	}
+	QueryConfigGetListReq {
+		Page           *PageInfo `json:"page,optional"` // 分页信息
+		Code           string    `json:"code,optional"` // 查询标识
+		Name           string    `json:"name,optional"` // 名称模糊搜索
+		DataSourceCode string    `json:"dataSourceCode,optional"` // 数据源过滤
+		Type           string    `json:"type,optional"` // 类型过滤
+	}
+	QueryConfigGetListResp {
+		List []*QueryConfigManage `json:"list"` // 列表数据
+		PageResp
+	}
+)
+
+// ==================== 查询执行 ====================
+type (
+	Aggregation {
+		Func   string `json:"argFunc,optional"` // 聚合函数 count|sum|avg|max|min|first|last 等
+		Column string `json:"column,optional"` // 聚合列名
+	}
+	QueryInfoGetOneReq {
+		Code         string                 `json:"code"` // 查询配置code
+		Page         *PageInfo              `json:"page,optional"` // 分页
+		Filter       map[string]interface{} `json:"filter,optional"` // 过滤条件
+		Aggregations []Aggregation          `json:"aggregations,optional"` // 聚合
+		GroupBy      string                 `json:"groupBy,optional"` // 分组
+		Columns      string                 `json:"columns,optional"` // 查询列（覆盖默认）
+	}
+	QueryInfoGetOneResp {
+		List []map[string]interface{} `json:"list"` // 查询结果列表
+	}
+	QueryInfoGetListReq {
+		Finds []*QueryInfoGetOneReq `json:"finds"` // 批量查询列表
+	}
+	QueryInfoGetListResp {
+		Lists [][]map[string]interface{} `json:"list"` // 批量查询结果
+	}
+)
+
+// ==================== 数据源管理路由 ====================
+@server (
+	group:           data/datasource/manage
+	prefix:          /api/v1/data/datasource/manage
+	middleware:      CheckTokenWare,InitCtxsWare
+	defaultAuthType: "platform"
+)
+service data {
+	@doc (
+		summary:       "添加数据源"
+		description:   "业务说明：创建新的数据库连接配置，支持MySQL、PostgreSQL、SQLite、TDengine等多种数据库类型。配置连接字符串、连接池参数后可用于查询配置的数据来源。数据源是平台级基础设施，跨租户共享，仅平台管理员可操作。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "create"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (DataSourceManage) returns (WithID)
+
+	@doc (
+		summary:       "获取数据源列表"
+		description:   "业务说明：分页查询数据源配置列表，支持按标识、名称、数据库类型、状态过滤。用于数据源管理页面展示，返回基本信息不含敏感字段。仅平台管理员可访问。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (DataSourceGetListReq) returns (DataSourceGetListResp)
+
+	@doc (
+		summary:       "获取数据源详情"
+		description:   "业务说明：根据ID查询单个数据源的完整配置信息，包括连接字符串、连接池参数、自定义函数模板等。用于编辑回显、配置查看等场景。仅平台管理员可访问。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (DataSourceManage)
+
+	@doc (
+		summary:       "更新数据源"
+		description:   "业务说明：修改数据源配置参数，支持更新名称、连接字符串、连接池参数、状态等。部分更新，空值字段不修改。修改后需重新测试连接有效性。仅平台管理员可操作。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "update"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (DataSourceManage)
+
+	@doc (
+		summary:       "删除数据源"
+		description:   "业务说明：删除数据源配置记录。删除前需确保无查询配置引用该数据源，否则删除失败。删除后相关查询配置将无法执行。仅平台管理员可操作。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "delete"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:       "测试数据源连接"
+		description:   "业务说明：验证数据源连接配置是否有效，尝试建立数据库连接并立即关闭。用于新增/编辑数据源时的配置验证，确保连接字符串正确。仅平台管理员可操作。"
+		authType:      "platform"
+		resource:      "dataSource"
+		action:        "test"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler ping
+	post /ping (DataSourcePingReq)
+}
+
+// ==================== 查询配置管理路由 ====================
+@server (
+	group:           data/query/manage
+	prefix:          /api/v1/data/query/manage
+	middleware:      CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+)
+service data {
+	@doc (
+		summary:       "添加查询配置"
+		description:   "业务说明：创建查询配置模板，定义SQL模板或表名、查询列、过滤条件、权限配置等。支持两种类型：sql（SQL模板查询）和table（直接查表）。用于动态报表、数据看板、通用查询等场景。租户管理员可操作。"
+		authType:      "admin"
+		resource:      "queryConfig"
+		action:        "create"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (QueryConfigManage) returns (WithID)
+
+	@doc (
+		summary:       "获取查询配置列表"
+		description:   "业务说明：分页查询查询配置列表，支持按标识、名称、数据源、类型过滤。用于查询配置管理页面展示。租户管理员可访问。"
+		authType:      "admin"
+		resource:      "queryConfig"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (QueryConfigGetListReq) returns (QueryConfigGetListResp)
+
+	@doc (
+		summary:       "获取查询配置详情"
+		description:   "业务说明：根据ID查询单个查询配置的完整信息，包括SQL模板、列定义、过滤器、权限配置等。用于编辑回显、配置查看等场景。租户管理员可访问。"
+		authType:      "admin"
+		resource:      "queryConfig"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (QueryConfigManage)
+
+	@doc (
+		summary:       "更新查询配置"
+		description:   "业务说明：修改查询配置参数，支持更新SQL模板、列定义、过滤器、权限配置等。部分更新，空值字段不修改。修改后立即生效。租户管理员可操作。"
+		authType:      "admin"
+		resource:      "queryConfig"
+		action:        "update"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (QueryConfigManage)
+
+	@doc (
+		summary:       "删除查询配置"
+		description:   "业务说明：删除查询配置记录。删除后相关查询将无法执行，需确保无业务依赖后再删除。租户管理员可操作。"
+		authType:      "admin"
+		resource:      "queryConfig"
+		action:        "delete"
+		group:         "数据服务"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+}
+
+// ==================== 查询执行路由 ====================
+@server (
+	group:           data/query/info
+	prefix:          /api/v1/data/query/info
+	middleware:      CheckTokenWare,InitCtxsWare
+	defaultAuthType: "all"
+)
+service data {
+	@doc (
+		summary:       "执行单个查询"
+		description:   "业务说明：根据查询配置code执行SQL查询，支持动态过滤条件、分页、聚合、分组等。权限配置（PermConfig）自动注入租户过滤、项目过滤等条件，确保用户只能查询其权限范围内的数据。用于报表数据加载、数据看板、通用查询等场景。所有登录用户可调用。"
+		authType:      "all"
+		resource:      "queryExecution"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (QueryInfoGetOneReq) returns (QueryInfoGetOneResp)
+
+	@doc (
+		summary:       "批量执行查询"
+		description:   "业务说明：批量执行多个查询配置，一次请求返回多个查询结果。用于数据看板场景，减少HTTP请求数量。每个查询独立执行，支持各自的过滤条件和分页参数。权限配置自动注入确保数据隔离。所有登录用户可调用。"
+		authType:      "all"
+		resource:      "queryExecution"
+		action:        "view"
+		group:         "数据服务"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (QueryInfoGetListReq) returns (QueryInfoGetListResp)
+}
+

@@ -1,0 +1,425 @@
+{
+  "components": {
+    "schemas": {
+      "AiAppChatSendReq": {
+        "properties": {
+          "appCode": {
+            "description": "执行的应用",
+            "type": "string"
+          },
+          "conversationID": {
+            "description": "（选填）会话 ID，需要基于之前的聊天记录继续对话，必须传之前消息的 conversation_id。",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "query": {
+            "description": "用户输入/提问内容",
+            "type": "string"
+          },
+          "user": {
+            "description": "用户标识，用于定义终端用户的身份，方便检索、统计。 由开发者定义规则，需保证用户标识在应用内唯一。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appCode",
+          "query",
+          "user"
+        ],
+        "title": "AiAppChatSendReq",
+        "type": "object"
+      },
+      "AiAppChatSendResp": {
+        "properties": {
+          "answer": {
+            "description": " 完整回复内容",
+            "type": "string"
+          },
+          "conversationID": {
+            "description": "会话 ID",
+            "type": "string"
+          },
+          "createdAt": {
+            "description": "消息创建时间戳，如：1705395332",
+            "format": "int64",
+            "type": "integer"
+          },
+          "event": {
+            "description": " message(阻塞模式只有这种) LLM 返回文本块事件，即：完整的文本以分块的方式输出。 messageEnd 消息结束事件，收到此事件则代表流式返回结束。 agentMessage Agent模式下返回文本块事件，即：在Agent模式下，文章的文本以分块的方式输出（仅Agent模式下使用） agentThought Agent模式下有关Agent思考步骤的相关内容，涉及到工具调用（仅Agent模式下使用） ping 每 10s 一次的 ping 事件，保持连接存活。",
+            "type": "string"
+          },
+          "messageID": {
+            "description": "消息唯一 ID",
+            "type": "string"
+          },
+          "mode": {
+            "description": "App 模式，固定为 chat",
+            "type": "string"
+          }
+        },
+        "required": [
+          "messageID",
+          "conversationID",
+          "mode",
+          "answer",
+          "createdAt"
+        ],
+        "title": "AiAppChatSendResp",
+        "type": "object"
+      },
+      "AiAppWorkflowRunReq": {
+        "properties": {
+          "appCode": {
+            "description": "执行的应用",
+            "type": "string"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "user": {
+            "description": "用户标识，用于定义终端用户的身份，方便检索、统计。 由开发者定义规则，需保证用户标识在应用内唯一。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appCode",
+          "user"
+        ],
+        "title": "AiAppWorkflowRunReq",
+        "type": "object"
+      },
+      "AiAppWorkflowRunResp": {
+        "properties": {
+          "createdAt": {
+            "description": "开始时间",
+            "format": "int32",
+            "type": "integer"
+          },
+          "elapsedTime": {
+            "description": "Optional 耗时(s)",
+            "format": "double",
+            "type": "number"
+          },
+          "error": {
+            "description": "错误原因",
+            "type": "string"
+          },
+          "event": {
+            "description": "workflowStarted workflow 开始执行 nodeStarted node 开始执行  nodeFinished node 执行结束，成功失败同一事件中不同状态 workflowFinished workflow 执行结束，成功失败同一事件中不同状态",
+            "type": "string"
+          },
+          "finishedAt": {
+            "description": "结束时间",
+            "format": "int32",
+            "type": "integer"
+          },
+          "inputs": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "outputs": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "status": {
+            "description": "执行状态 running / succeeded / failed / stopped",
+            "type": "string"
+          },
+          "taskID": {
+            "type": "string"
+          },
+          "workflowID": {
+            "type": "string"
+          },
+          "workflowRunID": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "event",
+          "workflowRunID",
+          "taskID",
+          "workflowID",
+          "status",
+          "outputs",
+          "elapsedTime",
+          "createdAt",
+          "finishedAt",
+          "inputs"
+        ],
+        "title": "AiAppWorkflowRunResp",
+        "type": "object"
+      },
+      "AiSSeReq": {
+        "title": "AiSSeReq",
+        "type": "object"
+      },
+      "AiSSeResp": {
+        "title": "AiSSeResp",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "things-ai",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/ai/app/chat-send": {
+      "post": {
+        "operationId": "postApiV1AiAppChat-send",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAppChatSendReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiAppChatSendResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "发送对话消息",
+        "tags": [
+          "ai/app",
+          "aiApp"
+        ]
+      }
+    },
+    "/api/v1/ai/app/sse/chat-run": {
+      "post": {
+        "operationId": "postApiV1AiAppSseChat-run",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAppChatSendReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiAppChatSendResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "sse模式ai聊天运行",
+        "tags": [
+          "ai/app",
+          "aiApp"
+        ]
+      }
+    },
+    "/api/v1/ai/app/sse/workflow-run": {
+      "post": {
+        "operationId": "postApiV1AiAppSseWorkflow-run",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAppWorkflowRunReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiAppWorkflowRunResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "sse模式执行 workflow",
+        "tags": [
+          "ai/app",
+          "aiApp"
+        ]
+      }
+    },
+    "/api/v1/ai/app/workflow-run": {
+      "post": {
+        "operationId": "postApiV1AiAppWorkflow-run",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiAppWorkflowRunReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiAppWorkflowRunResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "执行 workflow",
+        "tags": [
+          "ai/app",
+          "aiApp"
+        ]
+      }
+    },
+    "/api/v1/ai/mcp/run": {
+      "post": {
+        "operationId": "postApiV1AiMcpRun",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AiSSeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AiSSeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加规则链",
+        "tags": [
+          "ai/mcp",
+          "aiMcp"
+        ]
+      }
+    }
+  }
+}

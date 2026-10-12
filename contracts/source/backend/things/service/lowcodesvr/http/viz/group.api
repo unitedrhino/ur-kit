@@ -1,0 +1,105 @@
+syntax = "v1"
+
+info (
+	title:   "type title here"
+	desc:    "type desc here"
+	author:  "type author here"
+	email:   "type email here"
+	version: "type version here"
+)
+
+@server (
+	group:      lowcode/viz/group
+	prefix:     /api/v1/lowcode/viz/group
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "添加可视化分组"
+	    description: "业务说明：添加可视化分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler create
+	post /create (VizGroup) returns (WithIDStr)
+
+	@doc(
+	    summary: "获取可视化分组列表"
+	    description: "业务说明：获取可视化分组列表"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (VizGroupGetListReq) returns (VizGroupGetListResp)
+
+	@doc(
+	    summary: "获取可视化分组信息"
+	    description: "业务说明：获取可视化分组信息"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (VizGroupGetOneReq) returns (VizGroup)
+
+	@doc(
+	    summary: "更新可视化分组"
+	    description: "业务说明：更新可视化分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler update
+	post /update (VizGroup)
+
+	@doc(
+	    summary: "删除可视化分组"
+	    description: "业务说明：删除可视化分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithIDStr)
+}
+
+type (
+	// VizGroup 定义可视化
+	VizGroup {
+		ID          int64       `json:"id,string,optional"` //分组的标识符
+		ParentID    int64       `json:"parentID,string,optional"` //父级的ID
+		IDPath      string      `json:"idPath,optional"` //id路径
+		Name        string      `json:"name,optional"` //分组的名称
+		Desc        *string     `json:"desc,optional"`
+		VizCount    int64       `json:"vizCount,optional"` //只读,分组下的可视化数量
+		CreatedTime int64       `json:"createdTime,string,optional"`
+		UpdatedTime int64       `json:"updatedTime,optional"`
+		Children    []*VizGroup `json:"children,optional,omitempty"`
+	}
+	VizGroupGetOneReq {
+		ID           int64 `json:"id,string"` //分组的标识符
+		WithChildren bool  `json:"withChildren,optional"` //同时返回子分组
+	}
+	VizGroupGetListReq {
+		Page     *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		Name     string    `json:"name,optional"` //可视化分组的名称
+		ParentID int64     `json:"parentID,string,optional"` //父级的ID
+	}
+	VizGroupGetListResp {
+		List []*VizGroup `json:"list"` // 列表数据
+		PageResp
+	}
+)
+

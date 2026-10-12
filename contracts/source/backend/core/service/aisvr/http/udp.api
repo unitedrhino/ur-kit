@@ -1,0 +1,51 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-UDP令牌"
+	desc:    "AI UDP Token HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- UDP Token 类型定义 ----
+
+type UdpTokenCreateReq {
+	agentID         int64  `json:"agentID"`                 // 助手ID
+	sessionTtlSec   int64  `json:"sessionTtlSec,optional"` // 会话有效期（秒）
+	audioParamsJson string `json:"audioParamsJson,optional"` // 音频参数（JSON）
+	mcpToolsJson    string `json:"mcpToolsJson,optional"`  // MCP工具清单（JSON）
+}
+
+type UdpTokenCreateResp {
+	token       string `json:"token"`       // UDP令牌
+	aesKey      string `json:"aesKey"`      // AES加密密钥
+	nonce       string `json:"nonce"`       // 随机数
+	udpHost     string `json:"udpHost"`     // UDP服务器地址
+	udpPort     int64  `json:"udpPort"`     // UDP服务器端口
+	expireAt    int64  `json:"expireAt"`    // 过期时间（Unix秒）
+	sessionID   string `json:"sessionID"`   // 会话ID
+	replyFormat string `json:"replyFormat"` // 回复格式
+	replyTopic  string `json:"replyTopic"`  // 回复主题
+}
+
+// ---- UDP Token 服务定义 ----
+
+@server (
+	group:            ai/udp
+	prefix:           /api/v1/ai/udp
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "all"
+)
+service ai {
+	@doc(
+		summary: "创建UDP会话令牌"
+		description: "业务说明：为语音对话创建UDP会话令牌，返回加密令牌、AES密钥、随机数、UDP服务器地址端口、会话ID等。客户端使用令牌建立UDP连接，进行实时语音交互。令牌有过期时间，需在有效期内使用。用于语音对话场景的连接建立。"
+		authType: "all"
+		resource: "ai/udp"
+		action: "create"
+		group: "ai/udp"
+		recordLogMode: "2"
+	)
+	@handler tokenCreate
+	post /token/create (UdpTokenCreateReq) returns (UdpTokenCreateResp)
+}

@@ -1,0 +1,112 @@
+info(
+	title: "接口管理模块"
+	desc: "接口管理"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: system/resource/api
+	prefix: /api/v1/system/resource/api
+    accessCodePrefix: "systemAccessManage"
+    accessNamePrefix: "接口管理"
+    accessGroup: "授权管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加接口"
+        description: "业务说明：注册API接口定义。接口定义用于权限控制和操作日志记录，包含路由、请求方式、业务类型、日志模式等属性。用于新增业务接口后补充权限配置、API文档管理等场景。"
+        authType: "platform"
+        group: "system/resource/api"
+        resource: "system/resource/api"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (ApiInfo) returns (WithID)
+
+    @doc(
+        summary: "获取接口列表"
+        description: "业务说明：查询API接口定义列表，支持按路由、请求方式、名称、授权类型筛选。用于接口管理页面、权限配置参考、API文档查看等场景。返回分页结果包含接口基本信息。"
+        authType: "platform"
+        group: "system/resource/api"
+        resource: "system/resource/api"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (ApiInfoGetListReq) returns (ApiInfoGetListResp)
+
+    @doc(
+        summary: "更新接口"
+        description: "业务说明：修改API接口定义。可调整接口名称、业务类型、日志模式等属性。路由和请求方式通常不可修改以保持权限引用稳定性。用于接口信息修正、日志策略调整等场景。"
+        authType: "platform"
+        group: "system/resource/api"
+        resource: "system/resource/api"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (ApiInfo) returns ()
+
+    @doc(
+        summary: "删除接口"
+        description: "业务说明：删除API接口定义。删除前需确保无访问权限引用该接口，否则删除失败。用于清理废弃接口、API重构等场景。删除后相关权限配置需重新分配。"
+        authType: "platform"
+        group: "system/resource/api"
+        resource: "system/resource/api"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+}
+
+type (
+    ApiInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        Route string `json:"route,optional"`                   // 接口路由
+        Method string `json:"method,optional"`      // 接口请求方式: （1 GET 2 POST 3 HEAD 4 OPTIONS 5 PUT 6 DELETE 7 TRACE 8 CONNECT 9 其它）
+        Name string `json:"name,optional"`                     // 接口名称
+        AccessCode string `json:"accessCode,optional"`                               // 应用编号
+        AuthType int64 `json:"authType,optional,range=[0:3]"`        //  1(all) 全部人可以操作 2(admin) 默认授予租户管理员权限 3(superAdmin,supper) default租户才可以操作(超管是跨租户的)
+        Resource string `json:"resource,optional"` // 资源标识
+        GroupCode string `json:"groupCode,optional"` // 分组标识
+        OperTypeCode string `json:"operTypeCode,optional"` // 操作类型编码
+        AuthTypeCode string `json:"authTypeCode,optional"` // 权限层级编码
+    }
+
+    ApiActionInfo {
+        ID string `json:"id,optional"` // 动作ID
+        Code string `json:"code,optional"` // 动作编码
+        Name string `json:"name,optional"` // 动作名称
+        Children []*ApiInfo `json:"children,optional,omitempty"` // 接口列表
+    }
+
+    ApiResourceInfo {
+        ID string `json:"id,optional"` // 资源ID
+        Code string `json:"code,optional"` // 资源编码
+        Name string `json:"name,optional"` // 资源名称
+        Children []*ApiActionInfo `json:"children,optional,omitempty"` // 动作列表
+    }
+
+    ApiGroupInfo {
+        ID string `json:"id,optional"` // 分组ID
+        Code string `json:"code,optional"` // 分组编码
+        Name string `json:"name,optional"` // 分组名称
+        Children []*ApiResourceInfo `json:"children,optional,omitempty"` // 资源列表
+    }
+
+
+    ApiInfoGetListResp  {
+        List []*ApiInfo `json:"list"`            // 接口列表数据
+        Groups []*ApiGroupInfo `json:"groups,optional,omitempty"` // 聚合后的分组数据
+        PageResp
+    }
+
+)

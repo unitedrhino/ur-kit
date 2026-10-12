@@ -1,0 +1,79 @@
+info (
+	title:   "用户配置管理"
+	desc:    "用户配置相关接口"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:           system/user/self
+	prefix:          /api/v1/system/user/self
+	accessCode:      "systemUserSelf"
+	accessName:      "用户基础操作"
+	accessGroup:     "用户管理"
+	defaultAuthType: "all"
+	defaultNeedAuth: "false"
+	middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取用户配置详情"
+	    description: "业务说明：获取当前用户指定的个性化配置项，如界面偏好、通知设置等。返回配置编码和参数值（JSON格式）。用于前端加载用户偏好设置、恢复用户自定义配置等场景。可同时返回用户可访问的项目列表。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler profileGetOne
+	post /profile/get-one (UserProfileGetOneReq) returns (UserProfileGetOneResp)
+
+	@doc(
+	    summary: "更新用户配置"
+	    description: "业务说明：更新当前用户的个性化配置项，保存用户的界面偏好、操作习惯等自定义设置。配置参数以JSON格式存储。用于用户保存个人设置、修改偏好配置等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler profileUpdate
+	post /profile/update (UserProfile)
+
+	@doc(
+	    summary: "删除用户配置"
+	    description: "业务说明：删除当前用户指定编码的个性化配置项。仅允许删除当前登录用户自己的配置，供旧版 App 清理已失效的本地偏好。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler profileDelete
+	post /profile/delete (UserProfileDeleteReq)
+
+	@doc(
+	    summary: "获取用户配置列表"
+	    description: "业务说明：批量获取当前用户的多个配置项，传入配置编码列表，返回对应的配置参数。用于一次性加载多个用户偏好设置、配置项批量查询等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler profileGetList
+	post /profile/get-list (UserProfileGetListReq) returns (UserProfileGetListResp)
+
+	@doc(
+	    summary: "上报推送客户端"
+	    description: "业务说明：保存当前用户的 uni-push 客户端 ID；platform=unbind 时解绑当前用户与该客户端 ID。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler pushClientReport
+	post /push-client/report (UserPushClientReportReq)
+}

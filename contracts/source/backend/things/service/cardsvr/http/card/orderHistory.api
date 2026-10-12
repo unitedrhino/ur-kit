@@ -1,0 +1,120 @@
+syntax = "v1"
+
+info(
+    title: "物联卡订购历史"
+    desc: "物联卡订购历史只读查询与导出"
+    version: "v1"
+)
+
+type (
+    CardOrderHistory {
+        ID           int64   `json:"id,string"`
+        Iccid        string  `json:"iccid"`
+        RouteCode    string  `json:"routeCode,optional"`
+        Source       string  `json:"source,optional"`
+        PackageID    string  `json:"packageId,optional"`
+        PacketID     string  `json:"packetId,optional"`
+        OrdNo        string  `json:"ordNo,optional"`
+        SubscribeID  string  `json:"subscribeId,optional"`
+        AcceptDate   string  `json:"acceptDate,optional"`
+        AcceptMonth  string  `json:"acceptMonth,optional"`
+        ExecTime     string  `json:"execTime,optional"`
+        SubscribeDetail string `json:"subscribeDetail,optional"`
+        OperateCode  string  `json:"operateCode,optional"`
+        DealState    string  `json:"dealState,optional"`
+        UpstreamAcctID string `json:"upstreamAcctId,optional"`
+        UpstreamDeviceID string `json:"upstreamDeviceId,optional"`
+        UpstreamUserType string `json:"upstreamUserType,optional"`
+        UpstreamOperator string `json:"upstreamOperator,optional"`
+        UpstreamUpdateTime string `json:"upstreamUpdateTime,optional"`
+        UpstreamUpdater string `json:"upstreamUpdater,optional"`
+        TrueFlow     float64 `json:"trueFlow,optional"`
+        ErrorFlow    float64 `json:"errorFlow,optional"`
+        UseFlow      float64 `json:"useFlow,optional"`
+        UseTrueFlow  float64 `json:"useTrueFlow,optional"`
+        UseSoFlow    float64 `json:"useSoFlow,optional"`
+        ErrorTime    float64 `json:"errorTime,optional"`
+        StartTime    string  `json:"startTime,optional"`
+        EndTime      string  `json:"endTime,optional"`
+        OrdType      string  `json:"ordType,optional"`
+        Status       int64   `json:"status,optional"`
+        PacketType   int64   `json:"packetType,optional"`
+        ValidateType int64   `json:"validateType,optional"`
+        ValidateTime string  `json:"validateTime,optional"`
+        CreateTime   string  `json:"createTime,optional"`
+        UpdateTime   string  `json:"updateTime,optional"`
+    }
+
+    CardOrderHistoryGetListReq {
+        PageInfo
+        Iccid     string `json:"iccid,optional"`
+        PackageID string `json:"packageId,optional"`
+        PacketID  string `json:"packetId,optional"`
+        OrdNo     string `json:"ordNo,optional"`
+        Status    int64  `json:"status,optional"`
+    }
+
+    CardOrderHistoryGetListResp {
+        PageResp
+        List []*CardOrderHistory `json:"list"`
+    }
+
+    CardOrderHistoryExportReq {
+        Iccid     string `json:"iccid,optional"`
+        PackageID string `json:"packageId,optional"`
+        PacketID  string `json:"packetId,optional"`
+        OrdNo     string `json:"ordNo,optional"`
+        Status    int64  `json:"status,optional"`
+    }
+
+    CardOrderHistoryExportResp {
+        FileUrl string `json:"fileUrl"`
+    }
+
+    CardOrderHistorySyncReq {
+        Iccid string `json:"iccid"`
+    }
+)
+
+@server(
+    group: card/orderHistory
+    prefix: /api/v1/things/card/order-history
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取订购历史列表"
+        description: "业务说明：分页查询物联卡订购历史记录"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardOrderHistoryGetListReq) returns (CardOrderHistoryGetListResp)
+
+    @doc(
+        summary: "同步联通订购历史"
+        description: "业务说明：按显式 ICCID 从卡绑定通道同步只读预定事实；不执行取消、支付或续费"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "2"
+    )
+    @handler sync
+    post /sync (CardOrderHistorySyncReq) returns (WithCode)
+
+    @doc(
+        summary: "导出订购历史记录"
+        description: "业务说明：按搜索条件导出订购历史并返回 OSS 下载地址"
+        authType: "admin"
+        resource: "card"
+        action: "export"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler export
+    post /export (CardOrderHistoryExportReq) returns (CardOrderHistoryExportResp)
+}

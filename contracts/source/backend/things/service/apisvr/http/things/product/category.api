@@ -1,0 +1,211 @@
+info(
+    title: "产品管理模块"
+    desc: "产品管理模块"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/product/category
+    prefix: /api/v1/things/product/category
+    accessCodePrefix: "thingsProductCategory"
+    accessNamePrefix: "产品品类"
+    accessGroup: "产品管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "新增产品品类"
+        description: "业务说明：创建产品品类分类节点，用于组织管理产品。品类支持层级结构，可设置父品类。品类编码全局唯一，创建后不可修改。品类可用于筛选设备统计、产品分类展示"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (ProductCategory) returns ()
+    @doc(
+        summary: "更新产品品类"
+        description: "业务说明：修改品类名称、描述、图片、排序等属性。支持部分更新，空值字段保持原值不变。品类编码不可修改"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (ProductCategory) returns ()
+    @doc(
+        summary: "删除产品品类"
+        description: "业务说明：删除产品品类节点。如品类有子品类或关联产品，需先清理关联数据。删除后品类下的设备统计不再显示"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+    @doc(
+        summary: "获取产品品类列表"
+        description: "业务说明：查询产品品类树形列表。支持按名称、编码、父品类过滤。返回品类基本信息、层级路径、设备数量统计。可加载子品类树形结构"
+        authType: "admin"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (ProductCategoryGetListReq) returns (ProductCategoryGetListResp)
+    @doc(
+        summary: "获取产品品类详情"
+        description: "业务说明：根据品类ID查询品类完整信息。返回品类名称、编码、描述、图片、层级路径。可选择同时加载子品类列表"
+        authType: "admin"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithIDChildren) returns (ProductCategory)
+    @doc(
+        summary: "批量更新产品品类物模型"
+        description: "业务说明：更新品类关联的物模型标识符列表。品类物模型用于定义该品类产品的标准功能点，创建产品时可继承品类物模型模板"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler schemaBatchUpdate
+    post /schema/batch-update (ProductCategorySchemaBatchSaveReq) returns ()
+    @doc(
+        summary: "批量新增产品品类物模型"
+        description: "业务说明：向品类追加物模型标识符。标识符对应物模型中的属性、事件、服务定义。用于丰富品类功能模板"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler schemaBatchCreate
+    post /schema/batch-create (ProductCategorySchemaBatchSaveReq) returns ()
+    @doc(
+        summary: "批量删除产品品类物模型"
+        description: "业务说明：从品类移除物模型标识符。移除后不影响已创建的产品，仅影响后续新建产品的默认物模型继承"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler schemaBatchDelete
+    post /schema/batch-delete (ProductCategorySchemaBatchSaveReq) returns ()
+    @doc(
+        summary: "获取产品品类物模型列表"
+        description: "业务说明：查询品类关联的物模型标识符列表。返回标识符ID、名称。可选择加载父品类的物模型继承链。用于品类物模型模板查看"
+        authType: "admin"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler schemaGetList
+    post /schema/get-list (ProductCategorySchemaGetListReq) returns (ProductCategorySchemaGetListResp)
+
+
+    @doc(
+        summary: "批量导入产品品类"
+        description: "业务说明：从ZIP压缩包批量导入品类数据。压缩包包含品类树形结构JSON和物模型定义文件。用于品类数据迁移、模板批量部署"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "import"
+        recordLogMode: "1"
+    )
+    @handler batchImport
+    post /batch-import (ProductCategoryImportReq) returns (ImportResp)
+    @doc(
+        summary: "批量导出产品品类"
+        description: "业务说明：将选中的品类数据导出为ZIP压缩包。压缩包包含品类树形结构、物模型定义、图片资源。用于品类数据备份、跨平台迁移"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/product/category"
+        resource: "things/product/category"
+        action: "export"
+        recordLogMode: "1"
+    )
+    @handler batchExport
+    post /batch-export (ProductCategoryExportReq) returns (ProductCategoryExportResp)
+}
+
+type (
+    ProductCategoryImportReq{
+        CategoriesFile string  `json:"categoriesFile"` //品类数据文件的 OSS 地址（ZIP 压缩包）
+    }
+    ProductCategoryExportReq{
+        IDs []int64 `json:"ids,string,optional"`
+    }
+    ProductCategoryExportResp{
+        CategoriesFile string  `json:"categoriesFile"` //品类数据文件的 OSS 地址（ZIP 压缩包）
+    }
+
+    ProductCategorySchemaGetListReq{
+        ProductCategoryID int64    `json:"productCategoryID,string"`
+        WithFather bool  `json:"withFather,optional"`
+    }
+    ProductCategorySchemaItem{
+        Identifier string `json:"identifier"`
+        Name       string `json:"name,optional"`
+    }
+    ProductCategorySchemaGetListResp{
+        Identifiers []string                   `json:"identifiers"`
+        List        []ProductCategorySchemaItem `json:"list,optional"`
+    }
+
+    ProductCategorySchemaBatchSaveReq{
+        ProductCategoryID int64    `json:"productCategoryID,string"`
+        Identifiers []string `json:"identifiers"`
+    }
+
+    ProductCategory  {
+        ID int64 `json:"id,string,optional"`
+        ParentID int64 `json:"parentID,string,optional"`
+        IDPath []int64 `json:"idPath,optional"`//只读
+        Name string `json:"name,optional"` //品类名称
+        Code string `json:"code,optional"` //品类编码,全局唯一,创建后不可修改,创建时必填
+        Desc *string `json:"desc,optional"`                       //描述
+        Avatar  string `json:"avatar,optional"`        // 品类图片
+        IsLeaf int64 `json:"isLeaf,optional"`
+        Order     int64 `json:"order,optional"`//排序,必须大于等于1,为0代表不修改
+        DeviceCount int64 `json:"deviceCount,optional"`//设备数量
+        Children []*ProductCategory `json:"children,optional"`
+    }
+
+
+    ProductCategoryGetListReq  {
+        Page *PageInfo `json:"page,optional"`           //分页信息,只获取一个则不填
+        Name string `json:"name,optional"` //过滤产品名称
+        Code string `json:"code,optional"` //按品类编码过滤
+        ParentID int64 `json:"parentID,string,optional"`
+        IDs []int64 `json:"ids,optional"`//id过滤
+        ProjectID int64 `json:"projectID,string,optional"`                            //项目id,只获取项目下有设备的
+    }
+
+    ProductCategoryGetListResp  {
+        List []*ProductCategory `json:"list"`    //产品信息
+        Total int64 `json:"total,optional"`  //拥有的总数
+        Num int64 `json:"num,optional"`      //返回的数量
+    }
+)

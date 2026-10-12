@@ -1,0 +1,905 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-知识库"
+	desc:    "AI Knowledge Base HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+type KnowledgeBaseInfo {
+	ID                    int64  `json:"id,optional"`
+	tenantCode            string `json:"tenantCode,optional"`
+	scope                 string `json:"scope,optional"` // 归属层级：platform=平台公共库(common)，tenant=租户级库
+	name                  string `json:"name"`
+	desc                  string `json:"desc,optional"`
+	status                string `json:"status,optional"`
+	documentCount         int64  `json:"documentCount,optional"`
+	compiledDocumentCount int64  `json:"compiledDocumentCount,optional"`
+	failedDocumentCount   int64  `json:"failedDocumentCount,optional"`
+	lastCompileTime       int64  `json:"lastCompileTime,optional"`
+	questionsEnabled      bool   `json:"questionsEnabled,optional"` // 是否启用问题生成（Doc2QA）阶段，默认关闭
+	createdTime           int64  `json:"createdTime,optional"`
+	updatedTime           int64  `json:"updatedTime,optional"`
+}
+
+type KnowledgeGetOneReq {
+	ID int64 `json:"id"`
+}
+
+type KnowledgeGetListReq {
+	page       PageInfo `json:"page,optional"`
+	tenantCode string   `json:"tenantCode,optional"`
+	name       string   `json:"name,optional"`
+	status     string   `json:"status,optional"`
+	scope      string   `json:"scope,optional"` // 可选过滤：platform=仅平台公共库，tenant=仅本租户库，空=全部可见范围
+}
+
+type KnowledgeGetListResp {
+	list  []KnowledgeBaseInfo `json:"list"`
+	total int64               `json:"total"`
+}
+
+type KnowledgeSearchReq {
+	agentID          int64   `json:"agentID,optional"`
+	knowledgeBaseIDs []int64 `json:"knowledgeBaseIDs,optional"`
+	query            string  `json:"query"`
+	topK             int64   `json:"topK,optional"`
+	minScore         *float64 `json:"minScore,optional"` // 显式传值即用：0 表示不过滤；省略时按文档数动态缩放默认阈值
+}
+
+type KnowledgeSearchHit {
+	knowledgeID  int64  `json:"knowledgeID,optional"`
+	documentID   int64  `json:"documentID,optional"`
+	artifactID   int64  `json:"artifactID,optional"`
+	sourceArtifactID int64 `json:"sourceArtifactID,optional"`
+	documentName string `json:"documentName,optional"`
+	path         string `json:"path,optional"`
+	chunkIndex   int64  `json:"chunkIndex,optional"`
+	charStart    int64  `json:"charStart,optional"`
+	charEnd      int64  `json:"charEnd,optional"`
+	pageIdx      int64  `json:"pageIdx,optional"` // 命中切片来源页码，供证据 chip 按页定位
+	score        float64 `json:"score,optional"`
+	content      string `json:"content,optional"`
+	snippet      string `json:"snippet,optional"`
+	sourceType   string `json:"sourceType,optional"`
+	relationType string `json:"relationType,optional"`
+	// relationEvidence 关联补充切片的关系判定依据（关系生成时记录的证据文案）；直接命中切片为空。
+	relationEvidence string `json:"relationEvidence,optional"` // 关联补充切片的关系判定依据文案；直接命中切片为空
+	// relationScore 关系综合分（ai_knowledge_chunk_relations.score）；直接命中切片为 0。
+	relationScore float64 `json:"relationScore,optional"` // 关联补充切片的关系综合分；直接命中切片为 0
+	mediaURI     string `json:"mediaURI,optional"`
+	mimeType     string `json:"mimeType,optional"`
+	artifactType string `json:"artifactType,optional"`
+	// parentContent 命中元素级子块时回查到的聚合父块全文；无父子体系的存量切片为空。
+	parentContent string `json:"parentContent,optional"` // 命中元素级子块时回查到的聚合父块全文；无父子体系的存量切片为空
+}
+
+type KnowledgeSearchDocument {
+	knowledgeID  int64   `json:"knowledgeID,optional"`
+	documentID   int64   `json:"documentID,optional"`
+	documentName string  `json:"documentName,optional"`
+	path         string  `json:"path,optional"`
+	score        float64 `json:"score,optional"`
+	snippet      string  `json:"snippet,optional"`
+	chunkCount   int64   `json:"chunkCount,optional"`
+}
+
+type KnowledgeSearchResp {
+	originalQuery  string                    `json:"originalQuery,optional"`
+	rewrittenQuery string                    `json:"rewrittenQuery,optional"`
+	documents      []KnowledgeSearchDocument `json:"documents,optional"`
+	chunks         []KnowledgeSearchHit      `json:"chunks,optional"`
+	expandedChunks []KnowledgeSearchHit      `json:"expandedChunks,optional"`
+	searchReady    bool                      `json:"searchReady,optional"`
+	confidenceBand string                    `json:"confidenceBand,optional"`
+	list           []KnowledgeSearchHit      `json:"list"`
+	total          int64                     `json:"total"` // 应用相关度阈值前的召回候选数；大于 chunks 数说明有候选被阈值过滤
+}
+
+type KnowledgeDocumentNode {
+	ID            int64                   `json:"id,optional"`
+	knowledgeID   int64                   `json:"knowledgeID,optional"`
+	parentID      int64                   `json:"parentID,optional"`
+	nodeType      string                  `json:"nodeType,optional"`
+	name          string                  `json:"name,optional"`
+	path          string                  `json:"path,optional"`
+	uri           string                  `json:"uri,optional"`
+	parseStatus   string                  `json:"parseStatus,optional"`
+	compileStatus string                  `json:"compileStatus,optional"`
+	searchStatus  string                  `json:"searchStatus,optional"`
+	searchMessage string                  `json:"searchMessage,optional"`
+	lastError     string                  `json:"lastError,optional"`
+	children      []KnowledgeDocumentNode `json:"children,optional"`
+}
+
+type KnowledgeDocumentTreeReq {
+	knowledgeID int64 `json:"knowledgeID"`
+}
+
+type KnowledgeDocumentTreeResp {
+	knowledgeID int64                   `json:"knowledgeID"`
+	nodes       []KnowledgeDocumentNode `json:"nodes"`
+}
+
+type KnowledgeImportItem {
+	path       string `json:"path"`
+	name       string `json:"name,optional"`
+	filePath   string `json:"filePath,optional"`
+	rawContent string `json:"rawContent,optional"`
+}
+
+type KnowledgeDocumentImportReq {
+	knowledgeID int64                 `json:"knowledgeID"`
+	parentID    int64                 `json:"parentID,optional"` // 导入目标文件夹，0/缺省=根目录
+	items       []KnowledgeImportItem `json:"items"`
+}
+
+type KnowledgeDocumentCreateFolderReq {
+	knowledgeID int64  `json:"knowledgeID"`
+	parentID    int64  `json:"parentID,optional"` // 父文件夹，0/缺省=根目录
+	name        string `json:"name"`
+}
+
+type KnowledgeDocumentCreateFolderResp {
+	node KnowledgeDocumentNode `json:"node"`
+}
+
+type KnowledgeDocumentMoveReq {
+	nodeID         int64 `json:"nodeID"`
+	targetParentID int64 `json:"targetParentID"` // 目标文件夹，0=移到根目录
+}
+
+type KnowledgeDocumentDeleteReq {
+	nodeID int64 `json:"nodeID"`
+}
+
+type KnowledgeDocumentDeleteResp {
+	deletedCount int64 `json:"deletedCount"` // 含级联删除的后代节点数
+}
+
+type KnowledgeDocumentImportResp {
+	importedCount int64 `json:"importedCount"`
+	taskID        int64 `json:"taskID"`
+}
+
+// 知识库处理阶段摘要；历史无记录时不推断为成功。
+type KnowledgeProcessingStageInfo {
+	stage string `json:"stage"` // content/analysis/multimodal/relations
+	status string `json:"status"` // pending/processing/success/notApplicable/blocked/failed/partial
+	message string `json:"message,optional"` // 安全的用户可见原因
+	sourceVersion string `json:"sourceVersion,optional"` // 来源内容版本
+	updatedAt int64 `json:"updatedAt,optional"` // 更新时间（秒）
+}
+
+// 原始来源证据定位，可供未来实体图谱引用。
+type KnowledgeSourceReferenceInfo {
+	documentID int64 `json:"documentID"` // 来源文档
+	sourceVersion string `json:"sourceVersion,optional"` // 来源版本
+	artifactID int64 `json:"artifactID,optional"` // 该版本的产物定位
+	pageIdx int64 `json:"pageIdx,optional"` // 零基页码
+	headingPath string `json:"headingPath,optional"` // 标题路径
+	charStart int64 `json:"charStart,optional"` // rune 起点
+	charEnd int64 `json:"charEnd,optional"` // rune 终点
+}
+
+type KnowledgeArtifactInfo {
+	description string `json:"description,optional"` // AI 识别描述，与原始内容分开
+	descriptionStatus string `json:"descriptionStatus,optional"` // 描述阶段状态
+	generationMethod string `json:"generationMethod,optional"` // source/ai，历史可能为空
+	sourceVersion string `json:"sourceVersion,optional"` // 当前产物来源版本
+	sources []KnowledgeSourceReferenceInfo `json:"sources,optional"` // 原文证据引用
+	ID                int64   `json:"id,optional"`
+	knowledgeID       int64   `json:"knowledgeID,optional"`
+	documentID        int64   `json:"documentID,optional"`
+	artifactType      string  `json:"artifactType,optional"`
+	title             string  `json:"title,optional"`
+	content           string  `json:"content,optional"`
+	sourceDocumentIDs []int64 `json:"sourceDocumentIDs,optional"`
+	chunkIndex        int64   `json:"chunkIndex,optional"`
+	charStart         int64   `json:"charStart,optional"`
+	charEnd           int64   `json:"charEnd,optional"`
+	tokenEstimate     int64   `json:"tokenEstimate,optional"`
+	headingPath       string  `json:"headingPath,optional"`
+	relatedCount      int64   `json:"relatedCount,optional"`
+	mediaURI          string  `json:"mediaURI,optional"`
+	mimeType          string  `json:"mimeType,optional"`
+	pageIdx           int64   `json:"pageIdx,optional"`
+	bboxJSON          string  `json:"bboxJSON,optional"`
+	caption           string  `json:"caption,optional"`
+	extraJSON         string  `json:"extraJSON,optional"`
+	createdTime       int64   `json:"createdTime,optional"`
+	updatedTime       int64   `json:"updatedTime,optional"`
+}
+
+type KnowledgeCompileTaskInfo {
+	relationStatus string `json:"relationStatus,optional"` // 语义关系处理状态
+	relationMessage string `json:"relationMessage,optional"` // 语义关系处理说明
+	ID           int64  `json:"id,optional"`
+	knowledgeID  int64  `json:"knowledgeID,optional"`
+	triggerType  string `json:"triggerType,optional"`
+	status       string `json:"status,optional"`
+	errorMessage string `json:"errorMessage,optional"`
+	startedTime  int64  `json:"startedTime,optional"`
+	finishedTime int64  `json:"finishedTime,optional"`
+	createdTime  int64  `json:"createdTime,optional"`
+	updatedTime  int64  `json:"updatedTime,optional"`
+}
+
+type KnowledgeDocumentDetailReq {
+	documentID int64 `json:"documentID"`
+}
+
+type KnowledgeDocumentSourcePreviewReq {
+	documentID int64 `form:"documentID"`
+	// 文件名仅用于让预览组件从 URL 推断格式（file-viewer 取 URL 最后一段的扩展名），后端逻辑不使用
+	filename string `path:"filename"`
+}
+
+type KnowledgeDocumentDetailResp {
+	processingStages []KnowledgeProcessingStageInfo `json:"processingStages,optional"` // 文档分阶段结果
+	sourceVersion string `json:"sourceVersion,optional"` // 当前文档版本，用于判定历史产物
+	document            KnowledgeDocumentNode    `json:"document"`
+	previewText         string                   `json:"previewText,optional"`
+	sourceDownloadURL   string                   `json:"sourceDownloadURL,optional"`
+	sourcePreviewURL    string                   `json:"sourcePreviewURL,optional"`
+	summary             KnowledgeArtifactInfo    `json:"summary,optional"`
+	chunks              []KnowledgeArtifactInfo  `json:"chunks,optional"`
+	concepts            []KnowledgeArtifactInfo  `json:"concepts,optional"`
+	articles            []KnowledgeArtifactInfo  `json:"articles,optional"`
+	multimodalArtifacts []KnowledgeArtifactInfo  `json:"multimodalArtifacts,optional"`
+	compileStatus       string                   `json:"compileStatus,optional"`
+	lastError           string                   `json:"lastError,optional"`
+	lastCompileTask     KnowledgeCompileTaskInfo `json:"lastCompileTask,optional"`
+}
+
+type KnowledgeDocumentContentReq {
+	documentID int64 `json:"documentID"`
+}
+
+type KnowledgeDocumentContentChunkAnchor {
+	artifactID int64 `json:"artifactID"`
+	chunkIndex int64 `json:"chunkIndex,optional"`
+	charStart  int64 `json:"charStart,optional"` // 解析全文中的起始 rune 下标；0 表示未定位成功
+	charEnd    int64 `json:"charEnd,optional"`   // 解析全文中的结束 rune 下标（开区间）
+	pageIdx    int64 `json:"pageIdx,optional"`   // 切片来源页码，PDF 定位先验
+}
+
+type KnowledgeDocumentContentResp {
+	documentID      int64  `json:"documentID"`
+	parsedFullText  string `json:"parsedFullText,optional"`
+	sourceTextReady bool   `json:"sourceTextReady,optional"`
+	chunkAnchors    []KnowledgeDocumentContentChunkAnchor `json:"chunkAnchors,optional"` // 每个 chunk 在当前解析全文中的实时定位锚点
+}
+
+type KnowledgeFailedDocumentReq {
+	knowledgeID int64    `json:"knowledgeID"`
+	page        PageInfo `json:"page,optional"`
+}
+
+type KnowledgeFailedDocumentResp {
+	list  []KnowledgeDocumentNode `json:"list"`
+	total int64                   `json:"total"`
+}
+
+type KnowledgeCompileStatusReq {
+	knowledgeID int64 `json:"knowledgeID"`
+}
+
+type KnowledgeCompileStatusResp {
+	knowledgeID           int64                    `json:"knowledgeID"`
+	currentTask           KnowledgeCompileTaskInfo `json:"currentTask,optional"`
+	documentCount         int64                    `json:"documentCount,optional"`
+	compiledDocumentCount int64                    `json:"compiledDocumentCount,optional"`
+	failedDocumentCount   int64                    `json:"failedDocumentCount,optional"`
+	searchReadyDocumentCount int64                 `json:"searchReadyDocumentCount,optional"`
+	searchFailedDocumentCount int64                `json:"searchFailedDocumentCount,optional"`
+	searchStatus         string                    `json:"searchStatus,optional"`
+	searchMessage        string                    `json:"searchMessage,optional"`
+	relationStatus        string                   `json:"relationStatus,optional"`
+	relationMessage       string                   `json:"relationMessage,optional"`
+}
+
+type KnowledgeChunkRelationReq {
+	artifactID    int64    `json:"artifactID,optional"` // 切片范围，与 documentID 二选一，兼容旧调用
+	documentID    int64    `json:"documentID,optional"` // 文档范围，仅返回与其他文档的语义关系
+	relationTypes []string `json:"relationTypes,optional"`
+	minScore      float64  `json:"minScore,optional"`
+	limit         int64    `json:"limit,optional"`
+}
+
+type KnowledgeChunkRelationInfo {
+	id             int64                 `json:"id,optional"`
+	fromArtifactID int64                 `json:"fromArtifactID,optional"`
+	toArtifactID   int64                 `json:"toArtifactID,optional"`
+	fromDocumentID int64                 `json:"fromDocumentID,optional"`
+	toDocumentID   int64                 `json:"toDocumentID,optional"`
+	relationType   string                `json:"relationType,optional"`
+	score          float64               `json:"score,optional"`
+	cosineScore    float64               `json:"cosineScore,optional"`
+	lexicalOverlap float64               `json:"lexicalOverlap,optional"`
+	llmConfidence  float64               `json:"llmConfidence,optional"`
+	evidence       string                `json:"evidence,optional"`
+	targetDocument KnowledgeDocumentNode `json:"targetDocument,optional"`
+	targetArtifact KnowledgeArtifactInfo `json:"targetArtifact,optional"`
+	sourceArtifact KnowledgeArtifactInfo `json:"sourceArtifact,optional"` // 当前文档侧的原始证据，文档范围查询返回
+}
+
+type KnowledgeChunkRelationResp {
+	hasMore bool `json:"hasMore,optional"` // 文档关系达到返回上限，不能视为完整关系集合
+	artifact  KnowledgeArtifactInfo   `json:"artifact,optional"`
+	relations []KnowledgeChunkRelationInfo `json:"relations,optional"`
+}
+
+type KnowledgeCompileRetryReq {
+	stages []string `json:"stages,optional"` // analysis/multimodal/relations，空值保持完整重试
+	documentID int64 `json:"documentID,optional"` // 可选文档范围，必须属于当前知识库
+	knowledgeID int64  `json:"knowledgeID"`
+	mode        string `json:"mode,optional"`
+}
+
+// KnowledgeFieldLocatorInfo 字段级引用的单侧定位快照，字段按 kind 取舍：
+// table_formula(sheet/cell/formula) / equation(latex) / chunk_section(headingPath/pageIdx/charStart/charEnd) /
+// external(app/refType/paramKey/currentValue，业务系统参数键，不挂知识库产物)。
+type KnowledgeFieldLocatorInfo {
+	kind         string   `json:"kind,optional"`
+	sheet        string   `json:"sheet,optional"`
+	cell         string   `json:"cell,optional"`
+	formula      string   `json:"formula,optional"`
+	latex        string   `json:"latex,optional"`
+	headingPath  string   `json:"headingPath,optional"`
+	pageIdx      int64    `json:"pageIdx,optional"`
+	charStart    int64    `json:"charStart,optional"`
+	charEnd      int64    `json:"charEnd,optional"`
+	paramNames   []string `json:"paramNames,optional"`
+	app          string   `json:"app,optional"`
+	refType      string   `json:"refType,optional"`
+	paramKey     string   `json:"paramKey,optional"`
+	currentValue string   `json:"currentValue,optional"`
+}
+
+// KnowledgeFieldEndpointInfo 引用单侧端点：文档 + 产物 + 定位快照；sourceVersion 为建链时内容版本快照。
+type KnowledgeFieldEndpointInfo {
+	documentID    int64                     `json:"documentID,optional"`
+	artifactID    int64                     `json:"artifactID,optional"` // external 引用方允许为 0
+	sourceVersion string                    `json:"sourceVersion,optional"`
+	locator       KnowledgeFieldLocatorInfo `json:"locator,optional"`
+}
+
+// KnowledgeFieldReferenceInfo 字段级引用记录：from=引用方（使用公式一侧），to=被引用方（定义参数一侧）。
+type KnowledgeFieldReferenceInfo {
+	id               int64                      `json:"id,optional"`
+	source           string                     `json:"source,optional"`       // ai/manual
+	status           string                     `json:"status,optional"`       // candidate/confirmed/rejected
+	reviewStatus     string                     `json:"reviewStatus,optional"` // up_to_date/pending_review
+	score            float64                    `json:"score,optional"`        // manual 记录固定 1
+	evidence         string                     `json:"evidence,optional"`     // LLM 判定证据或人工备注
+	from             KnowledgeFieldEndpointInfo `json:"from,optional"`
+	to               KnowledgeFieldEndpointInfo `json:"to,optional"`
+	fromDocumentName string                     `json:"fromDocumentName,optional"`
+	toDocumentName   string                     `json:"toDocumentName,optional"`
+}
+
+type KnowledgeFieldReferenceListReq {
+	knowledgeID    int64  `json:"knowledgeID"`
+	fromDocumentID int64  `json:"fromDocumentID,optional"` // 正向：该文档引用的外部段落
+	toDocumentID   int64  `json:"toDocumentID,optional"`   // 反向：引用该文档的位置（影响分析）
+	artifactID     int64  `json:"artifactID,optional"`     // 匹配 from 或 to 侧产物
+	status         string `json:"status,optional"`         // candidate/confirmed/rejected，缺省不含 rejected
+	reviewStatus   string `json:"reviewStatus,optional"`   // up_to_date/pending_review
+	page           int64  `json:"page,optional"`
+	size           int64  `json:"size,optional"` // 上限 300，对齐文档关联口径
+}
+
+type KnowledgeFieldReferenceListResp {
+	hasMore    bool                         `json:"hasMore,optional"` // 达到返回上限，不能视为完整集合
+	references []KnowledgeFieldReferenceInfo `json:"references,optional"`
+}
+
+// KnowledgeFieldReferenceEndpointReq 建链/重挂请求中的单侧端点；sourceVersion 缺省由服务端按文档当前版本快照。
+type KnowledgeFieldReferenceEndpointReq {
+	documentID    int64                     `json:"documentID"`
+	artifactID    int64                     `json:"artifactID,optional"` // external 引用方允许为 0
+	sourceVersion string                    `json:"sourceVersion,optional"`
+	locator       KnowledgeFieldLocatorInfo `json:"locator"`
+}
+
+type KnowledgeFieldReferenceCreateReq {
+	knowledgeID int64                              `json:"knowledgeID"`
+	from        KnowledgeFieldReferenceEndpointReq `json:"from"` // 引用方（使用公式一侧）
+	to          KnowledgeFieldReferenceEndpointReq `json:"to"`   // 被引用方（定义参数一侧）
+	evidence    string                             `json:"evidence,optional"` // 人工备注
+}
+
+// KnowledgeFieldReferenceUpdateReq 按 side 替换单侧端点（修改定位或重挂失效侧），另一侧保持不变。
+type KnowledgeFieldReferenceUpdateReq {
+	id       int64                              `json:"id"`
+	side     string                             `json:"side"` // from/to
+	endpoint KnowledgeFieldReferenceEndpointReq `json:"endpoint"`
+	evidence string                             `json:"evidence,optional"`
+}
+
+// KnowledgeFieldReferenceReviewReq 候选确认与失效复核：confirm(candidate→confirmed) /
+// reject(candidate→rejected) / markReviewed(pending_review→up_to_date)。
+type KnowledgeFieldReferenceReviewReq {
+	id    int64  `json:"id"`
+	action string `json:"action"`
+}
+
+type KnowledgeFieldReferenceDeleteReq {
+	id int64 `json:"id"`
+}
+
+type KnowledgeFieldReferencePendingSummaryReq {
+	knowledgeID int64 `json:"knowledgeID"`
+}
+
+type KnowledgeFieldReferencePendingSummaryItem {
+	documentID int64 `json:"documentID,optional"`
+	count      int64 `json:"count,optional"` // confirmed 且 pending_review 的引用数
+}
+
+type KnowledgeFieldReferencePendingSummaryResp {
+	items []KnowledgeFieldReferencePendingSummaryItem `json:"items,optional"`
+}
+
+type KnowledgeExportReq {
+	knowledgeID int64 `json:"knowledgeID"`
+}
+
+type KnowledgeExportStatusReq {
+	taskID int64 `json:"taskID"`
+}
+
+type KnowledgeExportStatusResp {
+	taskID       int64  `json:"taskID"`
+	status       string `json:"status,optional"`
+	downloadURL  string `json:"downloadURL,optional"`
+	errorMessage string `json:"errorMessage,optional"`
+}
+
+type KnowledgeZipExportReq {
+	knowledgeID int64 `json:"knowledgeID"`
+}
+
+type KnowledgeZipExportResp {
+	taskID      int64  `json:"taskID"`
+	downloadURL string `json:"downloadURL,optional"`
+}
+
+type KnowledgeZipImportReq {
+	knowledgeID int64  `json:"knowledgeID"`
+	fileURL     string `json:"fileURL"`
+}
+
+type KnowledgeZipImportResp {
+	importedCount int64 `json:"importedCount"`
+	taskID        int64 `json:"taskID"`
+}
+
+@server (
+	group:            ai/knowledge/info
+	prefix:           /api/v1/ai/knowledge/info
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiKnowledgeManage"
+	accessNamePrefix: "知识库管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建知识库"
+		description: "业务说明：创建新的知识库记录，用于后续导入文档、编译切片和知识检索。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "create"
+		group: "ai/knowledge"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (KnowledgeBaseInfo) returns (WithID)
+
+	@doc(
+		summary: "更新知识库"
+		description: "业务说明：更新知识库名称和描述。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "update"
+		group: "ai/knowledge"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (KnowledgeBaseInfo) returns (WithID)
+
+	@doc(
+		summary: "获取知识库详情"
+		description: "业务说明：按知识库 ID 查询基础信息，用于详情回显和管理页展示。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "view"
+		group: "ai/knowledge"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (KnowledgeGetOneReq) returns (KnowledgeBaseInfo)
+
+	@doc(
+		summary: "获取知识库列表"
+		description: "业务说明：分页查询知识库列表，返回文档数、完成数、失败数和状态。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "view"
+		group: "ai/knowledge"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (KnowledgeGetListReq) returns (KnowledgeGetListResp)
+
+	@doc(
+		summary: "搜索知识库切片"
+		description: "业务说明：基于 Agent 绑定的知识库或显式指定的知识库列表检索相关切片，返回命中文档、切片和分数。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "view"
+		group: "ai/knowledge"
+		recordLogMode: "1"
+	)
+	@handler search
+	post /search (KnowledgeSearchReq) returns (KnowledgeSearchResp)
+
+	@doc(
+		summary: "删除知识库"
+		description: "业务说明：删除知识库及其文档、编译产物和相关任务记录。"
+		authType: "admin"
+		resource: "ai/knowledge"
+		action: "delete"
+		group: "ai/knowledge"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (KnowledgeGetOneReq)
+}
+
+@server (
+	group:            ai/knowledge/tool
+	prefix:           /api/v1/ai/knowledge/tool
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiKnowledgeManage"
+	accessNamePrefix: "知识库调试工具"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "CLI/调试-搜索知识库"
+		description: "业务说明：供 CLI、调试工作台或外部编排直接调用的知识库搜索接口。返回改写后的 query、命中文档、直接命中切片和关联补充切片，适合不经过聊天链路单独调试检索效果。"
+		authType: "admin"
+		resource: "ai/knowledge-tool"
+		action: "view"
+		group: "ai/knowledge-tool"
+		recordLogMode: "1"
+	)
+	@handler search
+	post /search (KnowledgeSearchReq) returns (KnowledgeSearchResp)
+
+	@doc(
+		summary: "CLI/调试-获取文档全文"
+		description: "业务说明：供 CLI、调试工作台或外部编排直接根据 documentID 获取知识库文档全文，用于复杂问题二次取数、全文审查和上下文扩展。"
+		authType: "admin"
+		resource: "ai/knowledge-tool"
+		action: "view"
+		group: "ai/knowledge-tool"
+		recordLogMode: "1"
+	)
+	@handler getDocumentContent
+	post /get-document-content (KnowledgeDocumentContentReq) returns (KnowledgeDocumentContentResp)
+
+	@doc(
+		summary: "CLI/调试-获取切片关联"
+		description: "业务说明：供 CLI、调试工作台或外部编排直接根据 artifactID 查询切片关联结果，用于复杂问题在直接证据不足时继续扩展上下文。"
+		authType: "admin"
+		resource: "ai/knowledge-tool"
+		action: "view"
+		group: "ai/knowledge-tool"
+		recordLogMode: "1"
+	)
+	@handler getChunkRelations
+	post /get-chunk-relations (KnowledgeChunkRelationReq) returns (KnowledgeChunkRelationResp)
+}
+
+@server (
+	group:            ai/knowledge/document
+	prefix:           /api/v1/ai/knowledge/document
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiKnowledgeManage"
+	accessNamePrefix: "知识库文档"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "导入知识库文档"
+		description: "业务说明：向知识库导入文件或文件夹，并触发后续编译任务。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "create"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler import
+	post /import (KnowledgeDocumentImportReq) returns (KnowledgeDocumentImportResp)
+
+	@doc(
+		summary: "新建文件夹"
+		description: "业务说明：在知识库文档树中创建文件夹节点，支持指定父文件夹，同级名称唯一。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "create"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler createFolder
+	post /create-folder (KnowledgeDocumentCreateFolderReq) returns (KnowledgeDocumentCreateFolderResp)
+
+	@doc(
+		summary: "移动文档节点"
+		description: "业务说明：移动文件或文件夹到目标文件夹，后代节点路径同步重写；仅修改树结构，对象存储文件不搬移、不触发重编译。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "update"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler move
+	post /move (KnowledgeDocumentMoveReq)
+
+	@doc(
+		summary: "删除文档节点"
+		description: "业务说明：删除文件或文件夹，文件夹级联删除后代节点；同步清理编译产物、切片向量、对象存储源文件及中间产物。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "delete"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (KnowledgeDocumentDeleteReq) returns (KnowledgeDocumentDeleteResp)
+
+	@doc(
+		summary: "ZIP导入知识库"
+		description: "业务说明：从ZIP压缩包导入知识库完整数据（含原文、编译产物、向量），同名文件更新，新文件追加。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "import"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler importZip
+	post /import-zip (KnowledgeZipImportReq) returns (KnowledgeZipImportResp)
+
+	@doc(
+		summary: "获取知识库目录树"
+		description: "业务说明：获取指定知识库的目录树结构，用于文档浏览和详情导航。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getTree
+	post /get-tree (KnowledgeDocumentTreeReq) returns (KnowledgeDocumentTreeResp)
+
+	@doc(
+		summary: "获取文档详情"
+		description: "业务说明：获取单个知识库文档的摘要、切片、概念、文章和最近编译任务信息。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getDetail
+	post /get-detail (KnowledgeDocumentDetailReq) returns (KnowledgeDocumentDetailResp)
+
+	@doc(
+		summary: "预览文档源文件"
+		description: "业务说明：流式代理返回知识库文档源文件，用于页面内联预览。COS 默认域名对浏览器直接访问一律强制 Content-Disposition: attachment（签名 URL 的 response-* 覆盖被忽略），故由后端签名拉取对象并流式回传，按扩展名重写 Content-Type、强制 inline、透传 Range 支持 PDF 分段加载。iframe 无法自定义请求头，token/app-id/tenant-code 通过查询参数传递（CheckTokenWare 中间件支持查询参数取参）。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler sourcePreview
+	get /source-preview/:filename (KnowledgeDocumentSourcePreviewReq)
+
+	@doc(
+		summary: "获取文档全文"
+		description: "业务说明：获取知识库文档解析后的完整正文，用于原文预览和定位。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getContent
+	post /get-content (KnowledgeDocumentContentReq) returns (KnowledgeDocumentContentResp)
+
+	@doc(
+		summary: "获取失败文档列表"
+		description: "业务说明：获取当前知识库编译失败的文档明细，返回路径、状态和错误信息。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getFailedList
+	post /get-failed-list (KnowledgeFailedDocumentReq) returns (KnowledgeFailedDocumentResp)
+
+	@doc(
+		summary: "获取切片关联列表"
+		description: "业务说明：查询指定切片关联到的其他文档切片，用于图谱和相关切片工作台。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getChunkRelations
+	post /chunk/relation/get-list (KnowledgeChunkRelationReq) returns (KnowledgeChunkRelationResp)
+
+	@doc(
+		summary: "获取字段级引用列表"
+		description: "业务说明：按引用方/被引用方反查字段级引用（公式/参数项粒度），toDocumentID 即影响分析；写操作对平台共享库只读用户拒绝。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getFieldReferences
+	post /field-reference/get-list (KnowledgeFieldReferenceListReq) returns (KnowledgeFieldReferenceListResp)
+
+	@doc(
+		summary: "手工新增字段级引用"
+		description: "业务说明：人工建立字段级引用（如 Excel 公式引用公约段落），服务端快照双侧内容版本用于更新比对。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "update"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler createFieldReference
+	post /field-reference/create (KnowledgeFieldReferenceCreateReq) returns (WithID)
+
+	@doc(
+		summary: "修改字段级引用单侧端点"
+		description: "业务说明：按 side（from/to）整体替换引用单侧定位，用于失效后人工重挂到新产物。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "update"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler updateFieldReference
+	post /field-reference/update (KnowledgeFieldReferenceUpdateReq) returns (WithID)
+
+	@doc(
+		summary: "确认或拒绝字段级引用"
+		description: "业务说明：confirm/reject 处理 AI 候选，markReviewed 将待复核引用恢复 up_to_date。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "update"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler reviewFieldReference
+	post /field-reference/review (KnowledgeFieldReferenceReviewReq) returns (WithID)
+
+	@doc(
+		summary: "删除字段级引用"
+		description: "业务说明：软删字段级引用记录。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "update"
+		group: "ai/knowledge-document"
+		recordLogMode: "2"
+	)
+	@handler deleteFieldReference
+	post /field-reference/delete (KnowledgeFieldReferenceDeleteReq) returns (WithID)
+
+	@doc(
+		summary: "获取文档引用待复核计数"
+		description: "业务说明：按知识库聚合各文档的待复核字段级引用数量，供文档列表角标展示。"
+		authType: "admin"
+		resource: "ai/knowledge-document"
+		action: "view"
+		group: "ai/knowledge-document"
+		recordLogMode: "1"
+	)
+	@handler getFieldReferencePendingSummary
+	post /field-reference/pending-summary (KnowledgeFieldReferencePendingSummaryReq) returns (KnowledgeFieldReferencePendingSummaryResp)
+}
+
+@server (
+	group:            ai/knowledge/compile
+	prefix:           /api/v1/ai/knowledge/compile
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiKnowledgeManage"
+	accessNamePrefix: "知识库编译"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "获取编译状态"
+		description: "业务说明：获取知识库当前或最近一次编译任务状态，以及实时文档统计。"
+		authType: "admin"
+		resource: "ai/knowledge-compile"
+		action: "view"
+		group: "ai/knowledge-compile"
+		recordLogMode: "1"
+	)
+	@handler getStatus
+	post /get-status (KnowledgeCompileStatusReq) returns (KnowledgeCompileStatusResp)
+
+	@doc(
+		summary: "触发知识库重编译"
+		description: "业务说明：触发知识库失败重试或全量重编译，异步创建编译任务。"
+		authType: "admin"
+		resource: "ai/knowledge-compile"
+		action: "update"
+		group: "ai/knowledge-compile"
+		recordLogMode: "2"
+	)
+	@handler retry
+	post /retry (KnowledgeCompileRetryReq) returns (WithID)
+}
+
+@server (
+	group:            ai/knowledge/export
+	prefix:           /api/v1/ai/knowledge/export
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiKnowledgeManage"
+	accessNamePrefix: "知识库导出"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建导出任务"
+		description: "业务说明：为知识库生成导出任务，导出文档树和编译产物。"
+		authType: "admin"
+		resource: "ai/knowledge-export"
+		action: "create"
+		group: "ai/knowledge-export"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (KnowledgeExportReq) returns (WithID)
+
+	@doc(
+		summary: "ZIP导出知识库"
+		description: "业务说明：将知识库完整导出为ZIP压缩包（含原文、编译产物、向量数据），返回下载地址。"
+		authType: "admin"
+		resource: "ai/knowledge-export"
+		action: "export"
+		group: "ai/knowledge-export"
+		recordLogMode: "2"
+	)
+	@handler exportZip
+	post /export-zip (KnowledgeZipExportReq) returns (KnowledgeZipExportResp)
+
+	@doc(
+		summary: "获取导出状态"
+		description: "业务说明：查询知识库导出任务状态和下载地址。"
+		authType: "admin"
+		resource: "ai/knowledge-export"
+		action: "view"
+		group: "ai/knowledge-export"
+		recordLogMode: "1"
+	)
+	@handler getStatus
+	post /get-status (KnowledgeExportStatusReq) returns (KnowledgeExportStatusResp)
+}

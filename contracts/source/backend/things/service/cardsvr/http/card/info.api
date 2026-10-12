@@ -1,0 +1,574 @@
+syntax = "v1"
+
+info(
+    title: "物联卡信息管理"
+    desc: "物联卡信息 CRUD、状态变更记录、扩展信息"
+    version: "v1"
+)
+
+type (
+    CardInfo {
+        ID                int64   `json:"id,string"`
+        Vid               string  `json:"vid,optional"`
+        Msisdn            string  `json:"msisdn,optional"`
+        Iccid             string  `json:"iccid"`
+        Imsi              string  `json:"imsi,optional"`
+        OpenDate          string  `json:"openDate,optional"`
+        ActivateDate      string  `json:"activateDate,optional"`
+        ChannelID         int64   `json:"channelID,string,optional,omitempty"`
+        ChannelName       string  `json:"channelName,optional"`
+        IsPool            int64   `json:"isPool,optional"`
+        PoolID            string  `json:"poolID,optional"`
+        RemindRatio       int64   `json:"remindRatio,optional"`
+        VirtualRatio      int64   `json:"virtualRatio,optional"`
+        StatusID          string  `json:"statusID,optional"`
+        PackageID         string  `json:"packageID,optional"`
+        PackageName       string  `json:"packageName,optional"`
+        ActivePacketID    string  `json:"activePacketId,optional"` // 当前生效主套餐编号
+        ActivePacketName  string  `json:"activePacketName,optional"` // 当前生效主套餐名称，未解析时回退套餐编号
+        ActivePacketExtraCount int64 `json:"activePacketExtraCount,optional"` // 除主套餐外的其他有效套餐事实数量
+        Used              float64 `json:"used,optional"`
+        Remaining         float64 `json:"remaining,optional"`
+        DeliverDate       string  `json:"deliverDate,optional"`
+        Imei              string  `json:"imei,optional"`
+        Type              string  `json:"type,optional"`
+        NetworkType       string  `json:"networkType,optional"`
+        Gprs              int64   `json:"gprs,optional"`
+        OutOfStock        string  `json:"outOfStock,optional"`
+        IsDisconnected    int64   `json:"isDisconnected,optional"`
+        ConnectionStatus  int64   `json:"connectionStatus,optional"`
+        CustomizeGrouping string  `json:"customizeGrouping,optional"`
+        Remarks           string  `json:"remarks,optional"`
+        DueExpireTime     string  `json:"dueExpireTime,optional"`
+        StatusShowID      int64   `json:"statusShowID,optional"`
+        IsPolling         int64   `json:"isPolling,optional"`
+        FlowTime          string  `json:"flowTime,optional"`
+        StateTime         string  `json:"stateTime,optional"`
+        SnapshotTime      string  `json:"snapshotTime,optional"` // 最近一次同步运营商状态快照时间
+        OnlineStatus      string  `json:"onlineStatus,optional"` // 是否在线快照，缺失表示尚未同步
+        SimBarred         string  `json:"simBarred,optional"` // 是否禁用SIM卡快照，缺失表示尚未同步
+        SimLocked         string  `json:"simLocked,optional"` // 锁定SIM卡快照，缺失表示尚未同步
+        FirstUseTime      string  `json:"firstUseTime,optional"`
+        Balance           float64 `json:"balance,optional"`
+        Level             float64 `json:"level,optional"`
+        IsStopNetwork     int64   `json:"isStopNetwork,optional"`
+        ChangeOther       string  `json:"changeOther,optional"`
+        CreatedTime       string  `json:"createdTime,optional"`
+        DeviceBinding     *CardDeviceBindingSummary `json:"deviceBinding,optional"` // 当前活动设备绑定摘要
+        UpstreamFields    map[string]string `json:"upstreamFields,optional"` // 已确认的只读上游详情字段，不包含凭据；未返回字段不填默认值
+        UpstreamIssues    []string `json:"upstreamIssues,optional"` // 各上游来源的稳定错误提示，不透传原始响应
+    }
+
+    CardInfoCreateReq {
+        Msisdn            string  `json:"msisdn,optional"`
+        Iccid             string  `json:"iccid"`
+        Imsi              string  `json:"imsi,optional"`
+        OpenDate          string  `json:"openDate,optional"`
+        ActivateDate      string  `json:"activateDate,optional"`
+        ChannelID         int64   `json:"channelID,string,optional"`
+        IsPool            int64   `json:"isPool,optional"`
+        PoolID            string  `json:"poolID,optional"`
+        RemindRatio       int64   `json:"remindRatio,optional"`
+        VirtualRatio      int64   `json:"virtualRatio,optional"`
+        StatusID          string  `json:"statusID,optional"`
+        PackageID         string  `json:"packageID,optional"`
+        Used              float64 `json:"used,optional"`
+        Remaining         float64 `json:"remaining,optional"`
+        DeliverDate       string  `json:"deliverDate,optional"`
+        Imei              string  `json:"imei,optional"`
+        Type              string  `json:"type,optional"`
+        NetworkType       string  `json:"networkType,optional"`
+        Gprs              int64   `json:"gprs,optional"`
+        OutOfStock        string  `json:"outOfStock,optional"`
+        IsDisconnected    int64   `json:"isDisconnected,optional"`
+        ConnectionStatus  int64   `json:"connectionStatus,optional"`
+        CustomizeGrouping string  `json:"customizeGrouping,optional"`
+        Remarks           string  `json:"remarks,optional"`
+        DueExpireTime     string  `json:"dueExpireTime,optional"`
+        StatusShowID      int64   `json:"statusShowID,optional"`
+        IsPolling         int64   `json:"isPolling,optional"`
+        Balance           float64 `json:"balance,optional"`
+        Level             float64 `json:"level,optional"`
+        IsStopNetwork     int64   `json:"isStopNetwork,optional"`
+        ChangeOther       string  `json:"changeOther,optional"`
+    }
+
+    CardInfoUpdateReq {
+        ID                int64   `json:"id,string"`
+        Vid               string  `json:"vid,optional"`
+        Msisdn            string  `json:"msisdn,optional"`
+        Imsi              string  `json:"imsi,optional"`
+        OpenDate          string  `json:"openDate,optional"`
+        ActivateDate      string  `json:"activateDate,optional"`
+        ChannelID         int64   `json:"channelID,string,optional"`
+        ClearChannel      bool    `json:"clearChannel,optional"` // 是否明确解除通道绑定；与非零 channelID 互斥
+        IsPool            int64   `json:"isPool,optional"`
+        PoolID            string  `json:"poolID,optional"`
+        RemindRatio       int64   `json:"remindRatio,optional"`
+        VirtualRatio      int64   `json:"virtualRatio,optional"`
+        StatusID          string  `json:"statusID,optional"`
+        PackageID         string  `json:"packageID,optional"`
+        ClearPackage      bool    `json:"clearPackage,optional"` // 是否明确解除平台资费组绑定；与非空 packageID 互斥
+        DeliverDate       string  `json:"deliverDate,optional"`
+        Imei              string  `json:"imei,optional"`
+        Type              string  `json:"type,optional"`
+        NetworkType       string  `json:"networkType,optional"`
+        Gprs              int64   `json:"gprs,optional"`
+        OutOfStock        string  `json:"outOfStock,optional"`
+        IsDisconnected    int64   `json:"isDisconnected,optional"`
+        ConnectionStatus  int64   `json:"connectionStatus,optional"`
+        CustomizeGrouping string  `json:"customizeGrouping,optional"`
+        Remarks           string  `json:"remarks,optional"`
+        DueExpireTime     string  `json:"dueExpireTime,optional"`
+        StatusShowID      int64   `json:"statusShowID,optional"`
+        IsPolling         int64   `json:"isPolling,optional"`
+        Balance           float64 `json:"balance,optional"`
+        Level             float64 `json:"level,optional"`
+        IsStopNetwork     int64   `json:"isStopNetwork,optional"`
+        ChangeOther       string  `json:"changeOther,optional"`
+    }
+
+    CardInfoGetListReq {
+        PageInfo
+        Iccid             string  `json:"iccid,optional"`            // ICCID，单值时支持模糊匹配
+        Iccids            []string `json:"iccids,optional"`           // ICCID 精确列表，用于批量筛选或多个 ICCID 精确查询
+        Msisdn            string  `json:"msisdn,optional"`           // MSISDN，支持模糊匹配
+        Imsi              string  `json:"imsi,optional"`             // IMSI，支持模糊匹配
+        ChannelID         int64   `json:"channelID,string,optional"` // 通道ID
+        RouteIDs          []int64 `json:"routeIds,string,optional"`  // 通道ID集合，集合内取并集
+        PackageID         string  `json:"packageID,optional"`        // 资费组ID
+        PackageIDs        []string `json:"packageIds,optional"`      // 资费组ID集合，集合内取并集
+        StatusID          string  `json:"statusID,optional"`         // 卡状态
+        StatusShowID      int64   `json:"statusShowID,optional"`     // 卡状态显示值
+        IsPool            int64   `json:"isPool,optional"`           // 是否流量池
+        IsPolling         int64   `json:"isPolling,optional"`        // 是否轮询
+        IsStopNetwork     int64   `json:"isStopNetwork,optional"`    // 是否执行断网
+        Type              string  `json:"type,optional"`             // 卡类型
+        NetworkType       string  `json:"networkType,optional"`      // 网络类型
+        CustomizeGrouping string  `json:"customizeGrouping,optional"` // 自定义分组
+        IccidPrefix       string  `json:"iccidPrefix,optional"`      // ICCID前缀匹配
+        IccidStart        string  `json:"iccidStart,optional"`       // ICCID号段开始
+        IccidEnd          string  `json:"iccidEnd,optional"`         // ICCID号段结束
+        MsisdnPrefix      string  `json:"msisdnPrefix,optional"`     // MSISDN前缀匹配
+        Operator          int64   `json:"operator,string,optional"`  // 运营商类型
+        OpenDateStart     string  `json:"openDateStart,optional"`    // 开卡日期开始
+        OpenDateEnd       string  `json:"openDateEnd,optional"`      // 开卡日期结束
+        ActivateDateStart string  `json:"activateDateStart,optional"` // 激活日期开始
+        ActivateDateEnd   string  `json:"activateDateEnd,optional"`   // 激活日期结束
+        BatchDateStart    string  `json:"batchDateStart,optional"`   // 批次日期开始
+        BatchDateEnd      string  `json:"batchDateEnd,optional"`     // 批次日期结束
+        DueExpireTimeStart string `json:"dueExpireTimeStart,optional"` // 到期时间开始
+        DueExpireTimeEnd  string  `json:"dueExpireTimeEnd,optional"` // 到期时间结束
+        ReachThreshold    bool    `json:"reachThreshold,optional"`   // 是否已达阈值
+        BindingStatus     int64   `json:"bindingStatus,optional"`    // 设备绑定状态：0全部、1已绑定、2未绑定
+        DeviceKeyword     string  `json:"deviceKeyword,optional"`    // 设备名称或别名；支持逗号、分号、换行分隔多个，匹配时取并集
+    }
+
+    // CardInfoGetOneReq 按当前企业内主键、ICCID 或两者一致组合查询卡详情。
+    CardInfoGetOneReq {
+        ID    int64  `json:"id,string,optional"` // 当前企业卡主键
+        Iccid string `json:"iccid,optional"` // 当前企业精确 ICCID
+        WithUpstream bool `json:"withUpstream,optional"` // 是否读取实时上游详情，仅详情页面按需开启，不触发诊断或修改状态
+    }
+
+    CardInfoGetListResp {
+        PageResp
+        List []*CardInfo `json:"list"`
+    }
+
+    CardInfoBatchUpdateReq {
+        IDs               []int64 `json:"ids"`
+        ChannelID         int64   `json:"channelID,string,optional"` // 通道ID
+        ClearChannel      bool    `json:"clearChannel,optional"` // 是否明确解除通道绑定；与非零 channelID 互斥
+        PackageID         string  `json:"packageID,optional"`
+        ClearPackage      bool    `json:"clearPackage,optional"` // 是否明确解除平台资费组绑定；与非空 packageID 互斥
+        StatusID          string  `json:"statusID,optional"`
+        IsPolling         int64   `json:"isPolling,optional"`
+        IsDisconnected    int64   `json:"isDisconnected,optional"`
+        ConnectionStatus  int64   `json:"connectionStatus,optional"`
+        CustomizeGrouping string  `json:"customizeGrouping,optional"`
+        Remarks           string  `json:"remarks,optional"`
+    }
+
+    CardInfoBatchSettingReq {
+        IDs                  []int64 `json:"ids"`
+        PackageID            string  `json:"packageID,optional"`
+        ChannelID            int64   `json:"channelID,string,optional"`
+        ClearChannel         bool    `json:"clearChannel,optional"` // 是否明确解除通道绑定；与非零 channelID 互斥
+        ClearPackage         bool    `json:"clearPackage,optional"` // 是否明确解除平台资费组绑定；与非空 packageID 互斥
+        SyncRemindRatio      int64   `json:"syncRemindRatio,optional"`
+        RemindRatio          int64   `json:"remindRatio,optional"`
+        SyncIsDisconnected   int64   `json:"syncIsDisconnected,optional"`
+        IsDisconnected       int64   `json:"isDisconnected,optional"`
+        SyncConnectionStatus int64   `json:"syncConnectionStatus,optional"`
+        ConnectionStatus     int64   `json:"connectionStatus,optional"`
+        SyncIsPolling        int64   `json:"syncIsPolling,optional"`
+        IsPolling            int64   `json:"isPolling,optional"`
+        SyncImei             int64   `json:"syncImei,optional"`
+        Imei                 string  `json:"imei,optional"`
+        Remarks              string  `json:"remarks,optional"`
+    }
+
+    CardInfoStatusChangeReq {
+        Iccids []string `json:"iccids"`
+        Action string   `json:"action"`
+    }
+
+    CardInfoUnbindIMEIReq {
+        ID    int64  `json:"id,string"`
+        Iccid string `json:"iccid"`
+        Imei  string `json:"imei,optional"`
+    }
+
+    CardInfoSyncActiveDateReq {
+        Iccid  string `json:"iccid"`            // SIM 卡号（ICCID）
+        OpType string `json:"opType"`           // 同步类型：activate 激活日期、open 开卡日期、all 全部
+    }
+
+    CardInfoStatusChangeResp {
+        Total    int64    `json:"total"`
+        Success  int64    `json:"success"`
+        Fail     int64    `json:"fail"`
+        FailList []string `json:"failList,optional"`
+    }
+
+    // CardSnapshotRefreshReq 刷新当前页指定物联卡的运营商状态快照。
+    CardSnapshotRefreshReq {
+        IDs []int64 `json:"ids,string"` // 当前企业物联卡主键，最多100张
+    }
+
+    // CardSnapshotRefreshResp 返回本次快照刷新统计。
+    CardSnapshotRefreshResp {
+        Total int64 `json:"total"` // 请求总数
+        Success int64 `json:"success"` // 刷新成功数
+        Fail int64 `json:"fail"` // 刷新失败数
+    }
+
+    // CardTerminalPropertyChange 表示一个允许真实下发的运营商终端属性。
+    CardTerminalPropertyChange {
+        Field string `json:"field"` // 字段名：deviceId/modemId/simStatus/ratePlan/subAccount/overageLimitOverride/copyRulePassword/copyRuleAccount
+        Value string `json:"value"` // 目标值；枚举值由后端按联通合同校验
+    }
+
+    // CardTerminalPropertiesUpdateReq 提交单卡终端属性即时或预定变更。
+    CardTerminalPropertiesUpdateReq {
+        ID            int64 `json:"id,string"` // 当前企业物联卡主键
+        Changes       []CardTerminalPropertyChange `json:"changes"` // 至少一个真实变更字段
+        EffectiveDate string `json:"effectiveDate,optional"` // 为空立即生效，否则 yyyy-MM-dd HH:mm:ss
+    }
+
+    CardInfoChange {
+        ID              int64  `json:"id,string"`
+        Iccid           string `json:"iccid"`
+        CType           int64  `json:"cType"`
+        CTypeName       string `json:"cTypeName,optional"`
+        CBefore         string `json:"cBefore"`
+        CAfterward      string `json:"cAfterward"`
+        CreateTime      string `json:"createTime"`
+        Remark          string `json:"remark,optional"`
+        SourceType      int64  `json:"sourceType"`
+        SourceTypeName  string `json:"sourceTypeName,optional"`
+        ExecutionStatus int64  `json:"executionStatus"`
+    }
+
+    CardInfoChangeGetListReq {
+        PageInfo
+        Iccid      string `json:"iccid,optional"`
+        CType      int64  `json:"cType,optional"`
+        SourceType int64  `json:"sourceType,optional"`
+    }
+
+    CardInfoChangeGetListResp {
+        PageResp
+        List []*CardInfoChange `json:"list"`
+    }
+
+    CardInfoExpand {
+        ID                   int64  `json:"id,string"`
+        Iccid                string `json:"iccid"`
+        TestPeriodLastTime   string `json:"testPeriodLastTime,optional"`
+        SilentPeriodLastTime string `json:"silentPeriodLastTime,optional"`
+    }
+
+    CardInfoExpandUpdateReq {
+        Iccid                string `json:"iccid"`
+        TestPeriodLastTime   string `json:"testPeriodLastTime,optional"`
+        SilentPeriodLastTime string `json:"silentPeriodLastTime,optional"`
+    }
+
+    CardImportResp {
+        Total   int64  `json:"total"`
+		Success int64  `json:"success"`
+		Fail    int64  `json:"fail"`
+		TaskNo  string `json:"taskNo"`
+    }
+
+    CardInfoImportReq {
+        Iccids    []string `json:"iccids"`
+        ChannelID int64    `json:"channelID,string,optional"`
+        ClearChannel bool   `json:"clearChannel,optional"` // 重复卡是否明确解除通道绑定；与非零 channelID 互斥
+        PackageID string   `json:"packageID,optional"`
+        ClearPackage bool   `json:"clearPackage,optional"` // 重复卡是否明确解除平台资费组绑定；与非空 packageID 互斥
+    }
+
+    CardInfoExportReq {
+        Iccid             string   `json:"iccid,optional"`            // ICCID，支持模糊匹配
+        Iccids            []string `json:"iccids,optional"`            // ICCID精确列表
+        Msisdn            string   `json:"msisdn,optional"`           // MSISDN，支持模糊匹配
+        Imsi              string   `json:"imsi,optional"`             // IMSI，支持模糊匹配
+        ChannelID         int64    `json:"channelID,string,optional"` // 通道ID
+        RouteIDs          []int64  `json:"routeIds,string,optional"`  // 通道ID集合，集合内取并集
+        PackageID         string   `json:"packageID,optional"`        // 资费组ID
+        PackageIDs        []string `json:"packageIds,optional"`       // 资费组ID集合，集合内取并集
+        StatusID          string   `json:"statusID,optional"`         // 卡状态
+        StatusShowID      int64    `json:"statusShowID,optional"`     // 卡状态显示值
+        IsPool            int64    `json:"isPool,optional"`           // 是否流量池
+        IsPolling         int64    `json:"isPolling,optional"`        // 是否轮询
+        IsStopNetwork     int64    `json:"isStopNetwork,optional"`    // 是否执行断网
+        Type              string   `json:"type,optional"`             // 卡类型
+        NetworkType       string   `json:"networkType,optional"`      // 网络类型
+        CustomizeGrouping string   `json:"customizeGrouping,optional"` // 自定义分组
+        IccidPrefix       string   `json:"iccidPrefix,optional"`      // ICCID前缀匹配
+        IccidStart        string   `json:"iccidStart,optional"`       // ICCID号段开始
+        IccidEnd          string   `json:"iccidEnd,optional"`         // ICCID号段结束
+        MsisdnPrefix      string   `json:"msisdnPrefix,optional"`     // MSISDN前缀匹配
+        Operator          int64    `json:"operator,string,optional"`  // 运营商类型
+        OpenDateStart     string   `json:"openDateStart,optional"`    // 开卡日期开始
+        OpenDateEnd       string   `json:"openDateEnd,optional"`      // 开卡日期结束
+        ActivateDateStart string   `json:"activateDateStart,optional"` // 激活日期开始
+        ActivateDateEnd   string   `json:"activateDateEnd,optional"`   // 激活日期结束
+        BatchDateStart    string   `json:"batchDateStart,optional"`   // 批次日期开始
+        BatchDateEnd      string   `json:"batchDateEnd,optional"`     // 批次日期结束
+        DueExpireTimeStart string  `json:"dueExpireTimeStart,optional"` // 到期时间开始
+        DueExpireTimeEnd  string   `json:"dueExpireTimeEnd,optional"` // 到期时间结束
+        ReachThreshold    bool     `json:"reachThreshold,optional"`   // 是否已达阈值
+        FileType          string   `json:"fileType,optional"`         // 导出文件类型
+    }
+
+    CardInfoExportResp {
+        FileUrl string `json:"fileUrl"`
+    }
+)
+
+@server(
+    group: card/info
+    prefix: /api/v1/things/card/info
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "新增物联卡"
+        description: "业务说明：新增物联卡"
+        authType: "admin"
+        resource: "card"
+        action: "create"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (CardInfoCreateReq) returns (WithID)
+
+    @doc(
+        summary: "更新物联卡"
+        description: "业务说明：更新物联卡"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (CardInfoUpdateReq) returns ()
+
+    @doc(
+        summary: "删除物联卡"
+        description: "业务说明：删除物联卡"
+        authType: "admin"
+        resource: "card"
+        action: "delete"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取物联卡详情"
+        description: "业务说明：获取物联卡详情"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (CardInfoGetOneReq) returns (CardInfo)
+
+    @doc(
+        summary: "获取物联卡列表"
+        description: "业务说明：获取物联卡列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardInfoGetListReq) returns (CardInfoGetListResp)
+
+    @doc(
+        summary: "批量更新物联卡"
+        description: "业务说明：批量更新物联卡"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler batchUpdate
+    post /batch-update (CardInfoBatchUpdateReq) returns ()
+
+    @doc(
+        summary: "物联卡批量设置"
+        description: "业务说明：对选中的物联卡批量设置资费组、通道、超量停机阈值、未订购资费断网、轮询开关、IMEI 等属性，并写入变更记录"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler batchSetting
+    post /batch-setting (CardInfoBatchSettingReq) returns ()
+
+    @doc(
+        summary: "批量变更物联卡状态"
+        description: "业务说明：批量变更物联卡状态，支持停机(stop)、复机(start)、断网(breakNet)、开网(openNet)，会真实下发到上游通道"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler statusChange
+    post /status-change (CardInfoStatusChangeReq) returns (CardInfoStatusChangeResp)
+
+    @doc(
+        summary: "刷新物联卡状态快照"
+        description: "业务说明：按当前企业物联卡主键读取运营商在线、禁用及锁定状态并保存本地快照，供列表快速展示"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler snapshotRefresh
+    post /snapshot/refresh (CardSnapshotRefreshReq) returns (CardSnapshotRefreshResp)
+
+    @doc(
+        summary: "更新运营商终端属性"
+        description: "业务说明：按白名单把单卡设备ID、调制解调器ID、SIM卡状态、资费计划、子账户、用量限额重置及复制规则真实下发到运营商平台；effectiveDate 非空时创建预定变更"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler terminalPropertiesUpdate
+    post /terminal-properties/update (CardTerminalPropertiesUpdateReq) returns ()
+
+    @doc(
+        summary: "同步物联卡激活日期"
+        description: "业务说明：调用上游通道查询指定 ICCID 的激活日期并更新本地卡信息；该能力不代表查询开卡日期"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncActiveDate
+    post /sync-active-date (CardInfoSyncActiveDateReq) returns ()
+
+    @doc(
+        summary: "批量导入物联卡"
+        description: "业务说明：批量导入物联卡"
+        authType: "admin"
+        resource: "card"
+        action: "import"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler import
+    post /import (CardInfoImportReq) returns (CardImportResp)
+
+    @doc(
+        summary: "Excel 导入物联卡"
+        description: "业务说明：上传正式模板版本 1 批量导入物联卡；ICCID 按行校验并按租户业务键 UPSERT，失败行写入任务明细供受控下载"
+        authType: "admin"
+        resource: "card"
+        action: "import"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler importExcel
+    post /import-excel returns (CardImportResp)
+
+    @doc(
+        summary: "下载物联卡导入模板"
+        description: "业务说明：下载带模板版本和 ICCID 文本格式的正式 Excel 导入模板"
+        authType: "admin"
+        resource: "card"
+        action: "import"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler importTemplate
+    post /import-template
+
+    @doc(
+        summary: "导出物联卡"
+        description: "业务说明：按筛选条件导出物联卡列表，生成 Excel 后上传到 OSS 返回下载地址"
+        authType: "admin"
+        resource: "card"
+        action: "export"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler export
+    post /export (CardInfoExportReq) returns (CardInfoExportResp)
+
+    @doc(
+        summary: "获取卡状态变更记录列表"
+        description: "业务说明：获取卡状态变更记录列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler changeGetList
+    post /change/get-list (CardInfoChangeGetListReq) returns (CardInfoChangeGetListResp)
+
+    @doc(
+        summary: "获取卡扩展信息"
+        description: "业务说明：获取卡扩展信息"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler expandGetOne
+    post /expand/get-one (ICCIDReq) returns (CardInfoExpand)
+
+    @doc(
+        summary: "更新卡扩展信息"
+        description: "业务说明：更新卡扩展信息"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler expandUpdate
+    post /expand/update (CardInfoExpandUpdateReq) returns ()
+}

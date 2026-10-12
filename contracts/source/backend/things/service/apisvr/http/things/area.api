@@ -1,0 +1,205 @@
+info(
+    title: "项目区域管理模块"
+    desc: "项目区域管理模块"
+    author: "大绵羊"
+    email: "robotyang123@163.com"
+    version: "v1"
+)
+
+@server(
+    group: things/area/info
+    prefix: /api/v1/things/area/info
+    accessCodePrefix: "thingsAreaManage"
+    accessNamePrefix: "区域管理"
+    accessGroup: "区域管理"
+    defaultAuthType: "admin"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "新增项目区域"
+        description: "在指定项目下创建新的区域节点，支持设置父区域ID形成树形层级结构。区域是设备管理的基本空间单元，设备绑定到区域后受区域权限控制。"
+        authType: "admin"
+        group: "things/area/info"
+        resource: "things/area/info"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler create
+    post /create (AreaInfo) returns (AreaWithID)
+    @doc(
+        summary: "更新项目区域"
+        description: "修改区域的基本信息（名称、位置、描述、标签等），不支持修改父区域ID（需通过删除重建调整层级）。更新后设备的区域归属不变。"
+        authType: "admin"
+        group: "things/area/info"
+        resource: "things/area/info"
+        action: "update"
+        recordLogMode: "3"
+    )
+    @handler update
+    post /update (AreaInfo) returns ()
+    @doc(
+        summary: "删除项目区域"
+        description: "删除指定区域节点。系统创建的区域（isSysCreated=1）只有平台管理员可删除。删除父区域时需先删除所有子区域。"
+        authType: "admin"
+        group: "things/area/info"
+        resource: "things/area/info"
+        action: "delete"
+        recordLogMode: "3"
+    )
+    @handler delete
+    post /delete (AreaWithID) returns ()
+    @doc(
+        summary: "获取项目区域详情"
+        description: "查询单个区域的完整信息，包括层级路径、设备统计、子区域数量。支持withChildren参数同时返回子区域列表，用于树形展示。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/area/info"
+        resource: "things/area/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (AreaInfoGetOneReq) returns (AreaInfo)
+    @doc(
+        summary: "获取项目区域列表"
+        description: "按项目查询区域列表，支持按父区域ID过滤获取子节点、按区域ID列表批量查询。isRetTopLevel=true返回有权限的最高层区域。返回数据包含设备/分组统计。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/area/info"
+        resource: "things/area/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (AreaInfoGetListReq) returns (AreaInfoGetListResp)
+}
+
+@server(
+    group: things/area/profile
+    prefix: /api/v1/things/area/profile
+    accessCodePrefix: "thingsAreaManage"
+    accessNamePrefix: "区域管理"
+    accessGroup: "区域管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "获取区域配置详情"
+        description: "查询区域的扩展配置信息，通过code标识配置类型（如区域参数、自定义属性）。配置以params字段存储JSON格式数据。"
+        authType: "admin"
+        group: "things/area/profile"
+        resource: "things/area/profile"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler profileGetOne
+    post /get-one (AreaProfileGetOneReq) returns (AreaProfile)
+    @doc(
+        summary: "更新区域配置"
+        description: "修改区域指定code的配置内容，params字段支持JSON格式存储复杂配置。不同code对应不同配置模块，可独立更新。"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/area/profile"
+        resource: "things/area/profile"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler profileUpdate
+    post /update (AreaProfile) returns ()
+    @doc(
+        summary: "获取区域配置列表"
+        description: "批量查询多个code对应的区域配置，支持按区域ID和code列表过滤。用于一次性获取区域的所有相关配置。"
+        authType: "admin"
+        group: "things/area/profile"
+        resource: "things/area/profile"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler profileGetList
+    post /get-list (AreaProfileGetListReq) returns (AreaProfileGetListResp)
+}
+
+
+type (
+    AreaProfileGetOneReq{
+        AreaID int64 `json:"areaID,string"`             //项目区域id（只读）
+        Code string `json:"code"`
+    }
+    AreaProfile{
+        AreaID int64 `json:"areaID,string"`             //项目区域id（只读）
+        Code string `json:"code"`
+        Params string  `json:"params"`
+    }
+    AreaProfileGetListReq{
+        AreaID int64 `json:"areaID,string"`             //项目区域id（只读）
+        Codes []string `json:"codes"`
+    }
+    AreaProfileGetListResp{
+        Profiles []*AreaProfile `json:"profiles"`
+    }
+)
+
+
+type (
+
+
+
+
+
+    AreaInfo {
+        CreatedTime        int64             `json:"createdTime,optional,string"` //创建时间（只读）
+        ProjectID          int64             `json:"projectID,string,optional"` //项目id（只读）
+        TenantCode         string            `json:"tenantCode,optional"` //租户编码（只读）
+        AreaID             int64             `json:"areaID,string,optional"` //项目区域id（只读）
+        ParentAreaID       int64             `json:"parentAreaID,string,optional"` //上级项目区域id（只读）
+        AreaName           string            `json:"areaName,optional"` //项目区域名称（读写）
+        Position           *Point            `json:"position,optional"` //项目区域定位，默认高德坐标系（读写）
+        Desc               *string           `json:"desc,optional"` //项目区域备注（读写）
+        Tags               map[string]string `json:"tags,optional,omitempty"` //自定义标签
+        LowerLevelCount    int64             `json:"lowerLevelCount,optional"` //下级的数量统计（只读）
+        DeviceCount        int64             `json:"deviceCount,optional"` //设备数量统计(只读)
+        GroupCount         int64             `json:"groupCount,optional"` //分组数量统计(只读)
+        UseBy              string            `json:"useBy,optional"` //用途: commonSpace default
+        IsLeaf             int64             `json:"isLeaf,optional"` //是否是子节点（只读）
+        Sort               int64             `json:"sort,optional"` // 排序标记,默认为1
+        IsSysCreated       int64             `json:"isSysCreated,optional"` //是否是系统创建的,系统创建的只有管理员可以删除
+        AreaIDPath         string            `json:"areaIDPath,optional"` //项目区域ids（只读）
+        AreaNamePath       string            `json:"areaNamePath,optional"` //（只读）
+        AreaImg            string            `json:"areaImg,optional"`
+        ConfigFile         string            `json:"configFile,optional"` //区域配置文件
+        Children           []*AreaInfo       `json:"children,optional"` //下级项目区域列表（只读）
+        Devices            []*DeviceInfo     `json:"devices,optional"` //区域下设备列表（按需返回）
+    }
+
+    AreaWithID  {
+        AreaID int64 `json:"areaID,string"` //项目区域id 只读
+    }
+
+    AreaInfoGetOneReq  {
+        AreaID int64 `json:"areaID,string"` //项目区域id
+        TenantCode string  `json:"tenantCode,optional"`
+        ProjectID int64 `json:"projectID,string,optional"` //项目id 不填选默认项目
+        WithChildren bool `json:"withChildren,optional"`
+//        WithDeviceInfoCount bool `json:"withDeviceInfoCount,optional"`//同时返回设备统计信息
+    }
+
+    AreaInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"`            //进行数据分页（不传默认2000相当于全部）
+        ProjectID int64 `json:"projectID,string,optional"` //项目id
+        AreaIDs []int64 `json:"areaIDs,string,optional"`          //项目区域ids
+        ParentAreaID int64 `json:"parentAreaID,string,optional"`
+        IsRetTopLevel bool  `json:"isRetTopLevel,optional"`//如果该参数为true则返回除了root节点的有权限的最高层的区域列表
+        TenantCode string  `json:"tenantCode,optional"`
+        DeviceCount *CompareInt64 `json:"deviceCount,optional"`
+        GroupCount *CompareInt64 `json:"groupCount,optional"`
+        WithDevices bool `json:"withDevices,optional"` //是否同时返回区域下设备列表
+//        WithDeviceInfoCount bool `json:"withDeviceInfoCount,optional"`//同时返回设备统计信息
+    }
+
+    AreaInfoGetListResp  {
+        PageResp
+        List []*AreaInfo `json:"list"`    //项目区域列表
+    }
+)

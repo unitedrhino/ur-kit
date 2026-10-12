@@ -1,0 +1,44 @@
+/* uni-app 全局变量与工具类 */
+
+/* 颜色 */
+$uni-color-primary: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY__;
+$uni-color-success: __MOBILE_UNIAPP_THEME_COLOR_SUCCESS__;
+$uni-color-warning: __MOBILE_UNIAPP_THEME_COLOR_WARNING__;
+$uni-color-error: __MOBILE_UNIAPP_THEME_COLOR_ERROR__;
+$uni-color-tab-text: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PLACEHOLDER__;
+$uni-color-tab-text-selected: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY__;
+
+/* 文本颜色 */
+$uni-text-color: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PRIMARY__;
+$uni-text-color-inverse: __MOBILE_UNIAPP_THEME_COLOR_ON_PRIMARY__;
+$uni-text-color-grey: __MOBILE_UNIAPP_THEME_COLOR_TEXT_SECONDARY__;
+$uni-text-color-placeholder: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PLACEHOLDER__;
+$uni-text-color-disable: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PLACEHOLDER__;
+
+/* 背景色 */
+$uni-bg-color: __MOBILE_UNIAPP_THEME_COLOR_SURFACE__;
+$uni-bg-color-grey: __MOBILE_UNIAPP_THEME_COLOR_SURFACE_CONTAINER__;
+$uni-bg-color-hover: __MOBILE_UNIAPP_THEME_COLOR_SURFACE_CONTAINER__;
+$uni-bg-color-mask: __MOBILE_UNIAPP_THEME_COLOR_SCRIM__;
+
+/* 边框颜色 */
+$uni-border-color: __MOBILE_UNIAPP_THEME_COLOR_OUTLINE_VARIANT__;
+
+/* 字号 */
+$uni-font-size-sm: 24rpx;
+$uni-font-size-base: 28rpx;
+$uni-font-size-lg: 32rpx;
+
+/* 间距 */
+$uni-spacing-row-sm: 10rpx;
+$uni-spacing-row-base: 20rpx;
+$uni-spacing-row-lg: 30rpx;
+$uni-spacing-col-sm: 8rpx;
+$uni-spacing-col-base: 16rpx;
+$uni-spacing-col-lg: 24rpx;
+
+/* 圆角 */
+$uni-border-radius-sm: 4rpx;
+$uni-border-radius-base: 6rpx;
+$uni-border-radius-lg: 12rpx;
+$uni-border-radius-circle: 50%;

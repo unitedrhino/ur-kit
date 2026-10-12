@@ -1,0 +1,309 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-clone任务管理"
+	desc:    "AI Clone Task Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- clone任务类型定义 ----
+
+type CloneTaskInfo {
+	ID                 int64  `json:"id,optional"` // 任务ID
+	tenantCode         string `json:"tenantCode,optional"` // 租户编码
+	cloneGroupID       int64  `json:"cloneGroupID,string"` // 所属CloneGroup ID
+	cloneID            int64  `json:"cloneID,string"` // 绑定的Clone ID
+	agentID            int64  `json:"agentID,optional"` // 冗余:Clone的Agent ID
+	name               string `json:"name"` // 任务名称
+	desc               string `json:"desc,optional"` // 任务描述
+	taskType           string `json:"taskType"` // 任务类型 ai_run/tool_run
+	prompt             string `json:"prompt,optional"` // AI运行的提示词
+	sessionID          string `json:"sessionID,optional"` // 专用会话ID
+	toolID             int64  `json:"toolID,optional"` // AiTool.ID
+	toolCodeSnapshot   string `json:"toolCodeSnapshot,optional"` // 快照:工具编码
+	toolVersionSnapshot int64 `json:"toolVersionSnapshot,optional"` // 快照:工具版本
+	toolManifestSnapshot string `json:"toolManifestSnapshot,optional"` // 快照:manifest.json
+	toolInputsTemplate string `json:"toolInputsTemplate,optional"` // JSON工具输入模板
+	triggerType        string `json:"triggerType,optional"` // 触发类型 schedule/subscribe_message
+	subscribeTopic     string `json:"subscribeTopic,optional"` // 订阅消息触发时选择的主题编码
+	subscribePayloadFilter string `json:"subscribePayloadFilter,optional"` // 订阅消息过滤条件JSON
+	scopeProjectID     string `json:"scopeProjectID,optional"` // 项目规则任务的事件归属项目ID，字符串传输
+	scheduleType       string `json:"scheduleType"` // 调度类型 none/once/interval/daily/weekly
+	scheduleTime       string `json:"scheduleTime,optional"` // once:指定执行时间(ISO格式)
+	scheduleInterval   int64  `json:"scheduleInterval,optional"` // interval:间隔分钟数
+	scheduleDailyTimeSec int64 `json:"scheduleDailyTimeSec,optional"` // daily:当天秒数(0-86399)
+	scheduleWeeklyDay  int64  `json:"scheduleWeeklyDay,optional"` // weekly:0=周日1=周一...6=周六
+	scheduleWeeklyTimeSec int64 `json:"scheduleWeeklyTimeSec,optional"` // weekly:当天秒数(0-86399)
+	enabled            int64  `json:"enabled,string,optional"` // 是否启用 1-启用 2-禁用
+	state              string `json:"state,optional"` // 状态 scheduled/paused/completed
+	repeatTimes        int64  `json:"repeatTimes,optional"` // 最大执行次数(0=无限)
+	repeatCompleted    int64  `json:"repeatCompleted,optional"` // 已完成次数
+	lastRunAt          int64  `json:"lastRunAt,optional"` // 最后执行时间
+	nextRunAt          int64  `json:"nextRunAt,optional"` // 下次执行时间
+	lastStatus         string `json:"lastStatus,optional"` // 最后状态 ok/error
+	lastError          string `json:"lastError,optional"` // 最后错误信息
+	lastRunID          string `json:"lastRunID,optional"` // 最后执行记录ID
+	timeoutSeconds     int64  `json:"timeoutSeconds,optional"` // 执行超时(秒)
+	createdTime        int64  `json:"createdTime,optional"` // 创建时间
+	updatedTime        int64  `json:"updatedTime,optional"` // 更新时间
+}
+
+type CloneTaskCreateReq {
+	cloneGroupID       int64  `json:"cloneGroupID,string"` // CloneGroup ID
+	cloneID            int64  `json:"cloneID,string"` // 绑定的Clone ID
+	name               string `json:"name"` // 任务名称
+	desc               string `json:"desc,optional"` // 任务描述
+	taskType           string `json:"taskType"` // 任务类型 ai_run/tool_run
+	prompt             string `json:"prompt,optional"` // AI运行的提示词(ai_run时必填)
+	toolID             int64  `json:"toolID,optional"` // AiTool ID(tool_run时必填)
+	toolInputs         string `json:"toolInputs,optional"` // 工具输入JSON(tool_run时选填)
+	triggerType        string `json:"triggerType,optional"` // 触发类型 schedule/subscribe_message，默认schedule
+	subscribeTopic     string `json:"subscribeTopic,optional"` // 订阅消息触发时选择的主题编码
+	subscribePayloadFilter string `json:"subscribePayloadFilter,optional"` // 订阅消息过滤条件JSON
+	scopeProjectID     string `json:"scopeProjectID,optional"` // 项目规则任务的事件归属项目ID，字符串传输
+	scheduleType       string `json:"scheduleType"` // 调度类型 none/once/interval/daily/weekly
+	scheduleTime       string `json:"scheduleTime,optional"` // once:ISO时间 "2026-06-01T08:00:00"
+	scheduleInterval   int64  `json:"scheduleInterval,optional"` // interval:间隔分钟数
+	scheduleDailyTimeSec int64 `json:"scheduleDailyTimeSec,optional"` // daily:当天秒数(0-86399)
+	scheduleWeeklyDay  int64  `json:"scheduleWeeklyDay,optional"` // weekly:0=周日1=周一...6=周六
+	scheduleWeeklyTimeSec int64 `json:"scheduleWeeklyTimeSec,optional"` // weekly:当天秒数(0-86399)
+	timeoutSeconds     int64  `json:"timeoutSeconds,optional"` // 超时时间，默认300
+	repeatTimes        int64  `json:"repeatTimes,optional"` // 最大执行次数，0=无限
+}
+
+type CloneTaskUpdateReq {
+	ID                 int64  `json:"id,string"` // 任务ID
+	name               string `json:"name,optional"` // 任务名称
+	desc               string `json:"desc,optional"` // 任务描述
+	prompt             string `json:"prompt,optional"` // AI运行的提示词
+	toolInputs         string `json:"toolInputs,optional"` // 工具输入JSON
+	triggerType        string `json:"triggerType,optional"` // 触发类型 schedule/subscribe_message
+	subscribeTopic     string `json:"subscribeTopic,optional"` // 订阅消息触发时选择的主题编码
+	subscribePayloadFilter string `json:"subscribePayloadFilter,optional"` // 订阅消息过滤条件JSON
+	scopeProjectID     string `json:"scopeProjectID,optional"` // 项目规则任务的事件归属项目ID，字符串传输
+	scheduleType       string `json:"scheduleType,optional"` // 调度类型
+	scheduleTime       string `json:"scheduleTime,optional"` // once:ISO时间
+	scheduleInterval   int64  `json:"scheduleInterval,optional"` // interval:间隔分钟数
+	scheduleDailyTimeSec int64 `json:"scheduleDailyTimeSec,optional"` // daily:当天秒数
+	scheduleWeeklyDay  int64  `json:"scheduleWeeklyDay,optional"` // weekly:周几
+	scheduleWeeklyTimeSec int64 `json:"scheduleWeeklyTimeSec,optional"` // weekly:当天秒数
+	timeoutSeconds     int64  `json:"timeoutSeconds,optional"` // 超时时间
+	repeatTimes        *int64 `json:"repeatTimes,optional"` // 最大执行次数，传0重置为不限，省略保持不变
+}
+
+type CloneTaskGetListReq {
+	page         PageInfo `json:"page"` // 分页信息
+	cloneGroupID int64    `json:"cloneGroupID,string,optional"` // 按CloneGroup过滤，字符串传输避免精度损失
+	cloneID      int64    `json:"cloneID,optional"` // 按Clone过滤
+	agentID      int64    `json:"agentID,optional"` // 按Agent过滤
+	taskType     string   `json:"taskType,optional"` // 按任务类型过滤
+	enabled      int64    `json:"enabled,optional"` // 按启用状态过滤
+	triggerType  string   `json:"triggerType,optional"` // 按触发类型过滤
+	scheduleType string   `json:"scheduleType,optional"` // 按调度类型过滤
+}
+
+type CloneTaskGetListResp {
+	list  []CloneTaskInfo `json:"list"` // 任务列表
+	total int64               `json:"total"` // 总数
+}
+
+type CloneTaskRunInfo {
+	ID          int64  `json:"id,optional"` // 执行记录ID
+	taskID      int64  `json:"taskID,optional"` // 关联任务ID
+	runID       string `json:"runID,optional"` // 运行标识UUID
+	triggerType string `json:"triggerType,optional"` // 触发类型 schedule/manual/subscribe_message
+	status      string `json:"status,optional"` // 执行状态 running/success/failed
+	startTime   int64  `json:"startTime,optional"` // 开始时间
+	endTime     int64  `json:"endTime,optional"` // 结束时间
+	durationMs  int64  `json:"durationMs,optional"` // 执行耗时(毫秒)
+	output      string `json:"output,optional"` // 执行结果
+	errorMsg    string `json:"errorMsg,optional"` // 错误信息
+	logs        string `json:"logs,optional"` // 执行日志
+	sessionID   string `json:"sessionID,optional"` // 使用的会话ID
+	toolID      int64  `json:"toolID,optional"` // 关联工具ID
+	createdTime int64  `json:"createdTime,optional"` // 创建时间
+}
+
+type CloneTaskGetRunsReq {
+	page   PageInfo `json:"page"` // 分页信息
+	taskID int64    `json:"taskID,string"` // 任务ID
+}
+
+type CloneTaskGetRunsResp {
+	list  []CloneTaskRunInfo `json:"list"` // 执行记录列表
+	total int64                  `json:"total"` // 总数
+}
+
+// 过滤字段信息（精简字段清单，仅暴露字段路径和中文说明，不暴露原始schema、payload示例、工具参数映射表）
+type FilterFieldInfo {
+	path  string `json:"path"`  // 字段路径，如 $.deviceName，供过滤条件规则使用
+	label string `json:"label"` // 字段中文说明，供前端下拉框展示
+}
+
+// 结构化过滤字段选项
+type FilterSchemaFieldOptionInfo {
+	value string `json:"value"` // 选项值
+	label string `json:"label"` // 选项展示名称
+}
+
+// 结构化过滤字段定义
+type FilterSchemaFieldInfo {
+	key      string                        `json:"key"`      // 表单字段键
+	label    string                        `json:"label"`    // 展示名称
+	required bool                          `json:"required"` // 是否必填
+	bind     string                        `json:"bind"`     // topic_param / payload_rule
+	path     string                        `json:"path"`     // 过滤规则 JSONPath
+	widget   string                        `json:"widget"`   // 控件类型：radio / 默认文本
+	options  []FilterSchemaFieldOptionInfo `json:"options"`  // 单选等控件选项
+}
+
+// 结构化过滤表单定义
+type FilterSchemaInfo {
+	Type   string                 `json:"type"`   // structured：结构化表单
+	fields []FilterSchemaFieldInfo `json:"fields"` // 结构化字段列表
+}
+
+// 订阅主题信息（前端仅展示描述名称，不暴露code、topicTemplate、原始schema等技术信息）
+type SubscribeTopicInfo {
+	code         string             `json:"code"`         // 主题编码，后端使用
+	description  string             `json:"description"`  // 主题描述名称，前端展示
+	filterFields []FilterFieldInfo `json:"filterFields"` // 可用于配置过滤条件的精简字段清单
+	filterSchema *FilterSchemaInfo `json:"filterSchema,optional"` // 结构化过滤表单定义，有则优先展示
+}
+
+type SubscribeTopicGetListResp {
+	list []SubscribeTopicInfo `json:"list"` // 订阅主题列表
+}
+
+// ---- clone任务管理服务定义 ----
+@server (
+	group:            ai/cloneTask
+	prefix:           /api/v1/ai/clone-task
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiCloneTask"
+	accessNamePrefix: "clone任务管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建clone任务"
+		description: "业务说明：创建clone任务，支持AI运行和工具运行两种类型。每个任务必须绑定一个Clone，执行时使用该Clone的环境配置。调度类型支持:非定时(none)、单次执行(once)、每间隔(interval)、每天(daily)、每周(weekly)。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "create"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (CloneTaskCreateReq) returns (WithID)
+
+	@doc(
+		summary: "更新clone任务"
+		description: "业务说明：更新clone任务的名称、描述、提示词、工具入参、调度配置等。部分更新，空值字段不修改。修改调度配置后会重新计算下次执行时间。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "update"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (CloneTaskUpdateReq)
+
+	@doc(
+		summary: "删除clone任务"
+		description: "业务说明：删除指定的clone任务。删除后关联的执行日志保留，不会被删除。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "delete"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "获取clone任务详情"
+		description: "业务说明：根据任务ID查询完整信息，包括调度配置、执行记录摘要等。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "view"
+		group: "ai/clone-task"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (CloneTaskInfo)
+
+	@doc(
+		summary: "获取clone任务列表"
+		description: "业务说明：分页查询clone任务列表，支持按CloneGroup、Clone、Agent、任务类型、调度类型过滤。返回结果按创建时间倒序排列。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "view"
+		group: "ai/clone-task"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (CloneTaskGetListReq) returns (CloneTaskGetListResp)
+
+	@doc(
+		summary: "启用clone任务"
+		description: "业务说明：启用指定的clone任务。启用后会重新计算下次执行时间。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "update"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler start
+	post /start (WithID)
+
+	@doc(
+		summary: "禁用clone任务"
+		description: "业务说明：禁用指定的clone任务。禁用后任务不会被自动触发，但仍可手动触发。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "update"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler stop
+	post /stop (WithID)
+
+	@doc(
+		summary: "手动触发clone任务"
+		description: "业务说明：立即执行一次指定的clone任务，不受调度规则限制。执行结果会记录到执行日志中。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "update"
+		group: "ai/clone-task"
+		recordLogMode: "2"
+	)
+	@handler run
+	post /run (WithID)
+
+	@doc(
+		summary: "获取clone任务执行日志"
+		description: "业务说明：分页查询指定任务的执行日志，包括执行时间、状态、输入输出、错误信息等。返回结果按执行时间倒序排列。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "view"
+		group: "ai/clone-task"
+		recordLogMode: "1"
+	)
+	@handler getRuns
+	post /get-runs (CloneTaskGetRunsReq) returns (CloneTaskGetRunsResp)
+
+	@doc(
+		summary: "获取订阅主题列表"
+		description: "业务说明：获取系统预置的订阅消息主题清单，供前端下拉选择。返回结果只包含主题编码和描述名称。"
+		authType: "all"
+		resource: "ai/clone-task"
+		action: "view"
+		group: "ai/clone-task"
+		recordLogMode: "1"
+	)
+	@handler getSubscribeTopics
+	post /get-subscribe-topics returns (SubscribeTopicGetListResp)
+}

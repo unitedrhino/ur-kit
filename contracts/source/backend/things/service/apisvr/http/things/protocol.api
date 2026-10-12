@@ -1,0 +1,732 @@
+info (
+	title:   "自定义协议管理模块"
+	desc:    "自定义协议管理模块"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+@server (
+	group:            things/protocol/info
+	prefix:           /api/v1/things/protocol/info
+	accessCodePrefix: "thingsProtocolService"
+	accessNamePrefix: "协议管理"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "新增自定义协议"
+		description: "创建新的设备接入协议定义，包括协议类型（MQTT/TCP/UDP）、传输配置、字段定义等。协议定义后可关联产品实现设备接入，支持配置字段、产品字段、设备字段三级定义。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/info"
+		resource: "things/protocol/info"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (ProtocolInfo) returns (WithID)
+
+	@doc (
+		summary:    "更新自定义协议"
+		description: "修改协议的基本信息和字段定义，已关联产品的协议修改需谨慎。支持修改协议名称、描述、端点配置、字段列表等。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/info"
+		resource: "things/protocol/info"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (ProtocolInfo)
+
+	@doc (
+		summary:    "删除自定义协议"
+		description: "删除协议定义，会检查是否有产品正在使用该协议。已关联产品的协议无法直接删除，需先解除产品关联。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/info"
+		resource: "things/protocol/info"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:    "获取自定义协议信息列表"
+		description: "查询系统中所有协议定义，支持按协议类型、传输协议、名称等过滤。返回协议完整信息包括配置字段定义。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/info"
+		resource: "things/protocol/info"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProtocolInfoGetListReq) returns (ProtocolInfoGetListResp)
+
+	@doc (
+		summary:    "获取自定义协议详情"
+		description: "查询单个协议的完整定义，包括所有配置字段、产品字段、设备字段的详细规格。支持按ID或Code查询。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/info"
+		resource: "things/protocol/info"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithIDOrCode) returns (ProtocolInfo)
+}
+
+@server (
+	group:            things/protocol/service
+	prefix:           /api/v1/things/protocol/service
+	accessCodePrefix: "thingsProtocolInfo"
+	accessNamePrefix: "协议管理"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "删除自定义协议服务器"
+		description: "从协议服务注册列表中移除指定的协议服务实例。协议服务实例由dgsvr自动注册，手动删除后如服务仍运行会再次注册。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/service"
+		resource: "things/protocol/service"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:    "获取自定义协议服务器信息列表"
+		description: "查询指定协议下已注册的服务实例列表，包括服务IP、端口、状态、注册时间等。用于监控协议服务的运行状态。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/service"
+		resource: "things/protocol/service"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProtocolServiceGetListReq) returns (ProtocolServiceGetListResp)
+}
+
+@server (
+	group:            things/protocol/config
+	prefix:           /api/v1/things/protocol/config
+	accessCodePrefix: "thingsProtocolConfig"
+	accessNamePrefix: "协议配置"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "创建协议配置"
+		description: "为协议创建具体的配置实例，关联协议ID并填写配置参数键值对。同一协议可以有多个配置实例，用于不同产品或场景。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/config"
+		resource: "things/protocol/config"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (ProtocolConfig) returns (WithID)
+
+	@doc (
+		summary:    "更新协议配置"
+		description: "修改协议配置实例的参数内容，支持更新描述和配置键值对。配置修改后已关联产品需重新适配。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/config"
+		resource: "things/protocol/config"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (ProtocolConfig)
+
+	@doc (
+		summary:    "删除协议配置"
+		description: "删除协议配置实例。已被产品使用的配置无法删除，需先解除产品关联。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/config"
+		resource: "things/protocol/config"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:    "获取协议配置列表"
+		description: "查询协议配置实例列表，支持按协议ID或协议Code过滤。返回配置的ID、描述、参数内容等。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/config"
+		resource: "things/protocol/config"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProtocolConfigGetListReq) returns (ProtocolConfigGetListResp)
+
+	@doc (
+		summary:    "获取协议配置详情"
+		description: "查询单个协议配置实例的完整信息，包括关联的协议ID和所有配置参数。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/config"
+		resource: "things/protocol/config"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (ProtocolConfig)
+}
+
+@server (
+	group:            things/protocol/sync
+	prefix:           /api/v1/things/protocol/sync
+	accessCodePrefix: "thingsProtocolSync"
+	accessNamePrefix: "协议同步"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "产品同步(如果该协议不支持会返回不支持)"
+		description: "触发协议级的产品数据同步，从第三方平台拉取产品信息到本地。仅对支持同步功能的协议有效（isEnableSyncProduct=1），不支持同步的协议返回错误。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/sync"
+		resource: "things/protocol/sync"
+		action: "sync"
+		recordLogMode: "1"
+	)
+	@handler product
+	post /product (CodeReq)
+
+	@doc (
+		summary:    "设备同步(如果该协议不支持会返回不支持)"
+		description: "触发协议级的设备数据同步，从第三方平台拉取指定产品下的设备信息。返回新增的设备ID列表。仅对支持同步功能的协议有效。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/sync"
+		resource: "things/protocol/sync"
+		action: "sync"
+		recordLogMode: "1"
+	)
+	@handler device
+	post /device (ProtocolSyncDeviceReq) returns (ProtocolSyncDeviceResp)
+}
+
+@server (
+	group:            things/protocol/image
+	prefix:           /api/v1/things/protocol/image
+	accessCodePrefix: "thingsProtocolImage"
+	accessNamePrefix: "协议镜像"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "下载协议镜像"
+		description: "拉取协议对应的 Docker 镜像到本地。若本地已有该镜像则直接返回成功。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/image"
+		resource: "things/protocol/image"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler pull
+	post /pull (ProtocolImagePullReq)
+}
+
+@server (
+	group:            things/protocol/container
+	prefix:           /api/v1/things/protocol/container
+	accessCodePrefix: "thingsProtocolContainer"
+	accessNamePrefix: "协议容器"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "安装协议容器"
+		description: "根据协议镜像配置创建并启动 Docker 容器。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/container"
+		resource: "things/protocol/container"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler install
+	post /install (ProtocolContainerInstallReq) returns (WithID)
+
+	@doc (
+		summary:    "停止协议容器"
+		description: "停止运行中的协议 Docker 容器。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/container"
+		resource: "things/protocol/container"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler stop
+	post /stop (ProtocolContainerOperateReq)
+
+	@doc (
+		summary:    "更新协议容器"
+		description: "拉取新镜像并重启协议容器，失败时自动回退到旧版本。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/container"
+		resource: "things/protocol/container"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (ProtocolContainerInstallReq)
+
+	@doc (
+		summary:    "卸载协议容器"
+		description: "停止并删除协议 Docker 容器，可选同时删除本地镜像。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/container"
+		resource: "things/protocol/container"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler uninstall
+	post /uninstall (ProtocolContainerUninstallReq)
+
+	@doc (
+		summary:    "查询协议容器状态"
+		description: "实时查询协议 Docker 容器的运行状态，包括容器ID、镜像、状态等。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/container"
+		resource: "things/protocol/container"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler status
+	post /status (ProtocolContainerOperateReq) returns (ProtocolContainerStatusResp)
+}
+
+@server (
+	group:            things/protocol/script
+	prefix:           /api/v1/things/protocol/script
+	accessCodePrefix: "thingsProtocolScript"
+	accessNamePrefix: "协议管理"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "新增协议脚本"
+		description: "创建协议脚本用于自定义设备消息处理逻辑。支持上行（设备到平台）和下行（平台到设备）方向，可设置触发时机（before/after）、触发类型（property/event/action）。脚本内容为JavaScript代码。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (ProtocolScript) returns (WithIDStr)
+
+	@doc (
+		summary:    "更新协议脚本"
+		description: "修改协议脚本的配置或代码内容。可更新脚本名称、触发条件、脚本代码、启用状态等。修改后立即生效，影响关联设备的消息处理。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (ProtocolScript)
+
+	@doc (
+		summary:    "删除协议脚本"
+		description: "删除协议脚本定义。删除后关联此脚本的设备将不再执行该脚本逻辑，设备消息处理恢复默认行为。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithIDStr)
+
+	@doc (
+		summary:    "获取协议脚本列表"
+		description: "查询协议脚本列表，支持按触发方向、触发时机、触发类型、状态等过滤。返回脚本基本信息，不含代码内容。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProtocolScriptGetListReq) returns (ProtocolScriptGetListResp)
+
+	@doc (
+		summary:    "获取协议脚本详情"
+		description: "查询单个协议脚本的完整信息，包括脚本代码内容。用于脚本编辑或调试时查看完整定义。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithIDStr) returns (ProtocolScript)
+
+	@doc (
+		summary:    "协议脚本调试"
+		description: "在隔离环境中运行脚本进行调试，传入模拟的请求消息和可选的响应消息，返回脚本处理后的输出和执行日志。用于脚本开发阶段验证逻辑正确性。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler debug
+	post /debug (ProtocolScriptDebugReq) returns (ProtocolScriptDebugResp)
+
+	@doc (
+		summary:    "批量导入协议脚本"
+		description: "从ZIP压缩包批量导入协议脚本，压缩包需包含脚本JSON定义文件。用于批量部署或迁移脚本配置。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "import"
+		recordLogMode: "1"
+	)
+	@handler batchImport
+	post /batch-import (ProtocolScriptImportReq) returns (ImportResp)
+
+	@doc (
+		summary:    "批量导出协议脚本"
+		description: "将选定的协议脚本导出为ZIP压缩包，包含脚本JSON定义文件。用于备份或跨环境迁移脚本配置。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script"
+		resource: "things/protocol/script"
+		action: "export"
+		recordLogMode: "1"
+	)
+	@handler batchExport
+	post /batch-export (ProtocolScriptExportReq) returns (ProtocolScriptExportResp)
+}
+
+@server (
+	group:            things/protocol/script/device
+	prefix:           /api/v1/things/protocol/script/device
+	accessCodePrefix: "thingsProtocolScriptDevice"
+	accessNamePrefix: "协议管理"
+	accessGroup:      "设备自定义"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc (
+		summary:    "新增协议脚本设备"
+		description: "为产品或设备绑定协议脚本，设置触发源（产品级/设备级）、脚本ID和执行优先级。设备消息按优先级顺序执行绑定的脚本。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script/device"
+		resource: "things/protocol/script/device"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (ProtocolScriptDevice) returns (WithIDStr)
+
+	@doc (
+		summary:    "更新协议脚本设备"
+		description: "修改设备与脚本的绑定关系，可更新脚本ID、优先级、启用状态等。同一设备可绑定多个脚本，优先级决定执行顺序。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script/device"
+		resource: "things/protocol/script/device"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (ProtocolScriptDevice)
+
+	@doc (
+		summary:    "删除协议脚本设备"
+		description: "解除设备与脚本的绑定关系。删除后该设备不再执行此脚本，其他绑定的脚本不受影响。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script/device"
+		resource: "things/protocol/script/device"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithIDStr)
+
+	@doc (
+		summary:    "获取协议脚本设备列表"
+		description: "查询脚本与设备的绑定关系列表，支持按触发源、产品ID、设备名、脚本ID过滤。withScript/withDevice参数可同时返回脚本/设备详情。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script/device"
+		resource: "things/protocol/script/device"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProtocolScriptDeviceGetListReq) returns (ProtocolScriptDeviceGetListResp)
+
+	@doc (
+		summary:    "获取协议脚本设备详情"
+		description: "查询单个脚本设备绑定记录的完整信息，包括绑定配置和关联的脚本、设备信息。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "things/protocol/script/device"
+		resource: "things/protocol/script/device"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithIDStr) returns (ProtocolScriptDevice)
+}
+
+type (
+	ProtocolSyncDeviceReq {
+		Code      string `json:"code"` //  协议code
+		ProductID string `json:"productID"`
+	}
+	ProtocolSyncDeviceResp {
+		DeviceNames []string `json:"deviceNames"` //同步新增的设备ID列表
+	}
+	ProtocolScriptImportReq {
+		ScriptsFile string `json:"scriptsFile"` //协议脚本数据文件的 OSS 地址（ZIP 压缩包）
+	}
+	ProtocolScriptExportReq {
+		IDs []int64 `json:"ids,string,optional"`
+	}
+	ProtocolScriptExportResp {
+		ScriptsFile string `json:"scriptsFile"` //协议脚本数据文件的 OSS 地址（ZIP 压缩包）
+	}
+)
+
+type (
+	ProtocolScriptDevice {
+		TenantCode  string          `json:"tenantCode,optional"` //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+		ID          int64           `json:"id,string,optional"`
+		TriggerSrc  int64           `json:"triggerSrc,optional"` //product:1 device:2
+		ProductID   string          `json:"productID,optional"`
+		DeviceName  string          `json:"deviceName,optional"`
+		ScriptID    int64           `json:"scriptID,string,optional"`
+		Priority    int64           `json:"priority,optional"` //执行优先级
+		Status      int64           `json:"status,optional"` //状态:是否启用
+		CreatedTime int64           `json:"createdTime,string,optional"` //创建时间
+		Script      *ProtocolScript `json:"script,optional"` //只读 脚本信息 withScript传true返回
+		Product     *ProductInfo    `json:"product,optional"` //withDevice时,绑定的是产品返回
+		Device      *DeviceInfo     `json:"device,optional"` //withDevice时,绑定的是设备返回
+	}
+	ProtocolScriptDeviceGetListReq {
+		Page       *PageInfo `json:"page,optional"` //分页信息,只获取一个则不填
+		TriggerSrc int64     `json:"triggerSrc,optional"` //product:1 device:2
+		ProductID  string    `json:"productID,optional"`
+		DeviceName string    `json:"deviceName,optional"`
+		Status     int64     `json:"status,optional"` //状态:是否启用
+		ScriptID   int64     `json:"scriptID,string,optional"`
+		WithScript bool      `json:"withScript,optional"`
+		WithDevice bool      `json:"withDevice,optional"`
+	}
+	ProtocolScriptDeviceGetListResp {
+		List  []*ProtocolScriptDevice `json:"list"` //自定义协议信息
+		Total int64                   `json:"total,optional"` //拥有的总数
+	}
+)
+
+type (
+	ProtocolScriptDebugReq {
+		TriggerDir   int64       `json:"triggerDir"` //1:up 2:down
+		TriggerTimer int64       `json:"triggerTimer"` //收到前处理1:before 2:after
+		Script       string      `json:"script"` //脚本内容
+		Req          *PublishMsg `json:"req"` //请求
+		Resp         *PublishMsg `json:"resp,optional"` //回复
+	}
+	ProtocolScriptDebugResp {
+		Out  *PublishMsg `json:"out"`
+		Logs []string    `json:"logs"`
+	}
+	ProtocolScript {
+		TenantCode    string  `json:"tenantCode,optional"` //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+		ID            int64   `json:"id,string,optional"`
+		Name          string  `json:"name,optional"`
+		Desc          *string `json:"desc,optional"`
+		TriggerDir    int64   `json:"triggerDir,optional"` //1:up 2:down
+		TriggerTimer  int64   `json:"triggerTimer,optional"` //收到前处理1:before 2:after
+		TriggerHandle string  `json:"triggerHandle,optional"` //对应 mqtt topic的第一个 thing ota config 等等
+		TriggerType   string  `json:"triggerType,optional"` // 操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+		Script        string  `json:"script,optional"` //脚本内容
+		Status        int64   `json:"status,optional"` //状态:是否启用
+		CreatedTime   int64   `json:"createdTime,string,optional"` //创建时间
+	}
+	ProtocolScriptGetListReq {
+		Page          *PageInfo `json:"page,optional"` //分页信息,只获取一个则不填
+		Name          string    `json:"name,optional"` //
+		TriggerDir    int64     `json:"triggerDir,optional"` //1:up 2:down
+		TriggerTimer  int64     `json:"triggerTimer,optional"` //收到前处理1:before 2:after
+		TriggerHandle string    `json:"triggerHandle,optional"` //对应 mqtt topic的第一个 thing ota config 等等
+		TriggerType   string    `json:"triggerType,optional"` // 操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+		Status        int64     `json:"status,optional"` //状态:是否启用
+	}
+	ProtocolScriptGetListResp {
+		List []*ProtocolScript `json:"list"` //自定义协议信息
+		PageResp
+	}
+)
+
+type (
+	ProtocolInfo {
+		ID                  int64                  `json:"id,string,optional"`
+		Name                string                 `json:"name,optional"`
+		Code                string                 `json:"code,optional"` //  iThings,iThings-thingsboard,wumei,aliyun,huaweiyun,tuya
+		Type                string                 `json:"type,optional"` //协议类型: 普通设备(默认):normal  音视频:media
+		TransProtocol       string                 `json:"transProtocol,optional"` // 传输协议: mqtt,tcp,udp
+		Desc                string                 `json:"desc,optional"`
+		Endpoints           []string               `json:"endpoints,optional"`
+		EtcdKey             string                 `json:"etcdKey,optional"`
+		IsEnableSyncProduct int64                  `json:"isEnableSyncProduct"` //是否支持主动同步产品信息
+		IsEnableSyncDevice  int64                  `json:"isEnableSyncDevice"` //是否支持主动同步设备信息
+		ConfigFields        []*ProtocolConfigField `json:"configFields,optional"` //配置字段列表,没有可以不传
+		ProductFields       []*ProtocolConfigField `json:"productFields,optional"` //产品级的配置字段列表,没有可以不传
+		DeviceFields        []*ProtocolConfigField `json:"deviceFields,optional"` //设备级的配置字段列表,没有可以不传
+		Image               string                 `json:"image,optional"`       // 镜像地址
+		Version             string                 `json:"version,optional"`     // 镜像版本
+		ContainerPort       int64                  `json:"containerPort,optional"` // 容器端口
+		EnvVars             map[string]string      `json:"envVars,optional"`     // 环境变量
+		IsBuiltin           int64                  `json:"isBuiltin,optional"`   // 是否内置 1:是 2:否
+		DeployStatus        string                 `json:"deployStatus,optional"` // 部署状态: notInstalled/downloaded/running/stopped
+	}
+	ProtocolConfigField {
+		ID           int64             `json:"id,string"`
+		Group        string            `json:"group"`                  // 分组(不传为默认)
+		Key          string            `json:"key"`                    // 配置键名
+		Label        string            `json:"label"`                  // 展示标签
+		IsRequired   bool              `json:"isRequired"`             // 是否必填
+		Sort         int64             `json:"sort"`                   // 排序权重
+		Type         string            `json:"type,optional"`          // 字段类型: string/int/bool/enum/float/text/password
+		DefaultValue string            `json:"defaultValue,optional"`  // 默认值
+		Placeholder  string            `json:"placeholder,optional"`   // 输入提示
+		Mapping      map[string]string `json:"mapping,optional"`       // 枚举映射（type=enum 时有效）
+		Min          string            `json:"min,optional"`           // 最小值（type=int/float 时有效）
+		Max          string            `json:"max,optional"`           // 最大值（type=int/float 时有效）
+	}
+	ProtocolInfoGetListReq {
+		Page          *PageInfo `json:"page,optional"` //分页信息,只获取一个则不填
+		Name          string    `json:"name,optional"` //
+		Code          string    `json:"code,optional"` //
+		Codes         []string  `json:"codes,optional"`
+		Type          string    `json:"type,optional"` //协议类型: 普通设备(默认):normal  音视频:media
+		TransProtocol string    `json:"transProtocol,optional"` // 传输协议: mqtt,tcp,udp
+	}
+	ProtocolInfoGetListResp {
+		List  []*ProtocolInfo `json:"list"` //自定义协议信息
+		Total int64           `json:"total,optional"` //拥有的总数
+	}
+)
+
+type (
+	ProtocolService {
+		ID          int64  `json:"id,string"`
+		Code        string `json:"code"` //协议code
+		IP          string `json:"ip"` // 协议服务的ip地址
+		Port        int64  `json:"port"` //监听的端口,如果没有填0即可
+		Status      int64  `json:"status"` //服务状态
+		UpdatedTime int64  `json:"updatedTime"` //更新时间
+		CreatedTime int64  `json:"createdTime,string"` //首次加入时间
+	}
+	ProtocolServiceGetListReq {
+		Page *PageInfo `json:"page,optional"` //分页信息,只获取一个则不填
+		Code string    `json:"code"` //
+	}
+	ProtocolServiceGetListResp {
+		List  []*ProtocolService `json:"list"` //自定义协议信息
+		Total int64              `json:"total,optional"` //拥有的总数
+	}
+	ProtocolImagePullReq {
+		ProtocolID int64 `json:"protocolID,string"`
+	}
+	ProtocolContainerInstallReq {
+		ProtocolID int64  `json:"protocolID,string"`
+		Version    string `json:"version,optional"`
+	}
+	ProtocolContainerOperateReq {
+		ProtocolID int64 `json:"protocolID,string"`
+	}
+	ProtocolContainerUninstallReq {
+		ProtocolID  int64 `json:"protocolID,string"`
+		RemoveImage bool  `json:"removeImage,optional"`
+	}
+	ProtocolContainerStatusResp {
+		Status      string `json:"status"`
+		ContainerID string `json:"containerID,optional"`
+		Image       string `json:"image,optional"`
+	}
+)
+
+type (
+	ProtocolConfig {
+		ID           int64             `json:"id,string,optional"`
+		ProtocolID   int64             `json:"protocolID,string,optional"`   // 关联协议ID
+		ProtocolCode string            `json:"protocolCode,optional"`        // 关联协议Code
+		Config       map[string]string `json:"config,optional"`              // 配置键值对
+		Desc         *string           `json:"desc,optional"`                // 描述（可清空）
+		CreatedTime  int64             `json:"createdTime,string,optional"`  // 创建时间
+		UpdatedTime  int64             `json:"updatedTime,string,optional"`  // 更新时间
+	}
+	ProtocolConfigGetListReq {
+		Page         *PageInfo `json:"page,optional"`         // 分页信息
+		ProtocolID   int64     `json:"protocolID,string,optional"`   // 按协议ID过滤
+		ProtocolCode string    `json:"protocolCode,optional"`        // 按协议Code过滤
+	}
+	ProtocolConfigGetListResp {
+		List  []*ProtocolConfig `json:"list"`              // 协议配置列表
+		Total int64             `json:"total,optional"`    // 总数
+	}
+)

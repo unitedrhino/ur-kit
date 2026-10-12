@@ -1,0 +1,101 @@
+info(
+	title: "IM 消息管理"
+	desc: "即时通讯消息的发送、撤回、已读与历史查询"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/chatlog
+	prefix: /api/v1/im
+	accessCodePrefix: "imChatlog"
+	accessNamePrefix: "IM消息"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "发送消息"
+		description: "业务说明：向会话发送消息，支持文本、图片等消息类型，clientMsgId 用于客户端幂等去重。单聊会话先按好友关系放行，非好友回退共享项目校验。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler send
+	post /message/send (ImSendMessageReq) returns (ImSendMessageResp)
+
+	@doc(
+		summary: "撤回消息"
+		description: "业务说明：撤回本人在会话中已发送的消息。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler recall
+	post /message/recall (ImRecallReq)
+
+	@doc(
+		summary: "获取消息列表"
+		description: "业务说明：分页查询会话内的历史消息，按序号倒序返回。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /chatlog/get-list (ImMessageGetListReq) returns (ImMessageGetListResp)
+
+	@doc(
+		summary: "搜索聊天记录"
+		description: "业务说明：按关键词搜索当前用户可见的聊天记录，可限定单个会话。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler search
+	post /chatlog/search (ImMessageSearchReq) returns (ImMessageGetListResp)
+
+	@doc(
+		summary: "增量同步消息"
+		description: "业务说明：客户端以本地最大消息序号为游标，增量拉取会话内其后的消息，用于断线重连补齐与后台对账。只读语义，不触发已读、不清未读。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler sync
+	post /chatlog/sync (ImMessageSyncReq) returns (ImMessageSyncResp)
+
+	@doc(
+		summary: "未读数对账"
+		description: "业务说明：按已读游标重算当前用户在会话内的未读数并持久化，用于修复撤回不回扣等造成的未读漂移。已撤回与系统消息不计入未读。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler recalcUnread
+	post /chatlog/recalc-unread (ImRecalcUnreadReq) returns (ImRecalcUnreadResp)
+
+	@doc(
+		summary: "标记已读"
+		description: "业务说明：标记会话消息已读，同步更新会话未读数并向相关用户推送已读状态。"
+		authType: "all"
+		group: "im/chatlog"
+		resource: "im/chatlog"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler markRead
+	post /chatlog/mark-read (ImMarkReadReq)
+}

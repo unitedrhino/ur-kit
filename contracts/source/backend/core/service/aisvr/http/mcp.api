@@ -1,0 +1,206 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-MCP管理"
+	desc:    "AI MCP Service Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- MCP 类型定义 ----
+
+type McpServiceInfo {
+	ID          int64  `json:"id,optional"`          // MCP服务ID
+	tenantCode  string `json:"tenantCode,optional"`  // 租户编码
+	name        string `json:"name"`                  // 服务名称
+	description string `json:"description,optional"` // 服务描述
+	endpoint    string `json:"endpoint"`              // 服务端点URL
+	authType    string `json:"authType,optional"`    // 认证类型
+	authConfig  string `json:"authConfig,optional"`  // 认证配置（JSON字符串）
+	tools       string `json:"tools,optional"`        // 工具列表（JSON字符串）
+	enabled     bool   `json:"enabled,optional"`      // 是否启用
+}
+
+type McpServiceGetListReq {
+	tenantCode string   `json:"tenantCode,optional"` // 租户编码
+	nameLike   string   `json:"nameLike,optional"`   // 名称模糊搜索
+	enabled    bool     `json:"enabled,optional"`    // 启用状态过滤
+	page       PageInfo `json:"page,optional"`        // 分页信息
+}
+
+type McpServiceGetListResp {
+	list  []McpServiceInfo `json:"list"`  // MCP服务列表
+	total int64            `json:"total"` // 总数
+}
+
+type McpServiceGetOneReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // MCP服务ID
+}
+
+type McpServiceDeleteReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // MCP服务ID
+}
+
+type McpRefreshToolsReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // MCP服务ID
+}
+
+type McpRefreshToolsResp {
+	tools string `json:"tools"` // 刷新后的工具列表（JSON字符串）
+}
+
+type McpResolveReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	name       string `json:"name"`                 // 服务名称
+}
+
+type McpResolveResp {
+	endpoint   string `json:"endpoint"`            // 服务端点URL
+	authType   string `json:"authType,optional"`  // 认证类型
+	authConfig string `json:"authConfig,optional"` // 认证配置
+	tools      string `json:"tools,optional"`       // 工具列表
+	enabled    bool   `json:"enabled,optional"`     // 是否启用
+}
+
+type McpToolsReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	sessionID  string `json:"sessionID"`            // 会话ID
+}
+
+type McpToolsResp {
+	tools       map[string]interface{} `json:"tools"`     // 工具列表
+	totalCount  int64                  `json:"totalCount"` // 工具总数
+	timestampMs int64                  `json:"timestamp"`  // 时间戳
+}
+
+// ---- MCP 服务管理 ----
+
+@server (
+	group:            ai/mcp/service
+	prefix:           /api/v1/ai/mcp/service
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiMcpManage"
+	accessNamePrefix: "MCP服务管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建MCP服务"
+		description: "业务说明：注册新的MCP（Model Context Protocol）服务端点，定义服务名称、描述、端点URL、认证配置等。MCP服务提供外部工具能力，助手绑定MCP服务后可获得其工具列表，扩展AI的交互能力。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "create"
+		group: "ai/mcp/service"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (McpServiceInfo) returns (WithID)
+
+	@doc(
+		summary: "更新MCP服务"
+		description: "业务说明：修改已注册的MCP服务配置，支持更新名称、描述、端点URL、认证配置、启用状态等。部分更新，空值字段不修改。更新后需要刷新工具列表才能同步最新的工具定义。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "update"
+		group: "ai/mcp/service"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (McpServiceInfo)
+
+	@doc(
+		summary: "删除MCP服务"
+		description: "业务说明：删除指定的MCP服务注册记录。删除前需检查是否有助手组或助手正在使用该MCP服务，如有则需先解除绑定后再删除。删除后相关工具调用将失败。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "delete"
+		group: "ai/mcp/service"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (McpServiceDeleteReq)
+
+	@doc(
+		summary: "获取MCP服务详情"
+		description: "业务说明：根据MCP服务ID查询完整的服务配置信息，包括端点URL、认证类型、认证配置、工具列表等。用于MCP服务编辑回显、配置查看、工具调试等场景。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "view"
+		group: "ai/mcp/service"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (McpServiceGetOneReq) returns (McpServiceInfo)
+
+	@doc(
+		summary: "获取MCP服务列表"
+		description: "业务说明：分页查询MCP服务列表，支持按租户、名称模糊搜索、启用状态过滤。用于MCP服务管理页面、助手组选择MCP服务等场景。返回结果包含基本信息，不含详细工具定义。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "view"
+		group: "ai/mcp/service"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (McpServiceGetListReq) returns (McpServiceGetListResp)
+
+	@doc(
+		summary: "刷新MCP服务工具列表"
+		description: "业务说明：重新从MCP服务端点获取最新的工具定义列表，同步到本地数据库。用于MCP服务升级后更新工具、初次绑定MCP服务时获取工具等场景。返回刷新后的工具列表JSON。"
+		authType: "admin"
+		resource: "ai/mcp/service"
+		action: "sync"
+		group: "ai/mcp/service"
+		recordLogMode: "2"
+	)
+	@handler refreshTools
+	post /refresh-tools (McpRefreshToolsReq) returns (McpRefreshToolsResp)
+}
+
+// ---- MCP 解析 ----
+
+@server (
+	group:            ai/mcp/resolve
+	prefix:           /api/v1/ai/mcp/resolve
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "all"
+)
+service ai {
+	@doc(
+		summary: "解析MCP服务端点"
+		description: "业务说明：根据MCP服务名称查询其端点URL和认证信息，用于客户端建立MCP连接。返回端点地址、认证类型、认证配置、可用工具列表等。用于助手初始化MCP连接前的预查询。"
+		authType: "all"
+		resource: "ai/mcp/resolve"
+		action: "view"
+		group: "ai/mcp/resolve"
+		recordLogMode: "1"
+	)
+	@handler resolve
+	post /resolve (McpResolveReq) returns (McpResolveResp)
+}
+
+// ---- MCP 工具查询 ----
+
+@server (
+	group:            ai/mcp/tools
+	prefix:           /api/v1/ai/mcp/tools
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "all"
+)
+service ai {
+	@doc(
+		summary: "获取会话MCP工具列表"
+		description: "业务说明：查询指定会话上下文中已加载的MCP工具定义列表，包含工具名称、参数定义、描述等。用于前端展示工具面板、调试工具调用、验证工具可用性等场景。返回工具总数和时间戳。"
+		authType: "all"
+		resource: "ai/mcp/tools"
+		action: "view"
+		group: "ai/mcp/tools"
+		recordLogMode: "1"
+	)
+	@handler getTools
+	post /get-tools (McpToolsReq) returns (McpToolsResp)
+}

@@ -1,0 +1,75 @@
+info(
+    title: "设备管理模块"
+    desc: "设备管理模块"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+
+@server(
+    group: things/device/version
+    prefix: /api/v1/things/device/version
+//    accessCode: "thingsDevice"
+//    accessName: "设备信息"
+//    accessGroup: "设备管理"
+//    accessDesc: "管理设备"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "获取设备模块版本列表"
+        description: "查询设备的模块版本信息列表。模块版本用于记录设备各个模块（如固件、软件、硬件）的版本号，便于OTA升级管理和版本追溯。支持按产品、模块编码筛选。"
+        isNeedAuth: "false"
+        isAuthTenant: "true"
+        authType: "admin"
+        group: "things/device/version"
+        resource: "things/device/version"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (DeviceModuleVersionGetListReq) returns (DeviceModuleVersionGetListResp)
+    @doc(
+        summary: "获取设备模块版本详情"
+        description: "获取设备单个模块的版本详情信息。可通过ID、产品+模块编码等方式查询。用于查看特定模块的版本号、版本名称等详细信息。"
+        isNeedAuth: "false"
+        isAuthTenant: "true"
+        authType: "admin"
+        group: "things/device/version"
+        resource: "things/device/version"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (DeviceModuleVersionGetOneReq) returns (DeviceModuleVersion)
+}
+
+type (
+    DeviceModuleVersion  {
+        ID    int64  `json:"id,string,optional,omitempty"`
+        ProductID string `json:"productID,optional"`                                              //产品id 只读
+        ProductName string `json:"productName,optional"`
+        ModuleCode int64    `json:"moduleCode,optional"`
+        Version string `json:"version,optional"`
+    }
+    DeviceModuleVersionGetListReq {
+        Page *PageInfo `json:"page,optional"`             //分页信息 只获取一个则不填
+        ProductID string `json:"productID,optional"`                                              //产品id 只读
+        ProductName string `json:"productName,optional"`
+        ModuleCode int64    `json:"moduleCode,optional"`
+    }
+    DeviceModuleVersionGetListResp{
+        List []*DeviceModuleVersion `json:"list"`    //设备信息
+        PageResp
+    }
+
+    DeviceModuleVersionGetOneReq{
+        ID    int64  `json:"id,string,optional,omitempty"`
+        ProductID string `json:"productID,optional"`                                              //产品id 只读
+        ProductName string `json:"productName,optional"`
+        ModuleCode int64    `json:"moduleCode,optional"`
+    }
+)

@@ -1,0 +1,82 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡套餐余量提醒"
+    desc: "物联卡套餐余量提醒信息查询与手动同步"
+    version: "v1"
+)
+
+type (
+    CardUsageReminder {
+        ID           int64   `json:"id,string"`
+        Iccid        string  `json:"iccid"`
+        OfferingID   string  `json:"offeringId"`
+        OfferingName string  `json:"offeringName"`
+        ApnName      string  `json:"apnName,optional"`
+        TotalAmount  float64 `json:"totalAmount"`
+        UseAmount    float64 `json:"useAmount"`
+        RemainAmount float64 `json:"remainAmount"`
+        Percentage   float64 `json:"percentage"`
+        CreateDate   string  `json:"createDate"`
+        UpdateDate   string  `json:"updateDate"`
+    }
+
+    CardUsageReminderGetListReq {
+        PageInfo
+        Iccid      string `json:"iccid,optional"`
+        OfferingID string `json:"offeringId,optional"`
+    }
+
+    CardUsageReminderGetListResp {
+        PageResp
+        List []*CardUsageReminder `json:"list"`
+    }
+
+    CardUsageReminderSyncReq {
+        Iccid string `json:"iccid"`
+    }
+)
+
+@server(
+    group: card/usageReminder
+    prefix: /api/v1/things/card/usage-reminder
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取套餐余量提醒列表"
+        description: "业务说明：分页查询物联卡套餐余量提醒"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardUsageReminderGetListReq) returns (CardUsageReminderGetListResp)
+
+    @doc(
+        summary: "获取套餐余量提醒详情"
+        description: "业务说明：按租户和主键查询单条套餐余量快照"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardUsageReminder)
+
+    @doc(
+        summary: "手动同步套餐余量"
+        description: "业务说明：按 ICCID 手动同步套餐余量提醒"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler sync
+    post /sync (CardUsageReminderSyncReq) returns (WithCode)
+}

@@ -1,0 +1,54 @@
+syntax = "v1"
+
+// ChatExportCreateReq 指向已保存的快照，模型不能指定路径或执行命令。
+type ChatExportCreateReq {
+ resultID string `json:"resultID"` // 不可变结果标识
+ format string `json:"format"` // xlsx 或 pdf
+ requestID string `json:"requestID"` // 幂等请求标识
+}
+
+// ChatExportReq 查询或重试已创建的任务。
+type ChatExportReq {
+ taskID string `json:"taskID"` // 导出任务标识
+}
+
+// ChatExportListReq 用于刷新页面后恢复当前结果的导出任务。
+type ChatExportListReq {
+ resultID string `json:"resultID"` // 已鉴权的结果标识
+}
+
+// ChatExportInfo 仅提供公开状态及长期附件 ID。
+type ChatExportInfo {
+ taskID string `json:"taskID"` // 导出任务标识
+ resultID string `json:"resultID"` // 原始快照
+ format string `json:"format"` // 文件格式
+ status string `json:"status"` // pending、generating、uploading、success、failed
+ artifactID string `json:"artifactID"` // 成功后可用的附件 ID
+ errorCode string `json:"errorCode"` // 不包含敏感信息的错误码
+}
+
+// ChatExportListResp 返回最近二十次导出，所有任务独立鉴权。
+type ChatExportListResp {
+ list []ChatExportInfo `json:"list"` // 当前结果的最近导出
+}
+
+@server (
+ group: ai/chatExport
+ prefix: /api/v1/ai/chat/export
+ middleware: CheckTokenWare,InitCtxsWare
+ defaultAuthType: "all"
+)
+service ai {
+ @doc(summary: "创建对话导出任务" description: "业务说明：鉴权不可变结果后排队，由独立 sandbox 生成 Excel 或 PDF 并上传私有 OSS。" authType: "all" resource: "ai/chat" action: "export" group: "ai/chat" recordLogMode: "3")
+ @handler create
+ post /create (ChatExportCreateReq) returns (ChatExportInfo)
+ @doc(summary: "查询对话导出任务" description: "业务说明：按当前用户和应用范围读取导出状态，成功时返回长期附件标识。" authType: "all" resource: "ai/chat" action: "view" group: "ai/chat" recordLogMode: "1")
+ @handler getOne
+ post /get-one (ChatExportReq) returns (ChatExportInfo)
+ @doc(summary: "重试对话导出任务" description: "业务说明：重新核验原始快照权限，仅将失败任务重新排队。" authType: "all" resource: "ai/chat" action: "export" group: "ai/chat" recordLogMode: "3")
+ @handler retry
+ post /retry (ChatExportReq) returns (ChatExportInfo)
+ @doc(summary: "恢复对话导出任务" description: "业务说明：返回当前结果最近二十次导出，刷新页面后可恢复文件卡片与任务状态。" authType: "all" resource: "ai/chat" action: "view" group: "ai/chat" recordLogMode: "1")
+ @handler getList
+ post /get-list (ChatExportListReq) returns (ChatExportListResp)
+}

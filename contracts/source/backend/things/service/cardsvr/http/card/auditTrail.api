@@ -1,0 +1,73 @@
+syntax = "v1"
+
+info(
+    title: "物联卡上游变更记录"
+    desc: "联通等上游设备变更记录只读查询"
+    version: "v1"
+)
+
+type (
+    CardApiAuditTrail {
+        ID               int64  `json:"id,string"`
+        Iccid            string `json:"iccid"`
+        RouteCode        string `json:"routeCode"`
+        SourceType       string `json:"sourceType"`
+        FieldName        string `json:"fieldName"`
+        EventType        string `json:"eventType,optional"`
+        ValueBefore      string `json:"valueBefore,optional"`
+        ValueAfter       string `json:"valueAfter,optional"`
+        EventTime        string `json:"eventTime"`
+        UpstreamTable    string `json:"upstreamTable,optional"`
+        UpstreamState    string `json:"upstreamState,optional"`
+        UpstreamOperator string `json:"upstreamOperator,optional"`
+        DelegatedUser    string `json:"delegatedUser,optional"`
+        SyncBatchNo      string `json:"syncBatchNo,optional"`
+        UpstreamSummary  string `json:"upstreamSummary,optional"`
+    }
+
+    CardApiAuditTrailGetListReq {
+        PageInfo
+        Iccid      string `json:"iccid,optional"`
+        RouteID    int64  `json:"routeId,string,optional"`
+        SourceType string `json:"sourceType,optional"`
+        EventType  string `json:"eventType,optional"`
+        StartTime  string `json:"startTime,optional"`
+        EndTime    string `json:"endTime,optional"`
+    }
+
+    CardApiAuditTrailGetListResp {
+        PageResp
+        List []*CardApiAuditTrail `json:"list"`
+    }
+)
+
+@server(
+    group: card/auditTrail
+    prefix: /api/v1/things/card/audit-trail
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取上游变更记录列表"
+        description: "业务说明：分页查询已同步的上游设备变更记录，支持按卡号、通道、变更类型与时间范围筛选"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardApiAuditTrailGetListReq) returns (CardApiAuditTrailGetListResp)
+
+    @doc(
+        summary: "获取上游变更记录详情"
+        description: "业务说明：按租户和主键查询单条上游变更记录，含上游摘要"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardApiAuditTrail)
+}

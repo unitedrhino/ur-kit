@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@vben/tsconfig/web-app.json",
+  "compilerOptions": {
+    "baseUrl": null,
+    // 与依赖的 bigscreen 包源码口径对齐（其 tsconfig 显式关闭以下三项）：
+    // org-iot-client 通过 @/ 与 @app/ 直接编译 bigscreen 源码（dashboard 嵌入 goview 场景），
+    // 若保持严格口径会对同一批依赖文件按更严规则重复报错
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
+    "paths": {
+      "#/*": ["./src/*"],
+      // 与 vite alias 对齐：@/ 与 @app/ 指向 bigscreen 包源码
+      "@/*": ["../../packages/bigscreen/src/goview/*"],
+      "@app/*": ["../../packages/bigscreen/src/*"],
+      "@app/shared/*": ["../../packages/bigscreen/src/shared/*"],
+      "@app/views/bigscreen/*": ["../../packages/bigscreen/src/views/bigscreen/*"]
+    }
+  },
+  "references": [{ "path": "./tsconfig.node.json" }],
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "src/**/*.vue",
+    // bigscreen 的 goview 全局声明（window.$message 等）与 *.vue 模块 shim，供依赖源码编译时生效
+    "../../packages/bigscreen/src/goview/types/global.d.ts",
+    "../../packages/bigscreen/src/goview/types/shims-vue.d.ts"
+  ]
+}

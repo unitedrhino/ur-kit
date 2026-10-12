@@ -1,0 +1,332 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-对话接口"
+	desc:    "AI Chat HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 对话类型定义 ----
+
+// ContentPart 消息内容片段（支持多模态）
+type ContentPart {
+	artifactID string `json:"artifactID,optional"` // 私有附件 ID；由服务端鉴权后解析，不能用 URL 绕过归属
+	contentType string `json:"type"`                // 内容类型：text / image_url / audio / video_url / file
+	text        string `json:"text,optional"`       // 文本内容（type=text）
+	imageUrl    string `json:"imageUrl,optional"`   // 图片URL（type=image_url）
+	audioData   string `json:"audioData,optional"`  // 音频数据 base64（type=audio）
+	audioFormat string `json:"audioFormat,optional"` // 音频格式：wav/mp3/opus（type=audio）
+	videoUrl    string `json:"videoUrl,optional"`   // 视频URL（type=video_url）
+	fileUrl     string `json:"fileUrl,optional"`    // 文件URL（type=file）
+	fileMime    string `json:"fileMime,optional"`   // 文件MIME类型（type=file）
+	fileName    string `json:"fileName,optional"`   // 文件名（type=file）
+}
+
+// AudioConfig 音频输出配置
+type AudioConfig {
+	format     string `json:"format,optional"`     // 音频格式：opus/mp3/wav，默认 opus
+	sampleRate int    `json:"sampleRate,optional"` // 采样率，默认 24000
+	channels   int    `json:"channels,optional"`   // 声道数，默认 1
+}
+
+// ---- Tool 定义（CopilotKit 式前端工具交互） ----
+
+// ToolParameter 工具参数定义（遵循 JSON Schema 规范，LLM 据此理解参数含义和格式）
+type ToolParameter {
+	paramType   string                   `json:"type"`                  // 参数类型：string / number / boolean / array / object
+	description string                   `json:"description,optional"`  // 参数含义说明，LLM 根据此描述决定如何传参
+	required    bool                     `json:"required,optional"`     // 是否必填参数
+	enum        []string                 `json:"enum,optional"`         // 允许值列表，限定 LLM 只能从这些值中选择
+	properties  map[string]ToolParameter `json:"properties,optional"`   // 嵌套属性定义，仅 type=object 时使用
+	items       *ToolParameter           `json:"items,optional"`        // 数组元素类型定义，仅 type=array 时使用
+}
+
+// ToolDef 前端注册的工具定义（发送给后端，后端合并到 LLM 的 tools 列表中）
+type ToolDef {
+	name            string                   `json:"name"`                     // 工具唯一标识名，LLM 调用时使用此名称，需全局唯一
+	description     string                   `json:"description"`              // 工具功能描述，LLM 根据此描述判断何时该调用此工具
+	parameters      map[string]ToolParameter `json:"parameters,optional"`      // 工具参数定义，key 为参数名
+	available       string                   `json:"available,optional"`       // 可用状态：enabled（默认）/ disabled（LLM 不可见）
+	interactionType string                   `json:"interactionType,optional"` // 交互类型：action（默认，前端直接执行）/ form（需用户填写表单后提交）
+	formSchema      *FormSchema              `json:"formSchema,optional"`      // 表单 Schema（interactionType=form 时必填）
+}
+
+// FormSchema 表单定义（前端据此渲染表单 UI）
+type FormSchema {
+	title       string      `json:"title"`                  // 表单标题
+	description string      `json:"description,optional"`   // 表单说明
+	fields      []FormField `json:"fields"`                 // 表单字段列表
+	submitLabel string      `json:"submitLabel,optional"`   // 提交按钮文字，默认"确认"
+	cancelLabel string      `json:"cancelLabel,optional"`   // 取消按钮文字，默认"取消"
+}
+
+// FormField 表单字段定义
+type FormField {
+	key         string   `json:"key"`                  // 字段标识，对应 ToolDef.Parameters 中的参数名
+	label       string   `json:"label"`                // 字段显示名
+	widgetType  string   `json:"type"`                 // 控件类型：text / textarea / number / select / multiSelect / date / dateTime / switch / slider
+	placeholder string   `json:"placeholder,optional"` // 占位提示文字
+	required    bool     `json:"required,optional"`    // 是否必填
+	defaultVal  string   `json:"default,optional"`     // 默认值
+	options     []Option `json:"options,optional"`     // 选项列表（select / multiSelect 时使用）
+	min         float64  `json:"min,optional"`         // 最小值（number / slider）
+	max         float64  `json:"max,optional"`         // 最大值
+}
+
+// Option 选项定义
+type Option {
+	label string `json:"label"` // 选项显示文字
+	value string `json:"value"` // 选项值
+}
+
+// ToolCall 单个工具调用记录（对应 LLM 返回的一次 function call）
+type ToolCall {
+	id        string `json:"id"`        // 调用唯一标识，用于在后续 tool 角色消息中关联本次调用
+	name      string `json:"name"`      // 被调用的工具名称
+	arguments string `json:"arguments"` // 调用参数，JSON 字符串格式
+}
+
+// ChatMessage 对话消息（扩展支持工具消息）
+type ChatMessage {
+	role       string        `json:"role"`                    // 角色：user / assistant / system / tool
+	contents   []ContentPart `json:"contents"`                // 内容片段列表
+	toolCallID string        `json:"toolCallID,optional"`     // 工具调用唯一标识（role=tool 时必填）
+	toolCalls  []ToolCall    `json:"toolCalls,optional"`      // AI 决定调用的工具列表（role=assistant 时可能有值）
+}
+
+// CheckAvailableResp AI 可用性检测响应
+type CheckAvailableResp {
+	available bool   `json:"available"`         // 是否可用
+	reason    string `json:"reason,optional"`   // 不可用原因（调试用）
+}
+
+// UserCompletionsReq 用户 AI 对话请求（无需指定 agentID，自动查找专属 Clone）
+// ChatResultContext 引用某个内容块继续提问，选择条件只作为业务查询输入。
+type ChatResultContext {
+ resultID string `json:"resultID"` // 已保存结果
+ blockID string `json:"blockID"` // 已保存内容块
+ selection string `json:"selection,optional"` // JSON 对象形式的当前交互条件
+}
+
+type UserCompletionsReq {
+ resultContext *ChatResultContext `json:"resultContext,optional"` // 继续提问的结果引用
+	sessionID        string        `json:"sessionID,optional"`        // 会话ID（为空自动生成）
+	messages         []ChatMessage `json:"messages"`                  // 对话消息列表
+	currentAppID     string        `json:"currentAppID,optional"`     // 当前页面所属应用ID
+	currentAppName   string        `json:"currentAppName,optional"`   // 当前页面所属应用名称
+	currentRoute     string        `json:"currentRoute,optional"`     // 当前前端路由
+	assistantCode    string        `json:"assistantCode,optional"`    // 助手编码（如 tool_assistant），指定时优先使用该 Agent
+	stream           bool          `json:"stream,optional"`           // 是否流式返回（SSE）
+	outputModalities []string      `json:"outputModalities,optional"` // 输出模态：text / audio，默认 ["text"]
+	tools            []ToolDef     `json:"tools,optional"`            // 前端注册的工具定义列表
+	toolID           int64         `json:"toolID,optional"`           // 工具ID（用于工具编辑场景，注入文件操作工具）
+}
+
+// ToolDevCompletionsReq 工具编辑对话请求（专用于 AI 工具开发场景）
+type ToolDevCompletionsReq {
+	sessionID  string        `json:"sessionID,optional"`  // 会话ID（为空自动生成）
+	messages   []ChatMessage `json:"messages"`              // 对话消息列表
+	toolID     int64         `json:"toolID,optional"`       // 工具ID（首次需传，后续可从 session 恢复）
+	cloneID    int64         `json:"cloneID,string,optional"` // 项目级分身ID；字符串避免浏览器精度丢失
+	stream     bool          `json:"stream,optional"`       // 是否流式返回（SSE）
+}
+
+// ChatCompletionsReq 文字对话请求
+type ChatCompletionsReq {
+ resultContext *ChatResultContext `json:"resultContext,optional"` // 继续提问的结果引用
+	agentID          int64         `json:"agentID,optional"`          // 助手ID（0=裸LLM调用，不注入任何上下文）
+	cloneID          int64         `json:"cloneID,optional"`          // 分身ID（agentID=0 时忽略）
+	sessionID        string        `json:"sessionID,optional"`        // 会话ID（agentID=0 时忽略）
+	messages         []ChatMessage `json:"messages"`                  // 对话消息列表
+	modelType        string        `json:"modelType,optional"`        // LLM 模型类型（agentID=0 时生效，默认 "small"）
+	currentAppID     string        `json:"currentAppID,optional"`     // 当前页面所属应用ID（agentID=0 时忽略）
+	currentAppName   string        `json:"currentAppName,optional"`   // 当前页面所属应用名称（agentID=0 时忽略）
+	currentRoute     string        `json:"currentRoute,optional"`     // 当前前端路由（agentID=0 时忽略）
+	stream           bool          `json:"stream,optional"`           // 是否流式返回（SSE）
+	outputModalities []string      `json:"outputModalities,optional"` // 输出模态：text / audio，默认 ["text"]
+	audioConfig      *AudioConfig  `json:"audioConfig,optional"`      // 音频输出配置（outputModalities 含 audio 时生效）
+	tools            []ToolDef     `json:"tools,optional"`            // 前端注册的工具定义列表（agentID=0 时忽略）
+	toolID           int64         `json:"toolID,optional"`           // 工具ID（agentID=0 时忽略）
+	cloneAutoResolved bool        `json:"cloneAutoResolved,optional"` // 分身由服务端按 assistantCode 自动解析（内部透传，客户端无需传）
+}
+
+// ChatCompletionsResp 文字对话响应
+type ChatCompletionsResp {
+	interactionResults []InteractionReference `json:"interactionResults,optional"` // 已持久化结果引用
+
+	sessionID   string        `json:"sessionID"`             // 会话ID
+	content     string        `json:"content"`               // AI 回复文本内容
+	role        string        `json:"role"`                  // 角色（assistant）
+	contents    []ContentPart `json:"contents,optional"`     // 多模态回复内容（含音频等）
+	audioData   string        `json:"audioData,optional"`    // 音频数据 base64（outputModalities 含 audio 时返回）
+	audioFormat string        `json:"audioFormat,optional"`  // 音频格式
+	rewrittenQuery string `json:"rewrittenQuery,optional"` // 检索改写后的问题
+	matchedDocuments []KnowledgeSearchDocument `json:"matchedDocuments,optional"` // 命中文档聚合结果
+	citations   []KnowledgeSearchHit `json:"citations,optional"` // 知识库引用切片
+	expandedCitations []KnowledgeSearchHit `json:"expandedCitations,optional"` // 关联补充引用切片
+	answerPolicy string `json:"answerPolicy,optional"` // 回答策略
+	confidenceBand string `json:"confidenceBand,optional"` // 命中置信度
+}
+
+// CheckAvailableReqBody 可用性检测请求体（空）
+type CheckAvailableReqBody {}
+
+// ToolResultReq 前端 Tool 执行结果回传
+type ToolResultReq {
+	sessionID  string `json:"sessionID"`             // 当前会话ID
+	toolCallID string `json:"toolCallID"`             // 工具调用ID，对应 SSE tool_call_execute 事件中的 toolCallID
+	result     string `json:"result"`                 // 工具执行结果，JSON 字符串格式
+	error      string `json:"error,optional"`         // 执行失败时的错误信息
+}
+
+// ToolResultResp 工具结果回传响应
+type ToolResultResp {
+	sessionID string `json:"sessionID"` // 当前会话ID
+	status    string `json:"status"`    // 回传状态：accepted（已接收）/ expired（已过期）
+}
+
+// AvailableToolsResp 后端可用工具列表响应
+type AvailableToolsResp {
+	tools []ToolDef `json:"tools"` // 后端已注册的所有可用工具定义
+}
+
+// LlmDebugReq LLM调试请求
+// 复用已有的 ChatMessage/ContentPart，jsonData 为 JSON 字符串（前端存储格式）
+type LlmDebugReq {
+	cfgType          string        `json:"cfgType"`                   // 配置类型，当前仅支持 llm
+	jsonData         string        `json:"jsonData"`                  // 模型配置 JSON 字符串
+	messages         []ChatMessage `json:"messages"`                  // 调试消息（复用现有 ChatMessage）
+	outputModalities []string      `json:"outputModalities,optional"` // 输出模态
+}
+
+// LlmDebugResp LLM调试响应
+// 与前端现有期望完全兼容：content / raw / audioData / audioFormat
+type LlmDebugResp {
+	content     string `json:"content"`               // AI 回复文本
+	raw         string `json:"raw,optional"`          // 原始回复（调试用，v1 与 content 相同）
+	audioData   string `json:"audioData,optional"`    // 音频数据 base64（预留）
+	audioFormat string `json:"audioFormat,optional"`  // 音频格式（预留）
+}
+
+// EmbeddingDebugReq Embedding 调试请求
+// 传入 embedding 配置的 jsonData 和待编码文本，后端直接创建 provider 进行真实调用
+type EmbeddingDebugReq {
+	jsonData string `json:"jsonData"`      // 模型配置 JSON 字符串
+	text     string `json:"text,optional"`  // 待编码文本（可选，与 image 至少传一个）
+	image    string `json:"image,optional"` // 待编码图片 URL（可选，仅 dashscope 协议支持）
+}
+
+// EmbeddingDebugResp Embedding 调试响应
+type EmbeddingDebugResp {
+	dimension int64     `json:"dimension"`           // 向量维度
+	preview   []float32 `json:"preview"`             // 前 10 个向量值（调试用）
+	model     string    `json:"model,optional"`      // 实际使用的模型名称
+	usage     int64     `json:"usage,optional"`      // token 消耗数
+}
+
+// ---- 对话服务定义 ----
+
+@server (
+	group:            ai/chat
+	prefix:           /api/v1/ai
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "all"
+)
+service ai {
+	@doc(
+		summary: "检测 AI 对话功能是否可用"
+		description: "业务说明：检查当前用户/租户是否具备AI对话能力，验证助手配置完整性（LLM/TTS/ASR配置是否存在且启用）。用于前端在发起对话前预检，避免用户发起对话后才发现服务不可用。返回available状态及不可用原因。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "view"
+		group: "ai/chat"
+		recordLogMode: "1"
+	)
+	@handler checkAvailable
+	post /chat/check-available (CheckAvailableReqBody) returns (CheckAvailableResp)
+
+	@doc(
+		summary: "文字对话（指定 agentID）"
+		description: "业务说明：向指定的AI助手发起文字对话请求，支持多轮对话、流式响应（SSE）、工具调用。传入历史消息列表，AI根据配置生成回复。可指定cloneID启用分身记忆，sessionID用于会话追踪。支持多模态输入（文本/图片/音频/文件）。agentID=0时为裸LLM调用模式，不注入任何上下文（Agent提示词、Skill、知识库、记忆等均跳过），不记录会话，可通过modelType指定LLM模型类型（默认small），适用于urcli、外部代码调用、调试场景。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "create"
+		group: "ai/chat"
+		recordLogMode: "2"
+	)
+	@handler chatCompletions
+	post /chat/completions (ChatCompletionsReq) returns (ChatCompletionsResp)
+
+	@doc(
+		summary: "用户 AI 对话（自动查找/创建专属 Clone）"
+		description: "业务说明：用户级对话接口，无需指定agentID，系统根据用户绑定的助手组自动查找专属分身。如果没有分身则自动创建。简化前端调用，用户直接发消息即可，适合移动端、嵌入式对话场景。支持流式响应和工具调用。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "create"
+		group: "ai/chat"
+		recordLogMode: "2"
+	)
+	@handler userCompletions
+	post /user/completions (UserCompletionsReq) returns (ChatCompletionsResp)
+
+	@doc(
+		summary: "工具编辑 AI 对话（自动绑定 tool_assistant）"
+		description: "业务说明：工具编辑专用对话接口，后端自动绑定 assistantCode=tool_assistant，无需前端传递。用于 AI 辅助编写 executor.js、readme.md、manifest.json。支持流式响应和文件操作工具。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "create"
+		group: "ai/chat"
+		recordLogMode: "2"
+	)
+	@handler toolDevCompletions
+	post /tool-dev/completions (ToolDevCompletionsReq) returns (ChatCompletionsResp)
+
+	@doc(
+		summary: "前端 Tool 执行结果回传"
+		description: "业务说明：前端执行完工具【如表单填写、UI交互】后，将执行结果回传给后端，后端将其注入到对话上下文，让AI继续处理。对应SSE事件tool_call_execute中的toolCallID。超时未回传的会话会被标记为expired。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "update"
+		group: "ai/chat"
+		recordLogMode: "2"
+	)
+	@handler toolResult
+	post /chat/tool-result (ToolResultReq) returns (ToolResultResp)
+
+	@doc(
+		summary: "获取当前会话可用的后端工具列表"
+		description: "业务说明：查询当前会话上下文中可用的MCP工具和后端注册工具定义，用于前端展示工具面板、调试工具调用等。返回工具名称、参数定义、交互类型等信息，供前端理解工具用途并正确回传执行结果。"
+		authType: "all"
+		resource: "ai/chat"
+		action: "view"
+		group: "ai/chat"
+		recordLogMode: "1"
+	)
+	@handler getAvailableTools
+	post /chat/available-tools (ChatCompletionsReq) returns (AvailableToolsResp)
+
+	@doc(
+		summary: "LLM配置调试"
+		description: "业务说明：使用前端传入的临时 LLM 配置直接发起一次真实调用，验证模型连通性和参数格式。不读取数据库配置，不创建会话，仅返回本轮结果。用于模型配置管理页面的调试功能。"
+		authType: "platform"
+		resource: "ai/chat"
+		action: "view"
+		group: "ai/chat"
+		recordLogMode: "1"
+	)
+	@handler llmDebug
+	post /llm/debug (LlmDebugReq) returns (LlmDebugResp)
+
+	@doc(
+		summary: "Embedding配置调试"
+		description: "业务说明：使用前端传入的临时 Embedding 配置直接发起一次真实调用，验证模型连通性和参数格式。传入待编码文本，返回向量维度、前10个预览值和 token 消耗。不读取数据库配置，不创建会话，仅返回本轮结果。用于模型配置管理页面的调试功能。"
+		authType: "platform"
+		resource: "ai/chat"
+		action: "view"
+		group: "ai/chat"
+		recordLogMode: "1"
+	)
+	@handler embeddingDebug
+	post /embedding/debug (EmbeddingDebugReq) returns (EmbeddingDebugResp)
+}

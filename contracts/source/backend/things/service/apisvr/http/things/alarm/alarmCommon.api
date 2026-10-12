@@ -1,0 +1,292 @@
+info (
+	title:   "告警V2公共结构体"
+	desc:    "告警V2公共结构体"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+
+
+// 告警目标
+type AlarmTarget {
+	SelectType    string               `json:"selectType,optional"`    // all / fixed / area / areaWithChildren / group
+	CategoryID    string               `json:"categoryID,optional"`    // 产品品类ID
+	ProductID     string               `json:"productID,optional"`     // 产品ID
+	Devices       []*AlarmTargetDevice `json:"devices,optional"`       // 指定设备列表
+	Areas         []int64              `json:"areas,optional"`         // 区域ID列表
+	Groups        []int64              `json:"groups,optional"`        // 分组ID列表
+}
+
+// 告警目标设备
+type AlarmTargetDevice {
+	ProductID string `json:"productID,optional"` // 产品ID
+	Name      string `json:"name,optional"`      // 设备名
+	Alias     string `json:"alias,optional"`     // 设备别名（只读）
+}
+
+// 触发条件根节点
+type AlarmIf {
+	Triggers []*AlarmTrigger `json:"triggers,optional"` // 触发器列表
+}
+
+// 触发器
+type AlarmTrigger {
+	Id           int64             `json:"id,string,optional"`     // 前端稳定标识
+	Type         string            `json:"type,optional"`          // and / or
+	Level        string            `json:"level,optional"`         // remind / minor / major / critical
+	TemplateID   int64             `json:"templateID,string,optional"` // 关联条件模板ID
+	TemplateName string            `json:"templateName,optional"`  // 模板名称（只读）
+	Criteria     []*AlarmCriterion `json:"criteria,optional"`      // 自定义条件
+}
+
+// 判定条件
+type AlarmCriterion {
+	Id               int64                           `json:"id,string,optional"`          // 前端稳定标识
+	Type             string                          `json:"type,optional"`               // plain / duration / kOfN / rollingAggregate / frequency
+	Order            int64                           `json:"order,optional"`              // 顺序
+	Plain            *AlarmPlainCriterion            `json:"plain,optional"`              // 普通条件
+	Duration         *AlarmDurationCriterion         `json:"duration,optional"`           // 持续条件
+	KOfN             *AlarmKOfNCriterion             `json:"kOfN,optional"`               // k/n条件
+	RollingAggregate *AlarmRollingAggregateCriterion `json:"rollingAggregate,optional"`   // 滚动聚合条件
+	Frequency        *AlarmFrequencyCriterion        `json:"frequency,optional"`          // 频率条件
+}
+
+// 叶子条件
+type AlarmLeafCondition {
+	Id              int64        `json:"id,string,optional"`      // 叶子稳定标识，用于跨周期状态隔离
+	SourceType      string       `json:"sourceType,optional"`      // property / event / online / action
+	DataID          string       `json:"dataID,optional"`          // 物模型参数标识
+	Compare         *AlarmCompare `json:"compare,optional"`         // 比较配置
+	Period          int64        `json:"period,optional"`          // 统计周期（秒），默认 60
+	AggregateMethod string       `json:"aggregateMethod,optional"` // 聚合方式：last / average / max / min / sum / count，默认 last
+	ContinuePeriod  int64        `json:"continuePeriod,optional"`  // 持续周期数，默认 1
+	Filters         []*AlarmFieldFilter `json:"filters,optional"`  // 事件或行为参数过滤，内部固定 AND
+}
+
+// 事件或行为参数过滤
+type AlarmFieldFilter {
+	Column  string   `json:"column,optional"`  // 参数成员路径
+	CmpType string   `json:"cmpType,optional"` // eq / not / btw / gt / gte / lt / lte / in
+	Values  []string `json:"values,optional"`  // 比较值列表
+}
+
+// 比较配置
+type AlarmCompare {
+	CmpType string   `json:"cmpType,optional"` // eq / not / btw / gt / gte / lt / lte / in / all
+	Values  []string `json:"values,optional"`  // 比较值列表
+}
+
+// 普通条件
+type AlarmPlainCriterion {
+	Leaves []*AlarmLeafCondition `json:"leaves,optional"` // 叶子条件列表
+}
+
+// 持续条件
+type AlarmDurationCriterion {
+	DurationSeconds int64           `json:"durationSeconds,optional"` // 持续秒数
+	Child           *AlarmCriterion `json:"child,optional"`           // 子条件
+}
+
+// k/n条件
+type AlarmKOfNCriterion {
+	K        int64           `json:"k,optional"`        // 至少命中数
+	N        int64           `json:"n,optional"`        // 子条件总数
+	Children []*AlarmCriterion `json:"children,optional"` // 子条件列表
+}
+
+// 滚动聚合条件
+type AlarmRollingAggregateCriterion {
+	WindowSeconds int64           `json:"windowSeconds,optional"` // 窗口秒数
+	Aggregate     string          `json:"aggregate,optional"`     // max / min / avg
+	Threshold     float64         `json:"threshold,optional"`     // 阈值
+	Cmp           string          `json:"cmp,optional"`           // gt / gte / lt / lte
+	Child         *AlarmCriterion `json:"child,optional"`         // 子条件
+}
+
+// 频率条件
+type AlarmFrequencyCriterion {
+	WindowSeconds int64           `json:"windowSeconds,optional"` // 窗口秒数
+	Times         int64           `json:"times,optional"`         // 触发次数
+	Child         *AlarmCriterion `json:"child,optional"`         // 子条件
+}
+
+// 通知目标
+type AlarmNotifyTargets {
+	UserIDs  []int64  `json:"userIDs,string,optional"`  // 用户ID列表
+	GroupIDs []int64  `json:"groupIDs,string,optional"` // 用户组ID列表
+	RoleIDs  []int64  `json:"roleIDs,string,optional"`  // 角色ID列表
+	Phones   []string `json:"phones,optional"`          // 直接填写的手机号列表（仅短信渠道生效）
+	Emails   []string `json:"emails,optional"`          // 直接填写的邮箱列表（仅邮件渠道生效）
+}
+
+// 接口回调配置
+type AlarmCallbackConfig {
+	Name            string            `json:"name,optional"`            // 名称
+	Method          string            `json:"method,optional"`          // GET / POST
+	Url             string            `json:"url,optional"`             // URL
+	Headers         map[string]string `json:"headers,optional"`         // 请求头
+	BodyTemplate    string            `json:"bodyTemplate,optional"`    // 请求体模板
+	AuthType        string            `json:"authType,optional"`        // none / basic / bearer
+	AuthToken       string            `json:"authToken,optional"`       // 认证Token
+	TimeoutSeconds  int64             `json:"timeoutSeconds,optional"`  // 超时秒数
+	RetryTimes      int64             `json:"retryTimes,optional"`      // 重试次数
+	NotifyCycle     string            `json:"notifyCycle,optional"`     // all / workday / weekend
+	NotifyStartTime string            `json:"notifyStartTime,optional"` // 通知开始时间
+	NotifyEndTime   string            `json:"notifyEndTime,optional"`   // 通知结束时间
+}
+
+// 通知阶梯
+type AlarmNotifyLadder {
+	Order            int64               `json:"order,optional"`             // 顺序
+	Timing           string              `json:"timing,optional"`            // trigger / recovery / both
+	Levels           []string            `json:"levels,optional"`            // 告警级别列表
+	Channels         []string            `json:"channels,optional"`          // 渠道列表
+	ChannelTemplates map[string]int64    `json:"channelTemplates,optional"`  // channel -> notifyTemplateID
+	DelaySeconds     int64               `json:"delaySeconds,optional"`      // 延迟秒数
+	RepeatIntervalSeconds int64          `json:"repeatIntervalSeconds,optional"` // 未处理重复提醒间隔秒数，0=不重复
+	RepeatMaxCount   int64               `json:"repeatMaxCount,optional"`    // 重复提醒最大次数，0=不限
+	Targets          *AlarmNotifyTargets `json:"targets,optional"`           // 通知目标
+	Callbacks        []*AlarmCallbackConfig `json:"callbacks,optional"`      // 回调列表
+}
+
+// 告警 AI 判断配置
+type AlarmAiConfig {
+	Enable  bool   `json:"enable,optional"`  // 是否启用 AI 判断
+	ToolID  int64  `json:"toolID,string,optional"` // 绑定的 AI 工具 ID
+	Prompt  string `json:"prompt,optional"`  // 用户提示词，拼装进工具入参
+	Timeout int64  `json:"timeout,optional"` // 等待工具出参超时秒数，默认10，上限30
+}
+
+// 告警规则
+type AlarmInfo {
+	Id          int64                `json:"id,string,optional"`      // ID
+	ProjectID   int64                `json:"projectID,string,optional"` // 项目ID
+	Name        string               `json:"name,optional"`           // 名称
+	Desc        string               `json:"desc,optional"`           // 描述
+	Target      *AlarmTarget         `json:"target,optional"`         // 告警目标
+	TargetName  string               `json:"targetName,optional"`     // 目标展示名快照
+	If          *AlarmIf             `json:"if,optional"`             // 触发条件
+	Ladders     []*AlarmNotifyLadder `json:"ladders,optional"`        // 通知阶梯
+	EvalPeriod  int64                `json:"evalPeriod,optional"`     // 评估周期（分钟）
+	Status      int64                `json:"status,optional"`         // 1启用 2停用
+	Version     int64                `json:"version,optional"`        // 版本
+	AiConfig    *AlarmAiConfig       `json:"aiConfig,optional"`       // AI 判断配置，为空表示不启用
+	CreatedTime int64                `json:"createdTime,string,optional"` // 创建时间
+	UpdatedTime int64                `json:"updatedTime,string,optional"` // 更新时间
+}
+
+// 告警规则ID响应
+type AlarmInfoWithID {
+	Id int64 `json:"id,string,optional"` // ID
+}
+
+// 触发条件模板
+type AlarmConditionTemplate {
+	Id                int64    `json:"id,string,optional"`          // ID
+	Name              string   `json:"name,optional"`               // 名称
+	Desc              string   `json:"desc,optional"`               // 描述
+	ProductID         string   `json:"productID,optional"`          // 产品ID
+	ProductCategoryID string   `json:"productCategoryID,optional"`  // 产品品类ID
+	If                *AlarmIf `json:"if,optional"`                 // 触发条件
+	RefCount          int64    `json:"refCount,optional"`           // 引用次数
+	Status            int64    `json:"status,optional"`             // 1启用 2停用
+	CreatedTime       int64    `json:"createdTime,string,optional"` // 创建时间
+	UpdatedTime       int64    `json:"updatedTime,string,optional"` // 更新时间
+}
+
+// 通知内容模板
+type AlarmNotifyTemplate {
+	Id           int64             `json:"id,string,optional"`          // ID
+	Name         string            `json:"name,optional"`               // 名称
+	Desc         string            `json:"desc,optional"`               // 描述
+	Channel      string            `json:"channel,optional"`            // 渠道
+	Subject      string            `json:"subject,optional"`            // 主题
+	TriggerBody  string            `json:"triggerBody,optional"`        // 触发内容
+	RecoveryBody string            `json:"recoveryBody,optional"`       // 恢复内容
+	Headers      map[string]string `json:"headers,optional"`            // 请求头
+	RefCount     int64             `json:"refCount,optional"`           // 引用次数
+	Status       int64             `json:"status,optional"`             // 1启用 2停用
+	CreatedTime  int64             `json:"createdTime,string,optional"` // 创建时间
+	UpdatedTime  int64             `json:"updatedTime,string,optional"` // 更新时间
+}
+
+// 告警事件
+type AlarmEvent {
+	Id                   int64        `json:"id,string,optional"`               // ID
+	AlarmID              int64        `json:"alarmID,string,optional"`          // 告警规则ID
+	AlarmName            string       `json:"alarmName,optional"`               // 告警规则名
+	Target               *AlarmTarget `json:"target,optional"`                  // 告警目标
+	TargetName           string       `json:"targetName,optional"`              // 目标展示名
+	ProductID            string       `json:"productID,optional"`               // 产品ID
+	DeviceName           string       `json:"deviceName,optional"`              // 设备名
+	DeviceID             string       `json:"deviceID,optional"`                // 设备记录 ID（dm_device_info.id），列表展示「设备名称(设备ID)」
+	Level                string       `json:"level,optional"`                   // 告警级别
+	Status               string       `json:"status,optional"`                  // 状态
+	TriggerValue         string       `json:"triggerValue,optional"`            // 触发值
+	TriggerContent       string       `json:"triggerContent,optional"`          // 触发内容
+	FirstTriggerTime     int64        `json:"firstTriggerTime,string,optional"` // 首次触发时间
+	LastTriggerTime      int64        `json:"lastTriggerTime,string,optional"`  // 最后触发时间
+	TriggerCount         int64        `json:"triggerCount,optional"`            // 触发次数
+	RecoveryTime         int64        `json:"recoveryTime,string,optional"`     // 恢复时间
+	FalseAlarm           bool         `json:"falseAlarm,optional"`              // 是否误报
+	FalseAlarmReason     string       `json:"falseAlarmReason,optional"`        // 误报原因
+	FalseAlarmReasonType string       `json:"falseAlarmReasonType,optional"`    // 误报原因类型
+	CreatedTime          int64        `json:"createdTime,string,optional"`      // 创建时间
+	UpdatedTime          int64        `json:"updatedTime,string,optional"`      // 更新时间
+}
+
+// 告警事件ID请求
+type AlarmEventWithID {
+	Id int64 `json:"id,string,optional"` // ID
+}
+
+// 处理记录
+type AlarmDealRecord {
+	Id           int64  `json:"id,string,optional"`           // ID
+	EventID      int64  `json:"eventID,string,optional"`      // 事件ID
+	Action       string `json:"action,optional"`              // 操作
+	FromStatus   string `json:"fromStatus,optional"`          // 原状态
+	ToStatus     string `json:"toStatus,optional"`            // 新状态
+	OperatorID   int64  `json:"operatorID,string,optional"`   // 操作人ID
+	OperatorName string `json:"operatorName,optional"`        // 操作人名
+	Remark       string `json:"remark,optional"`              // 备注
+	CreatedTime  int64  `json:"createdTime,string,optional"`  // 创建时间
+}
+
+// 通知记录
+type AlarmNotifyRecord {
+	Id           int64               `json:"id,string,optional"`          // ID
+	EventID      int64               `json:"eventID,string,optional"`     // 事件ID
+	AlarmID      int64               `json:"alarmID,string,optional"`     // 告警规则ID
+	AlarmName    string              `json:"alarmName,optional"`          // 告警规则名称
+	TargetName   string              `json:"targetName,optional"`         // 告警对象名称
+	Timing       string              `json:"timing,optional"`             // trigger / recovery
+	LadderOrder  int64               `json:"ladderOrder,optional"`        // 阶梯顺序
+	Channel      string              `json:"channel,optional"`            // 渠道
+	TemplateID   int64               `json:"templateID,string,optional"`  // 模板ID
+	Targets      *AlarmNotifyTargets `json:"targets,optional"`            // 通知目标
+	Content      string              `json:"content,optional"`            // 内容
+	Status       string              `json:"status,optional"`             // 状态
+	RetryTimes   int64               `json:"retryTimes,optional"`         // 重试次数
+	ExternalResp string              `json:"externalResp,optional"`       // 外部响应
+	FailReason   string              `json:"failReason,optional"`         // 失败原因
+	CreatedTime  int64               `json:"createdTime,string,optional"` // 创建时间
+	SentTime     int64               `json:"sentTime,string,optional"`    // 发送时间
+}
+
+// 告警事件详情
+type AlarmEventDetail {
+	Event         *AlarmEvent         `json:"event,optional"`          // 事件
+	DealRecords   []*AlarmDealRecord  `json:"dealRecords,optional"`    // 处理记录
+	NotifyRecords []*AlarmNotifyRecord `json:"notifyRecords,optional"`  // 通知记录
+}
+
+// 告警统计项
+type AlarmEventStatItem {
+	Key         string `json:"key,optional"`        // 分组键
+	Name        string `json:"name,optional"`       // 分组名
+	Total       int64  `json:"total,optional"`      // 总数
+	UnRecovered int64  `json:"unRecovered,optional"` // 未恢复数
+	Recovered   int64  `json:"recovered,optional"`   // 已恢复数
+}

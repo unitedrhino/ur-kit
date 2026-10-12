@@ -1,0 +1,66 @@
+info (
+	title:   "告警通知记录"
+	desc:    "告警通知记录"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+import "alarmCommon.api"
+
+@server (
+	group:            things/alarm/notifyRecord
+	prefix:           /api/v1/things/alarm/notify-record
+	accessCodePrefix: "thingsAlarmNotifyRecord"
+	accessNamePrefix: "通知记录"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+    summary: "获取通知记录列表"
+    description: "获取通知记录列表"
+    resource: "things/alarm/notifyRecord"
+    action: "view"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/notifyRecord"
+)
+	@handler getList
+	post /get-list (AlarmNotifyRecordGetListReq) returns (AlarmNotifyRecordGetListResp)
+
+	@doc(
+    summary: "重新发送通知"
+    description: "重新发送通知"
+    resource: "things/alarm/notifyRecord"
+    action: "update"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/notifyRecord"
+)
+	@handler resend
+	post /resend (AlarmNotifyRecordResendReq) returns (ShareEmpty)
+}
+
+type AlarmNotifyRecordGetListReq {
+	Page             *PageInfo  `json:"page,optional"`              // 分页
+	EventID          int64      `json:"eventID,string,optional"`    // 事件ID
+	AlarmID          int64      `json:"alarmID,string,optional"`    // 告警规则ID
+	AlarmName        string     `json:"alarmName,optional"`         // 规则名称模糊查询
+	TargetName       string     `json:"targetName,optional"`        // 告警对象模糊查询
+	Status           []string   `json:"status,optional"`            // 状态列表
+	Timing           string     `json:"timing,optional"`            // trigger / recovery
+	Channel          []string   `json:"channel,optional"`           // 渠道列表
+	CreatedTimeRange *TimeRange `json:"createdTimeRange,optional"`  // 创建时间范围
+}
+
+type AlarmNotifyRecordGetListResp {
+	List []*AlarmNotifyRecord `json:"list"` // 通知记录列表
+	PageResp
+}
+
+type AlarmNotifyRecordResendReq {
+	Id int64 `json:"id,string"` // 通知记录ID
+}

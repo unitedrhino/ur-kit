@@ -1,0 +1,51 @@
+syntax = "v1"
+
+// 对讲接口
+
+info(
+    title: "对讲"
+    desc: "GB28181 对讲：启动/停止，返回音频流播放地址"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+// AvTalkStartReq 对讲启动请求
+type AvTalkStartReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+// AvTalkStopReq 对讲停止请求
+type AvTalkStopReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "启动对讲"
+        description: "业务说明：ZLM 开启音频发流端口，SIP 邀请设备建立 s=Talk 会话，返回音频流播放地址。"
+        authType: "admin"
+        resource: "av"
+        action: "operate"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvTalkStartHandler
+    post /api/v1/av/talk/start (AvTalkStartReq) returns (AvPlayStreamInfo)
+
+    @doc(
+        summary: "停止对讲"
+        description: "业务说明：按通道停止对讲会话（BYE + 停止 ZLM 发流 + 删会话，幂等）。"
+        authType: "admin"
+        resource: "av"
+        action: "operate"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvTalkStopHandler
+    post /api/v1/av/talk/stop (AvTalkStopReq) returns (EmptyResp)
+}

@@ -1,0 +1,298 @@
+info(
+    title: "项目管理模块"
+    desc: "项目管理模块"
+    author: "大绵羊"
+    email: "robotyang123@163.com"
+    version: "v1"
+)
+
+@server(
+    group: things/project/info
+    prefix: /api/v1/things/project/info
+    accessCodePrefix: "thingsProjectManage"
+    accessNamePrefix: "项目管理"
+    accessGroup: "项目管理"
+    defaultAuthType: "admin"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "新增项目"
+        description: "创建新的项目空间，项目是物联网平台的顶层组织单元，包含区域、设备、用户等。支持设置项目名称、位置、图片、描述等基本信息，管理员默认为当前用户。"
+        authType: "admin"
+        group: "things/project/info"
+        resource: "things/project/info"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler create
+    post /create (ProjectInfoCreateReq) returns (ProjectWithID)
+    @doc(
+        summary: "更新项目"
+        description: "修改项目的基本信息，包括名称、地址、图片、描述、标签、状态等。系统创建的项目（isSysCreated=1）只有平台管理员可删除。"
+        authType: "admin"
+        group: "things/project/info"
+        resource: "things/project/info"
+        action: "update"
+        recordLogMode: "3"
+    )
+    @handler update
+    post /update (ProjectInfo) returns ()
+    @doc(
+        summary: "删除项目"
+        description: "删除项目及其所有关联数据（区域、设备绑定关系、用户权限等）。系统创建的项目需平台管理员权限。删除操作不可恢复，需谨慎操作。"
+        authType: "admin"
+        group: "things/project/info"
+        resource: "things/project/info"
+        action: "delete"
+        recordLogMode: "3"
+    )
+    @handler delete
+    post /delete (ProjectWithID) returns ()
+    @doc(
+        summary: "获取项目详情"
+        description: "查询单个项目的完整信息，包括区域统计、用户统计、设备统计、在线设备统计、报警状态等。支持同时获取管理员信息和顶层区域列表。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/project/info"
+        resource: "things/project/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (ProjectWithID) returns (ProjectInfo)
+    @doc(
+        summary: "获取项目列表"
+        description: "查询用户有权限的项目列表，支持按名称模糊搜索、按状态过滤。平台管理员可通过isGetAll获取所有租户的项目。返回数据包含设备统计和报警状态。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/project/info"
+        resource: "things/project/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (ProjectInfoGetListReq) returns (ProjectInfoGetListResp)
+}
+
+@server(
+    group: things/project/profile
+    prefix: /api/v1/things/project/profile
+    accessCodePrefix: "thingsProjectManage"
+    accessNamePrefix: "项目配置"
+    accessGroup: "项目管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "获取项目配置详情"
+        description: "查询项目的扩展配置信息，通过code标识配置类型。配置以params字段存储JSON格式数据，用于存储项目级别的自定义参数。"
+        authType: "admin"
+        group: "things/project/profile"
+        resource: "things/project/profile"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler profileGetOne
+    post /get-one (WithCode) returns (ProjectProfile)
+    @doc(
+        summary: "更新项目配置"
+        description: "修改项目指定code的配置内容，params字段支持JSON格式存储复杂配置。不同code对应不同配置模块，可独立更新。"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "things/project/profile"
+        resource: "things/project/profile"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler profileUpdate
+    post /update (ProjectProfile) returns ()
+    @doc(
+        summary: "获取项目配置列表"
+        description: "批量查询多个code对应的项目配置，用于一次性获取项目的所有相关配置参数。"
+        authType: "admin"
+        group: "things/project/profile"
+        resource: "things/project/profile"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler profileGetList
+    post /get-list (ProjectProfileGetListReq) returns (ProjectProfileGetListResp)
+}
+
+@server(
+    group: things/project/customData
+    prefix: /api/v1/things/project/crud
+    accessCodePrefix: "thingsProjectCrud"
+    accessNamePrefix: "项目下的curl业务"
+    accessGroup: "项目管理"
+    defaultAuthType: "admin"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "新增项目crud"
+        description: "在项目下创建自定义数据记录，用于存储项目级别的业务扩展数据。purpose字段标识用途，params存储JSON格式参数，支持文件类型字段自动上传。"
+        authType: "admin"
+        group: "things/project/customData"
+        resource: "things/project/customData"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (ProjectCrud) returns (WithIDStr)
+    @doc(
+        summary: "更新项目crud"
+        description: "修改项目自定义数据记录的内容，支持部分更新。params字段可存储复杂JSON数据，文件类型字段需特殊处理。"
+        authType: "admin"
+        group: "things/project/customData"
+        resource: "things/project/customData"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (ProjectCrud) returns ()
+    @doc(
+        summary: "删除项目crud"
+        description: "删除项目自定义数据记录，删除后数据不可恢复。"
+        authType: "admin"
+        group: "things/project/crud"
+        resource: "things/project/crud"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithIDStr) returns ()
+    @doc(
+        summary: "获取项目crud详情"
+        description: "查询单条项目自定义数据记录的完整信息，包括用途、参数内容、排序、创建时间等。"
+        authType: "admin"
+        group: "things/project/crud"
+        resource: "things/project/crud"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithIDStr) returns (ProjectCrud)
+    @doc(
+        summary: "获取项目crud列表"
+        description: "按用途查询项目自定义数据列表，支持params字段复杂查询（比较类型、类型转换）。用于获取特定用途的所有数据记录。"
+        authType: "admin"
+        group: "things/project/crud"
+        resource: "things/project/crud"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (ProjectCrudGetListReq) returns (ProjectCrudGetListResp)
+}
+
+
+type(
+    ProjectCrudGetListReq{
+        Page *PageInfo `json:"page,optional"`            //进行数据分页（不传默认2000相当于全部）
+        Purpose string `json:"purpose"`//用途必填
+        Params map[string]*Compare `json:"params,optional"`//params过滤查询,key 是params的key, value是对象,说明: {"cmpType":"比较类型(如=、>、like)","value":"比较值(需与类型匹配)","castTo":"数据类型(int/float/string,选填，填则转换)"}，其中 like 仅支持 string 类型，value 需以字符串格式传入 示例: {"aaa":{"cmpType":">","castTo":"int","value":"100"}
+    }
+    ProjectCrudGetListResp{
+        PageResp
+        List []*ProjectCrud `json:"list"`    //项目列表
+    }
+    ProjectCrud {
+        ID int64  `json:"id,string,optional"`
+        Purpose string `json:"purpose,optional"`//用途 新增必填
+        Params string `json:"params,optional"` //普通业务参数,如果是文件类型,则需要以 Img,File结尾,后端会进行文件的处理,上传方式可以参考设备图片
+        Sort int64  `json:"sort,optional,omitempty"` //排序
+        CreatedTime int64  `json:"createdTime,string,optional"`//只读
+    }
+)
+
+type (
+    ProjectProfile{
+        Code string `json:"code"`
+        Params string  `json:"params"`
+    }
+    ProjectProfileGetListReq{
+        Codes []string `json:"codes"`
+    }
+    ProjectProfileGetListResp{
+        Profiles []*ProjectProfile `json:"profiles"`
+    }
+)
+
+
+
+type (
+
+
+    // ProjectInfoCreateReq 新增项目请求体，仅包含可写字段
+    ProjectInfoCreateReq {
+        ProjectName  string            `json:"projectName"`                     // 必填：项目名称
+        AdminUserID  int64             `json:"adminUserID,string,optional"`     // 可选：管理员用户id，默认当前登录用户
+        Position     *Point            `json:"position,optional"`               // 可选：项目定位
+        Address      *string           `json:"address,optional"`                // 可选：项目详细地址
+        ProjectImg   string            `json:"projectImg,optional"`             // 可选：项目图片
+        Desc         *string           `json:"desc,optional"`                   // 可选：项目备注
+        Tags         map[string]string `json:"tags,optional,omitempty"`         // 可选：自定义标签
+        Type         string            `json:"type,optional,omitempty"`         // 可选：项目类型
+        Ppsm         int64             `json:"ppsm,optional,omitempty"`         // 可选：每平方米功耗
+        Area         *float32          `json:"area,optional,omitempty"`         // 可选：建筑面积（单位平米）
+        Sort         int64             `json:"sort,optional"`                   // 可选：排序标记，默认为1
+        Attachments  []*Attachment     `json:"attachments,optional,omitempty"`  // 可选：附件列表
+        Status       int64             `json:"status,optional,omitempty"`       // 可选：项目状态 1:正常 2:禁用 3:过期
+    }
+
+    ProjectInfo {
+        CreatedTime        int64             `json:"createdTime,optional,string"` //创建时间（只读）
+        ProjectID          int64             `json:"projectID,string,optional"` //项目id（只读）
+        TenantCode         string            `json:"tenantCode,optional"` //租户编码（只读）
+        ProjectName        string            `json:"projectName,optional"` //项目名称（读写）
+        AdminUserID        int64             `json:"adminUserID,string,optional"` // 管理员用户id（读写）
+        Position           *Point            `json:"position,optional"` //项目定位
+        Address            *string           `json:"address,optional"` //项目详细地址（读写）
+        ProjectImg         string            `json:"projectImg,optional"`
+        IsSysCreated       int64             `json:"isSysCreated,optional"` //是否是系统创建的,系统创建的只有管理员可以删除
+        Desc               *string           `json:"desc,optional"` //项目备注（读写）
+        Tags               map[string]string `json:"tags,optional,omitempty"` //自定义标签
+        AreaCount          int64             `json:"areaCount,optional"` //项目下的区域统计(只读)
+        UserCount          int64             `json:"userCount,optional"` //项目下的用户统计(只读)
+        DeviceCount        int64             `json:"deviceCount,optional"` //项目下的设备统计(只读)
+        DeviceOnlineCount  int64             `json:"deviceOnlineCount,optional"` //项目下的设备在线统计(只读)
+        AlarmStatus        int64             `json:"alarmStatus,optional,omitempty"` //报警状态(只读)
+        Status             int64             `json:"status,optional,omitempty"` //项目状态  1 正常，2-禁用，3-过期
+        Type               string            `json:"type,optional,omitempty"` //项目类型
+        Ppsm               int64             `json:"ppsm,optional,omitempty"` //每平方米功耗
+        Area               *float32          `json:"area,optional,omitempty"` //建筑面积(单位平米)
+        AdminUser          *UserCore         `json:"adminUser,optional,omitempty"` //管理员信息
+        Areas              []*AreaInfo       `json:"areas,optional,omitempty"`
+        Sort               int64             `json:"sort,optional"` // 排序标记,默认为1
+        Attachments        []*Attachment     `json:"attachments,optional,omitempty"` //附件
+    }
+
+    ProjectWithID  {
+        ProjectID int64 `json:"projectID,string"` //项目id 只读
+        WithAdminUser bool `json:"withAdminUser,optional"` //同时获取管理员核心信息
+        WithTopAreas bool `json:"withTopAreas,optional"` //同时返回顶层的区域列表
+    }
+
+    ProjectInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"`            //进行数据分页（不传默认2000相当于全部）
+        ProjectName string `json:"projectName,optional"` //过滤项目名称
+        IsGetAll bool `json:"isGetAll,optional"` //是否返回所有,只有平台管理员有权限
+        ProjectIDs []int64 `json:"projectIDs,string,optional"`  //过滤项目id列表
+        AdminUserID int64 `json:"adminUserID,string,optional"` //过滤负责人用户id
+        WithTopAreas bool `json:"withTopAreas,optional"` //同时返回顶层的区域列表
+        WithAdminUser bool `json:"withAdminUser,optional"` //同时获取管理员核心信息
+        TenantCode string `json:"tenantCode,optional"`//指定租户(只有default租户下的管理员才有效)
+        AlarmStatus  int64  `json:"alarmStatus,optional,omitempty"`//报警状态(只读) （1正常 2提醒 3一般 4严重 5紧急 6超紧急）
+        Status  int64  `json:"status,optional,omitempty"`//项目状态  1 正常，2-禁用，3-过期
+        Type  string  `json:"type,optional,omitempty"`//项目类型
+    }
+
+    ProjectInfoGetListResp  {
+        PageResp
+        List []*ProjectInfo `json:"list"`    //项目列表
+    }
+)

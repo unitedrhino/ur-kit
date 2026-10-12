@@ -1,0 +1,70 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-控制接口"
+	desc:    "AI Control HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 控制类型定义 ----
+
+type ControlListenReq {
+	sessionID     string                 `json:"sessionID"`              // 会话ID
+	sampleRate    int                    `json:"sampleRate,optional"`   // 采样率
+	channels      int                    `json:"channels,optional"`     // 声道数
+	frameDuration int                    `json:"frameDuration,optional"` // 帧时长（ms）
+	params        map[string]interface{} `json:"params,optional"`       // 扩展参数
+}
+
+type ControlCommonReq {
+	sessionID string `json:"sessionID"` // 会话ID
+}
+
+type ControlEmpty {}
+
+// ---- 控制服务定义 ----
+
+@server (
+	group:            ai/control
+	prefix:           /api/v1/ai/control
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "all"
+)
+service ai {
+	@doc(
+		summary: "开始语音监听"
+		description: "业务说明：启动语音会话的监听模式，等待用户语音输入。客户端可指定采样率、声道数、帧时长等音频参数。监听启动后服务端开始VAD检测，检测到语音后触发ASR转文字，再进行对话处理。用于语音对话开场。"
+		authType: "all"
+		resource: "ai/control"
+		action: "execute"
+		group: "ai/control"
+		recordLogMode: "2"
+	)
+	@handler listen
+	post /listen (ControlListenReq) returns (ControlEmpty)
+
+	@doc(
+		summary: "中断当前对话"
+		description: "业务说明：中断正在进行中的AI对话或语音播放，立即停止LLM推理和TTS播放。用户打断场景使用，如用户发现AI回答错误或不想继续听取。中断后可重新发起对话，保持会话上下文。"
+		authType: "all"
+		resource: "ai/control"
+		action: "execute"
+		group: "ai/control"
+		recordLogMode: "2"
+	)
+	@handler abort
+	post /abort (ControlCommonReq) returns (ControlEmpty)
+
+	@doc(
+		summary: "结束语音会话"
+		description: "业务说明：结束当前的语音会话，释放会话资源，保存对话记录。结束后会话标记为已结束状态，不再接受新消息。用于用户主动结束语音对话、挂断等场景。正常结束后服务端发送会话关闭通知。"
+		authType: "all"
+		resource: "ai/control"
+		action: "execute"
+		group: "ai/control"
+		recordLogMode: "2"
+	)
+	@handler goodbye
+	post /goodbye (ControlCommonReq) returns (ControlEmpty)
+}

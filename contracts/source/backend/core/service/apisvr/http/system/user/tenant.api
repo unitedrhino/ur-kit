@@ -1,0 +1,43 @@
+
+info(
+	title: "用户管理模块"
+	desc: "用户操作租户的接口"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: system/user/tenant
+	prefix: /api/v1/system/user/tenant
+	accessCode: "systemUser"
+	accessName: "用户基础操作"
+	accessGroup: "用户管理"
+	defaultAuthType: "all"
+	middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "用户所处的租户列表"
+        description: "业务说明：查询指定用户所属的所有租户信息，返回租户编码、用户在该租户的状态、角色等信息。用于管理员查看用户的租户归属、跨租户用户管理等场景。可同时返回用户在各租户的角色信息。"
+        authType: "all"
+        group: "system/user/tenant"
+        resource: "system/user/tenant"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (UserTenantGetListReq) returns (UserTenantGetListResp)
+}
+type(
+    UserTenantGetListReq{
+	    Page *PageInfo `json:"page,optional"` //分页信息
+        Status int64 `json:"status,optional"` // 用户状态（1:启用，2:禁用）
+        UserID int64 `json:"userID,string"` //
+        WithRole bool `json:"withRole,optional"` // 同时返回角色信息
+    }
+    UserTenantGetListResp{
+        List []*UserTenant `json:"list"` // 用户租户列表
+        Total int64 `json:"total"`
+    }
+)

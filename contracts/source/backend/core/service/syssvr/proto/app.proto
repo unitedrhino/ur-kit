@@ -1,0 +1,262 @@
+//--------------------应用管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+import "platform.proto";
+package sys;//必须为服务名
+
+message AppWithID{
+  int64 id = 1; //ID值
+}
+message AppEmpty{
+}
+
+// 应用分组信息（平台级公共配置，租户共用）
+message AppGroupInfo {
+  int64 id = 1; //分组ID
+  string tenantCode = 2; //所属租户,默认common
+  string name = 3; //分组名称
+  string icon = 4; //分组图标
+  string desc = 5; //分组描述
+  int64 sort = 6; //排序,不能小于等于0
+  int64 createdTime = 7; //创建时间
+}
+message AppGroupInfoGetListReq{
+  PageInfo page = 1; //分页信息
+  string name = 2; //分组名称(模糊匹配)
+}
+message AppGroupInfoGetListResp{
+  repeated AppGroupInfo list = 1; //分组列表
+  int64 total = 2; //总数
+}
+
+service AppManage{
+  rpc appInfoCreate(AppInfo) returns(AppWithID); //创建应用信息
+  rpc appInfoGetList(AppInfoGetListReq) returns(AppInfoGetListResp); //获取应用列表（支持分页和过滤）
+  rpc appInfoUpdate(AppInfo) returns(AppEmpty); //更新应用信息
+  rpc appInfoDelete(AppWithID) returns(AppEmpty); //删除应用
+  rpc appInfoGetOne(AppInfoGetOneReq) returns(AppInfo);   //获取应用详情
+
+  rpc appGroupCreate(AppGroupInfo) returns(AppWithID); //创建应用分组
+  rpc appGroupUpdate(AppGroupInfo) returns(AppEmpty); //更新应用分组
+  rpc appGroupDelete(AppWithID) returns(AppEmpty); //删除应用分组
+  rpc appGroupGetList(AppGroupInfoGetListReq) returns(AppGroupInfoGetListResp); //获取应用分组列表
+
+  rpc menuInfoCreate(MenuInfo) returns(AppWithID); //创建菜单信息
+  rpc menuInfoGetList(MenuInfoGetListReq) returns(MenuInfoGetListResp); //获取菜单列表（支持分页和过滤）
+  rpc menuInfoUpdate(MenuInfo) returns(AppEmpty); //更新菜单信息
+  rpc menuInfoDelete(AppWithID) returns(AppEmpty); //删除菜单
+
+  rpc appAgreementBindBatchUpdate(AppAgreementBindBatchUpdateReq) returns(AppEmpty); //批量更新应用协议绑定
+  rpc appAgreementBindGetList(AppAgreementBindGetListReq) returns(AppAgreementBindGetListResp); //获取应用协议绑定列表
+
+  rpc appMenuBatchImport(AppMenuBatchImportReq) returns(AppMenuBatchImportResp); //批量导入应用与菜单模板（幂等 upsert）
+  rpc appWxMiniGetUrlLink(AppWxMiniGetUrlLinkReq) returns(AppWxMiniGetUrlLinkResp); //获取微信小程序 URL Link
+
+  rpc appRoleCreate(AppRoleInfo) returns(AppWithID); //创建应用自定义角色（绑定应用时自动复制到 sys_role_info）
+  rpc appRoleGetList(AppRoleInfoGetListReq) returns(AppRoleInfoGetListResp); //获取应用自定义角色列表（支持分页和过滤）
+  rpc appRoleUpdate(AppRoleInfo) returns(AppEmpty); //更新应用自定义角色（同步 sys_role_info，全量调整关联应用）
+  rpc appRoleDelete(AppWithID) returns(AppEmpty); //删除应用自定义角色（级联清理 sys_role_info 记录与菜单权限）
+  rpc appRoleMenuGetList(AppRoleMenuGetListReq) returns(AppRoleMenuGetListResp); //获取应用角色菜单权限列表
+  rpc appRoleMenuBatchUpdate(AppRoleMenuBatchUpdateReq) returns(AppEmpty); //批量更新应用角色菜单权限（全量替换 sys_role_menu）
+}
+
+//---------------应用自定义角色（平台级，与租户无关，仅平台管理员可读写）----------------
+// 应用自定义角色信息，一个角色可通过 apps 关联多个应用；
+// 绑定应用时自动按 code 复制记录到 sys_role_info(Scope='app',ScopeID=appID)接入既有角色链路
+message AppRoleInfo {
+  int64   id = 1;          //角色ID
+  string  name = 2;        //角色名称（全局唯一）
+  string  code = 3;        //角色编码（全局唯一，复制到 sys_role_info 的关联键）
+  google.protobuf.StringValue desc = 4; //角色描述
+  int64   isFullAuth = 5;  //是否完全授权 1:是,2:否
+  int64   createdTime = 6; //创建时间（秒级时间戳）
+  repeated AppRoleApp apps = 7; //关联的应用列表（create/update 传 appID 全量，查询返回含 roleID）
+}
+// 应用角色的应用关联信息
+message AppRoleApp {
+  int64 id = 1;        //关联记录ID
+  int64 appID = 2;     //应用ID
+  int64 roleID = 3;    //复制到 sys_role_info 的角色记录ID
+  string appName = 4;  //应用名称（查询响应组装，请求忽略）
+}
+message AppRoleInfoGetListReq {
+  PageInfo page = 1;      //分页信息
+  int64 appID = 2;        //按关联应用ID过滤（多对多反查）
+  string name = 3;        //按角色名称模糊过滤
+  string code = 4;        //按角色编码精确过滤
+}
+message AppRoleInfoGetListResp {
+  repeated AppRoleInfo list = 1; //角色列表
+  int64 total = 2;               //总数
+}
+message AppRoleMenuGetListReq {
+  int64 id = 1;           //应用角色ID
+  int64 appID = 2;        //应用ID（须为该角色已关联的应用）
+}
+message AppRoleMenuGetListResp {
+  int64 total = 1;             //总条数
+  repeated int64 menuIDs = 2;  //菜单ID列表
+}
+message AppRoleMenuBatchUpdateReq {
+  int64 id = 1;               //应用角色ID
+  int64 appID = 2;            //应用ID（须为该角色已关联的应用）
+  repeated int64 menuIDs = 3; //菜单ID列表（全量替换）
+}
+
+message AppWxMiniGetUrlLinkReq {
+  int64 appID = 1;       // 平台应用 ID
+  string path = 2;       // 小程序页面路径
+  string query = 3;      // 启动参数
+  string envVersion = 4; // 小程序版本：release/trial/develop
+}
+
+message AppWxMiniGetUrlLinkResp {
+  string urlLink = 1;    // 微信 URL Link
+}
+
+message AppMenuBatchImportReq{
+  AppInfo app = 1; //应用模板信息
+  repeated MenuInfo menus = 2; //菜单模板列表
+}
+message AppMenuBatchImportResp{
+  int64 appID = 1; //导入后的应用ID
+}
+
+message AppleAppConfig {
+  string appID = 1;
+  string teamID = 2;
+  string keyID = 3;
+  string privateKey = 4;
+  string redirectURI = 5;
+  string bundleID = 6;
+}
+
+// OauthClientConfig OAuth/OIDC 客户端配置
+// 挂在 AppInfo 上，表示该应用可作为 OAuth/OIDC 客户端被外部系统接入（client_id 用应用 ID）
+// 为空表示普通应用；非空表示启用了 OAuth 客户端能力
+message OauthClientConfig {
+  string clientSecret = 1;          // OAuth client secret
+  repeated string redirectURIs = 2; // 允许的回调地址白名单
+  repeated string scopes = 3;       // 允许的 scope 列表
+  repeated string grantTypes = 4;   // 允许的授权类型
+}
+
+message AppInfo{
+  int64 id = 1;
+  string tenantCode = 2;
+  string name = 3;
+  string avatar = 4;
+  google.protobuf.StringValue desc = 5;
+  string useBy = 6;
+  string type = 7;
+  string url = 8;
+  int64 isUseMenu = 10;
+  string subType = 11;
+  ThirdAppConfig dingConfig = 12;
+  ThirdAppConfig wxMiniConfig = 13;
+  ThirdAppConfig wxOpenConfig = 14;
+  NativeConfig nativeConfig = 15;
+  int64 createdTime = 16;
+  int64 status = 17;
+  google.protobuf.Int64Value trialTime = 18;
+  int64 sort = 19;
+  int64 isUseProxy = 20;
+  string proxy = 21;
+  repeated string loginTypes = 22;
+  string menuRole = 24;
+  map<string, Agreement> agreementsMap = 25;
+  ThirdAppConfig googleConfig = 26;
+  ThirdAppConfig githubConfig = 27;
+  AppleAppConfig appleConfig = 28;
+  ThirdAppConfig huaweiConfig = 29; // 华为登录配置，appKey 保存 OAuth 回调地址
+  OauthClientConfig oauthClientConfig = 30; // OAuth/OIDC 客户端配置（该应用被外部系统接入做统一认证）
+  int64 groupID = 31; // 所属应用组,2=未分组(遵循1-是2-否预定义),其他为sys_app_group.id
+}
+message AppInfoGetListReq{
+  PageInfo page = 1;
+  string name = 2;
+  int64 id = 3;
+  repeated int64 ids =4;
+  string useBy = 6;
+  string type = 7;
+  string subType = 11;
+  int64 isUseProxy = 25;
+  int64 notID = 26;
+  int64 tenantIsBind = 28;
+  repeated string withAgreementCodes = 29;
+  int64 groupID = 30; // 按应用组筛选,2=未分组
+  int64 status = 31; // 应用状态筛选：0 不限，1 上架，2 下架
+}
+message AppInfoGetOneReq {
+  int64 id = 1;
+  repeated string withAgreementCodes = 2;
+}
+message AppInfoGetListResp{
+  repeated  AppInfo list =1;
+  int64 total = 2;
+}
+message MenuInfo{
+  string tenantCode = 17;
+  int64 id = 1;
+  string idPath =2;
+  int64 appID = 12;
+  int64 parentID = 3;
+  int64 type = 4;
+  int64 defaultSort = 18;
+  string defaultName = 19;
+  string path = 5;
+  string component = 6;
+  string defaultIcon = 20;
+  string redirect = 8;
+  int64 defaultIsHideInMenu = 21;
+  string role = 22;
+  // 仅 menu/update 请求有效：true 时把本次修改的名称/排序/图标/可见性同步覆盖所有企业已存在的菜单行
+  bool isSyncTenant = 23;
+  int64 createdTime = 9;
+  google.protobuf.StringValue body = 13;
+  repeated MenuInfo children = 14;
+}
+message MenuInfoGetListReq{
+  int64  appID = 1;
+  repeated int64 menuIDs = 2;
+  bool isRetTree = 3;
+  int64 isStar = 4;
+  string path = 6;
+}
+message MenuInfoGetListResp{
+  repeated MenuInfo list = 1;
+}
+
+message AppAgreementBind {
+  int64 id = 1;
+  int64 agreementID = 2;
+  int64 appID = 3;
+  string type = 4;
+  int64 sort = 5;
+  int64 status = 6;
+  Agreement agreement = 7;
+  AppInfo app = 8;
+}
+
+message AppAgreementBindGetListReq {
+  PageInfo page = 1;
+  int64 agreementID = 2;
+  int64 appID = 3;
+  string type = 4;
+  int64 status = 5;
+  bool withAgreement = 6;
+  bool withApp = 7;
+}
+
+message AppAgreementBindGetListResp {
+  repeated AppAgreementBind list = 1;
+  int64 total = 2;
+}
+
+message AppAgreementBindBatchUpdateReq {
+  int64 agreementID = 1;
+  int64 appID = 2;
+  repeated AppAgreementBind list = 3;
+}

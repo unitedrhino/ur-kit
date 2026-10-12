@@ -1,0 +1,554 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-数字分身管理"
+	desc:    "AI Clone Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 分身类型定义 ----（PageInfo 和 WithID 定义在 common.api）
+	type CloneInfo {
+		cloneGroupName string `json:"cloneGroupName,optional"` // 所属CloneGroup名称
+		thirdID        string `json:"thirdID,optional"`        // 第三方业务ID（用户个人分身=userID；设备分身=projectID）
+	ID            int64  `json:"id,optional"` // 分身ID
+	tenantCode    string `json:"tenantCode,optional"` // 租户编码
+	agentID       int64  `json:"agentID"` // 关联Agent ID
+	cloneGroupID  int64  `json:"cloneGroupID,optional"` // 所属CloneGroup ID
+	code          string `json:"code,optional"` // 分身编码（全局唯一，可为空）
+	name          string `json:"name"` // 分身名称
+	desc          string `json:"desc,optional"` // 描述
+	personaPrompt string `json:"personaPrompt,optional"` // 人设补充提示词
+	metadata      string `json:"metadata,optional"` // 扩展元数据（JSON字符串）
+	status        int64  `json:"status,optional"` // 状态 1-启用 2-禁用
+	createdTime   int64  `json:"createdTime,optional"` // 创建时间
+	updatedTime   int64  `json:"updatedTime,optional"` // 更新时间
+}
+
+	type CloneGetListReq {
+		isGetAll     bool     `json:"isGetAll,optional"`     // 是否返回所有（管理员看全租户，默认 false=个人视图）
+	page         PageInfo `json:"page"` // 分页信息
+	tenantCode   string   `json:"tenantCode,optional"` // 租户编码过滤
+	agentID      int64    `json:"agentID,optional"` // 按Agent ID过滤
+	cloneGroupID int64    `json:"cloneGroupID,optional"` // 按CloneGroup ID过滤
+	name         string   `json:"name,optional"` // 名称模糊搜索
+	status       int64    `json:"status,optional"` // 状态过滤
+	code         string   `json:"code,optional"` // 按code精确查询
+}
+
+type CloneGetListResp {
+	list  []CloneInfo `json:"list"` // 分身列表
+	total int64       `json:"total"` // 总数
+}
+
+// ---- 记忆管理类型定义 ----
+type CloneMemoryInfo {
+	ID          int64   `json:"id"` // 记忆ID
+	cloneID     int64   `json:"cloneID"` // 分身ID
+	sessionID   string  `json:"sessionID,optional"` // 会话ID
+	memoryType  string  `json:"memoryType"` // 记忆类型 fact/preference/event/summary
+	content     string  `json:"content"` // 记忆内容
+	keywords    string  `json:"keywords,optional"` // 关键词（JSON字符串）
+	importance  float64 `json:"importance"` // 重要性评分
+	accessCount int64   `json:"accessCount"` // 访问次数
+	status      int64   `json:"status"` // 状态 1-活跃 2-已衰减 3-已归档
+	createdTime int64   `json:"createdTime,optional"` // 创建时间
+}
+
+type CloneMemorySearchReq {
+	cloneID    int64  `json:"cloneID"` // 分身ID
+	query      string `json:"query"` // 搜索关键词
+	memoryType string `json:"memoryType,optional"` // 记忆类型过滤
+	topK       int64  `json:"topK,optional"` // 返回条数（默认10）
+}
+
+type CloneMemorySearchResp {
+	list []CloneMemoryInfo `json:"list"` // 记忆列表
+}
+
+type CloneMemoryAddReq {
+	cloneID    int64   `json:"cloneID"` // 分身ID
+	memoryType string  `json:"memoryType"` // 记忆类型
+	content    string  `json:"content"` // 记忆内容
+	keywords   string  `json:"keywords,optional"` // 关键词（JSON字符串）
+	importance float64 `json:"importance,optional"` // 重要性评分
+}
+
+type CloneMemoryDeleteReq {
+	cloneID  int64 `json:"cloneID"` // 分身ID
+	memoryID int64 `json:"memoryID"` // 记忆ID
+}
+
+// ---- 分身服务定义 ----
+@server (
+	group:            ai/clone
+	prefix:           /api/v1/ai/clone
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiCloneManage"
+	accessNamePrefix: "数字分身管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建分身"
+		description: "业务说明：创建新的数字分身实例，绑定到指定助手。分身是用户专属的AI人格实例，拥有独立的记忆存储、人设补充提示词、扩展元数据等。创建后返回分身ID，用户可通过分身ID获得个性化对话体验。"
+		authType: "admin"
+		resource: "ai/clone"
+		action: "create"
+		group: "ai/clone"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (CloneInfo) returns (WithID)
+
+	@doc(
+		summary: "更新分身"
+		description: "业务说明：修改已存在的分身配置，支持更新名称、描述、人设补充提示词、元数据、状态等。部分更新，空值字段不修改。更新后新会话将使用新配置，已有会话保持原配置。"
+		authType: "admin"
+		resource: "ai/clone"
+		action: "update"
+		group: "ai/clone"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (CloneInfo)
+
+	@doc(
+		summary: "删除分身"
+		description: "业务说明：删除指定的数字分身记录及其关联的记忆数据、快照数据。删除后分身ID失效，用户将失去个性化记忆。删除操作不可恢复，需谨慎操作。"
+		authType: "admin"
+		resource: "ai/clone"
+		action: "delete"
+		group: "ai/clone"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "获取分身详情"
+		description: "业务说明：根据分身ID查询完整的分身信息，包括名称、描述、人设提示词、元数据等。用于分身编辑回显、详情查看、配置管理等场景。长期记忆摘要需通过独立的 profile 接口查询。"
+		authType: "admin"
+		resource: "ai/clone"
+		action: "view"
+		group: "ai/clone"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (CloneInfo)
+
+	@doc(
+		summary: "获取分身列表"
+		description: "业务说明：分页查询分身列表，支持按租户、助手、名称、状态、code过滤。用于分身管理页面、用户选择分身等场景。返回结果按创建时间倒序排列。"
+		authType: "admin"
+		resource: "ai/clone"
+		action: "view"
+		group: "ai/clone"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (CloneGetListReq) returns (CloneGetListResp)
+}
+
+// ---- 分身记忆管理服务定义 ----
+@server (
+	group:            ai/clone/memory
+	prefix:           /api/v1/ai/clone/memory
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiCloneManage"
+	accessNamePrefix: "分身记忆管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "搜索记忆"
+		description: "业务说明：在分身的记忆库中搜索相关记忆，支持按关键词、记忆类型过滤。返回匹配的记忆列表，按重要性排序。用于AI对话时检索相关上下文、用户查看记忆等场景。记忆类型包括fact/preference/event/summary。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler search
+	post /search (CloneMemorySearchReq) returns (CloneMemorySearchResp)
+
+	@doc(
+		summary: "添加记忆"
+		description: "业务说明：向分身的记忆库添加新的记忆条目，记录用户事实、偏好、事件等。可指定记忆类型、关键词、重要性评分。添加后的记忆将在后续对话中被检索使用，增强个性化体验。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "create"
+		group: "ai/clone/memory"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (CloneMemoryAddReq) returns (WithID)
+
+	@doc(
+		summary: "删除记忆"
+		description: "业务说明：删除分身记忆库中的指定记忆条目。删除后该记忆不再参与后续对话检索。用于清理错误记忆、过时信息等。删除操作不可恢复。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "delete"
+		group: "ai/clone/memory"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (CloneMemoryDeleteReq)
+
+	@doc(
+		summary: "压缩记忆"
+		description: "业务说明：对分身的记忆库执行压缩操作，将多个低重要性记忆合并为摘要，释放存储空间。压缩后记忆数量减少，关键信息保留。用于长期记忆管理、性能优化等场景。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "compact"
+		group: "ai/clone/memory"
+		recordLogMode: "2"
+	)
+	@handler compact
+	post /compact (WithID)
+
+	@doc(
+		summary: "获取记忆记录列表"
+		description: "业务说明：分页查询指定分身的记忆记录，支持按层级、类别、状态、关键词过滤。用于记忆管理页面查看和调试。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryRecordGetList
+	post /records/get-list (MemoryRecordGetListReq) returns (MemoryRecordGetListResp)
+
+	@doc(
+		summary: "获取记忆实体列表"
+		description: "业务说明：分页查询指定分身的记忆实体关联，支持按实体类型、实体键过滤。用于查看记忆中提取的实体信息。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryEntityGetList
+	post /entities/get-list (MemoryEntityGetListReq) returns (MemoryEntityGetListResp)
+
+	@doc(
+		summary: "获取召回轨迹列表"
+		description: "业务说明：分页查询指定分身的记忆召回轨迹，支持按查询内容模糊搜索。用于调试记忆召回效果。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryTraceGetList
+	post /traces/get-list (MemoryTraceGetListReq) returns (MemoryTraceGetListResp)
+
+	@doc(
+		summary: "获取记忆画像"
+		description: "业务说明：查询指定分身的长期记忆画像，返回画像摘要文本。画像由 Dream 整理自动生成，反映用户的长期偏好和特征。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryProfileGetOne
+	post /profile/get-one (MemoryProfileGetOneReq) returns (MemoryProfileInfo)
+
+	@doc(
+		summary: "手动触发 Dream 整理"
+		description: "业务说明：手动触发指定分身的 Dream 记忆整理流程，将 L1 记录压缩为 L2 摘要并归档已处理记录。用于记忆维护和调试。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "create"
+		group: "ai/clone/memory"
+		recordLogMode: "2"
+	)
+	@handler memoryDreamRun
+	post /dream/run (MemoryDreamRunReq) returns (MemoryDreamRunResp)
+
+	@doc(
+		summary: "获取 Dream 运行记录列表"
+		description: "业务说明：分页查询指定分身的 Dream 运行历史，支持按状态过滤。用于查看记忆整理的历史记录和调试。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryDreamRunGetList
+	post /dream-runs/get-list (MemoryDreamRunGetListReq) returns (MemoryDreamRunGetListResp)
+
+	@doc(
+		summary: "获取归档记录列表"
+		description: "业务说明：分页查询指定分身的记忆归档记录，支持按归档原因过滤。用于查看已归档的记忆数据。"
+		authType: "admin"
+		resource: "ai/clone/memory"
+		action: "view"
+		group: "ai/clone/memory"
+		recordLogMode: "1"
+	)
+	@handler memoryArchiveGetList
+	post /archives/get-list (MemoryArchiveGetListReq) returns (MemoryArchiveGetListResp)
+}
+
+// ===== Clone 记忆管理 V2 类型定义 =====
+
+type MemoryRecordGetListReq {
+	cloneID     int64    `json:"cloneID"`         // 分身ID
+	page        PageInfo `json:"page"`            // 分页信息
+	query       string   `json:"query,optional"`  // 搜索关键词（摘要/内容模糊匹配）
+	memoryLevel string   `json:"memoryLevel,optional"` // 记忆层级 l1/l2/profile
+	memoryKind  string   `json:"memoryKind,optional"`  // 记忆类别
+	status      int64    `json:"status,optional,string"` // 状态 1-活跃 2-已衰减 3-已归档
+	startTime   int64    `json:"startTime,optional,string"` // 开始时间戳（秒）
+	endTime     int64    `json:"endTime,optional,string"`   // 结束时间戳（秒）
+}
+
+type MemoryRecordInfo {
+	ID          int64  `json:"id,string"`            // 记忆ID
+	cloneID     int64  `json:"cloneID"`              // 分身ID（owner_id）
+	memoryLevel string `json:"memoryLevel"`          // 记忆层级
+	memoryKind  string `json:"memoryKind"`           // 记忆类别
+	sessionID   string `json:"sessionID,optional"`   // 来源会话ID
+	summary     string `json:"summary,optional"`     // 摘要
+	content     string `json:"content,optional"`     // 完整内容
+	keywords    string `json:"keywords,optional"`    // 关键词（逗号分隔展示）
+	importance  float64 `json:"importance"`          // 重要性评分
+	status      int64  `json:"status,string"`        // 状态
+	updatedTime int64  `json:"updatedTime,optional,string"` // 更新时间
+}
+
+type MemoryRecordGetListResp {
+	list  []MemoryRecordInfo `json:"list"`  // 记忆记录列表
+	total int64              `json:"total,string"` // 总数
+}
+
+type MemoryEntityGetListReq {
+	cloneID    int64    `json:"cloneID"`               // 分身ID
+	page       PageInfo `json:"page"`                  // 分页信息
+	entityType string   `json:"entityType,optional"`   // 实体类型过滤
+	entityKey  string   `json:"entityKey,optional"`    // 实体键过滤
+}
+
+type MemoryEntityInfo {
+	entityType  string  `json:"entityType"`           // 实体类型
+	entityKey   string  `json:"entityKey"`            // 实体唯一键
+	entityName  string  `json:"entityName,optional"`  // 实体展示名
+	role        string  `json:"role,optional"`        // 实体角色
+	confidence  float64 `json:"confidence"`           // 抽取置信度
+	recordCount int64   `json:"recordCount,string"`   // 关联记忆记录数
+}
+
+type MemoryEntityGetListResp {
+	list  []MemoryEntityInfo `json:"list"`  // 实体列表
+	total int64              `json:"total,string"` // 总数
+}
+
+type MemoryTraceGetListReq {
+	cloneID  int64    `json:"cloneID"`          // 分身ID
+	page     PageInfo `json:"page"`             // 分页信息
+	query    string   `json:"query,optional"`   // 查询内容模糊搜索
+}
+
+type MemoryTraceInfo {
+	traceID       string `json:"traceID"`                   // 轨迹标识
+	query         string `json:"query"`                     // 用户查询
+	enoughAt      string `json:"enoughAt,optional"`         // 命中层级
+	path          string `json:"path,optional"`             // 召回路径
+	resultSummary string `json:"resultSummary,optional"`    // 召回摘要
+	createdTime   int64  `json:"createdTime,optional,string"` // 创建时间
+}
+
+type MemoryTraceGetListResp {
+	list  []MemoryTraceInfo `json:"list"`  // 召回轨迹列表
+	total int64             `json:"total,string"` // 总数
+}
+
+type MemoryProfileGetOneReq {
+	cloneID int64 `json:"cloneID"` // 分身ID
+}
+
+type MemoryProfileInfo {
+	ownerType   string `json:"ownerType"`                   // 归属主体类型
+	ownerID     int64  `json:"ownerID,string"`              // 归属主体ID
+	profileText string `json:"profileText,optional"`        // 画像摘要文本
+	updatedTime int64  `json:"updatedTime,optional,string"` // 更新时间
+}
+
+type MemoryDreamRunReq {
+	cloneID     int64  `json:"cloneID"`               // 分身ID
+	triggerType string `json:"triggerType,optional"`   // 触发类型 manual/repair
+}
+
+type MemoryDreamRunResp {
+	runID         int64  `json:"runID,string"`              // Dream 运行ID
+	status        string `json:"status"`                    // 运行状态
+	archivedCount int64  `json:"archivedCount,optional,string"` // 归档记录数
+	newRecordID   int64  `json:"newRecordID,optional,string"`   // 新产生的L2记录ID
+	summary       string `json:"summary,optional"`          // Dream 摘要
+}
+
+type MemoryDreamRunGetListReq {
+	cloneID  int64    `json:"cloneID"`             // 分身ID
+	page     PageInfo `json:"page"`                // 分页信息
+	status   string   `json:"status,optional"`     // 状态过滤 running/success/skipped/failed
+}
+
+type MemoryDreamRunInfo {
+	ID               int64  `json:"id,string"`                 // Dream运行ID
+	cloneID          int64  `json:"cloneID,string"`            // 分身ID（owner_id）
+	triggerType      string `json:"triggerType"`               // 触发类型
+	status           string `json:"status"`                    // 运行状态
+	inputWindowStart string `json:"inputWindowStart,optional"` // 审查窗口开始
+	inputWindowEnd   string `json:"inputWindowEnd,optional"`   // 审查窗口结束
+	summary          string `json:"summary,optional"`          // Dream摘要
+	createdTime      int64  `json:"createdTime,optional,string"`   // 创建时间
+	updatedTime      int64  `json:"updatedTime,optional,string"`   // 更新时间
+}
+
+type MemoryDreamRunGetListResp {
+	list  []MemoryDreamRunInfo `json:"list"`  // Dream运行记录列表
+	total int64                `json:"total,string"` // 总数
+}
+
+type MemoryArchiveGetListReq {
+	cloneID       int64    `json:"cloneID"`               // 分身ID
+	page          PageInfo `json:"page"`                  // 分页信息
+	archiveReason string   `json:"archiveReason,optional"` // 归档原因过滤
+}
+
+type MemoryArchiveInfo {
+	ID            int64  `json:"id,string"`              // 归档ID
+	cloneID       int64  `json:"cloneID,string"`         // 分身ID（owner_id）
+	recordID      int64  `json:"recordID,string"`        // 来源记忆记录ID
+	archiveReason string `json:"archiveReason"`          // 归档原因
+	createdTime   int64  `json:"createdTime,optional,string"` // 创建时间
+}
+
+type MemoryArchiveGetListResp {
+	list  []MemoryArchiveInfo `json:"list"`  // 归档记录列表
+	total int64               `json:"total,string"` // 总数
+}
+
+// ---- 快照类型定义 ----
+
+type CloneSnapshotInfo {
+	ID          int64  `json:"id,optional"`          // 快照ID
+	cloneID     int64  `json:"cloneID"`              // 分身ID
+	checksum    string `json:"checksum,optional"`    // 校验和
+	description string `json:"description,optional"` // 快照描述
+	sizeBytes   int64  `json:"sizeBytes,optional"`   // 快照大小（字节）
+	fileCount   int32  `json:"fileCount,optional"`   // 文件数量
+	isAuto      int64  `json:"isAuto,optional"`      // 是否自动创建 1-是 2-否
+	status      int64  `json:"status,optional"`      // 状态 1-正常 2-已过期
+	createdTime int64  `json:"createdTime,optional"` // 创建时间
+}
+
+type CloneSnapshotCreateReq {
+	cloneID     int64  `json:"cloneID"`              // 分身ID
+	description string `json:"description,optional"` // 快照描述
+	isAuto      int64  `json:"isAuto,optional"`      // 是否自动创建 1-是 2-否
+}
+
+type CloneSnapshotCreateResp {
+	ID       int64  `json:"id"`       // 快照ID
+	Checksum string `json:"checksum"` // 校验和
+}
+
+type CloneSnapshotRestoreReq {
+	snapshotID int64 `json:"snapshotID"` // 快照ID
+}
+
+type CloneSnapshotDeleteReq {
+	snapshotID int64 `json:"snapshotID"` // 快照ID
+}
+
+type CloneSnapshotGetOneReq {
+	snapshotID int64 `json:"snapshotID"` // 快照ID
+}
+
+type CloneSnapshotGetListReq {
+	cloneID int64     `json:"cloneID"`       // 分身ID
+	page    PageInfo  `json:"page"`          // 分页信息
+}
+
+type CloneSnapshotGetListResp {
+	list  []CloneSnapshotInfo `json:"list"`  // 快照列表
+	total int64               `json:"total"` // 总数
+}
+
+// ---- 分身快照管理服务定义 ----
+@server (
+	group:            ai/clone/snapshot
+	prefix:           /api/v1/ai/clone/snapshot
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiCloneManage"
+	accessNamePrefix: "分身快照管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建快照"
+		description: "业务说明：为分身创建状态快照，保存当前的记忆库状态、配置信息等。快照可用于备份、版本管理、故障恢复等场景。返回快照ID和校验和，可用于后续恢复操作。支持自动快照和手动快照。"
+		authType: "admin"
+		resource: "cloneSnapshot"
+		action: "create"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (CloneSnapshotCreateReq) returns (CloneSnapshotCreateResp)
+
+	@doc(
+		summary: "恢复快照"
+		description: "业务说明：将分身恢复到指定快照时的状态，包括记忆库数据、配置信息等。恢复后当前状态被覆盖，不可回退。用于故障恢复、版本回退、实验回滚等场景。恢复前建议先创建当前状态快照。"
+		authType: "admin"
+		resource: "cloneSnapshot"
+		action: "restore"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler restore
+	post /restore (CloneSnapshotRestoreReq)
+
+	@doc(
+		summary: "删除快照"
+		description: "业务说明：删除指定的分身快照记录及其存储数据。删除后该快照不可恢复。用于清理过期快照、释放存储空间等。删除前需确认快照不再需要。"
+		authType: "admin"
+		resource: "cloneSnapshot"
+		action: "delete"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (CloneSnapshotDeleteReq)
+
+	@doc(
+		summary: "获取快照详情"
+		description: "业务说明：根据快照ID查询完整的快照信息，包括分身ID、校验和、描述、大小、文件数量、创建时间等。用于快照详情查看、恢复前确认等场景。"
+		authType: "admin"
+		resource: "cloneSnapshot"
+		action: "view"
+		group: "AI中台"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (CloneSnapshotGetOneReq) returns (CloneSnapshotInfo)
+
+	@doc(
+		summary: "获取快照列表"
+		description: "业务说明：分页查询指定分身的快照列表，返回所有历史快照记录。用于快照管理页面、版本历史查看等场景。返回结果按创建时间倒序排列。"
+		authType: "admin"
+		resource: "cloneSnapshot"
+		action: "view"
+		group: "AI中台"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (CloneSnapshotGetListReq) returns (CloneSnapshotGetListResp)
+}

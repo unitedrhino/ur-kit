@@ -1,0 +1,127 @@
+info (
+	title:   "用户消息管理"
+	desc:    "用户消息相关接口"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:           system/user/self
+	prefix:          /api/v1/system/user/self
+	accessCode:      "systemUserSelf"
+	accessName:      "用户基础操作"
+	accessGroup:     "用户管理"
+	defaultAuthType: "all"
+	defaultNeedAuth: "false"
+	middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "用户消息批量已读"
+	    description: "业务说明：将指定的多条消息标记为已读状态，传入消息ID列表。用于用户批量处理未读消息、清理消息提醒等场景。标记后消息在列表中显示为已读，未读计数相应减少。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler messageBatchIsRead
+	post /message/multi-is-read (IDList)
+
+	@doc(
+	    summary: "用户消息批量删除"
+	    description: "业务说明：批量删除指定的消息记录，传入消息ID列表。删除后消息不再显示在消息列表中。用于用户清理不需要的消息、整理消息箱等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler messageMultiDelete
+	post /message/multi-delete (IDList)
+
+	@doc(
+	    summary: "用户消息全部已读"
+	    description: "业务说明：将当前用户的所有未读消息一次性标记为已读。用于用户一键清理所有未读提醒、快速消除消息提醒红点等场景。执行后未读计数归零。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler messageMarkAllRead
+	post /message/mark-all-read
+
+	@doc(
+	    summary: "用户消息统计"
+	    description: "业务说明：获取当前用户的消息统计信息，包括各分组的未读数量、总未读数、待处理消息数等。用于消息中心顶部统计展示、消息提醒红点计算等场景。返回分组维度的统计数据。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler messageStatistics
+	post /message/statistics returns (UserMessageStatisticsResp)
+
+	@doc(
+	    summary: "用户消息列表"
+	    description: "业务说明：分页查询当前用户的消息列表，支持按分组、类型、通知编码、已读状态、已处理状态等条件过滤。返回消息详情包括消息内容、发送时间等。用于消息中心列表展示、消息历史查询等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler messageGetList
+	post /message/get-list (UserMessageGetListReq) returns (UserMessageGetListResp)
+
+	@doc(
+	    summary: "用户消息标记已处理"
+	    description: "业务说明：将指定消息标记为已处理状态。用于处理需要用户响应的消息（如审批通知、任务提醒等），标记后消息状态变更为已处理。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "execute"
+	    recordLogMode: "3"
+	)
+	@handler messageHandle
+	post /message/handle (WithID)
+
+	@doc(
+	    summary: "用户待处理消息"
+	    description: "业务说明：查询当前用户需要处理的消息列表，返回未处理状态的消息。用于待办事项展示、待处理消息提醒等场景，帮助用户快速了解需要响应的消息。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler messageGetPending
+	post /message/get-pending (UserMessageGetPendingReq) returns (UserMessageGetListResp)
+
+	@doc(
+	    summary: "用户通知偏好读取"
+	    description: "业务说明：获取当前用户的通知偏好设置，包括免打扰时间段、免打扰渠道、各通知分组的订阅控制等。用于用户查看和修改通知偏好设置等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler notifyPreferenceRead
+	post /notify-preference/read returns (UserNotifyPreference)
+
+	@doc(
+	    summary: "用户通知偏好更新"
+	    description: "业务说明：更新当前用户的通知偏好设置，包括设置免打扰时间段、启用/禁用特定通知渠道、控制各通知分组的订阅状态等。用于用户个性化配置消息接收方式。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler notifyPreferenceUpdate
+	post /notify-preference/update (UserNotifyPreference)
+}

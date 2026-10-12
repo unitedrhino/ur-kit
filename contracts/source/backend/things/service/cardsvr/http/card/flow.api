@@ -1,0 +1,90 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡流量包记录"
+    desc: "物联卡已订购流量包记录查询"
+    version: "v1"
+)
+
+type (
+    CardFlow {
+        ID           int64   `json:"id,string"`
+        PackageID    string  `json:"packageId,optional"`
+        PackageName  string  `json:"packageName,optional"`
+        PacketID     string  `json:"packetId"`
+        PacketName   string  `json:"packetName,optional"`
+        OrdNo        string  `json:"ordNo"`
+        TrueFlow     float64 `json:"trueFlow,optional"`
+        ErrorFlow    float64 `json:"errorFlow,optional"`
+        StartTime    string  `json:"startTime,optional"`
+        EndTime      string  `json:"endTime,optional"`
+        CreateTime   string  `json:"createTime,optional"`
+        OrdType      string  `json:"ordType"`
+        Status       int64   `json:"status,optional"`
+        PacketType   int64   `json:"packetType"`
+        UseFlow      float64 `json:"useFlow,optional"`
+        Iccid        string  `json:"iccid"`
+        ErrorTime    float64 `json:"errorTime,optional"`
+        ValidateType int64   `json:"validateType,optional"`
+        ValidateTime string  `json:"validateTime,optional"`
+        UseTrueFlow  float64 `json:"useTrueFlow,optional"`
+        UseSoFlow    float64 `json:"useSoFlow,optional"`
+        RelationResolved bool `json:"relationResolved"`
+        RelationReason string `json:"relationReason,optional"`
+        Source string `json:"source"`
+        RouteCode string `json:"routeCode,optional"`
+        BusinessKey string `json:"businessKey,optional"`
+        UpstreamName string `json:"upstreamName,optional"`
+        UpstreamPrice *float64 `json:"upstreamPrice,optional"`
+    }
+
+    CardFlowGetListReq {
+        PageInfo
+        Iccid     string `json:"iccid,optional"`
+        PacketID  string `json:"packetId,optional"`
+        PackageID string `json:"packageId,optional"`
+        RouteIDs  []int64 `json:"routeIds,string,optional"`
+        PackageIDs []string `json:"packageIds,optional"`
+        OrdNo     string `json:"ordNo,optional"`
+        Status    int64  `json:"status,optional"`
+        ActiveOnly bool  `json:"activeOnly,optional"` // 仅查询当前有效且状态为生效的计划事实
+    }
+
+    CardFlowGetListResp {
+        PageResp
+        List []*CardFlow `json:"list"`
+    }
+
+)
+
+@server(
+    group: card/flow
+    prefix: /api/v1/things/card/flow
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取流量包记录列表"
+        description: "业务说明：获取流量包记录列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardFlowGetListReq) returns (CardFlowGetListResp)
+
+    @doc(
+        summary: "获取流量包记录详情"
+        description: "业务说明：按租户和主键查询单条流量包事实记录"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardFlow)
+}

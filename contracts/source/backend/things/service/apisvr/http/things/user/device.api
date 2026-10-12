@@ -1,0 +1,442 @@
+info (
+	title:   "用户管理模块"
+	desc:    "用户管理相关接口，包括创建账号，登录，获取验证码，获取用户列表，获取单个用户信息，更新用户信息，删除用户"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            things/user/device/collect
+	prefix:           /api/v1/things/user/device/collect
+	accessCodePrefix: "thingsUserDevice"
+	accessNamePrefix: "设备收藏"
+	accessGroup:      "用户设备"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "all"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "批量收藏设备"
+	    description: "业务说明：用户将多个设备添加到个人收藏列表，便于快速访问常用设备。收藏关系保存在用户设备关联表中，不影响设备实际归属和权限。"
+	    authType: "all"
+	    group: "things/user/device/collect"
+	    resource: "things/user/device/collect"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler batchCreate
+	post /batch-create (UserCollectDeviceSave)
+
+	@doc(
+	    summary: "批量取消收藏设备"
+	    description: "业务说明：用户从个人收藏列表中移除多个设备，取消收藏不影响设备实际归属，仅删除用户与设备的收藏关联关系。"
+	    authType: "all"
+	    group: "things/user/device/collect"
+	    resource: "things/user/device/collect"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler batchDelete
+	post /batch-delete (UserCollectDeviceSave)
+
+	@doc(
+	    summary: "获取收藏设备列表"
+	    description: "业务说明：查询当前用户收藏的所有设备信息，返回设备详情列表（包括产品名称、设备别名、在线状态等），用于用户快速访问常用设备。"
+	    authType: "all"
+	    group: "things/user/device/collect"
+	    resource: "things/user/device/collect"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list returns (UserCollectDeviceInfo)
+}
+
+@server (
+	group:            things/user/device/share
+	prefix:           /api/v1/things/user/device/share
+	accessCodePrefix: "thingsUserDevice"
+	accessNamePrefix: "设备分享"
+	accessGroup:      "用户设备"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "all"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "分享设备"
+	    description: "业务说明：设备所有者将设备权限分享给其他用户，支持全部授权（完整控制权限）和部分授权（指定功能权限）。可设置分享权限范围（物模型功能、系统功能）和过期时间，分享记录写入设备分享表。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler create
+	post /create (UserDeviceShareInfo) returns (WithID)
+
+	@doc(
+	    summary: "生成批量分享设备二维码"
+	    description: "业务说明：设备所有者批量选择多个设备生成分享二维码，其他用户扫码后可一次性接受多个设备的分享权限。适用于批量设备移交场景（如项目交付、设备群控）。返回分享Token用于二维码生成和后续验证。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler batchCreate
+	post /batch-create (UserDeviceShareBatchInfo) returns (UserDeviceShareBatchToken)
+
+	@doc(
+	    summary: "获取批量分享的设备列表"
+	    description: "业务说明：用户扫描批量分享二维码后，通过分享Token查询待接受的设备列表及其权限配置详情，用于用户确认是否接受分享。返回设备信息、授权类型、权限范围、过期时间等。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler batchGetList
+	post /batch-get-list (UserDeviceShareBatchToken) returns (UserDeviceShareBatchGetListResp)
+
+	@doc(
+	    summary: "接受批量分享设备"
+	    description: "业务说明：用户确认接受批量分享的设备权限，将分享记录中的设备与当前用户建立关联关系。接受后用户获得设备相应权限（读/写/控制），可在设备列表中看到已分享设备。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler batchAccept
+	post /batch-accept (UserDeviceShareBatchAcceptInfo)
+
+	@doc(
+	    summary: "取消分享设备"
+	    description: "业务说明：设备所有者取消对单个用户的设备分享，删除分享记录，被分享用户立即失去该设备的访问权限。不影响设备所有者的所有权。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler delete
+	post /delete (UserDeviceShareGetOneReq)
+
+	@doc(
+	    summary: "批量取消分享设备"
+	    description: "业务说明：设备所有者批量取消多个设备分享记录，可按分享ID列表或项目维度批量删除。适用于设备退役、项目关闭等需要清理分享关系的场景。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler batchDelete
+	post /batch-delete (UserDeviceShareBatchDeleteReq)
+
+	@doc(
+	    summary: "更新分享设备信息"
+	    description: "业务说明：设备所有者修改已分享设备的权限配置，包括调整授权类型、权限范围（物模型功能权限、系统功能权限）、过期时间等。更新后被分享用户的权限立即生效。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "update"
+	    recordLogMode: "3"
+	)
+	@handler update
+	post /update (UserDeviceShareInfo)
+
+	@doc(
+	    summary: "获取分享设备详情"
+	    description: "业务说明：查询单条设备分享记录的完整信息，包括设备信息、被分享用户、授权类型、权限配置、过期时间等。用于分享管理页面的详情查看或权限编辑前的数据获取。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (UserDeviceShareGetOneReq) returns (UserDeviceShareInfo)
+
+	@doc(
+	    summary: "获取分享设备列表"
+	    description: "业务说明：查询设备分享记录列表，支持按设备维度筛选，可选同时返回被分享用户信息。用于分享管理页面展示当前用户作为分享者或被分享者的所有设备分享关系。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (UserDeviceShareGetListReq) returns (UserDeviceShareGetListResp)
+
+	@doc(
+	    summary: "生成设备分享码"
+	    description: "业务说明：设备所有者选择设备及权限配置后生成分享码，支持单设备或批量设备。分享码默认有效期24小时，最长72小时（3天），可通过纯文本方式分享给其他用户。被分享者输入分享码即可接受设备权限。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler shareCodeGen
+	post /share-code-gen (UserDeviceShareCodeGenReq) returns (UserDeviceShareCodeGenResp)
+
+	@doc(
+	    summary: "通过分享码接受设备"
+	    description: "业务说明：用户输入分享码，验证有效性后将设备权限绑定到当前用户。验证通过后创建 dm_user_device_share 记录，并删除分享码（一次性使用）。支持单设备和批量设备接受。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "create"
+	    recordLogMode: "3"
+	)
+	@handler shareCodeAccept
+	post /share-code-accept (UserDeviceShareCodeAcceptReq) returns (UserDeviceShareCodeAcceptResp)
+
+	@doc(
+	    summary: "获取分享码列表"
+	    description: "业务说明：查询当前登录用户生成的所有有效分享码列表，包括设备信息、权限配置、有效期等。用于分享者在管理页面查看自己发出的分享码。列表自动过滤已过期的分享码。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler shareCodeGetList
+	post /share-code-get-list returns (UserDeviceShareCodeGetListResp)
+
+	@doc(
+	    summary: "删除分享码"
+	    description: "业务说明：分享者手动删除自己生成的分享码，使其立即失效。删除后该分享码不可再被接受，被分享者查询时返回【分享码不存在或已过期】。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler shareCodeDelete
+	post /share-code-delete (UserDeviceShareCodeDeleteReq)
+
+	@doc(
+	    summary: "获取批量分享 Token 列表"
+	    description: "业务说明：查询当前登录用户生成的所有有效批量分享 Token 列表，包括设备数量、授权类型、有效期等。用于分享者在管理页面查看自己发出的批量分享。列表自动过滤已过期的 Token。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler batchGetTokenList
+	post /batch-get-token-list returns (UserDeviceShareBatchGetTokenListResp)
+
+	@doc(
+	    summary: "删除批量分享 Token"
+	    description: "业务说明：分享者手动删除自己生成的批量分享 Token，使其立即失效。删除后该 Token 不可再被接受，被分享者查询时返回【分享 Token 不存在或已过期】。"
+	    authType: "all"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "delete"
+	    recordLogMode: "3"
+	)
+	@handler batchDeleteToken
+	post /batch-delete-token (UserDeviceShareBatchDeleteTokenReq)
+}
+
+@server (
+	group:            things/user/device/share
+	prefix:           /api/v1/things/user/device/share
+	accessCodePrefix: "thingsUserDevice"
+	accessNamePrefix: "设备分享"
+	accessGroup:      "用户设备"
+	middleware:       InitCtxsWare
+	defaultAuthType:  "public"
+	defaultNeedAuth:  "false"
+)
+service api {
+	@doc(
+	    summary: "校验批量分享 Token"
+	    description: "业务说明：无需登录，通过分享 Token 查询链接是否仍然有效。仅返回有效状态、过期时间、用途和设备数量，不返回设备详情、权限配置或用户信息，用于公开分享承接页展示链接状态。"
+	    authType: "public"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler tokenCheck
+	post /token/check (UserDeviceShareBatchToken) returns (UserDeviceShareTokenCheckResp)
+
+	@doc(
+	    summary: "通过分享码查询分享信息"
+	    description: "业务说明：无需登录，通过分享码查询对应的设备列表和分享权限信息。用于被分享者在未登录状态下预览即将接受的设备信息。分享码过期或无效时返回对应错误。"
+	    authType: "public"
+	    group: "things/user/device/share"
+	    resource: "things/user/device/share"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler shareCodeGetInfo
+	post /share-code-get-info (UserDeviceShareCodeGetInfoReq) returns (UserDeviceShareCodeGetInfoResp)
+}
+
+type (
+	UserDeviceShareBatchDeleteReq {
+		IDs       []int64 `json:"ids,optional"`
+		ProjectID int64   `json:"projectID,string,optional"`
+	}
+	UserDeviceShareInfo {
+		ID                int64                 `json:"id,string,optional"`
+		ProjectID         int64                 `json:"projectID,string,optional"`
+		Device            DeviceCore            `json:"device,optional"` //设备信息
+		SharedUserID      int64                 `json:"sharedUserID,string,optional"` //分享的对象
+		SharedUserAccount string                `json:"sharedUserAccount,optional"`
+		AuthType          int64                 `json:"authType,optional"` //授权类型:1:全部授权 2:部分授权
+		SchemaPerm        map[string]*SharePerm `json:"schemaPerm,optional"` //普通功能权限 2:读写权限 3读权限
+		AccessPerm        map[string]*SharePerm `json:"accessPerm,optional"` //系统功能权限 2:读写权限 3读权限
+		ExpTime           *int64                `json:"expTime,optional,string"` //到期时间
+		UseBy             string                `json:"useBy,optional,omitempty"` //用途
+		User              *UserCore             `json:"user,optional"` //只读,传withUser会赋值
+		CreatedTime       int64                 `json:"createdTime,string,optional"`
+	}
+	UserDeviceShareBatchInfo {
+		Devices     []*DeviceCore         `json:"devices,optional"` //批量设备信息
+		AuthType    int64                 `json:"authType,optional"` //授权类型:1:全部授权 2:部分授权
+		SchemaPerm  map[string]*SharePerm `json:"schemaPerm,optional"` //普通功能权限 2:读写权限 3读权限
+		AccessPerm  map[string]*SharePerm `json:"accessPerm,optional"` //系统功能权限 2:读写权限 3读权限
+		ExpTime     int64                 `json:"expTime,optional"` //到期时间
+		UseBy       string                `json:"useBy,optional,omitempty"` //用途
+		CreatedTime int64                 `json:"createdTime,string,optional"`
+	}
+	UserDeviceShareBatchAcceptInfo {
+		ShareToken string        `json:"shareToken,optional"` //分享后的用于生成二维码的字符串
+		Devices    []*DeviceCore `json:"devices,optional"` //批量设备信息
+	}
+	UserDeviceShareBatchToken {
+		ShareToken   string `json:"shareToken,optional"`
+		LinkExpireAt int64  `json:"linkExpireAt,optional"` // 分享链接过期时间，Unix 秒
+		AuthExpireAt int64  `json:"authExpireAt,optional"` // 分享授权过期时间，Unix 秒
+		CreatedTime  int64  `json:"createdTime,optional"` // Token 创建时间，Unix 秒
+		UseBy        string `json:"useBy,optional,omitempty"` // 用途
+	}
+	UserDeviceShareTokenCheckResp {
+		Valid        bool   `json:"valid"` // Token 是否有效
+		Reason       string `json:"reason,optional"` // 失效原因
+		LinkExpireAt int64  `json:"linkExpireAt,optional"` // 分享链接过期时间，Unix 秒
+		AuthExpireAt int64  `json:"authExpireAt,optional"` // 分享授权过期时间，Unix 秒
+		CreatedTime  int64  `json:"createdTime,optional"` // Token 创建时间，Unix 秒
+		UseBy        string `json:"useBy,optional,omitempty"` // 用途
+		DeviceCount  int64  `json:"deviceCount,optional"` // 分享设备数量
+	}
+	SharePerm {
+		Perm int64 `json:"perm,optional,default=3"` //2:读写权限 3读权限
+	}
+	UserDeviceShareGetOneReq {
+		ID     int64       `json:"id,string,optional"`
+		UseBy  string      `json:"useBy,optional,omitempty"` //用途
+		Device *DeviceCore `json:"device,optional"` //设备信息
+	}
+	UserDeviceShareGetListReq {
+		Page     *PageInfo   `json:"page,optional"`
+		Device   *DeviceCore `json:"device,optional"` //设备信息
+		WithUser bool        `json:"withUser,optional"` //同时返回用户信息
+	}
+	UserDeviceShareGetListResp {
+		List  []*UserDeviceShareInfo `json:"list,optional"`
+		Total int64                  `json:"total,optional"`
+	}
+	UserDeviceShareBatchGetListResp {
+		Devices     []*DeviceShareInfo    `json:"devices,optional"` //批量设备信息
+		AuthType    int64                 `json:"authType,optional"` //授权类型:1:全部授权 2:部分授权
+		SchemaPerm  map[string]*SharePerm `json:"schemaPerm,optional"` //普通功能权限 2:读写权限 3读权限
+		AccessPerm  map[string]*SharePerm `json:"accessPerm,optional"` //系统功能权限 2:读写权限 3读权限
+		ExpTime     int64                 `json:"expTime,optional"` //到期时间
+		UseBy       string                `json:"useBy,optional,omitempty"` //用途
+		CreatedTime int64                 `json:"createdTime,string,optional"`
+	}
+	DeviceShareInfo {
+		ProductID   string `json:"productID"` //产品ID
+		ProductName string `json:"productName,optional,omitempty"`
+		ProductImg  string `json:"productImg,optional,omitempty"` //产品图片
+		DeviceName  string `json:"deviceName"` //设备名称
+		DeviceAlias string `json:"deviceAlias,optional"` //设备别名 读写
+		UseBy       string `json:"useBy,optional,omitempty"` //用途
+	}
+	UserDeviceShareCodeGenReq {
+		Devices    []*DeviceCore         `json:"devices"`                    //要分享的设备列表（至少1个）
+		AuthType   int64                 `json:"authType,optional"`          //授权类型:1全部授权 2部分授权
+		SchemaPerm map[string]*SharePerm `json:"schemaPerm,optional"`        //物模型权限
+		AccessPerm map[string]*SharePerm `json:"accessPerm,optional"`        //系统功能权限
+		ExpTime    *int64                `json:"expTime,optional,string"`   //分享过期时间（0表示不限制）
+		UseBy      string                `json:"useBy,optional,omitempty"`   //用途
+		ValidHours int64                 `json:"validHours,optional"`        //分享码有效时长（小时），默认24，最大72（3天）
+	}
+	UserDeviceShareCodeGenResp {
+		Code           string `json:"code"`                             //分享码
+		ValidUntilTime int64  `json:"validUntilTime,string"`           //有效期截止时间（毫秒时间戳）
+		DeviceCount    int64  `json:"deviceCount,string"`              //分享设备数量
+	}
+	UserDeviceShareCodeAcceptReq {
+		Code string `json:"code"` //分享码
+	}
+	UserDeviceShareCodeAcceptResp {
+		Devices []*DeviceShareInfo `json:"devices,optional"` //已接受的设备列表
+	}
+	UserDeviceShareCodeGetInfoReq {
+		Code string `json:"code"` //分享码
+	}
+	UserDeviceShareCodeGetInfoResp {
+		Devices        []*DeviceShareInfo    `json:"devices,optional"`    //设备列表
+		AuthType       int64                 `json:"authType,optional"`   //授权类型
+		SchemaPerm     map[string]*SharePerm `json:"schemaPerm,optional"` //物模型权限
+		AccessPerm     map[string]*SharePerm `json:"accessPerm,optional"` //系统功能权限
+		ExpTime        int64                 `json:"expTime,optional"`    //分享过期时间
+		ValidUntilTime int64                 `json:"validUntilTime,string,optional"` //分享码有效期截止时间
+		DeviceCount    int64                 `json:"deviceCount,string,optional"`    //设备数量
+	}
+	UserDeviceShareCodeListItem {
+		Code           string                `json:"code"`                             //分享码
+		ValidUntilTime int64                 `json:"validUntilTime,string"`           //有效期截止时间
+		AuthType       int64                 `json:"authType,optional"`               //授权类型
+		SchemaPerm     map[string]*SharePerm `json:"schemaPerm,optional"`             //物模型权限
+		AccessPerm     map[string]*SharePerm `json:"accessPerm,optional"`             //系统功能权限
+		ExpTime        int64                 `json:"expTime,optional"`                //分享过期时间
+		UseBy          string                `json:"useBy,optional,omitempty"`        //用途
+		Devices        []*DeviceShareInfo    `json:"devices,optional"`                //设备列表
+		DeviceCount    int64                 `json:"deviceCount,string,optional"`     //设备数量
+		CreatedTime    int64                 `json:"createdTime,string,optional"`     //创建时间
+	}
+	UserDeviceShareCodeGetListResp {
+		List  []*UserDeviceShareCodeListItem `json:"list,optional"` //分享码列表
+		Total int64                          `json:"total,optional"` //总数
+	}
+	UserDeviceShareCodeDeleteReq {
+		Code string `json:"code"` //要删除的分享码
+	}
+	UserDeviceShareBatchListItem {
+		ShareToken  string `json:"shareToken"`                              //分享 Token
+		DeviceCount int64  `json:"deviceCount,string"`                     //设备数量
+		CreatedTime int64  `json:"createdTime,string,optional"`            //创建时间
+		ExpTime     int64  `json:"expTime,optional"`                       //分享过期时间
+		AuthType    int64  `json:"authType,optional"`                      //授权类型
+		UseBy       string `json:"useBy,optional,omitempty"`               //用途
+	}
+	UserDeviceShareBatchGetTokenListResp {
+		List  []*UserDeviceShareBatchListItem `json:"list,optional"` //Token 列表
+		Total int64                           `json:"total,optional"` //总数
+	}
+	UserDeviceShareBatchDeleteTokenReq {
+		ShareToken string `json:"shareToken"` //要删除的分享 Token
+	}
+)
+
+type (
+	UserCollectDeviceSave {
+		Devices []*DeviceCore `json:"devices"`
+	}
+	UserCollectDeviceInfo {
+		Devices []*DeviceInfo `json:"devices"`
+	}
+)

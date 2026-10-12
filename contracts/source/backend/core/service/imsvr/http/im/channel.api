@@ -1,0 +1,65 @@
+info(
+	title: "IM 渠道绑定"
+	desc: "渠道端点（设备等）绑定与免打扰管理，消息按 user 身份绑定渠道全量下行，免打扰可在此设置"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/channel
+	prefix: /api/v1/im
+	accessCodePrefix: "imChannel"
+	accessNamePrefix: "IM渠道"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "绑定渠道端点"
+		description: "业务说明：把渠道端点（如设备 {productID}:{deviceName}）绑定到当前用户，绑定后该用户消息将下行到端点，端点上行消息进入用户最近单聊。重复绑定幂等更新名称。"
+		authType: "all"
+		group: "im/channel"
+		resource: "im/channel"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler bind
+	post /channel/bind (ImChannelBindReq) returns (Empty)
+
+	@doc(
+		summary: "解绑渠道端点"
+		description: "业务说明：解除当前用户与渠道端点的绑定（仅本人可操作）。"
+		authType: "all"
+		group: "im/channel"
+		resource: "im/channel"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler unbind
+	post /channel/unbind (ImChannelUnbindReq) returns (Empty)
+
+	@doc(
+		summary: "查询渠道绑定列表"
+		description: "业务说明：查询当前用户绑定的全部渠道端点及免打扰状态。"
+		authType: "all"
+		group: "im/channel"
+		resource: "im/channel"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /channel/get-list (Empty) returns (ImChannelBindGetListResp)
+
+	@doc(
+		summary: "设置端点免打扰"
+		description: "业务说明：设置渠道端点级免打扰（isMuted=1 后站内消息不再下行到该端点，不影响端点上行）。"
+		authType: "all"
+		group: "im/channel"
+		resource: "im/channel"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler setMute
+	post /channel/set-mute (ImChannelBindSetMuteReq) returns (Empty)
+}

@@ -1,0 +1,81 @@
+info(
+    title: "网关子设备管理"
+    desc: "网关子设备管理"
+    author: "godLei6"
+    email: "603785348@qq.com"
+    version: "v1"
+)
+
+
+@server(
+    group: things/device/gateway
+    prefix: /api/v1/things/device/gateway
+    accessCodePrefix: "thingsDeviceGateway"
+    accessNamePrefix: "设备交互"
+    accessGroup: "设备管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "添加网关子设备"
+        description: "批量将子设备添加到网关的拓扑关系中。子设备通过网关与云端通信，网关代理子设备的消息上下行。添加后子设备可通过该网关上报数据和接收指令。支持批量添加多个子设备。"
+        authType: "admin"
+        group: "things/device/gateway"
+        resource: "things/device/gateway"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler batchCreate
+    post /batch-create (DeviceGateWayBatchCreateReq) returns ()
+
+    @doc(
+        summary: "获取子设备列表"
+        description: "查询指定网关下绑定的子设备列表。返回子设备的详细信息，包括设备状态、在线情况、产品信息等。用于网关拓扑管理、子设备监控。"
+        authType: "admin"
+        group: "things/device/gateway"
+        resource: "things/device/gateway"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (DeviceGateWayGetListReq) returns (DeviceGateWayGetListResp)
+
+    @doc(
+        summary: "解绑子设备"
+        description: "批量解除网关与子设备的拓扑关系。解绑后子设备无法通过该网关与云端通信，需重新绑定或改为直连模式。支持批量解绑多个子设备。"
+        authType: "admin"
+        group: "things/device/gateway"
+        resource: "things/device/gateway"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler batchDelete
+    post /batch-delete (DeviceGateWayBatchDeleteReq) returns ()
+}
+
+type (
+    DeviceGateWayGetListReq  {
+        Page *PageInfo `json:"page,optional"`             //分页信息 只获取一个则不填
+        GateWayProductID string `json:"gateWayProductID"`      //产品ID
+        GateWayDeviceName string `json:"gateWaydeviceName"`    //设备名称
+    }
+
+    DeviceGateWayGetListResp  {
+        List []*DeviceInfo `json:"list"`   //分组信息
+        PageResp
+    }
+
+    DeviceGateWayBatchCreateReq  {
+        GateWayProductID string `json:"gateWayProductID"`      //产品ID
+        GateWayDeviceName string `json:"gateWaydeviceName"`    //设备名称
+        List []*DeviceCore `json:"list,optional"`   //分组tag
+    }
+
+    DeviceGateWayBatchDeleteReq  {
+        GateWayProductID string `json:"gateWayProductID"`      //产品ID
+        GateWayDeviceName string `json:"gateWaydeviceName"`    //设备名称
+        List []*DeviceCore `json:"list,optional"`   //分组tag
+    }
+)

@@ -1,0 +1,60 @@
+info(
+    title: "产品管理模块"
+    desc: "产品管理模块"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+
+@server(
+    group: things/product/custom
+    prefix: /api/v1/things/product/custom
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "更新产品自定义信息"
+        description: "业务说明：更新产品自定义扩展配置，包括协议转换脚本、登录认证脚本、自定义Topic等。脚本用于处理非标准协议设备的数据转换、自定义认证逻辑"
+        authType: "admin"
+        group: "things/product/custom"
+        resource: "things/product/custom"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (ProductCustom) returns ()
+    @doc(
+        summary: "获取产品自定义信息详情"
+        description: "业务说明：根据产品ID查询产品自定义扩展配置。返回协议转换脚本、登录认证脚本、脚本语言类型、自定义Topic列表。用于产品高级配置查看"
+        authType: "admin"
+        group: "things/product/custom"
+        resource: "things/product/custom"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (ProductCustomGetOneReq) returns (ProductCustom)
+}
+
+type (
+
+     ProductCustom  {
+        ProductID string    `json:"productID"`
+        TransformScript *string  `json:"transformScript,optional"` //协议转换脚本
+        LoginAuthScript *string  `json:"loginAuthScript,optional"` //登录认证脚本
+        ScriptLang      int64    `json:"scriptLang,optional"` //脚本语言类型（默认JavaScript） 1:JavaScript 2:lua 3:python
+        CustomTopics     []*ProductCustomTopic `json:"customTopics,optional"` //自定义topic数组
+    }
+
+    ProductCustomGetOneReq  {
+        ProductID string `json:"productID"`                            //产品id 只读
+    }
+
+     ProductCustomTopic  {
+        Topic     string `json:"topic"`          //自定义主题需要以$custom 并包含设备名称{deviceName}及产品名称{productID}
+        Direction int64  `json:"direction"` //1:上行 2:下行 3:双向
+    }
+)

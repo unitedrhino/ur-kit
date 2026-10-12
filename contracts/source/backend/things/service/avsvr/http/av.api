@@ -1,0 +1,25 @@
+syntax = "v1"
+
+info (
+	title:   "音视频服务 API"
+	desc:    "联犀物联网平台音视频服务接口定义，接口前缀 /api/v1/av"
+	author:  "unitedrhino"
+	version: "v1"
+)
+
+import "common.api"
+import "device/info.api"
+import "device/channel.api"
+import "device/iotBind.api"
+import "media/server.api"
+import "play/live.api"
+import "play/talk.api"
+import "play/playback.api"
+import "record/record.api"
+import "record/nvr.api"
+import "event/event.api"
+import "snap/snap.api"
+import "webhook/webhook.api"
+import "onvif/onvif.api"
+import "ptz/ptz.api"
+import "config/config.api"

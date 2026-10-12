@@ -1,0 +1,52 @@
+info (
+	title:   "告警 AI 工具开发"
+	desc:    "告警 AI 判断工具开发会话管理"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+import "alarmCommon.api"
+
+@server (
+	group:            things/alarm/ai
+	prefix:           /api/v1/things/alarm/ai
+	accessCodePrefix: "thingsAlarm"
+	accessNamePrefix: "告警管理"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+    summary: "告警工具开发会话初始化"
+    description: "为项目幂等初始化告警 AI 判断工具开发 clone【含场景化提示词与项目记忆】，返回 cloneID 供 AI 工具开发会话使用"
+    resource: "things/alarm/ai"
+    action: "create"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/ai"
+	)
+	@handler toolSession
+	post /tool-session (AlarmToolDevSessionReq) returns (AlarmToolDevSessionResp)
+}
+
+// 告警工具开发会话初始化请求
+type AlarmToolDevSessionReq {
+	ToolID       int64  `json:"toolID,string"`         // 绑定的告警 AI 工具 ID（必填）
+	CloneGroupID int64  `json:"cloneGroupID,string"`   // 项目 cloneGroup ID（必填），clone 挂载与记忆归属分组
+	RuleName     string `json:"ruleName,optional"`     // 告警规则名称
+	SourceLabel  string `json:"sourceLabel,optional"`  // 告警来源描述，如【设备属性上报】
+	ProductID    string `json:"productID,optional"`    // 产品 ID
+	ProductName  string `json:"productName,optional"`  // 产品名称
+	CategoryName string `json:"categoryName,optional"` // 产品品类名称
+	ScopeLabel   string `json:"scopeLabel,optional"`   // 设备范围描述，如【A 区全部温湿度传感器】
+	EvalPeriod   string `json:"evalPeriod,optional"`   // 评估周期描述，如【5 分钟】
+	ProjectID    int64  `json:"projectID,string,optional"` // 项目 ID
+}
+
+// 告警工具开发会话初始化响应
+type AlarmToolDevSessionResp {
+	CloneID int64 `json:"cloneID,string"` // 告警工具开发 clone ID，供 tool-dev 会话指定
+}

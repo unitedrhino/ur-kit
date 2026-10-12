@@ -1,0 +1,167 @@
+info(
+	title: "接口管理模块"
+	desc: "接口管理"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: system/app/info
+	prefix: /api/v1/system/app/info
+    accessCodePrefix: "systemAppManage"
+    accessNamePrefix: "应用管理"
+    accessGroup: "应用管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+	middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加应用"
+        description: "业务说明：创建新的应用配置，包括应用名称、类型（web/小程序/原生）、使用对象、试用时长等。应用是平台的功能模块单元，租户可通过绑定应用获取相应功能权限。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (AppInfo) returns (WithID)
+
+    @doc(
+        summary: "获取应用列表"
+        description: "业务说明：查询平台应用列表，支持按名称、类型、状态、租户绑定状态等条件筛选。用于应用管理页面的列表展示，平台管理员可查看所有应用及租户绑定情况。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (AppInfoGetListReq) returns (AppInfoGetListResp)
+
+    @doc(
+        summary: "获取应用详情"
+        description: "业务说明：查询单个应用的完整配置信息，包括基本信息、试用策略、状态等。用于应用编辑页面加载初始数据，或查看应用详细配置。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (AppInfoGetOneReq) returns (AppInfo)
+
+    @doc(
+        summary: "更新应用"
+        description: "业务说明：修改应用配置，包括名称、类型、试用时长、状态等，支持部分更新。应用上架/下架通过状态字段控制，上架后租户可申请绑定。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (AppInfo) returns ()
+
+    @doc(
+        summary: "删除应用"
+        description: "业务说明：删除指定应用，删除后租户无法再绑定该应用。删除前需确认无租户已绑定该应用，避免影响已开通的功能。通常用于清理废弃的应用配置。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取微信小程序 URL Link"
+        description: "业务说明：根据平台应用 ID 动态调用微信服务端接口生成小程序 URL Link，用于微信外扫码或 H5 页面拉起小程序。"
+        authType: "all"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler wxMiniGetUrlLink
+    post /wx-mini/get-url-link (AppWxMiniGetUrlLinkReq) returns (AppWxMiniGetUrlLinkResp)
+}
+@server (
+	group:      system/app/core
+	prefix:     /api/v1/system/app/core
+	middleware: InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "无需登录获取应用信息"
+	    description: "业务说明：公开接口，用于登录页面或公开页面获取应用基本信息（如Logo、名称）。无需认证，任何人可调用，主要用于前端登录页展示应用标识。"
+	    authType: "public"
+	    group: "system/app/core"
+	    resource: "system/app/core"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (AppInfoGetOneReq) returns (AppInfo)
+}
+
+
+type (
+//    AppPolicyGetOneReq{
+//        AppID int64 `json:"appID,string"`
+//        Code string `json:"code"`
+//    }
+//    AppPolicy{
+//     ID int64 `json:"id,string,optional"`
+//     AppID int64 `json:"appID,string,optional"`
+//     Code string           `json:"code,optional"`//
+//     Name string           `json:"name,optional"`//
+//     Subject string `json:"subject,optional"`
+//     Body string `json:"body,optional"`
+//    }
+
+
+    AppInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        Name string `json:"name,optional"`                     // 应用名称
+        UseBy string `json:"useBy,optional"`     // 使用对象 client:登录直接授权该应用 admin:管理员使用,需要邀请 
+        Type string `json:"type,optional"`       // 应用类型 web:web页面  native:原生  mini:小程序
+        SubType string `json:"subType,optional"`  // 子类型 mini:(wx:微信小程序,ding:钉钉小程序)  native:安卓,ios,鸿蒙,win
+        IDs []int64 `json:"ids,string,optional"` // 应用ID列表
+        NotID int64 `json:"notID,string,optional"` // 排除某个应用ID
+        Status int64 `json:"status,optional"`//应用状态 1 上架 2 下架
+        TenantIsBind int64 `json:"tenantIsBind,optional"` // 过滤租户是否已绑定的应用 1-是 2-否,如果要过滤指定租户,通过http头里指定
+        WithAgreementCodes []string `json:"withAgreementCodes,optional"` // 非空时按 code 回填已绑定协议
+        GroupID int64 `json:"groupID,string,optional"` // 按应用组筛选,2=未分组
+    }
+
+    AppInfoGetOneReq {
+        ID int64 `json:"id,string"`
+        WithAgreementCodes []string `json:"withAgreementCodes,optional"`
+    }
+
+
+    AppInfoGetListResp  {
+        List []*AppInfo `json:"list"`            // 接口列表数据
+        PageResp
+    }
+
+    AppDeleteReq  {
+        ID int64 `json:"id,string"`                          // 接口编号
+    }
+
+    AppWxMiniGetUrlLinkReq {
+        AppID int64 `json:"appID,string"`              // 平台应用 ID
+        Path string `json:"path,optional"`             // 小程序页面路径，默认 pages/home/index
+        Query string `json:"query,optional"`           // 启动参数，如 org-id=xxx&from=console&appID=700
+        EnvVersion string `json:"envVersion,optional"` // 小程序版本：release/trial/develop，默认 release
+    }
+
+    AppWxMiniGetUrlLinkResp {
+        UrlLink string `json:"urlLink"` // 微信 URL Link，如 https://wxaurl.cn/xxx
+    }
+)

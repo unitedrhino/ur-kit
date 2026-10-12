@@ -1,0 +1,38 @@
+syntax = "v1"
+
+// 音视频通道实时截图接口
+
+info(
+    title: "音视频通道截图"
+    desc: "对指定通道调用 ZLM 截图并返回 Base64 图片"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvSnapReq {
+    ChannelID string `json:"channelID"`          // 通道 ID
+    Protocol  string `json:"protocol,optional"`  // 用于截图的流协议，默认 webrtc 对应播放地址
+}
+
+type AvSnapResp {
+    ImageBase64 string `json:"imageBase64"` // JPEG 图片 Base64
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "通道实时截图"
+        description: "业务说明：对指定通道调用 ZLM 截图并返回 JPEG 图片 Base64 数据。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvSnap
+    post /api/v1/av/snap (AvSnapReq) returns (AvSnapResp)
+}

@@ -1,0 +1,261 @@
+syntax = "v1"
+
+info (
+	title:   "定时器相关功能"
+	desc:    "type desc here"
+	author:  "yl"
+	email:   "type email here"
+	version: "type version here"
+)
+
+@server (
+	group:            system/job/task
+	prefix:           /api/v1/system/job/task
+	accessCodePrefix: "systemJobManage"
+	accessNamePrefix: "任务管理"
+	accessGroup:      "任务管理"
+	defaultAuthType:  "platform"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "发送延时请求"
+	    description: "业务说明：发送延时任务请求，如果任务不存在会自动创建。用于需要延迟执行的业务场景，如定时推送、延时提醒等。自动创建的任务需填写param参数。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "execute"
+	    recordLogMode: "1"
+	)
+	@handler send
+	post /send (TimedTaskSendReq) returns (TimedTaskWithTaskID)
+
+	@doc(
+	    summary: "取消执行任务"
+	    description: "业务说明：取消正在等待执行的定时或延时任务。用于业务流程中断、用户主动取消等场景，任务取消后不会执行预定操作。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "execute"
+	    recordLogMode: "3"
+	)
+	@handler cancel
+	post /cancel (TimedTaskWithTaskID)
+
+	@doc(
+	    summary: "创建任务"
+	    description: "业务说明：创建新的定时任务定义。支持Cron定时任务和延时任务两种类型。用于周期性报表生成、定时数据同步、定期清理等场景。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler infoCreate
+	post /info/create (TimedTaskInfo) returns (TimedTaskInfo)
+
+	@doc(
+	    summary: "更新任务"
+	    description: "业务说明：修改已存在的定时任务配置。可调整执行时间、参数、重试策略等属性。任务运行中更新时需注意状态兼容性。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler infoUpdate
+	post /info/update (TimedTaskInfo)
+
+	@doc(
+	    summary: "删除任务"
+	    description: "业务说明：删除定时任务定义。删除后任务将不再执行，历史执行记录保留。用于清理废弃任务、业务功能下线等场景。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler infoDelete
+	post /info/delete (WithID)
+
+	@doc(
+	    summary: "启动任务"
+	    description: "业务说明：启动已停止的定时任务。任务启动后按配置的执行周期自动运行。用于恢复暂停的周期性业务流程。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "start"
+	    recordLogMode: "1"
+	)
+	@handler infoStart
+	post /info/start (WithID)
+
+	@doc(
+	    summary: "停止任务"
+	    description: "业务说明：暂停正在运行的定时任务。任务停止后不再自动执行，但保留任务定义可随时重新启动。用于临时中断周期性业务、维护窗口等场景。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "stop"
+	    recordLogMode: "1"
+	)
+	@handler infoStop
+	post /info/stop (WithID)
+
+	@doc(
+	    summary: "获取任务列表"
+	    description: "业务说明：查询定时任务列表，支持按分组、名称、类型、状态筛选。用于任务管理页面展示、监控仪表盘等场景。返回分页结果包含任务基本信息和执行统计。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler infoGetList
+	post /info/get-list (TimedTaskInfoGetListReq) returns (TimedTaskInfoGetListResp)
+
+	@doc(
+	    summary: "获取任务详情"
+	    description: "业务说明：查询单个定时任务的完整配置信息。包括执行周期、参数、重试策略、执行历史等详细属性。用于任务编辑、调试诊断等场景。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler infoGetOne
+	post /info/get-one (WithID) returns (TimedTaskInfo)
+
+	@doc(
+	    summary: "新建任务分组"
+	    description: "业务说明：创建任务分组用于组织管理相关任务。分组可按业务模块、执行类型等维度划分，便于批量管理和权限控制。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler groupCreate
+	post /group/create (TimedTaskGroup)
+
+	@doc(
+	    summary: "更新任务分组"
+	    description: "业务说明：修改任务分组的基本信息（名称、状态、描述等）。分组下的任务不受影响继续正常运行。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler groupUpdate
+	post /group/update (TimedTaskGroup)
+
+	@doc(
+	    summary: "删除任务分组"
+	    description: "业务说明：删除任务分组。分组下存在任务时需先迁移或删除任务才能成功删除分组。用于清理废弃的业务分类。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler groupDelete
+	post /group/delete (WithCode)
+
+	@doc(
+	    summary: "获取任务分组列表"
+	    description: "业务说明：查询任务分组列表，支持按名称和状态筛选。用于分组选择器、管理页面等场景。返回分页结果包含分组基本信息。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler groupGetList
+	post /group/get-list (TimedTaskGroupGetListReq) returns (TimedTaskGroupGetListResp)
+
+	@doc(
+	    summary: "获取任务分组详情"
+	    description: "业务说明：查询单个任务分组的完整信息。用于分组编辑、查看分组下任务统计等场景。"
+	    authType: "platform"
+	    group: "system/job/task"
+	    resource: "system/job/task"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler groupGetOne
+	post /group/get-one (WithCode) returns (TimedTaskGroup)
+}
+
+type (
+	TimedTaskGroup {
+		ID          int64  `json:"id,string,optional"` // 任务组ID
+		Code        string `json:"code"` // 任务组编码
+		Name        string `json:"name,optional"` // 组名
+		Status      int64  `json:"status,optional"` // 状态 1:启用 2:禁用
+		Desc        string `json:"desc,optional"` // 描述
+		CreatedTime int64  `json:"createdTime,string,optional"` // 创建时间（Unix 毫秒）
+	}
+	TimedTaskGroupGetListReq {
+		Page   *PageInfo `json:"page,optional"` // 分页信息
+		Name   string    `json:"name,optional"` // 名称模糊搜索
+		Status int64     `json:"status,optional"` // 状态过滤 1:启用 2:禁用
+	}
+	TimedTaskGroupGetListResp {
+		List []*TimedTaskGroup `json:"list"`
+		PageResp
+	}
+	RetryPolicy {
+		MaxRetry   int64  `json:"maxRetry,optional"` // 最大重试次数，默认 3
+		RetryDelay int64  `json:"retryDelay,optional"` // 重试间隔基数（秒），默认 10
+		Backoff    string `json:"backoff,optional"` // 退避策略：fixed / exponential
+	}
+	TimedTaskInfo {
+		ID           int64        `json:"id,string,optional"` // 任务ID
+		GroupCode    string       `json:"groupCode"` // 关联分组编码
+		Code         string       `json:"code"` // 任务编码
+		Name         string       `json:"name,optional"` // 任务名称
+		Type         int64        `json:"type,optional"` // 类型 1:定时(Cron) 2:延时(Delay)
+		CronExpr     string       `json:"cronExpr,optional"` // Cron 表达式（type=1）
+		ExecuteAt    int64        `json:"executeAt,string,optional"` // 执行时间 Unix 毫秒（type=2）
+		Params       string       `json:"params,optional"` // 任务参数（JSON 字符串）
+		RetryPolicy  *RetryPolicy `json:"retryPolicy,optional"` // 重试策略
+		Priority     int64        `json:"priority,optional"` // 优先级 1-10
+		Status       int64        `json:"status,optional"` // 状态 1:WaitRun 2:Running 3:WaitStop 4:Stopped 5:WaitDelete
+		LastRunTime  int64        `json:"lastRunTime,string,optional"` // 上次执行时间 Unix 毫秒
+		RetriedCount int64        `json:"retriedCount,optional"` // 已重试次数
+		Desc         string       `json:"desc,optional"` // 描述
+		CreatedTime  int64        `json:"createdTime,string,optional"` // 创建时间（Unix 毫秒）
+	}
+	TimedTaskInfoGetListReq {
+		Page      *PageInfo `json:"page,optional"` // 分页信息
+		GroupCode string    `json:"groupCode"` // 关联分组编码
+		Name      string    `json:"name,optional"` // 名称模糊搜索
+		Type      int64     `json:"type,optional"` // 按类型过滤 1:定时 2:延时
+		Status    int64     `json:"status,optional"` // 按状态过滤
+	}
+	TimedTaskInfoGetListResp {
+		List []*TimedTaskInfo `json:"list"`
+		PageResp
+	}
+)
+
+type (
+	TimedTaskWithTaskID {
+		TaskID string `json:"taskID"` //运行的taskID
+	}
+	TimedTaskOption {
+		Priority  int64  `json:"priority,optional"` //优先级: 6:critical 最高优先级  3: default 普通优先级 1:low 低优先级//以下两个参数优先使用ProcessIn
+		ProcessIn int64  `json:"processIn,optional"` //多久之后发 秒数
+		ProcessAt int64  `json:"processAt,optional"` // 固定时间发 秒时间戳
+		Timeout   int64  `json:"timeout,optional"` //超时时间 优先使用 秒数
+		Deadline  int64  `json:"deadline,optional"` //截止时间  秒时间戳
+		TaskID    string `json:"taskID,optional"` //指定运行的taskID
+	}
+	TimedTaskSendReq {
+		GroupCode string           `json:"groupCode"` //组需要提前创建好
+		Code      string           `json:"code"` //任务code
+		Option    *TimedTaskOption `json:"option,optional"` //选项
+	}
+)

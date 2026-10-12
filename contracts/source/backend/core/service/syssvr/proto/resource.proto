@@ -1,0 +1,89 @@
+//--------------------资源管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message ResourceWithID{
+  int64 id = 1; //ID值
+}
+message ResourceEmpty{
+}
+
+service ResourceManage{
+  rpc apiInfoCreate(ApiInfo) returns(ResourceWithID);   //创建API接口信息
+  rpc apiInfoGetList(ApiInfoGetListReq) returns(ApiInfoGetListResp); //获取API接口列表
+  rpc apiInfoUpdate(ApiInfo) returns(ResourceEmpty);   //更新API接口信息
+  rpc apiInfoDelete(ResourceWithID) returns(ResourceEmpty);   //删除API接口信息
+
+  rpc roleResourceActionGetList(RoleResourceActionGetListReq) returns(RoleResourceActionGetListResp);   //获取角色资源动作权限列表
+  rpc roleResourceActionBatchUpdate(RoleResourceActionBatchUpdateReq) returns(ResourceEmpty);   //批量更新角色资源动作权限
+}
+
+message ApiInfo{
+  string accessCode = 7;
+  int64 id = 1;            // 接口编号
+  string route = 2;        // 接口路由
+  string method = 3;        // 接口请求方式: POST GET
+  string name = 5;         // 接口名称
+  string operType = 6;     // 操作类型（create/update/delete/get/other）
+  int64 recordLogMode = 8; //1为自动模式(读取类型忽略,其他类型记录日志) 2全部记录 3不记录
+  string desc = 9;//描述
+  string resource = 10; // 资源标识
+  string groupCode = 11; // 分组标识
+  string authTypeCode = 12; // 权限层级编码 platform/admin/all/public/device
+}
+message ApiInfoGetListReq{
+  PageInfo page = 1;// 分页信息
+  string route = 2; // 接口路由
+  string method = 3; // 接口请求方式: POST GET
+  string name = 4;  // 接口名称
+  int64 authType = 5;// 1(all) 全部人可以操作 2(admin) 默认授予租户管理员权限 3(superAdmin,supper) default租户才可以操作(超管是跨租户的)
+  repeated int64 apiIDs = 6;//API列表数据
+  string accessCode =7;
+  string resource = 8; // 资源标识
+  string groupCode = 9; // 分组标识
+  string operTypeCode = 10; // 动作类型
+  string authTypeCode = 11; // 权限层级编码
+}
+message ApiInfoGetListResp{
+  repeated ApiInfo list = 1; // 接口列表数据
+  int64 total = 2;           // 接口列表总记录数
+  repeated ApiGroupInfo groups = 3; // 聚合后的分组数据
+}
+message ApiResourceInfo{
+  string id = 1; // 资源ID
+  string code = 2; // 资源编码
+  string name = 3; // 资源名称
+  repeated ApiActionInfo children = 4; // 动作列表
+}
+message ApiActionInfo{
+  string id = 1; // 动作ID
+  string code = 2; // 动作编码
+  string name = 3; // 动作名称
+  repeated ApiInfo children = 4; // 接口列表
+}
+message ApiGroupInfo{
+  string id = 1; // 分组ID
+  string code = 2; // 分组编码
+  string name = 3; // 分组名称
+  repeated ApiResourceInfo children = 4; // 资源列表
+}
+message RoleResourceActionItem {
+  string resource = 1; // 资源标识
+  string action = 2;   // 动作标识
+}
+message RoleResourceActionGetListReq {
+  int64 roleID = 1;      // 角色ID
+  string tenantCode = 2; // 租户编码
+  string resource = 3;   // 可选资源筛选
+}
+message RoleResourceActionGetListResp {
+  repeated RoleResourceActionItem list = 1;
+}
+message RoleResourceActionBatchUpdateReq {
+  int64 roleID = 1;                        // 角色ID
+  string tenantCode = 2;                   // 租户编码
+  repeated RoleResourceActionItem list = 3; // 完整权限列表（全量替换）
+}

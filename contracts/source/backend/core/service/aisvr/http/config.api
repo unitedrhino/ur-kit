@@ -1,0 +1,175 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-配置管理"
+	desc:    "AI Config Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 配置类型定义 ----
+
+type ConfigInfo {
+	ID         int64  `json:"id,optional"`         // 配置ID
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	cfgType    string `json:"cfgType,optional"`    // 配置类型：llm/tts/asr/vad
+	name       string `json:"name,optional"`       // 配置名称
+	configID   string `json:"configID,optional"`   // 配置唯一标识
+	jsonData   string `json:"jsonData,optional"`   // 配置参数（JSON字符串）
+	modelType  string `json:"modelType,optional"`  // 模型级别：small/medium/large/xlarge
+	inputModalities string `json:"inputModalities,optional"` // 输入模态（JSON字符串）
+	outputModalities string `json:"outputModalities,optional"` // 输出模态（JSON字符串）
+	contextLength int64 `json:"contextLength,optional"` // 上下文长度
+	enabled    bool   `json:"enabled,optional"`    // 是否启用
+	isDefault  bool   `json:"isDefault,optional"`  // 是否默认
+}
+
+type ConfigGetOneReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // 配置ID
+}
+
+type ConfigGetDefaultReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	cfgType    string `json:"cfgType"`             // 配置类型
+}
+
+type ConfigGetListReq {
+	tenantCode  string   `json:"tenantCode,optional"`  // 租户编码
+	cfgType     string   `json:"cfgType,optional"`     // 配置类型过滤
+	onlyEnabled bool     `json:"onlyEnabled,optional"` // 仅返回启用的
+	page        PageInfo `json:"page,optional"`        // 分页信息
+}
+
+type ConfigGetListResp {
+	list  []ConfigInfo `json:"list"`  // 配置列表
+	total int64        `json:"total"` // 总数
+}
+
+type ConfigDeleteReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	ID         int64  `json:"id"`                  // 配置ID
+}
+
+type ConfigTestReq {
+	tenantCode       string        `json:"tenantCode,optional"`       // 租户编码
+	cfgType          string        `json:"cfgType"`                   // 配置类型，目前先支持 llm
+	name             string        `json:"name,optional"`             // 配置名称，仅用于调试展示
+	configID         string        `json:"configID,optional"`         // 配置唯一标识，仅用于调试展示
+	jsonData         string        `json:"jsonData"`                  // 配置参数（JSON字符串）
+	modelType        string        `json:"modelType,optional"`        // 模型级别
+	inputModalities  string        `json:"inputModalities,optional"`  // 输入模态（JSON字符串）
+	outputModalities string        `json:"outputModalities,optional"` // 输出模态（JSON字符串）
+	messages         []ChatMessage `json:"messages"`                  // 调试输入消息
+}
+
+type ConfigTestResp {
+	content          string                    `json:"content"`                    // 测试返回文本
+	role             string                    `json:"role"`                       // 角色（assistant）
+	contents         []ContentPart             `json:"contents,optional"`          // 多模态回复内容（含音频）
+	audioData        string                    `json:"audioData,optional"`         // 音频数据（base64）
+	audioFormat      string                    `json:"audioFormat,optional"`       // 音频格式
+	rewrittenQuery   string                    `json:"rewrittenQuery,optional"`    // 检索改写后的问题
+	matchedDocuments []KnowledgeSearchDocument `json:"matchedDocuments,optional"`  // 命中文档
+	citations        []KnowledgeSearchHit      `json:"citations,optional"`         // 引用切片
+	expandedCitations []KnowledgeSearchHit     `json:"expandedCitations,optional"` // 关联补充切片
+	answerPolicy     string                    `json:"answerPolicy,optional"`      // 回答策略
+	confidenceBand   string                    `json:"confidenceBand,optional"`    // 置信度
+}
+
+// ---- 配置管理服务定义 ----
+
+@server (
+	group:            ai/config/info
+	prefix:           /api/v1/ai/config/info
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiConfigManage"
+	accessNamePrefix: "配置管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建配置"
+		description: "业务说明：创建新的AI能力配置（LLM/TTS/ASR/VAD/Realtime），定义连接参数、模型选择和计费参数。Realtime 凭据加密保存，读取仅返回已配置标记。接口含密钥，不记录完整请求体；成功变更记录不含密钥的服务日志。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "create"
+		group: "ai/config"
+		recordLogMode: "3"
+	)
+	@handler create
+	post /create (ConfigInfo) returns (WithID)
+
+	@doc(
+		summary: "更新配置"
+		description: "业务说明：修改AI能力配置，未提交字段不修改。Realtime 的 jsonData 为完整表单，密钥空白保留，清除须显式确认并禁用配置。更新只影响新会话；接口含密钥，不记录完整请求体，成功变更记录不含密钥的服务日志。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "update"
+		group: "ai/config"
+		recordLogMode: "3"
+	)
+	@handler update
+	post /update (ConfigInfo)
+
+	@doc(
+		summary: "删除配置"
+		description: "业务说明：删除指定的AI能力配置记录。删除前需检查是否有助手正在使用该配置（通过configID关联），如有则需先解除关联或更换配置后再删除。删除操作不可恢复。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "delete"
+		group: "ai/config"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (ConfigDeleteReq)
+
+	@doc(
+		summary: "获取配置详情"
+		description: "业务说明：根据配置ID查询完整的配置信息，包括模型用途、模型级别和jsonData参数等。用于配置编辑回显、参数调试、配置查看等场景。jsonData字段为JSON字符串，需前端解析展示。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "view"
+		group: "ai/config"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ConfigGetOneReq) returns (ConfigInfo)
+
+	@doc(
+		summary: "获取配置列表"
+		description: "业务说明：分页查询AI能力配置列表，支持按配置类型（llm/tts/asr/vad）、启用状态过滤。用于配置管理页面列表展示、助手创建时选择配置等场景。返回结果包含配置基本信息，不含详细参数。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "view"
+		group: "ai/config"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ConfigGetListReq) returns (ConfigGetListResp)
+
+	@doc(
+		summary: "获取默认配置"
+		description: "业务说明：查询指定类型（LLM/TTS/ASR/VAD）的租户默认配置。当助手未指定具体配置ID时，系统将自动使用默认配置。如果租户未设置默认配置，则回退到common租户的默认配置。用于快速获取推荐配置。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "view"
+		group: "ai/config"
+		recordLogMode: "1"
+	)
+	@handler getDefault
+	post /get-default (ConfigGetDefaultReq) returns (ConfigInfo)
+
+	@doc(
+		summary: "测试配置"
+		description: "业务说明：使用当前表单里的临时 AI 配置直接发起一次真实调用，验证模型连通性、参数格式和多模态输入兼容性。该接口不依赖已保存配置，不创建会话、不写入历史摘要，仅返回本轮结果，用于模型配置页调试。"
+		authType: "admin"
+		resource: "ai/config"
+		action: "view"
+		group: "ai/config"
+		recordLogMode: "1"
+	)
+	@handler test
+	post /test (ConfigTestReq) returns (ConfigTestResp)
+}

@@ -1,0 +1,107 @@
+/* 全局样式（自原 app.wxss 迁移） */
+
+page {
+  --md-sys-color-primary: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY__;
+  --md-sys-color-primary-container: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY_CONTAINER__;
+  --md-sys-color-on-primary: __MOBILE_UNIAPP_THEME_COLOR_ON_PRIMARY__;
+  --md-sys-color-on-surface: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PRIMARY__;
+  --md-sys-color-on-surface-variant: __MOBILE_UNIAPP_THEME_COLOR_TEXT_SECONDARY__;
+  --md-sys-color-outline: __MOBILE_UNIAPP_THEME_COLOR_TEXT_PLACEHOLDER__;
+  --md-sys-color-background: __MOBILE_UNIAPP_THEME_COLOR_PAGE_BACKGROUND__;
+  --md-sys-color-surface: __MOBILE_UNIAPP_THEME_COLOR_SURFACE__;
+  --md-sys-color-surface-container: __MOBILE_UNIAPP_THEME_COLOR_SURFACE_CONTAINER__;
+  --md-sys-color-outline-variant: __MOBILE_UNIAPP_THEME_COLOR_OUTLINE_VARIANT__;
+  --md-sys-color-success: __MOBILE_UNIAPP_THEME_COLOR_SUCCESS__;
+  --md-sys-color-success-container: __MOBILE_UNIAPP_THEME_COLOR_SUCCESS_CONTAINER__;
+  --md-sys-color-warning: __MOBILE_UNIAPP_THEME_COLOR_WARNING__;
+  --md-sys-color-warning-container: __MOBILE_UNIAPP_THEME_COLOR_WARNING_CONTAINER__;
+  --md-sys-color-error: __MOBILE_UNIAPP_THEME_COLOR_ERROR__;
+  --md-sys-color-error-container: __MOBILE_UNIAPP_THEME_COLOR_ERROR_CONTAINER__;
+  --md-sys-color-scrim: __MOBILE_UNIAPP_THEME_COLOR_SCRIM__;
+  --md-sys-color-primary-shadow: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY_SHADOW__;
+  --md-sys-color-shadow: __MOBILE_UNIAPP_THEME_COLOR_SHADOW__;
+  --md-sys-color-chart-grid: __MOBILE_UNIAPP_THEME_COLOR_CHART_GRID__;
+
+  --color-primary: var(--md-sys-color-primary);
+  --color-primary-light: var(--md-sys-color-primary-container);
+  --color-primary-soft: var(--md-sys-color-primary-container);
+  --color-primary-bg: var(--md-sys-color-primary-container);
+  --color-primary-shadow: var(--md-sys-color-primary-shadow);
+  --color-success: var(--md-sys-color-success);
+  --color-success-bg: var(--md-sys-color-success-container);
+  --color-warning: var(--md-sys-color-warning);
+  --color-warning-bg: var(--md-sys-color-warning-container);
+  --color-error: var(--md-sys-color-error);
+  --color-error-bg: var(--md-sys-color-error-container);
+  --color-danger: var(--md-sys-color-error);
+  --color-danger-bg: var(--md-sys-color-error-container);
+  --color-offline: var(--md-sys-color-outline);
+  --color-on-primary: var(--md-sys-color-on-primary);
+  --color-bg-secondary: var(--md-sys-color-surface-container);
+  --color-mask: var(--md-sys-color-scrim);
+  --color-shadow: var(--md-sys-color-shadow);
+  --color-chart-grid: var(--md-sys-color-chart-grid);
+
+  --text-primary: var(--md-sys-color-on-surface);
+  --text-secondary: var(--md-sys-color-on-surface-variant);
+  --text-tertiary: var(--md-sys-color-outline);
+  --text-muted: var(--md-sys-color-outline);
+  --text-placeholder: var(--md-sys-color-outline);
+
+  --page-bg: var(--md-sys-color-background);
+  --card-bg: var(--md-sys-color-surface);
+  --surface-bg: var(--md-sys-color-surface);
+  --surface-muted: var(--md-sys-color-surface-container);
+  --border-color: var(--md-sys-color-outline-variant);
+  --divider: var(--md-sys-color-outline-variant);
+
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
+  font-size: 14px;
+  color: var(--text-primary);
+  background: var(--page-bg);
+  box-sizing: border-box;
+}
+
+/* H5 兜底（page 在 H5 下不存在） */
+body {
+  margin: 0;
+}
+
+/* Flex utilities */
+.flex { display: flex; }
+.flex-col { display: flex; flex-direction: column; }
+.flex-center { display: flex; align-items: center; justify-content: center; }
+.flex-between { display: flex; align-items: center; justify-content: space-between; }
+.flex-1 { flex: 1; }
+.gap-xs { gap: 4px; }
+.gap-sm { gap: 8px; }
+.gap-md { gap: 12px; }
+.gap-lg { gap: 16px; }
+
+/* Text utilities */
+.text-center { text-align: center; }
+.text-ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.text-primary { color: var(--color-primary); }
+.text-secondary { color: var(--text-secondary); }
+.text-error { color: var(--color-error); }
+
+/* Spacing */
+.p-sm { padding: 8px; }
+.p-md { padding: 16px; }
+.p-lg { padding: 24px; }
+.mt-sm { margin-top: 8px; }
+.mt-md { margin-top: 16px; }
+.mt-lg { margin-top: 24px; }
+.mb-sm { margin-bottom: 8px; }
+.mb-md { margin-bottom: 16px; }
+
+/* Card */
+.card { background: var(--card-bg); border-radius: var(--radius-md); padding: 16px; }
+
+/* Divider */
+.divider { height: 1px; background: var(--border-color); }

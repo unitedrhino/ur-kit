@@ -1,0 +1,481 @@
+//--------------------租户管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+import "role.proto";
+import "app.proto";
+package sys;//必须为服务名
+
+message TenantWithIDCode{
+  int64 id = 1; //ID值
+  string code=2; //Code值
+}
+
+message TenantWithID{
+  int64 id = 1; //ID值
+}
+message TenantEmpty{
+}
+message TenantWithTenantCode{
+  string tenantCode = 1; //租户编码
+}
+message TenantWithCode{
+  string code=1; //Code值
+}
+message TenantWithTenantUserID{
+  int64 userID = 1;
+    string tenantCode =12; //租户代码,(平台管理员查看其他租户下的用户时使用,普通租户只能查看自己的用户)
+}
+
+service TenantManage {
+  rpc tenantInfoCreate (TenantInfo) returns(TenantWithIDCode); //创建租户信息
+  rpc tenantInfoUpdate (TenantInfo) returns(TenantEmpty); //更新租户信息
+  rpc tenantAiTokenAccumulate (TenantAiTokenAccumulateReq) returns(TenantAiTokenAccumulateResp); //内部累计企业 AI Token 用量并刷新缓存
+  rpc tenantAiTokenAccumulateIdempotent (TenantAiTokenAccumulateReq) returns(TenantAiTokenAccumulateResp); //原生实时用量专用；旧服务不支持时明确拒绝，避免忽略幂等键后重复扣费
+  rpc tenantInfoDelete (TenantWithIDCode) returns(TenantEmpty); //删除租户
+  rpc tenantInfoGetOne (TenantWithIDCode) returns (TenantInfo); //获取租户信息详情
+  rpc tenantInfoGetList (TenantInfoGetListReq) returns (TenantInfoGetListResp); //获取租户信息列表（支持分页和过滤）
+  rpc tenantInfoTransfer(TenantInfoTransferReq) returns(TenantEmpty); //将租户转让给别人,只有owner可以转让,并且只能转让给租户下的成员
+
+  rpc tenantConfigUpdate(TenantConfig)returns(TenantEmpty); //更新租户配置
+  rpc tenantConfigGetOne(TenantWithTenantCode)returns(TenantConfig); //获取租户配置
+
+  rpc tenantOpenCheckToken(TenantOpenCheckTokenReq) returns(TenantOpenCheckTokenResp); //验证租户开放接口令牌
+
+  rpc tenantAgreementGetList(TenantAgreementGetListReq) returns(TenantAgreementGetListResp); //获取租户协议列表
+  rpc tenantAgreementUpdate(TenantAgreement) returns(TenantEmpty); //更新租户协议
+  rpc tenantAgreementCreate(TenantAgreement) returns(TenantWithID); //创建租户协议
+  rpc tenantAgreementGetOne(TenantWithIDCode) returns(TenantAgreement); //获取租户协议详情
+  rpc tenantAgreementDelete(TenantWithID) returns(TenantEmpty); //删除租户协议
+
+  rpc tenantAppGetList(TenantAppGetListReq) returns (TenantAppGetListResp); //获取租户APP权限列表
+  rpc tenantAppCreate(TenantAppCreateReq) returns(TenantEmpty); //创建租户APP权限
+  rpc tenantAppGetOne(WithTenantAppID) returns(TenantAppInfo); //获取租户APP权限详情
+  rpc tenantAppUpdate(TenantAppInfo) returns(TenantEmpty); //更新租户APP权限
+  rpc tenantAppDelete(WithTenantAppID) returns(TenantEmpty); //删除租户APP权限
+  rpc renewalGetList(RenewalListReq) returns (RenewalListResp); // 获取续期列表
+  rpc renewalRenew(RenewalRenewReq) returns (RenewalRenewResp); // 续费/扩容
+  rpc renewalDirectGrant(RenewalDirectGrantReq) returns (RenewalDirectGrantResp); // 直接授权
+  rpc tenantMenuGetList(TenantMenuGetListReq) returns(TenantMenuGetListResp); //获取租户菜单权限列表
+  rpc tenantMenuUpdate(TenantMenu) returns(TenantEmpty); //更新租户菜单权限
+  rpc tenantMenuBackfill(TenantMenuBackfillReq) returns(TenantEmpty); //按应用ID回填所有租户菜单（幂等 upsert）
+
+  rpc tenantUserBatchCreate(TenantUserBatchCreateReq) returns(TenantEmpty); //添加用户加入租户
+  rpc tenantUserGetList(TenantUserGetListReq) returns(TenantUserGetListResp); //获取租户用户列表
+  rpc tenantUserRoleGetList(TenantUserRoleGetListReq) returns(TenantUserRoleGetListResp); //获取租户用户角色列表
+  rpc tenantUserRoleBatchUpdate(TenantUserRoleBatchUpdateReq) returns(TenantEmpty); //更新租户用户的角色列表
+  rpc tenantUserUpdate(UserTenant) returns(TenantEmpty); //更新租户用户
+  rpc tenantUserDelete(TenantWithTenantUserID) returns(TenantEmpty); //删除租户用户
+  rpc tenantUserGetOne(TenantWithTenantUserID) returns(UserTenant); //获取租户用户详情
+
+  rpc tenantUserInviteCodeGen(TenantUserInviteCodeGenReq) returns(TenantUserInviteCodeGenResp); //生成租户用户邀请码
+  rpc tenantUserInviteCodeGetOne(TenantEmpty) returns(TenantUserInviteCodeGenResp); //获取当前有效的租户用户邀请码
+  rpc tenantUserInviteSend(TenantUserInviteSendReq) returns(TenantEmpty); //发送邀请（支持邮件和手机号）
+  rpc tenantUserInvitePendingGetList(TenantUserInvitePendingGetListReq) returns(TenantUserInvitePendingGetListResp); //获取待处理邀请列表
+  rpc tenantUserInvitePendingDelete(TenantUserInvitePendingDeleteReq) returns(TenantEmpty); //删除待处理邀请
+
+  rpc tenantUserJoin(TenantUserJoinReq) returns(TenantEmpty); //用户加入租户（通过邀请码、邮件或手机邀请）
+}
+
+message TenantInfo {
+  int64 id = 1; // ID编号
+  string code = 2; // 租户编码,创建的时候自动生成
+  string avatar = 3; // 头像,更新时传filePath
+  string name = 4; // 租户名称
+  google.protobuf.StringValue desc = 5; // 应用描述
+  int64 ownerUserID = 6; // 超级管理员ID
+  TenantResource resource = 7; // 租户资源总览
+  int64 status = 9; // 租户状态（1:启用，2:禁用）
+  TenantConfig config = 10; // 配置,只读
+  int64 createdTime = 11; // 创建时间（毫秒时间戳）
+  string licenseCode = 24; // 创建时传入授权码（只写不读），超过租户数限制时必须提供
+  repeated int64 appIDs = 25; // 租户拥有的应用ID列表
+  string companyCode = 26; // 统一社会信用代码
+  string companyLicense = 27; // 营业执照（文件 code）
+  string legalName = 28; // 法人姓名
+  string legalID = 29; // 法人身份证号
+  string legalPhotoFront = 30; // 法人身份证正面（文件 code）
+  string legalPhotoBackside = 31; // 法人身份证反面（文件 code）
+  string contactName = 32; // 联系人姓名
+  string contactPhone = 33; // 联系人电话
+  reserved 8, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21;
+}
+
+message TenantResource {
+  TenantPackage package = 1; // 套餐摘要
+  TenantQuota quota = 2; // 配额总览（可写）
+  TenantUsage usage = 3; // 已用量统计（只读）
+}
+
+message TenantPackage {
+  google.protobuf.StringValue packageCode = 1; // 当前套餐编码
+  google.protobuf.StringValue packageName = 2; // 当前套餐名称
+  google.protobuf.Int64Value expTime = 3; // 企业套餐到期时间（毫秒时间戳）
+}
+
+message TenantQuota {
+  google.protobuf.Int64Value deviceNum = 1; // 租户下的设备数量限制（0为不限制）
+  google.protobuf.Int64Value userNum = 2; // 租户下的用户数量限制（0为不限制）
+  google.protobuf.Int64Value aiTokenMonthly = 4; // AI Token 月配额
+  google.protobuf.Int64Value aiTokenBalance = 5; // AI Token 充值余额
+  google.protobuf.Int64Value diskSpaceGB = 6; // 磁盘空间配额（GB）
+  google.protobuf.Int64Value deviceMsgPerDay = 7; // 租户每天设备消息总量上限
+}
+
+message TenantUsage {
+  google.protobuf.Int64Value userCount = 1; // 租户下用户数量统计
+  google.protobuf.Int64Value deviceCount = 3; // 租户下设备数量统计
+  google.protobuf.Int64Value aiTokenUsed = 4; // AI Token 月已用
+  google.protobuf.StringValue aiTokenMonth = 5; // AI Token 用量月份
+  google.protobuf.Int64Value aiTokenBalanceUsed = 6; // AI Token 余额已用
+}
+
+message TenantAiTokenAccumulateReq {
+  string tenantCode = 1; // 租户编码
+  int64 usedDelta = 2; // 本次新增消耗 token 数
+  string usageMonth = 3; // 用量归属月份，格式：yyyy-MM，为空则按当前月
+  string idempotencyKey = 4; // 可选结算键；同一租户内相同键只计一次，旧调用留空保持原行为
+}
+
+message TenantAiTokenAccumulateResp {
+  int64 aiTokenUsed = 1; // 当前月累计已用 token 数
+  int64 aiTokenBalanceUsed = 2; // 当前累计已使用的充值余额 token 数
+  string aiTokenMonth = 3; // 当前统计月份，格式：yyyy-MM
+  int64 monthlyDelta = 4; // 本次记入月配额的 token 数
+  int64 balanceDelta = 5; // 本次记入充值余额的 token 数
+  bool duplicate = 6; // 本次是已结算请求的安全重放，未再次扣减配额
+}
+
+message TenantInfoTransferReq{
+  int64 newOwnerUserID =1; // 新的租户所有者用户ID
+  string tenantCode =2; // 目标租户编码;平台管理员强制转让时必填(需超管权限),企业主自助转让不传(默认当前登录者所在租户)
+}
+
+message TenantInfoGetListReq{
+  PageInfo page = 1; // 分页信息
+  string name = 2; // 租户名称
+  string code = 3; // 租户编码
+  int64 status = 4; // 租户状态（1:启用，2:禁用）
+  int64  appID =5; // 应用ID（过滤绑定了指定应用的租户）
+  bool isGetAll =6; // 是否获取所有租户（包括禁用的）
+  int64 ownerUserID = 7; // 超级管理员ID（平台管理员可用于过滤）
+}
+message TenantInfoGetListResp{
+  repeated TenantInfo list =1; // 租户信息列表
+  int64 total = 2; // 总条数
+}
+message TenantConfig {
+  int64 id = 1; // 配置ID
+  string tenantCode = 3; // 租户编码
+  int64 registerRoleID=5; // 注册新用户时分配的角色ID
+  // int64 isSsl =12;           // 是否单会话登录（默认为2）
+}
+message TenantOpenCheckTokenReq{
+  string token = 1; // 访问令牌
+  string ip = 2; // 请求IP地址
+}
+message TenantOpenCheckTokenResp{
+  int64 userID = 1; // 用户ID
+  string tenantCode = 5; // 租户编码
+  int64 isAdmin = 6; // 是否是超级管理员（1:是，2:否）
+  string userName = 7; // 用户名
+  map<string,string> expand = 8; // 扩展信息（如 clone_id 等）
+  int64 isPtAdmin = 9; // 是否是平台管理员（1:是，2:否）
+  int64 isPtOwner = 10; // 是否是平台租户管理员（1:是，2:否）
+  int64 isOwner = 11; // 是否是租户所有者（1:是，2:否）
+  int64 isFullAuth = 12; // 是否完全授权（1:是，2:否）
+  repeated int64 roleIDs = 13; // 角色ID列表
+  repeated string roleCodes = 14; // 角色编码列表
+}
+message TenantAgreementGetListReq{
+  PageInfo page =1; // 分页信息
+}
+message TenantAgreementGetListResp{
+  repeated TenantAgreement list =1; // 协议列表
+  int64 total= 2; // 总条数
+}
+message TenantAgreement{
+  int64 id =1; // 协议ID
+  string code =2; // 协议编码
+  string name =3; // 协议名称
+  string title =4; // 协议标题
+  string content = 5; // 协议内容
+}
+message TenantAppGetListReq{
+  PageInfo page = 1; //分页信息
+  repeated int64  appIDs = 3;
+  int64 notAppID = 8; //排除某个appID
+  string type=4; //应用类型 web:web页面  app:应用  mini:小程序
+  string subType=5; //子类型  wx:微信小程序  dingTalk:钉钉小程序
+  int64 appID =6;
+  string tenantCode =7; //指定租户
+  int64 status =10; // 应用状态 1 正常，2 禁用，3 过期
+  bool withApp = 11; //同时返回应用信息
+  string useBy = 12; // 使用对象 client:登录直接授权该应用 admin:管理员使用,需要邀请
+}
+message TenantAppGetListResp{
+  int64 total = 1;
+  repeated TenantAppInfo list = 2; //app列表数据
+}
+message TenantAppCreateReq {
+  string tenantCode =1; //租户号,默认不用填写,只有平台可以指定
+  int64  appID = 3;
+  string licenseCode = 12; // 授权码
+}
+
+message TenantAppInfo{
+  string tenantCode =1; //租户号
+  int64 id =2;
+  int64  appID = 3;
+  int64 createdTime =8;
+  AppInfo app =7;
+  google.protobuf.Int64Value expTime =9; //过期时间,为0不限制
+  int64 status =10; // 应用状态 1 正常，2 禁用，3 过期
+  int64 sort =11; //排序 不能小于等于0
+}
+message GrantItem {
+  string grantType = 1; // app / tenantQuota
+  string grantKey = 2;
+  string grantValue = 3;
+}
+message RenewalListReq {
+  PageInfo page = 1;
+  string tenantCode = 2; // 平台管理员指定租户
+  string targetType = 3; // all/tenant/app
+  string status = 4; // all/normal/expiring/expired
+  string keyword = 5; // 企业名/应用名关键字
+  int64 expireWithinDays = 6; // 到期天数筛选
+}
+message RenewalItem {
+  string targetType = 1; // tenant/app
+  string targetID = 2;
+  string tenantCode = 3;
+  int64 appID = 4;
+  string appCode = 5;
+  string targetName = 6;
+  string packageCode = 7;
+  string packageName = 8;
+  int64 expireTime = 9; // 到期时间（毫秒时间戳）
+  int64 remainDays = 10;
+  string status = 11; // normal/expiring/expired
+  map<string, string> quota = 12;
+  map<string, string> usage = 13;
+  bool renewable = 14;
+  bool trialing = 15;
+  repeated GrantItem grantItems = 16; // 授权项快照（应用类型有效）
+  repeated string categories = 17; // 来源类别：plan / subscription / quotaRecharge / balanceTopup
+}
+message RenewalListResp {
+  repeated RenewalItem list = 1;
+  int64 total = 2;
+}
+message RenewalRenewReq {
+  string licenseCode = 1;
+  string targetType = 2; // tenant/app
+  string tenantCode = 3;
+  string targetID = 4; // tenant=tenantCode app=tenantAppID
+  bool confirmReplace = 5; // 确认替换不同套餐（plan类型不同商品时需要）
+}
+message RenewalRenewResp {
+  string targetType = 1;
+  string targetID = 2;
+  int64 oldExpireTime = 3; // 续费前到期时间（毫秒时间戳）
+  int64 newExpireTime = 4; // 续费后到期时间（毫秒时间戳）
+  string packageCode = 5;
+  string packageName = 6;
+  map<string, string> newQuota = 7;
+  bool renewed = 8;
+  bool needsConfirm = 9; // 是否需要用户确认替换
+  string confirmMessage = 10; // 确认提示消息
+}
+message RenewalDirectGrantReq {
+  string tenantCode = 1; // 目标租户编码
+  string sourceType = 2; // 来源类型：product / package
+  int64 sourceID = 3; // 来源对象ID
+  string skuCode = 4; // SKU编码（sourceType=product时必填）
+  int64 count = 5; // 授权数量，默认1，最小1
+  bool confirmReplace = 6; // 确认替换不同套餐
+}
+message RenewalDirectGrantResp {
+  string targetType = 1;
+  string targetID = 2;
+  int64 oldExpireTime = 3;
+  int64 newExpireTime = 4;
+  string packageCode = 5;
+  string packageName = 6;
+  map<string, string> newQuota = 7;
+  bool granted = 8;
+  bool needsConfirm = 9;
+  string confirmMessage = 10;
+}
+message WithTenantAppID{
+  int64 appID =1;
+  string tenantCode =2; // 指定租户编码, 为空则使用请求上下文的租户
+}
+message TenantMenuGetListReq{
+  PageInfo page = 1; //分页信息
+  string tenantCode =2;
+  int64  appID =3;
+  bool isRetTree = 5;
+  repeated int64 menuIDs = 6;
+  int64 isStar = 7; // 是否收藏（1:是，2:否）
+}
+message TenantMenuBackfillReq{
+  int64 appID =1; //需要回填菜单的应用ID
+}
+message TenantMenuGetListResp{
+  repeated TenantMenu list = 1;
+}
+message TenantMenu{
+  int64 id = 2; // 编号
+  int64 appID = 3; // 应用ID
+  int64 menuID = 4; // 菜单ID
+  int64 parentMenuID = 5; // 父菜单ID，一级菜单为1
+  string name = 6; // 菜单名称
+  int64 sort = 7; // 左侧table排序序号
+  string icon = 8; // 图标
+  int64 isStar = 9; // 是否收藏（1:是，2:否）
+  int64 isHideInMenu = 10; // 是否隐藏菜单（1:是，2:否）
+  MenuInfo menu=11;
+  repeated TenantMenu children = 12;
+}
+
+message TenantUserBatchCreateReq{
+  repeated UserTenantCore users = 1;
+}
+
+message UserTenantCore{
+  int64  userID = 1; // 用户ID,新增必填
+  int64 status =21; // 租户状态（1:启用(默认)，2:禁用）
+  repeated int64 roleIDs =22; // 角色ID(新增必填)
+  repeated int64 deptIDs =25; // 部门ID列表,默认展示第一个(可选)
+  map<string, string> tags = 24; // 私有标签,只有管理员可以修改(可选)
+  map<string,string>pubTags =28;     // 公共的标签,用户自己可以修改(可选)
+}
+
+message TenantUserInviteReq{
+  repeated int64 userIDs = 1;
+  repeated string accounts =4; //userIDs没有取这个
+  int64  roleID = 2; //角色ID,默认取这个
+  string roleCode = 3; //角色code,如果有重复的,则只授权第一个角色
+}
+message TenantUserGetListReq{
+  PageInfo page =1;
+  int64 status =21; // 用户状态（1:启用，2:禁用）
+    string userName = 2;
+  string phone = 3;
+  string email = 4;
+  repeated int64 userIDs =5;
+  int64 userID = 9;
+  string account =6;
+  repeated int64 hasAccessAreas =7;
+  string roleCode =8;
+  int64 deptID =10;
+  string nickName =11;
+  string tenantCode =12; //租户代码,(平台管理员查看其他租户下的用户时使用,普通租户只能查看自己的用户)
+  bool withRole =13; //同时返回角色信息
+}
+message TenantUserGetListResp{
+  int64 total = 1;
+  repeated UserTenant list = 2; //用户列表
+}
+message UserTenant{
+  string tenantCode =22; // 租户编码
+  int64  userID = 1; // 用户ID
+  int64 deviceCount =26; // 拥有的设备统计
+  int64 status =21; // 租户状态（1:启用，2:禁用）
+  int64 isTenantOwner = 23; // 是否是租户超级管理员（1:是，2:否）
+  repeated int64 deptIDs =25; // 部门ID列表,默认展示第一个
+  map<string, string> tags = 24; // 私有标签,只有管理员可以修改
+  map<string,string>pubTags =28;     // 公共的标签,用户自己可以修改
+  int64 createdTime =27; // 创建时间（毫秒时间戳）
+  repeated RoleInfo roles = 29; // 角色列表
+}
+message TenantLimit {
+  google.protobuf.Int64Value deviceNum = 1; // 租户下的设备数量限制（0为不限制）
+  google.protobuf.Int64Value userNum = 2; // 租户下的用户数量限制（0为不限制）
+  google.protobuf.Int64Value aiTokenMonthly = 4; // 默认 AI Token 月配额（单位：token）
+  google.protobuf.Int64Value diskSpaceGB = 5; // 默认磁盘空间 GB
+  google.protobuf.Int64Value deviceMsgPerDay = 6; // 默认租户每天设备消息总量上限（运行时最小按100生效）
+}
+message TenantStatistic {
+  google.protobuf.Int64Value userCount = 1; // 租户下的用户数量统计
+  google.protobuf.Int64Value deviceCount = 3; // 租户下的设备数量统计
+}
+
+// ==================== 租户用户邀请相关消息 ====================
+
+// 生成租户用户邀请码请求
+message TenantUserInviteCodeGenReq {
+  string tenantCode = 1; // 租户编码（可选，不填取header）
+  int64 roleID = 2; // 分配的角色ID（必填）
+}
+
+// 生成租户用户邀请码响应
+message TenantUserInviteCodeGenResp {
+  string code = 1; // 邀请码
+  int64 validUntilTime = 2; // 有效期截止时间（毫秒时间戳）
+  int64 roleID = 3; // 角色ID
+}
+
+// 发送邀请请求（统一接口，支持邮件和手机号）
+message TenantUserInviteSendReq {
+  string tenantCode = 1; // 租户编码（可选，不填取header）
+  int64 roleID = 2; // 分配的角色ID（必填）
+  repeated string addresses = 3; // 邀请地址列表（邮箱或手机号，自动识别类型）
+  int64 validUntilTime = 4; // 有效期到（毫秒时间戳，不填使用默认值）
+}
+
+// 租户用户邀请信息（统一的邀请数据结构）
+message TenantUserInvite {
+  string inviteType = 1; // 邀请类型：email（邮件）、phone（手机号）
+  string address = 2; // 邮箱地址或手机号
+  int64 roleID = 3; // 角色ID
+  int64 validUntilTime = 4; // 有效期到（毫秒时间戳）
+  int64 createdTime = 5; // 创建时间（毫秒时间戳）
+}
+
+// 获取待处理邀请列表请求
+message TenantUserInvitePendingGetListReq {
+  string tenantCode = 1; // 租户编码（可选，不填取header）
+  string inviteType = 2; // 邀请类型筛选（可选：email/phone，不填返回全部）
+}
+
+// 获取待处理邀请列表响应
+message TenantUserInvitePendingGetListResp {
+  repeated TenantUserInvite list = 1; // 待处理邀请列表
+}
+
+// 删除待处理邀请请求
+message TenantUserInvitePendingDeleteReq {
+  string tenantCode = 1; // 租户编码（可选，不填取header）
+  string inviteType = 2; // 邀请类型：email/phone
+  string address = 3; // 邮箱地址或手机号
+}
+
+// 用户加入租户请求
+message TenantUserJoinReq {
+  string code = 1; // 邀请码（使用邀请码加入时填写）
+  string method = 2; // 加入方法：code（邀请码）、email（邮件邀请）、phone（手机邀请）
+  string tenantCode = 3; // 租户编码（可选，某些场景可能需要明确指定）
+}
+
+// 租户用户角色列表请求
+message TenantUserRoleGetListReq {
+  int64 userID = 1; // 用户ID
+  string tenantCode = 2; // 租户编码（可选，不填取当前用户租户）
+}
+
+// 租户用户角色列表响应
+message TenantUserRoleGetListResp {
+  int64 total = 1; // 总条数
+  repeated RoleInfo list = 2; // 角色列表
+}
+
+// 租户用户角色批量更新请求
+message TenantUserRoleBatchUpdateReq {
+  int64 userID = 1; // 用户ID
+  string tenantCode = 2; // 租户编码（可选，不填取当前用户租户）
+  repeated int64 roleIDs = 3; // 角色编号列表
+}

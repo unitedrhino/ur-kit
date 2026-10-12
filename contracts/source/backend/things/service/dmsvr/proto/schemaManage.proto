@@ -1,0 +1,185 @@
+//--------------------公共物模型管理服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+
+// 空请求/响应体。
+message SchemaManageEmpty {
+}
+
+// 仅包含 ID 的请求体。
+message SchemaManageWithID {
+  int64 id = 1; // 记录 ID。
+}
+
+// 包含 ID 与编码的请求体。
+message SchemaManageWithIDCode {
+  int64 id = 1; // 记录 ID。
+  string code = 2; // 业务编码。
+}
+
+// 物模型管理服务。
+service SchemaManage {
+  rpc commonSchemaInit(SchemaManageEmpty) returns (SchemaManageEmpty);
+  // 更新物模型。
+  rpc commonSchemaUpdate(CommonSchemaUpdateReq) returns (SchemaManageEmpty);
+  // 新增物模型。
+  rpc commonSchemaCreate(CommonSchemaCreateReq) returns (SchemaManageEmpty);
+  // 删除物模型。
+  rpc commonSchemaDelete(CommonSchemaDeleteReq) returns (SchemaManageEmpty);
+  // 查询物模型列表。
+  rpc commonSchemaGetList(CommonSchemaGetListReq) returns (CommonSchemaGetListResp);
+
+  rpc commonSchemaBatchImport(CommonSchemaImportReq) returns (SchemaImportResp); // 批量导入。
+  rpc commonSchemaBatchExport(CommonSchemaExportReq) returns (CommonSchemaExportResp); // 批量导出。
+
+  // 根据示例参数生成 mock 物模型。
+  rpc schemaMockGen(CommonSchemaMockGenReq) returns (CommonSchemaMockGenResp);
+}
+
+// 更新物模型请求。
+message CommonSchemaUpdateReq {
+  CommonSchemaInfo info = 1; // 物模型信息。
+}
+
+// 物模型信息。
+message CommonSchemaInfo {
+  string tenantCode = 18;
+  string identifier = 1; // 标识符。
+  int64 type = 2; // 类型：1=property, 2=event, 3=action。
+  int64 tag = 3; // 标签：1=标准, 2=自定义, 3=继承（具体以业务定义为准）。
+  google.protobuf.StringValue name = 4; // 名称。
+  google.protobuf.StringValue desc = 5; // 描述。
+  int64 required = 6; // 是否必填：1=是, 2=否。
+  int64 isCanSceneLinkage = 7; // 是否支持场景联动。
+  int64 funcGroup = 8; // 功能分组：1=基础功能, 2=高级功能。
+  // int64 userPerm =9; // 用户权限：1=r, 3=rw。
+  // int64 controlMode = 10; // 控制模式：1=云端+本地, 2=仅本地。
+  // int64 recordMode = 11; // 记录模式。
+  // int64 isPassword = 12; // 是否密码字段。
+  /*
+    affordance 为不同 type 对应的 JSON 配置，详见：
+    things/share/domain/schema/affordance.go
+
+    1) type=1 PropertyAffordance（属性）
+       - isUseShadow: bool
+       - isNoRecord: bool
+       - define: object（Define）
+       - mode: int（PropertyMode，1:r / 2:rw）
+       - 示例：
+         {"isUseShadow":true,"isNoRecord":false,"define":{"type":"int","min":0,"max":100,"unit":"%"},"mode":2}
+
+    2) type=2 EventAffordance（事件）
+       - type: string（EventType：info / alert / fault）
+       - params: object（事件参数 Define）
+       - 示例：
+         {"type":"alert","params":{"code":{"type":"string"},"level":{"type":"enum","enum":["L1","L2","L3"]}}}
+
+    3) type=3 ActionAffordance（动作）
+       - dir: string（ActionDir：up/down）
+       - input: object（输入参数 Define）
+       - output: object（输出参数 Define）
+       - 示例：
+         {"dir":"down","input":{"switch":{"type":"bool"}},"output":{"result":{"type":"int","enum":[0,1]}}}
+  */
+  google.protobuf.StringValue affordance = 13; // 能力定义 JSON。
+  string extendConfig = 14; // 扩展配置。
+  int64 order = 15; // 排序。
+}
+
+// 新增物模型请求。
+message CommonSchemaCreateReq {
+  CommonSchemaInfo info = 1; // 物模型信息。
+}
+
+message CommonSchemaDeleteReq {
+  string identifier = 1; // 标识符。
+}
+
+// 物模型列表查询请求。
+message CommonSchemaGetListReq {
+  PageInfo page = 1; // 分页信息，分页查询时必填。
+  repeated string productIDs = 2; // 按产品 ID 过滤。
+  int64 type = 3; // 类型：1=property, 2=event, 3=action。
+  bool withProductCategory = 4;
+  repeated string identifiers = 5; // 按标识符集合过滤。
+  string name = 6; // 按名称模糊匹配。
+  int64 productCategoryID = 7; // 按产品品类过滤。
+  string productCategoryCode = 26; // 品类编码。
+  bool productCategoryWithFather = 8; // 品类过滤时是否包含父级。
+  int64 isCanSceneLinkage = 9; // 是否支持场景联动。
+  int64 funcGroup = 14; // 功能分组：1=基础功能, 2=高级功能。
+  int64 userPerm = 15; // 用户权限：1=r, 3=rw。
+  int64 areaID = 16; // 按区域过滤。
+  int64 groupID = 17; // 按分组过滤。
+  repeated int64 groupIDs = 18; // 按分组集合过滤。
+  string propertyMode = 19; // 属性读写模式：1=r, 2=rw。
+  repeated int64 types = 20;
+  int64 controlMode = 21; // 控制模式：1=云端+本地, 2=仅本地。
+  string productSceneMode = 22; // 产品场景模式：r/rw/none。
+  string areaIDPath = 23; // 区域路径过滤。
+  int64 projectID = 24; // 按项目过滤。
+  int64 tag = 25; // 标签过滤：1=标准, 2=自定义, 3=继承。
+}
+
+// 物模型列表查询响应。
+message CommonSchemaGetListResp {
+  repeated CommonSchemaInfo list = 1;
+  int64 total = 2; // 总数（分页前）。
+}
+
+// 批量导入请求。
+message CommonSchemaImportReq {
+  string schemasFile = 1; // 物模型文件地址（如 OSS 文件 URL）。
+}
+
+// 批量导出请求。
+message CommonSchemaExportReq {
+  repeated string identifiers = 5; // 导出的标识符集合。
+}
+
+// 批量导出响应。
+message CommonSchemaExportResp {
+  string schemasFile = 1; // 导出文件地址（如 OSS 文件 URL）。
+}
+
+// 批量导入结果。
+message SchemaImportResp {
+  int64 total = 1; // 总处理数。
+  int64 errCount = 2; // 失败数。
+  int64 ignoreCount = 3; // 忽略数。
+  int64 succCount = 4; // 成功数。
+}
+
+// mock 物模型生成请求。
+message CommonSchemaMockGenReq {
+  int64 type = 1; // 类型：1=property, 2=event, 3=action。
+  string params = 2; // property/event 参数样例（JSON）。
+  string inputParams = 3; // action 输入参数样例（JSON）。
+  string outputParams = 4; // action 输出参数样例（JSON）。
+}
+
+// mock 物模型生成响应。
+message CommonSchemaMockGenResp {
+  repeated CommonSchemaMockGenItems schemas = 1; // 生成结果集合。
+}
+
+message CommonSchemaMockGenItems {
+  string identifier = 1; // 标识符。
+  // int64 userPerm =9; // 用户权限：1=r, 3=rw。
+  // int64 controlMode = 10; // 控制模式：1=云端+本地, 2=仅本地。
+  // int64 recordMode = 11; // 记录模式。
+  // int64 isPassword = 12; // 是否密码字段。
+  /*
+    affordance 为不同 type 对应的 JSON 配置，详见：
+    things/share/domain/schema/affordance.go
+
+    1) type=1 PropertyAffordance（属性）
+    2) type=2 EventAffordance（事件）
+    3) type=3 ActionAffordance（动作）
+  */
+  string affordance = 13; // 能力定义 JSON。
+}

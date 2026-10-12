@@ -1,0 +1,47 @@
+info(
+    title: "校验模块"
+    desc: "负责短信验证码,图形验证码等的校验"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+
+type UploadReq {
+    Sign string `form:"sign"`       //签名
+    FileName string `form:"fileName"` //文件名
+    //File file `form:"file"`//文件二进制 这个需要传!!! 因
+
+}
+type DownloadReq {
+    Sign string `form:"sign"`       //签名
+}
+@server (
+    group:open/oss
+    prefix: open/oss
+)
+
+service api {
+    @doc(
+        summary: "上传文件"
+        description: "业务说明：通过PUT方式直传文件到OSS存储。用于第三方系统集成、服务端间文件传输等场景。需要签名验证确保上传安全性。"
+        authType: "public"
+        group: "open/oss"
+        resource: "open/oss"
+        action: "upload"
+        recordLogMode: "3"
+    )
+    @handler upload
+    put /upload (UploadReq) returns ()
+    @doc(
+        summary: "下载文件"
+        description: "业务说明：通过GET方式从OSS下载文件。用于第三方系统获取文件、服务端间文件传输等场景。私有文件需签名验证，公开文件可直接访问。"
+        authType: "public"
+        group: "open/oss"
+        resource: "open/oss"
+        action: "download"
+        recordLogMode: "3"
+    )
+    @handler downLoad
+    get /download (DownloadReq) returns ()
+}

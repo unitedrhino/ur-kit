@@ -1,0 +1,131 @@
+//--------------------设备分组服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "dmShare.proto";
+import "deviceManage.proto";
+
+
+message DeviceGroupWithID{
+  int64 id = 1;
+}
+
+message DeviceGroupEmpty {
+}
+
+
+//设备分组
+service DeviceGroup {
+  //创建分组
+  rpc groupInfoCreate(GroupInfo)     returns (DeviceGroupWithID);
+  rpc groupInfoBatchCreate(GroupInfoBatchCreateReq)     returns (DeviceGroupEmpty);
+
+  //获取分组信息列表
+  rpc groupInfoGetList(GroupInfoGetListReq)     returns (GroupInfoGetListResp);
+  //获取分组信息详情
+  rpc groupInfoGetOne(GroupInfoGetOneReq)     returns (GroupInfo);
+  //更新分组
+  rpc groupInfoUpdate(GroupInfo)     returns (DeviceGroupEmpty);
+  //删除分组
+  rpc groupInfoDelete(DeviceGroupWithID)     returns (DeviceGroupEmpty);
+  //创建分组设备
+  rpc groupDeviceBatchCreate(GroupDeviceBatchSaveReq)     returns (DeviceGroupEmpty);
+  //更新分组设备
+  rpc groupDeviceBatchUpdate(GroupDeviceBatchSaveReq)     returns (DeviceGroupEmpty);
+  //删除分组设备
+  rpc groupDeviceBatchDelete(GroupDeviceBatchDeleteReq)     returns (DeviceGroupEmpty);
+}
+
+// GroupCore 分组核心信息（简化版）
+message GroupCore{
+  int64 id = 1;
+  int64 parentID = 2;
+  string name = 4;
+}
+
+// GroupInfo 分组信息
+message GroupInfo{
+  int64 id = 1;//分组ID
+  int64 parentID = 2;//父分组ID
+  int64 projectID = 3;//项目ID
+  string name = 4;//分组名称
+  string desc = 5;//分组描述
+  int64 createdTime = 6;//创建时间
+  map<string, string> tags = 7;//标签
+  string productID = 8;//产品ID
+  string productName = 9;//产品名称
+  int64 areaID = 10;//分组可以属于某个区域下
+  repeated DeviceCore devices =11;//设备列表
+  int64 deviceCount = 12;//设备数量
+  int64 isLeaf =13;//是否叶子节点
+  repeated GroupInfo children =14;//子分组列表
+  string purpose =15;//用途 不填默认为default
+  map<string,string> files =16;//key 是用途, value是 是文件的路径,如果要更新该文件, 传filePath即可
+  string idPath =17;//ID路径
+}
+
+// GroupInfoCreateReq 分组创建请求
+message GroupInfoCreateReq{
+  string name = 1;//分组名称
+  int64 parentID = 2;//父分组ID
+  string productID = 3;//产品ID
+  string desc = 4;//分组描述
+  int64 areaID = 5;//分组可以属于某个区域下
+  string purpose =6;//用途 不填默认为default
+}
+
+// GroupInfoBatchCreateReq 批量创建分组请求
+message GroupInfoBatchCreateReq{
+  repeated GroupInfo groups=1;//分组列表
+}
+
+// GroupInfoGetOneReq 分组读取请求
+message  GroupInfoGetOneReq{
+  int64 id =1;         // 分组ID
+  bool withChildren =2;//是否包含子分组
+  string purpose =15;//用途 不填默认为default
+}
+
+// GroupInfoGetListReq 分组列表查询请求
+message GroupInfoGetListReq{
+  PageInfo page = 1;//分页信息
+  string name = 2;//分组名称
+  int64 parentID = 3;//父分组ID
+  map<string, string> tags = 4;//标签
+  int64 areaID = 5;//分组可以属于某个区域下
+  repeated string names =6;//分组名称列表
+  string purpose =15;//用途 不填默认为default
+  repeated string purposes =16;//用途列表
+  DeviceCore hasDevice=17;//是否有该设备
+}
+
+// GroupInfoGetListResp 分组列表查询响应
+message GroupInfoGetListResp{
+  repeated GroupInfo list = 1;//分组列表
+  int64 total = 2;//总数
+}
+
+// GroupInfoUpdateReq 分组更新请求
+message GroupInfoUpdateReq{
+  int64 id = 1;//分组ID
+  string name = 2;//分组名称
+  string desc = 3;//分组描述
+  map<string, string> tags = 4;//标签
+  string productID = 5;//产品ID
+}
+
+// GroupDeviceBatchSaveReq 分组设备保存请求
+message GroupDeviceBatchSaveReq{
+  int64 groupID = 1;//分组ID
+  repeated DeviceCore list = 2;//设备列表
+}
+
+// GroupDeviceBatchDeleteReq 分组设备删除请求
+message GroupDeviceBatchDeleteReq{
+  int64 groupID = 1;//分组ID
+  string purpose =2;//用途 不填默认为default
+  repeated DeviceCore list = 3;//设备列表
+}
+
+

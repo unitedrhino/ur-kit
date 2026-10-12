@@ -1,0 +1,32 @@
+// 本文件定义规则引擎通用 AI 任务的开发会话接口，调度复用已有 clone-task。
+type AiTaskToolSessionReq {
+    ProjectID int64 `json:"projectID,string,optional"` // 项目 ID，缺省使用请求头
+    CloneGroupID int64 `json:"cloneGroupID,string"` // 当前项目对应的分身组
+    Prompt string `json:"prompt,optional"` // 可选任务需求
+}
+type AiTaskToolSessionResp {
+    CloneID int64 `json:"cloneID,string"` // 项目工具开发分身 ID
+    Persona string `json:"persona,optional"` // 工具开发约定
+}
+@server(
+    group: things/ruleEngine/aiTask
+    prefix: /api/v1/things/rule-engine/ai-task
+    middleware: CheckTokenWare,InitCtxsWare
+    defaultAuthType: "all"
+    accessCodePrefix: "thingsAiTask"
+    accessNamePrefix: "规则引擎AI任务"
+    accessGroup: "规则引擎"
+)
+service api {
+    @doc(
+        summary: "初始化 AI 任务开发会话"
+        description: "业务说明：校验用户对项目的访问权限及分身组归属，幂等返回项目级工具开发分身，用于多轮对话开发和保存任务工具。"
+        authType: "all"
+        resource: "things/rule-engine/ai-task"
+        action: "create"
+        group: "things/rule-engine/ai-task"
+        recordLogMode: "2"
+    )
+    @handler toolSession
+    post /tool-session (AiTaskToolSessionReq) returns (AiTaskToolSessionResp)
+}

@@ -1,0 +1,5409 @@
+{
+  "components": {
+    "schemas": {
+      "Empty": {
+        "title": "Empty",
+        "type": "object"
+      },
+      "ImCallActiveReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 群聊会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImCallActiveReq",
+        "type": "object"
+      },
+      "ImCallActiveResp": {
+        "properties": {
+          "active": {
+            "description": " 是否有进行中的通话",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "callId": {
+            "description": " 通话 ID",
+            "type": "string"
+          },
+          "callType": {
+            "description": " 通话媒体类型：voice / video",
+            "type": "string"
+          },
+          "participantIds": {
+            "description": " 当前参与者用户 ID 列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "active",
+          "callId",
+          "callType",
+          "participantIds"
+        ],
+        "title": "ImCallActiveResp",
+        "type": "object"
+      },
+      "ImCallSignalReq": {
+        "properties": {
+          "callId": {
+            "description": " 通话 ID（invite 类信令为空，由服务端生成）",
+            "type": "string"
+          },
+          "callType": {
+            "description": " 通话媒体类型：voice / video",
+            "type": "string"
+          },
+          "calleeId": {
+            "description": " 1:1 被叫用户 ID",
+            "type": "string"
+          },
+          "conversationId": {
+            "description": " 关联的 IM 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "members": {
+            "description": " 群通话邀请成员用户 ID 列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "payload": {
+            "description": " 扩展 JSON（media_state 的 mute/video 状态等）",
+            "type": "string"
+          },
+          "to": {
+            "description": " media_state 定向目标用户 ID（空=1:1 对端/群通话全员）",
+            "type": "string"
+          },
+          "type": {
+            "description": " 信令类型：call_invite/call_accept/call_reject/call_cancel/call_end/call_heartbeat/group_invite/group_join/group_leave/media_state",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "title": "ImCallSignalReq",
+        "type": "object"
+      },
+      "ImCallSignalResp": {
+        "properties": {
+          "callId": {
+            "description": " 通话 ID",
+            "type": "string"
+          },
+          "event": {
+            "description": " 对应下行事件名（created / busy / group.roster 等）",
+            "type": "string"
+          },
+          "notifyUserIDs": {
+            "description": " 本次信令已通知的用户 ID 列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "payload": {
+            "description": " 下行 payload JSON（含 members、duration 等）",
+            "type": "string"
+          },
+          "state": {
+            "description": " 通话状态：inviting / connected / ended / active / left",
+            "type": "string"
+          },
+          "zlmPushUrl": {
+            "description": " 当前用户推流地址（invite/accept/group_invite/group_join 时返回）",
+            "type": "string"
+          },
+          "zlmServer": {
+            "description": " ZLM SDP 交换地址（前端 play 用）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "callId",
+          "state",
+          "event",
+          "payload",
+          "notifyUserIDs",
+          "zlmPushUrl",
+          "zlmServer"
+        ],
+        "title": "ImCallSignalResp",
+        "type": "object"
+      },
+      "ImChannelBindGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 绑定列表",
+            "items": {
+              "$ref": "#/components/schemas/ImChannelBindInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ImChannelBindGetListResp",
+        "type": "object"
+      },
+      "ImChannelBindInfo": {
+        "properties": {
+          "channelId": {
+            "description": " 渠道标识",
+            "type": "string"
+          },
+          "channelName": {
+            "description": " 渠道展示名",
+            "type": "string"
+          },
+          "channelType": {
+            "description": " 渠道类型",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 绑定时间（Unix 秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 绑定记录 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isMuted": {
+            "description": " 端点级免打扰：0-下发 1-不下发",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userId": {
+            "description": " 绑定用户 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "channelType",
+          "channelId",
+          "channelName",
+          "isMuted",
+          "createdTime"
+        ],
+        "title": "ImChannelBindInfo",
+        "type": "object"
+      },
+      "ImChannelBindReq": {
+        "properties": {
+          "channelId": {
+            "description": " 渠道标识（device 为 {productID}:{deviceName}）",
+            "type": "string"
+          },
+          "channelName": {
+            "description": " 渠道展示名（设备名称）",
+            "type": "string"
+          },
+          "channelType": {
+            "description": " 渠道类型：device / ...",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelType",
+          "channelId"
+        ],
+        "title": "ImChannelBindReq",
+        "type": "object"
+      },
+      "ImChannelBindSetMuteReq": {
+        "properties": {
+          "id": {
+            "description": " 绑定记录 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isMuted": {
+            "description": " 0-下发 1-免打扰",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "isMuted"
+        ],
+        "title": "ImChannelBindSetMuteReq",
+        "type": "object"
+      },
+      "ImChannelUnbindReq": {
+        "properties": {
+          "id": {
+            "description": " 绑定记录 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImChannelUnbindReq",
+        "type": "object"
+      },
+      "ImContextConsentCreateReq": {
+        "properties": {
+          "expiresAt": {
+            "description": " UTC毫秒绝对截止，不超过实际源及服务目录授权。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "firstTurnIndex": {
+            "description": " 原完成轮首项，自1开始。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastTurnIndex": {
+            "description": " 原完成轮末项，范围最多32轮。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "msgToken": {
+            "description": " 本人原固定创建幂等键，同键换参数拒绝。",
+            "type": "string"
+          },
+          "serviceId": {
+            "description": " 当前显式服务目录项，不接受自由设备身份。",
+            "type": "string"
+          },
+          "snapshotVersion": {
+            "description": " 可选期望原版本，只比较不自赋。",
+            "type": "string"
+          },
+          "sourceSessionId": {
+            "description": " 当前本人的原IM AI源会话。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "msgToken",
+          "sourceSessionId",
+          "serviceId",
+          "firstTurnIndex",
+          "lastTurnIndex",
+          "expiresAt"
+        ],
+        "title": "ImContextConsentCreateReq",
+        "type": "object"
+      },
+      "ImContextConsentCreateResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImContextConsentMetadata"
+          },
+          "replay": {
+            "description": " 相同原请求重放，不刷新版本或期限。",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "consent",
+          "replay"
+        ],
+        "title": "ImContextConsentCreateResp",
+        "type": "object"
+      },
+      "ImContextConsentGetReq": {
+        "properties": {
+          "consentId": {
+            "description": " 原本人授权引用。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consentId"
+        ],
+        "title": "ImContextConsentGetReq",
+        "type": "object"
+      },
+      "ImContextConsentGetResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImContextConsentMetadata"
+          }
+        },
+        "required": [
+          "consent"
+        ],
+        "title": "ImContextConsentGetResp",
+        "type": "object"
+      },
+      "ImContextConsentMetadata": {
+        "properties": {
+          "consentId": {
+            "description": " 不透明原授权ID，不表示媒体或接听许可。",
+            "type": "string"
+          },
+          "consumed": {
+            "description": " 已绑定唯一handoff意图，不表示实际文本已投递。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "expiresAt": {
+            "description": " 原UTC毫秒截止，重放不续期。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "firstTurnIndex": {
+            "description": " 实际原授权首轮。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "grantedAt": {
+            "description": " 首次服务端授权时间。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastTurnIndex": {
+            "description": " 实际原授权末轮。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recipientSubject": {
+            "description": " 原精确接收设备，不包含连接凭据。",
+            "type": "string"
+          },
+          "revision": {
+            "description": " 当前持久授权代次。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "revokedAt": {
+            "description": " 零表示未撤销，不代表未到期。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scope": {
+            "description": " 固定completedText：有序本人user及assistant完成文本。",
+            "type": "string"
+          },
+          "serviceId": {
+            "description": " 原授权显式服务。",
+            "type": "string"
+          },
+          "serviceRevision": {
+            "description": " 原服务目录修订，换修订后不自动迁移授权。",
+            "type": "string"
+          },
+          "snapshotDigest": {
+            "description": " 原完整私有快照SHA256，不授予正文读取权限。",
+            "type": "string"
+          },
+          "snapshotVersion": {
+            "description": " 真实可信服务不可变版本。",
+            "type": "string"
+          },
+          "sourceSessionId": {
+            "description": " 原IM AI源会话，不是aisvr内部ID。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consentId",
+          "sourceSessionId",
+          "serviceId",
+          "serviceRevision",
+          "recipientSubject",
+          "scope",
+          "snapshotVersion",
+          "snapshotDigest",
+          "firstTurnIndex",
+          "lastTurnIndex",
+          "expiresAt",
+          "grantedAt",
+          "revision",
+          "revokedAt",
+          "consumed"
+        ],
+        "title": "ImContextConsentMetadata",
+        "type": "object"
+      },
+      "ImContextConsentRevokeReq": {
+        "properties": {
+          "consentId": {
+            "description": " 原本人授权引用，不支持管理员代撤销。",
+            "type": "string"
+          },
+          "expectedRevision": {
+            "description": " 原授权代次，重复原撤销保持原结果。",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "consentId",
+          "expectedRevision"
+        ],
+        "title": "ImContextConsentRevokeReq",
+        "type": "object"
+      },
+      "ImContextConsentRevokeResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImContextConsentMetadata"
+          }
+        },
+        "required": [
+          "consent"
+        ],
+        "title": "ImContextConsentRevokeResp",
+        "type": "object"
+      },
+      "ImConversationAddMembersReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "participants": {
+            "description": " 被邀请的参与者列表",
+            "items": {
+              "$ref": "#/components/schemas/ImParticipant"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "conversationId",
+          "participants"
+        ],
+        "title": "ImConversationAddMembersReq",
+        "type": "object"
+      },
+      "ImConversationAddMembersResp": {
+        "properties": {
+          "id": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImConversationAddMembersResp",
+        "type": "object"
+      },
+      "ImConversationCreateAIReq": {
+        "properties": {
+          "cloneId": {
+            "description": " AI 分身（Clone）ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "cloneId"
+        ],
+        "title": "ImConversationCreateAIReq",
+        "type": "object"
+      },
+      "ImConversationCreateReq": {
+        "properties": {
+          "name": {
+            "description": " 会话名称（群聊必填）",
+            "type": "string"
+          },
+          "participants": {
+            "description": " 参与者列表",
+            "items": {
+              "$ref": "#/components/schemas/ImParticipant"
+            },
+            "type": "array"
+          },
+          "type": {
+            "description": " 会话类型：single / group",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "participants"
+        ],
+        "title": "ImConversationCreateReq",
+        "type": "object"
+      },
+      "ImConversationCreateResp": {
+        "properties": {
+          "id": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImConversationCreateResp",
+        "type": "object"
+      },
+      "ImConversationDisbandReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImConversationDisbandReq",
+        "type": "object"
+      },
+      "ImConversationGetByParticipantsReq": {
+        "properties": {
+          "userID1": {
+            "description": " 用户 1 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userID2": {
+            "description": " 用户 2 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "userID1",
+          "userID2"
+        ],
+        "title": "ImConversationGetByParticipantsReq",
+        "type": "object"
+      },
+      "ImConversationGetListReq": {
+        "properties": {
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "20",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize"
+        ],
+        "title": "ImConversationGetListReq",
+        "type": "object"
+      },
+      "ImConversationGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 会话列表",
+            "items": {
+              "$ref": "#/components/schemas/ImConversationInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "ImConversationGetListResp",
+        "type": "object"
+      },
+      "ImConversationGetMembersReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImConversationGetMembersReq",
+        "type": "object"
+      },
+      "ImConversationGetMembersResp": {
+        "properties": {
+          "list": {
+            "description": " 成员列表",
+            "items": {
+              "$ref": "#/components/schemas/ImConversationMemberInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ImConversationGetMembersResp",
+        "type": "object"
+      },
+      "ImConversationGetReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImConversationGetReq",
+        "type": "object"
+      },
+      "ImConversationGetResp": {
+        "properties": {
+          "info": {
+            "$ref": "#/components/schemas/ImConversationInfo"
+          }
+        },
+        "required": [
+          "info"
+        ],
+        "title": "ImConversationGetResp",
+        "type": "object"
+      },
+      "ImConversationInfo": {
+        "properties": {
+          "avatar": {
+            "description": " 会话头像",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isMuted": {
+            "description": " 是否免打扰",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isPinned": {
+            "description": " 是否置顶",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastMsgContent": {
+            "description": " 最后一条消息内容摘要",
+            "type": "string"
+          },
+          "lastMsgID": {
+            "description": " 最后一条消息 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastMsgTime": {
+            "description": " 最后一条消息时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastReadMsgID": {
+            "description": " 已读到的消息 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": " 会话名称",
+            "type": "string"
+          },
+          "ownerID": {
+            "description": " 群主用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 会话状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 会话类型",
+            "type": "string"
+          },
+          "unreadCount": {
+            "description": " 未读消息数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "avatar",
+          "ownerID",
+          "status",
+          "lastMsgID",
+          "lastMsgTime",
+          "lastMsgContent",
+          "unreadCount",
+          "lastReadMsgID",
+          "isPinned",
+          "isMuted",
+          "createdTime",
+          "updatedTime"
+        ],
+        "title": "ImConversationInfo",
+        "type": "object"
+      },
+      "ImConversationMemberInfo": {
+        "properties": {
+          "avatar": {
+            "description": " 头像",
+            "type": "string"
+          },
+          "groupNickname": {
+            "description": " 群昵称",
+            "type": "string"
+          },
+          "isMuted": {
+            "description": " 是否被禁言",
+            "format": "int64",
+            "type": "integer"
+          },
+          "joinedTime": {
+            "description": " 加入时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "nickName": {
+            "description": " 昵称",
+            "type": "string"
+          },
+          "participantId": {
+            "description": " 参与者 ID",
+            "type": "string"
+          },
+          "participantType": {
+            "description": " 参与者类型",
+            "type": "string"
+          },
+          "role": {
+            "description": " 角色：owner / admin / member",
+            "type": "string"
+          },
+          "userName": {
+            "description": " 用户名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "participantType",
+          "participantId",
+          "role",
+          "groupNickname",
+          "isMuted",
+          "joinedTime",
+          "userName",
+          "nickName",
+          "avatar"
+        ],
+        "title": "ImConversationMemberInfo",
+        "type": "object"
+      },
+      "ImConversationMuteMemberReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isMuted": {
+            "description": " 是否禁言：1 禁言 / 0 取消禁言",
+            "format": "int64",
+            "type": "integer"
+          },
+          "participantId": {
+            "description": " 参与者 ID",
+            "type": "string"
+          },
+          "participantType": {
+            "description": " 参与者类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversationId",
+          "participantType",
+          "participantId",
+          "isMuted"
+        ],
+        "title": "ImConversationMuteMemberReq",
+        "type": "object"
+      },
+      "ImConversationRemoveMemberReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "participantId": {
+            "description": " 参与者 ID",
+            "type": "string"
+          },
+          "participantType": {
+            "description": " 参与者类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversationId",
+          "participantType",
+          "participantId"
+        ],
+        "title": "ImConversationRemoveMemberReq",
+        "type": "object"
+      },
+      "ImConversationSetAdminReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isAdmin": {
+            "description": " 是否管理员：1 设置 / 0 取消",
+            "format": "int64",
+            "type": "integer"
+          },
+          "participantId": {
+            "description": " 参与者 ID",
+            "type": "string"
+          },
+          "participantType": {
+            "description": " 参与者类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversationId",
+          "participantType",
+          "participantId",
+          "isAdmin"
+        ],
+        "title": "ImConversationSetAdminReq",
+        "type": "object"
+      },
+      "ImConversationTransferOwnerReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "newOwnerID": {
+            "description": " 新群主用户 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId",
+          "newOwnerID"
+        ],
+        "title": "ImConversationTransferOwnerReq",
+        "type": "object"
+      },
+      "ImConversationUpdateSettingReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isDeleted": {
+            "description": " 是否删除（退出会话列表）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isMuted": {
+            "description": " 是否免打扰",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isPinned": {
+            "description": " 是否置顶",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImConversationUpdateSettingReq",
+        "type": "object"
+      },
+      "ImFriendApplyReq": {
+        "properties": {
+          "recvUserID": {
+            "description": " 被申请人用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reqMsg": {
+            "description": " 申请附言",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recvUserID"
+        ],
+        "title": "ImFriendApplyReq",
+        "type": "object"
+      },
+      "ImFriendApplyResp": {
+        "properties": {
+          "id": {
+            "description": " 申请记录 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImFriendApplyResp",
+        "type": "object"
+      },
+      "ImFriendDeleteReq": {
+        "properties": {
+          "friendUserID": {
+            "description": " 好友用户 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "friendUserID"
+        ],
+        "title": "ImFriendDeleteReq",
+        "type": "object"
+      },
+      "ImFriendGetListReq": {
+        "properties": {
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "200",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize"
+        ],
+        "title": "ImFriendGetListReq",
+        "type": "object"
+      },
+      "ImFriendGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 好友列表",
+            "items": {
+              "$ref": "#/components/schemas/ImFriendInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "ImFriendGetListResp",
+        "type": "object"
+      },
+      "ImFriendHandleReq": {
+        "properties": {
+          "handleMsg": {
+            "description": " 处理附言",
+            "type": "string"
+          },
+          "handleResult": {
+            "description": " 处理结果：1 同意 / 2 拒绝",
+            "format": "int64",
+            "type": "integer"
+          },
+          "requestID": {
+            "description": " 申请记录 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "requestID",
+          "handleResult"
+        ],
+        "title": "ImFriendHandleReq",
+        "type": "object"
+      },
+      "ImFriendInfo": {
+        "properties": {
+          "avatar": {
+            "description": " 好友头像",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "friendUserID": {
+            "description": " 好友用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 记录 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "nickName": {
+            "description": " 好友昵称",
+            "type": "string"
+          },
+          "remark": {
+            "description": " 好友备注",
+            "type": "string"
+          },
+          "userID": {
+            "description": " 当前用户 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "userID",
+          "friendUserID",
+          "remark",
+          "nickName",
+          "avatar",
+          "createdTime"
+        ],
+        "title": "ImFriendInfo",
+        "type": "object"
+      },
+      "ImFriendRequestGetListReq": {
+        "properties": {
+          "direction": {
+            "description": " 方向：0 我收到的 / 1 我发起的",
+            "format": "int64",
+            "type": "integer"
+          },
+          "handleResult": {
+            "default": "-1",
+            "description": " 处理结果过滤：-1 全部",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "20",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "direction",
+          "handleResult",
+          "page",
+          "pageSize"
+        ],
+        "title": "ImFriendRequestGetListReq",
+        "type": "object"
+      },
+      "ImFriendRequestGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 申请列表",
+            "items": {
+              "$ref": "#/components/schemas/ImFriendRequestInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "ImFriendRequestGetListResp",
+        "type": "object"
+      },
+      "ImFriendRequestInfo": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "handleMsg": {
+            "description": " 处理附言",
+            "type": "string"
+          },
+          "handleResult": {
+            "description": " 处理结果：0 待处理 / 1 同意 / 2 拒绝",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 申请记录 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recvUserAvatar": {
+            "description": " 被申请人头像",
+            "type": "string"
+          },
+          "recvUserID": {
+            "description": " 被申请人用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recvUserNickName": {
+            "description": " 被申请人昵称",
+            "type": "string"
+          },
+          "reqMsg": {
+            "description": " 申请附言",
+            "type": "string"
+          },
+          "reqUserAvatar": {
+            "description": " 申请人头像",
+            "type": "string"
+          },
+          "reqUserID": {
+            "description": " 申请人用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reqUserNickName": {
+            "description": " 申请人昵称",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "reqUserID",
+          "reqUserNickName",
+          "reqUserAvatar",
+          "recvUserID",
+          "recvUserNickName",
+          "recvUserAvatar",
+          "reqMsg",
+          "handleResult",
+          "handleMsg",
+          "createdTime",
+          "updatedTime"
+        ],
+        "title": "ImFriendRequestInfo",
+        "type": "object"
+      },
+      "ImInteractionCommandsReq": {
+        "properties": {
+          "command": {
+            "description": " 完整原应用命令JSON对象，不能是字符串或媒体帧。",
+            "type": "object"
+          },
+          "endpointId": {
+            "description": " 已注册的本用户端点，不得自报用户或企业。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpointId",
+          "command"
+        ],
+        "title": "ImInteractionCommandsReq",
+        "type": "object"
+      },
+      "ImInteractionCommandsResp": {
+        "properties": {
+          "accepted": {
+            "description": " 原操作及通知已持久受理，不代表设备接听或媒体连通。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "msgToken": {
+            "description": " 原业务请求token。",
+            "type": "string"
+          },
+          "replay": {
+            "description": " 已受理原请求的幂等重放，不产生新媒体或新副作用。",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "accepted",
+          "msgToken",
+          "replay"
+        ],
+        "title": "ImInteractionCommandsResp",
+        "type": "object"
+      },
+      "ImInteractionEndpointResp": {
+        "properties": {
+          "endpointId": {
+            "description": " 当前登录用户的随机端点标识。",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": " Unix毫秒，端点固定有效一小时。",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "endpointId",
+          "expiresAt"
+        ],
+        "title": "ImInteractionEndpointResp",
+        "type": "object"
+      },
+      "ImInteractionEvent": {
+        "properties": {
+          "deliveryId": {
+            "description": " 稳定传输ID，重复拉取不更换。",
+            "type": "string"
+          },
+          "event": {
+            "description": " 原interaction.result/state信封对象，不包含媒体帧。",
+            "type": "object"
+          }
+        },
+        "required": [
+          "deliveryId",
+          "event"
+        ],
+        "title": "ImInteractionEvent",
+        "type": "object"
+      },
+      "ImInteractionEventsAckReq": {
+        "properties": {
+          "deliveryIds": {
+            "description": " 1至32个已处理的稳定传输ID，不能重复。",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "endpointId": {
+            "description": " 已注册的当前用户端点。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "endpointId",
+          "deliveryIds"
+        ],
+        "title": "ImInteractionEventsAckReq",
+        "type": "object"
+      },
+      "ImInteractionEventsAckResp": {
+        "properties": {
+          "acknowledged": {
+            "description": " 已确认数量，重复确认幂等成功。",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "acknowledged"
+        ],
+        "title": "ImInteractionEventsAckResp",
+        "type": "object"
+      },
+      "ImInteractionEventsReq": {
+        "properties": {
+          "endpointId": {
+            "description": " 已注册的本用户端点，不接受自报用户身份。",
+            "type": "string"
+          },
+          "limit": {
+            "description": " 1至32，客户端应处理后再确认。",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "endpointId",
+          "limit"
+        ],
+        "title": "ImInteractionEventsReq",
+        "type": "object"
+      },
+      "ImInteractionEventsResp": {
+        "properties": {
+          "list": {
+            "description": " 当前端点未确认且未过期的有界通知。",
+            "items": {
+              "$ref": "#/components/schemas/ImInteractionEvent"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ImInteractionEventsResp",
+        "type": "object"
+      },
+      "ImInteractionRecordingMetadata": {
+        "properties": {
+          "audioCodec": {
+            "description": " 可选opus，不授权实时采集。",
+            "type": "string"
+          },
+          "available": {
+            "description": " 目录状态不保证文件实际可打开。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "cameraId": {
+            "description": " 原档案相机。",
+            "type": "string"
+          },
+          "durationMs": {
+            "description": " 整份相对毫秒时长。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "endTimeMs": {
+            "description": " 原UTC结束。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordingId": {
+            "description": " 固定档案标识。",
+            "type": "string"
+          },
+          "recordingVersion": {
+            "description": " 原不可变版本。",
+            "type": "string"
+          },
+          "startTimeMs": {
+            "description": " 原UTC开始。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "videoCodec": {
+            "description": " 当前H264。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordingId",
+          "recordingVersion",
+          "cameraId",
+          "startTimeMs",
+          "endTimeMs",
+          "durationMs",
+          "available",
+          "videoCodec"
+        ],
+        "title": "ImInteractionRecordingMetadata",
+        "type": "object"
+      },
+      "ImInteractionRecordingTarget": {
+        "properties": {
+          "deviceName": {
+            "description": " 原具体设备名称。",
+            "type": "string"
+          },
+          "productID": {
+            "description": " 原具体设备产品，不接自由subject。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "ImInteractionRecordingTarget",
+        "type": "object"
+      },
+      "ImInteractionRecordingsQueryReq": {
+        "properties": {
+          "cameraId": {
+            "description": " 显式档案相机，不授权实时画面。",
+            "type": "string"
+          },
+          "endTimeMs": {
+            "description": " 不包含的UTC Unix毫秒终点，最多24小时窗口。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "endpointId": {
+            "description": " 原已登录用户注册端点。",
+            "type": "string"
+          },
+          "limit": {
+            "description": " 1至32，不默认扩大查询。",
+            "format": "int32",
+            "type": "integer"
+          },
+          "startTimeMs": {
+            "description": " 包含的UTC Unix毫秒起点。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "target": {
+            "$ref": "#/components/schemas/ImInteractionRecordingTarget"
+          }
+        },
+        "required": [
+          "endpointId",
+          "target",
+          "cameraId",
+          "startTimeMs",
+          "endTimeMs",
+          "limit"
+        ],
+        "title": "ImInteractionRecordingsQueryReq",
+        "type": "object"
+      },
+      "ImInteractionRecordingsQueryResp": {
+        "properties": {
+          "hasMore": {
+            "description": " 截断时应缩小查询窗口。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "list": {
+            "description": " 有限元数据，无路径或引用。",
+            "items": {
+              "$ref": "#/components/schemas/ImInteractionRecordingMetadata"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list",
+          "hasMore"
+        ],
+        "title": "ImInteractionRecordingsQueryResp",
+        "type": "object"
+      },
+      "ImInteractionTalkAudioAccessReq": {
+        "properties": {
+          "allowed": {
+            "description": " 仅set显式必填，read禁止携带。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "callId": {
+            "description": " 原IM活群通话，不是设备sessionId。",
+            "type": "string"
+          },
+          "expectedRevision": {
+            "description": " 仅set原许可正代次。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "operation": {
+            "description": " read或set；严格入口保留重复/null检查。",
+            "type": "string"
+          },
+          "targetUserID": {
+            "description": " 规范安全正整数字符串。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "operation",
+          "callId",
+          "targetUserID"
+        ],
+        "title": "ImInteractionTalkAudioAccessReq",
+        "type": "object"
+      },
+      "ImInteractionTalkAudioAccessResp": {
+        "properties": {
+          "audioRevision": {
+            "description": " 原成员许可代次。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "callId": {
+            "description": " 原IM通话。",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": " Unix毫秒，最多两秒。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "memberEpoch": {
+            "description": " 当前加入实例。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "publishAllowed": {
+            "description": " 服务器许可，不是实际静音事实。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "targetUserID": {
+            "description": " 原目标用户。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "callId",
+          "targetUserID",
+          "publishAllowed",
+          "audioRevision",
+          "memberEpoch",
+          "expiresAt"
+        ],
+        "title": "ImInteractionTalkAudioAccessResp",
+        "type": "object"
+      },
+      "ImMarkReadReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "readSeq": {
+            "description": " 已读到的序号",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImMarkReadReq",
+        "type": "object"
+      },
+      "ImMessageGetListReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "20",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId",
+          "page",
+          "pageSize"
+        ],
+        "title": "ImMessageGetListReq",
+        "type": "object"
+      },
+      "ImMessageGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 消息列表",
+            "items": {
+              "$ref": "#/components/schemas/ImMessageInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "ImMessageGetListResp",
+        "type": "object"
+      },
+      "ImMessageInfo": {
+        "properties": {
+          "clientMsgId": {
+            "description": " 客户端消息 ID（幂等去重）",
+            "type": "string"
+          },
+          "content": {
+            "description": " 消息内容",
+            "type": "string"
+          },
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "extra": {
+            "description": " 扩展字段",
+            "type": "string"
+          },
+          "id": {
+            "description": " 消息 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isAtAll": {
+            "description": " 是否 @ 全体成员",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "msgType": {
+            "description": " 消息类型",
+            "type": "string"
+          },
+          "sendTime": {
+            "description": " 发送时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "senderId": {
+            "description": " 发送者 ID",
+            "type": "string"
+          },
+          "senderType": {
+            "description": " 发送者类型",
+            "type": "string"
+          },
+          "seq": {
+            "description": " 会话内序号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 消息状态",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "conversationId",
+          "clientMsgId",
+          "senderType",
+          "senderId",
+          "msgType",
+          "content",
+          "extra",
+          "status",
+          "sendTime",
+          "isAtAll",
+          "mentionUserIDs"
+        ],
+        "title": "ImMessageInfo",
+        "type": "object"
+      },
+      "ImMessageSearchReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID（可选，限定单个会话）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "keyword": {
+            "description": " 搜索关键词",
+            "type": "string"
+          },
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "20",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "keyword",
+          "page",
+          "pageSize"
+        ],
+        "title": "ImMessageSearchReq",
+        "type": "object"
+      },
+      "ImMessageSyncReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "lastSeq": {
+            "description": " 本地已同步的最大消息序号，0 表示全量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "limit": {
+            "description": " 单次拉取上限，默认 100，封顶 500",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImMessageSyncReq",
+        "type": "object"
+      },
+      "ImMessageSyncResp": {
+        "properties": {
+          "hasMore": {
+            "description": " 是否还有更多消息待拉取",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "latestSeq": {
+            "description": " 会话当前最新序号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "list": {
+            "description": " 消息列表（按 seq 升序）",
+            "items": {
+              "$ref": "#/components/schemas/ImMessageInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list",
+          "latestSeq",
+          "hasMore"
+        ],
+        "title": "ImMessageSyncResp",
+        "type": "object"
+      },
+      "ImMomentCommentCreateHttpReq": {
+        "properties": {
+          "content": {
+            "$ref": "#/components/schemas/ImMomentCommentCreateReq"
+          },
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "content"
+        ],
+        "title": "ImMomentCommentCreateHttpReq",
+        "type": "object"
+      },
+      "ImMomentCommentCreateReq": {
+        "properties": {
+          "content": {
+            "description": " 评论内容",
+            "type": "string"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "content",
+          "mentionUserIDs"
+        ],
+        "title": "ImMomentCommentCreateReq",
+        "type": "object"
+      },
+      "ImMomentCommentDeleteReq": {
+        "properties": {
+          "commentID": {
+            "description": " 评论 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "momentID": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "momentID",
+          "commentID"
+        ],
+        "title": "ImMomentCommentDeleteReq",
+        "type": "object"
+      },
+      "ImMomentCommentInfo": {
+        "properties": {
+          "content": {
+            "description": " 评论内容",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 评论 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "momentID": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 评论状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userID": {
+            "description": " 评论人用户 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "momentID",
+          "userID",
+          "content",
+          "mentionUserIDs",
+          "status",
+          "createdTime",
+          "updatedTime"
+        ],
+        "title": "ImMomentCommentInfo",
+        "type": "object"
+      },
+      "ImMomentCreateReq": {
+        "properties": {
+          "content": {
+            "description": " 文本内容",
+            "type": "string"
+          },
+          "mediaList": {
+            "description": " 媒体列表",
+            "items": {
+              "$ref": "#/components/schemas/ImMomentMedia"
+            },
+            "type": "array"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "projectIDs": {
+            "description": " 可见项目列表（visibility=1 时生效）",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "visibility": {
+            "description": " 可见范围：0 公开 / 1 项目 / 2 指定人",
+            "format": "int64",
+            "type": "integer"
+          },
+          "visibleUserIDs": {
+            "description": " 可见用户列表（visibility=2 时生效）",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "content",
+          "mediaList",
+          "visibility",
+          "projectIDs",
+          "visibleUserIDs",
+          "mentionUserIDs"
+        ],
+        "title": "ImMomentCreateReq",
+        "type": "object"
+      },
+      "ImMomentCreateResp": {
+        "properties": {
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImMomentCreateResp",
+        "type": "object"
+      },
+      "ImMomentDeleteReq": {
+        "properties": {
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImMomentDeleteReq",
+        "type": "object"
+      },
+      "ImMomentGetListReq": {
+        "properties": {
+          "filterProjectID": {
+            "description": " 按项目过滤",
+            "format": "int64",
+            "type": "integer"
+          },
+          "filterUserID": {
+            "description": " 按发布人过滤",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "default": "1",
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "default": "20",
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "page",
+          "pageSize"
+        ],
+        "title": "ImMomentGetListReq",
+        "type": "object"
+      },
+      "ImMomentGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 动态列表",
+            "items": {
+              "$ref": "#/components/schemas/ImMomentInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "ImMomentGetListResp",
+        "type": "object"
+      },
+      "ImMomentGetReq": {
+        "properties": {
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImMomentGetReq",
+        "type": "object"
+      },
+      "ImMomentGetResp": {
+        "properties": {
+          "comments": {
+            "description": " 评论列表",
+            "items": {
+              "$ref": "#/components/schemas/ImMomentCommentInfo"
+            },
+            "type": "array"
+          },
+          "info": {
+            "$ref": "#/components/schemas/ImMomentInfo"
+          }
+        },
+        "required": [
+          "info",
+          "comments"
+        ],
+        "title": "ImMomentGetResp",
+        "type": "object"
+      },
+      "ImMomentInfo": {
+        "properties": {
+          "commentCount": {
+            "description": " 评论数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "content": {
+            "description": " 文本内容",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isLiked": {
+            "description": " 当前用户是否已点赞",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "likeCount": {
+            "description": " 点赞数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mediaList": {
+            "description": " 媒体列表",
+            "items": {
+              "$ref": "#/components/schemas/ImMomentMedia"
+            },
+            "type": "array"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "projectIDs": {
+            "description": " 可见项目列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "status": {
+            "description": " 动态状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userID": {
+            "description": " 发布人用户 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "visibility": {
+            "description": " 可见范围",
+            "format": "int64",
+            "type": "integer"
+          },
+          "visibleUserIDs": {
+            "description": " 可见用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "userID",
+          "content",
+          "mediaList",
+          "visibility",
+          "projectIDs",
+          "visibleUserIDs",
+          "mentionUserIDs",
+          "status",
+          "likeCount",
+          "commentCount",
+          "isLiked",
+          "createdTime",
+          "updatedTime"
+        ],
+        "title": "ImMomentInfo",
+        "type": "object"
+      },
+      "ImMomentLikeReq": {
+        "properties": {
+          "id": {
+            "description": " 动态 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ImMomentLikeReq",
+        "type": "object"
+      },
+      "ImMomentLikeResp": {
+        "properties": {
+          "likeCount": {
+            "description": " 最新点赞数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "likeCount"
+        ],
+        "title": "ImMomentLikeResp",
+        "type": "object"
+      },
+      "ImMomentMedia": {
+        "properties": {
+          "duration": {
+            "description": " 音视频时长（秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": " 文件名",
+            "type": "string"
+          },
+          "size": {
+            "description": " 文件大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "thumb": {
+            "description": " 缩略图地址",
+            "type": "string"
+          },
+          "type": {
+            "description": " 媒体类型：image/video/voice/file",
+            "type": "string"
+          },
+          "url": {
+            "description": " 媒体地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "url",
+          "thumb",
+          "size",
+          "duration",
+          "name"
+        ],
+        "title": "ImMomentMedia",
+        "type": "object"
+      },
+      "ImParticipant": {
+        "properties": {
+          "id": {
+            "description": " 参与者 ID",
+            "type": "string"
+          },
+          "type": {
+            "description": " 参与者类型：user / device / ai",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "id"
+        ],
+        "title": "ImParticipant",
+        "type": "object"
+      },
+      "ImRecalcUnreadReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId"
+        ],
+        "title": "ImRecalcUnreadReq",
+        "type": "object"
+      },
+      "ImRecalcUnreadResp": {
+        "properties": {
+          "unreadCount": {
+            "description": " 对账后的未读数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "unreadCount"
+        ],
+        "title": "ImRecalcUnreadResp",
+        "type": "object"
+      },
+      "ImRecallReq": {
+        "properties": {
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "msgId": {
+            "description": " 消息 ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "conversationId",
+          "msgId"
+        ],
+        "title": "ImRecallReq",
+        "type": "object"
+      },
+      "ImSendMessageReq": {
+        "properties": {
+          "clientMsgId": {
+            "description": " 客户端消息 ID",
+            "type": "string"
+          },
+          "content": {
+            "description": " 消息内容",
+            "type": "string"
+          },
+          "conversationId": {
+            "description": " 会话 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "extra": {
+            "description": " 扩展字段",
+            "type": "string"
+          },
+          "isAtAll": {
+            "description": " 是否 @ 全体成员",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mentionUserIDs": {
+            "description": " @ 的用户列表",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "msgType": {
+            "description": " 消息类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "conversationId",
+          "msgType",
+          "content"
+        ],
+        "title": "ImSendMessageReq",
+        "type": "object"
+      },
+      "ImSendMessageResp": {
+        "properties": {
+          "id": {
+            "description": " 消息 ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sendTime": {
+            "description": " 发送时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "seq": {
+            "description": " 会话内序号",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "seq",
+          "sendTime"
+        ],
+        "title": "ImSendMessageResp",
+        "type": "object"
+      },
+      "ImVisionConsentCreateReq": {
+        "properties": {
+          "cameraId": {
+            "description": " 本人选择，须核平台原摄像头。",
+            "type": "string"
+          },
+          "expectedMediaRevision": {
+            "description": " 原媒体代次，不是Consent修订。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "expiresAt": {
+            "description": " 本人明确UTC毫秒截止，不超过原会话。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "msgToken": {
+            "description": " 原本人签发幂等键，重放不刷新截止。",
+            "type": "string"
+          },
+          "sourceSessionId": {
+            "description": " 原活aiVision会话。",
+            "type": "string"
+          },
+          "trackId": {
+            "description": " 平台原选视频轨，不接受任意附件。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "msgToken",
+          "sourceSessionId",
+          "cameraId",
+          "trackId",
+          "expectedMediaRevision",
+          "expiresAt"
+        ],
+        "title": "ImVisionConsentCreateReq",
+        "type": "object"
+      },
+      "ImVisionConsentCreateResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImVisionConsentMetadata"
+          },
+          "replay": {
+            "description": " 原参数重放，不刷新授权或期限。",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "consent",
+          "replay"
+        ],
+        "title": "ImVisionConsentCreateResp",
+        "type": "object"
+      },
+      "ImVisionConsentGetReq": {
+        "properties": {
+          "consentId": {
+            "description": " 原本人同意引用。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consentId"
+        ],
+        "title": "ImVisionConsentGetReq",
+        "type": "object"
+      },
+      "ImVisionConsentGetResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImVisionConsentMetadata"
+          }
+        },
+        "required": [
+          "consent"
+        ],
+        "title": "ImVisionConsentGetResp",
+        "type": "object"
+      },
+      "ImVisionConsentMetadata": {
+        "properties": {
+          "cameraId": {
+            "description": " 原已选摄像头。",
+            "type": "string"
+          },
+          "consentId": {
+            "description": " 不透明同意引用，不赋予读帧权限。",
+            "type": "string"
+          },
+          "expiresAt": {
+            "description": " 首次本人截止，重放不续期。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "grantedAt": {
+            "description": " 首次持久签发UTC毫秒时点。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mediaRevision": {
+            "description": " 原媒体代次。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "revision": {
+            "description": " 独立同意CAS水位。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "revokedAt": {
+            "description": " 零仅表示未撤销，不代表仍有效。",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scope": {
+            "description": " 固定cameraAI，不授权IPC/录像/人工分享。",
+            "type": "string"
+          },
+          "sourceSessionId": {
+            "description": " 原aiVision会话。",
+            "type": "string"
+          },
+          "trackId": {
+            "description": " 原已选视频轨。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "consentId",
+          "scope",
+          "sourceSessionId",
+          "cameraId",
+          "trackId",
+          "mediaRevision",
+          "expiresAt",
+          "grantedAt",
+          "revision",
+          "revokedAt"
+        ],
+        "title": "ImVisionConsentMetadata",
+        "type": "object"
+      },
+      "ImVisionConsentRevokeReq": {
+        "properties": {
+          "consentId": {
+            "description": " 本人原同意，不支持管理员代撤销。",
+            "type": "string"
+          },
+          "expectedRevision": {
+            "description": " 原独立Consent修订。",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "consentId",
+          "expectedRevision"
+        ],
+        "title": "ImVisionConsentRevokeReq",
+        "type": "object"
+      },
+      "ImVisionConsentRevokeResp": {
+        "properties": {
+          "consent": {
+            "$ref": "#/components/schemas/ImVisionConsentMetadata"
+          }
+        },
+        "required": [
+          "consent"
+        ],
+        "title": "ImVisionConsentRevokeResp",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "core-api",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/im/call/active": {
+      "get": {
+        "description": "业务说明：查询指定群聊当前是否有进行中的群通话，用于前端进入群聊时补拉通话横幅（离线期间错过的 group.state 事件）。",
+        "operationId": "getApiV1ImCallActive",
+        "parameters": [
+          {
+            "description": " 群聊会话 ID",
+            "in": "query",
+            "name": "conversationId",
+            "required": true,
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImCallActiveResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询群通话进行状态",
+        "tags": [
+          "im/call",
+          "imCall"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/call",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/call"
+      }
+    },
+    "/api/v1/im/call/signal": {
+      "post": {
+        "description": "业务说明：音视频通话上行信令统一入口，按 type 分发：call_invite 发起 1:1 通话、call_accept 接听、call_reject 拒接、call_cancel 取消、call_end 挂断、call_heartbeat 通话中心跳（15s 一次）、group_invite 发起群通话（上限 9 人）、group_join 加入、group_leave 离开、media_state 静音/关摄像头同步。媒体由前端直连 ZLMediaKit 推拉流，本接口只负责状态机与通知扇出。",
+        "operationId": "postApiV1ImCallSignal",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImCallSignalReq"
+              }
+            }
+          },
+          "description": " ImCallSignalReq 通话信令请求（音视频通话，type 决定语义）",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImCallSignalResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "通话信令统一入口",
+        "tags": [
+          "im/call",
+          "imCall"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/call",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/call"
+      }
+    },
+    "/api/v1/im/channel/bind": {
+      "post": {
+        "description": "业务说明：把渠道端点（如设备 {productID}:{deviceName}）绑定到当前用户，绑定后该用户消息将下行到端点，端点上行消息进入用户最近单聊。重复绑定幂等更新名称。",
+        "operationId": "postApiV1ImChannelBind",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImChannelBindReq"
+              }
+            }
+          },
+          "description": " ==================== 渠道绑定（阶段 3：设备接入与渠道统一） ====================, ImChannelBindReq 绑定渠道端点请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "绑定渠道端点",
+        "tags": [
+          "im/channel",
+          "imChannel"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/channel",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/channel"
+      }
+    },
+    "/api/v1/im/channel/get-list": {
+      "post": {
+        "description": "业务说明：查询当前用户绑定的全部渠道端点及免打扰状态。",
+        "operationId": "postApiV1ImChannelGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          },
+          "description": " Empty 空响应（无返回体的接口统一使用）",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImChannelBindGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询渠道绑定列表",
+        "tags": [
+          "im/channel",
+          "imChannel"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/channel",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/channel"
+      }
+    },
+    "/api/v1/im/channel/set-mute": {
+      "post": {
+        "description": "业务说明：设置渠道端点级免打扰（isMuted=1 后站内消息不再下行到该端点，不影响端点上行）。",
+        "operationId": "postApiV1ImChannelSet-mute",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImChannelBindSetMuteReq"
+              }
+            }
+          },
+          "description": " ImChannelBindSetMuteReq 设置端点级免打扰请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "设置端点免打扰",
+        "tags": [
+          "im/channel",
+          "imChannel"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/channel",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/channel"
+      }
+    },
+    "/api/v1/im/channel/unbind": {
+      "post": {
+        "description": "业务说明：解除当前用户与渠道端点的绑定（仅本人可操作）。",
+        "operationId": "postApiV1ImChannelUnbind",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImChannelUnbindReq"
+              }
+            }
+          },
+          "description": " ImChannelUnbindReq 解绑渠道端点请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "解绑渠道端点",
+        "tags": [
+          "im/channel",
+          "imChannel"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/channel",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/channel"
+      }
+    },
+    "/api/v1/im/chatlog/get-list": {
+      "post": {
+        "description": "业务说明：分页查询会话内的历史消息，按序号倒序返回。",
+        "operationId": "postApiV1ImChatlogGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMessageGetListReq"
+              }
+            }
+          },
+          "description": " ImMessageGetListReq 消息列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMessageGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取消息列表",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/chatlog/mark-read": {
+      "post": {
+        "description": "业务说明：标记会话消息已读，同步更新会话未读数并向相关用户推送已读状态。",
+        "operationId": "postApiV1ImChatlogMark-read",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMarkReadReq"
+              }
+            }
+          },
+          "description": " ImMarkReadReq 标记已读请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "标记已读",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/chatlog/recalc-unread": {
+      "post": {
+        "description": "业务说明：按已读游标重算当前用户在会话内的未读数并持久化，用于修复撤回不回扣等造成的未读漂移。已撤回与系统消息不计入未读。",
+        "operationId": "postApiV1ImChatlogRecalc-unread",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImRecalcUnreadReq"
+              }
+            }
+          },
+          "description": " ImRecalcUnreadReq 未读数对账请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImRecalcUnreadResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "未读数对账",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/chatlog/search": {
+      "post": {
+        "description": "业务说明：按关键词搜索当前用户可见的聊天记录，可限定单个会话。",
+        "operationId": "postApiV1ImChatlogSearch",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMessageSearchReq"
+              }
+            }
+          },
+          "description": " ImMessageSearchReq 搜索聊天记录请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMessageGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "搜索聊天记录",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/chatlog/sync": {
+      "post": {
+        "description": "业务说明：客户端以本地最大消息序号为游标，增量拉取会话内其后的消息，用于断线重连补齐与后台对账。只读语义，不触发已读、不清未读。",
+        "operationId": "postApiV1ImChatlogSync",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMessageSyncReq"
+              }
+            }
+          },
+          "description": " ImMessageSyncReq 增量同步消息请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMessageSyncResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "增量同步消息",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/context-consents/create": {
+      "post": {
+        "description": "当前登录本人明确选择原AI源、显式人工服务、完成轮范围及截止时间。服务器复核原设备绑定、服务目录和既有IM权限，经aisvr本人授权导出后保存不可变快照；不接受客户端正文、管理员代签、未完成流或音视频，不自动创建转人工候选。",
+        "operationId": "postApiV1ImContext-consentsCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImContextConsentCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImContextConsentCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "授权本人已完成AI文本上下文",
+        "tags": [
+          "im/contextconsent",
+          "imContextconsent"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/contextconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "im/contextconsent"
+      }
+    },
+    "/api/v1/im/context-consents/get": {
+      "post": {
+        "description": "仅当前登录本人可查询原授权元数据和撤销状态，不返回私有正文、不赋予新媒体或设备权限。",
+        "operationId": "postApiV1ImContext-consentsGet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImContextConsentGetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImContextConsentGetResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询本人上下文授权",
+        "tags": [
+          "im/contextconsent",
+          "imContextconsent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/contextconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/contextconsent"
+      }
+    },
+    "/api/v1/im/context-consents/revoke": {
+      "post": {
+        "description": "仅本人按原授权代次撤销，重复原撤销返回同一持久结果。撤销或到期会阻止后继接受、最终移交与尚未发送的正文投递；不声称已发给接收方的文本可被回收。",
+        "operationId": "postApiV1ImContext-consentsRevoke",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImContextConsentRevokeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImContextConsentRevokeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "撤销本人上下文授权",
+        "tags": [
+          "im/contextconsent",
+          "imContextconsent"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/contextconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "im/contextconsent"
+      }
+    },
+    "/api/v1/im/conversation/add-members": {
+      "post": {
+        "description": "业务说明：向已有群聊会话中邀请新成员，支持一次邀请多个参与者。",
+        "operationId": "postApiV1ImConversationAdd-members",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationAddMembersReq"
+              }
+            }
+          },
+          "description": " ImConversationAddMembersReq 群聊邀请成员请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationAddMembersResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊邀请成员",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/create": {
+      "post": {
+        "description": "业务说明：创建单聊或群聊会话，指定参与者列表。单聊会话按参与者去重，群聊可设置会话名称。",
+        "operationId": "postApiV1ImConversationCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationCreateReq"
+              }
+            }
+          },
+          "description": " ImConversationCreateReq 创建会话请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建会话",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/create-ai": {
+      "post": {
+        "description": "业务说明：创建当前用户与指定 AI 分身（Clone）的单聊会话，已存在时复用原会话。",
+        "operationId": "postApiV1ImConversationCreate-ai",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationCreateAIReq"
+              }
+            }
+          },
+          "description": " ImConversationCreateAIReq 创建 AI 会话请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建 AI 会话",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/disband": {
+      "post": {
+        "description": "业务说明：群主解散群聊会话，解散后所有成员不可再发送消息。",
+        "operationId": "postApiV1ImConversationDisband",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationDisbandReq"
+              }
+            }
+          },
+          "description": " ImConversationDisbandReq 群聊解散请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊解散",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/get": {
+      "post": {
+        "description": "业务说明：按会话 ID 查询会话详情，含未读数与个人设置状态。",
+        "operationId": "postApiV1ImConversationGet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationGetReq"
+              }
+            }
+          },
+          "description": " ImConversationGetReq 获取会话详情请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationGetResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取会话详情",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/get-by-participants": {
+      "post": {
+        "description": "业务说明：按两个用户 ID 查询其单聊会话，用于发起单聊前定位已有会话。",
+        "operationId": "postApiV1ImConversationGet-by-participants",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationGetByParticipantsReq"
+              }
+            }
+          },
+          "description": " ImConversationGetByParticipantsReq 按参与者查询单聊会话",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "按参与者查询单聊会话",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/get-list": {
+      "post": {
+        "description": "业务说明：分页查询当前用户的会话列表，含最后一条消息摘要、未读数、置顶/免打扰状态。",
+        "operationId": "postApiV1ImConversationGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationGetListReq"
+              }
+            }
+          },
+          "description": " ImConversationGetListReq 获取会话列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取会话列表",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/get-members": {
+      "post": {
+        "description": "业务说明：查询会话全部成员及其角色、禁言状态，用户基础信息（昵称、头像）由 apisvr 富化返回。",
+        "operationId": "postApiV1ImConversationGet-members",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationGetMembersReq"
+              }
+            }
+          },
+          "description": " ImConversationGetMembersReq 获取会话成员列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImConversationGetMembersResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取会话成员列表",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/mute-member": {
+      "post": {
+        "description": "业务说明：群主或管理员对群成员执行禁言或取消禁言。",
+        "operationId": "postApiV1ImConversationMute-member",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationMuteMemberReq"
+              }
+            }
+          },
+          "description": " ImConversationMuteMemberReq 群聊禁言/取消禁言成员请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊禁言/取消禁言成员",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/remove-member": {
+      "post": {
+        "description": "业务说明：将指定成员移出群聊，或成员主动退出群聊。",
+        "operationId": "postApiV1ImConversationRemove-member",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationRemoveMemberReq"
+              }
+            }
+          },
+          "description": " ImConversationRemoveMemberReq 群聊移除/退出成员请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊移除/退出成员",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/set-admin": {
+      "post": {
+        "description": "业务说明：群主设置或取消群成员的管理员身份。",
+        "operationId": "postApiV1ImConversationSet-admin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationSetAdminReq"
+              }
+            }
+          },
+          "description": " ImConversationSetAdminReq 群聊设置/取消管理员请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊设置/取消管理员",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/transfer-owner": {
+      "post": {
+        "description": "业务说明：群主将会话所有权转让给其他成员。",
+        "operationId": "postApiV1ImConversationTransfer-owner",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationTransferOwnerReq"
+              }
+            }
+          },
+          "description": " ImConversationTransferOwnerReq 群聊转让群主请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "群聊转让群主",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/conversation/update-setting": {
+      "post": {
+        "description": "业务说明：更新当前用户在会话中的个人设置，包括置顶、免打扰、从会话列表删除。",
+        "operationId": "postApiV1ImConversationUpdate-setting",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImConversationUpdateSettingReq"
+              }
+            }
+          },
+          "description": " ImConversationUpdateSettingReq 更新会话设置请求（置顶/免打扰/删除）",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新会话设置",
+        "tags": [
+          "im/conversation",
+          "imConversation"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/conversation",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/conversation"
+      }
+    },
+    "/api/v1/im/friend/apply": {
+      "post": {
+        "description": "业务说明：向指定用户发起好友申请，可附申请留言，申请通过后双方建立双向好友关系。",
+        "operationId": "postApiV1ImFriendApply",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImFriendApplyReq"
+              }
+            }
+          },
+          "description": " ImFriendApplyReq 发起好友申请请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImFriendApplyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "发起好友申请",
+        "tags": [
+          "im/friend",
+          "imFriend"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/friend",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/friend"
+      }
+    },
+    "/api/v1/im/friend/delete": {
+      "post": {
+        "description": "业务说明：删除指定好友，双向好友关系同时解除。",
+        "operationId": "postApiV1ImFriendDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImFriendDeleteReq"
+              }
+            }
+          },
+          "description": " ImFriendDeleteReq 删除好友请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除好友",
+        "tags": [
+          "im/friend",
+          "imFriend"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/friend",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/friend"
+      }
+    },
+    "/api/v1/im/friend/get-list": {
+      "post": {
+        "description": "业务说明：分页查询当前用户的好友列表，含好友昵称、头像等用户资料。",
+        "operationId": "postApiV1ImFriendGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImFriendGetListReq"
+              }
+            }
+          },
+          "description": " ImFriendGetListReq 获取好友列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImFriendGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取好友列表",
+        "tags": [
+          "im/friend",
+          "imFriend"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/friend",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/friend"
+      }
+    },
+    "/api/v1/im/friend/handle": {
+      "post": {
+        "description": "业务说明：被申请人处理好友申请，同意则双方成为好友，拒绝则申请关闭。",
+        "operationId": "postApiV1ImFriendHandle",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImFriendHandleReq"
+              }
+            }
+          },
+          "description": " ImFriendHandleReq 处理好友申请请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Empty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "处理好友申请",
+        "tags": [
+          "im/friend",
+          "imFriend"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "all",
+        "x-group": "im/friend",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "im/friend"
+      }
+    },
+    "/api/v1/im/friend/request/get-list": {
+      "post": {
+        "description": "业务说明：分页查询好友申请列表，支持按方向（我收到的/我发起的）与处理结果过滤，含双方用户资料。",
+        "operationId": "postApiV1ImFriendRequestGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImFriendRequestGetListReq"
+              }
+            }
+          },
+          "description": " ImFriendRequestGetListReq 获取好友申请列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImFriendRequestGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取好友申请列表",
+        "tags": [
+          "im/friend",
+          "imFriend"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/friend",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/friend"
+      }
+    },
+    "/api/v1/im/interaction/commands": {
+      "post": {
+        "description": "按当前登录用户绑定端点提交原应用信令；当前接通IPC预览打开、媒体协商、状态报告、观看端按轨订阅控制及结束。打开可显式请求单向监听音频，省略时不开麦克风；观看端仅能订阅、取消订阅、暂停或恢复自身已授权轨，不能控制摄像头发布。受理不代表设备接听或媒体连通，原结果通过持久事件接口获取。",
+        "operationId": "postApiV1ImInteractionCommands",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImInteractionCommandsReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionCommandsResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "提交应用信令命令",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "operate",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "operate",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/interaction/endpoints/register": {
+      "post": {
+        "description": "为已登录用户创建独立一小时端点；端点不替代登录鉴权，不代表设备会话或媒体已建立。",
+        "operationId": "postApiV1ImInteractionEndpointsRegister",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionEndpointResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "注册应用信令端点",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/interaction/events": {
+      "post": {
+        "description": "按当前用户已注册端点拉取持久interaction.result/state；未确认事件可重放，不把读取当媒体连通或业务执行完成。",
+        "operationId": "postApiV1ImInteractionEvents",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImInteractionEventsReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionEventsResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "拉取应用信令事件",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/interaction/events/ack": {
+      "post": {
+        "description": "同事务确认当前登录端点已处理的事件，任一ID无权限则整体拒绝；不确认设备投递或音视频播放。",
+        "operationId": "postApiV1ImInteractionEventsAck",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImInteractionEventsAckReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionEventsAckResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "确认应用信令事件接收",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/interaction/recordings/query": {
+      "post": {
+        "description": "按当前登录端点和真实设备主人查询显式配置的有限档案窗口；不分配媒体、不授予实时摄像头权限，不返回路径或下载地址。历史播放通过独立recordPlayback会话。",
+        "operationId": "postApiV1ImInteractionRecordingsQuery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImInteractionRecordingsQueryReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionRecordingsQueryResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询历史录像目录",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/interaction/talk/audio-access": {
+      "post": {
+        "description": "原活IM与持久群成员可读取同会议目标音权；设置仅原通话发起人按原代次CAS执行，不以管理员或设备主人替代。服务端许可不代表实际音频已停止，不创建媒体端点。",
+        "operationId": "postApiV1ImInteractionTalkAudio-access",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImInteractionTalkAudioAccessReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImInteractionTalkAudioAccessResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "读取或设置会议发言许可",
+        "tags": [
+          "im/interaction",
+          "imInteraction"
+        ],
+        "x-action": "operate",
+        "x-auth-type": "all",
+        "x-group": "im/interaction",
+        "x-log-mode": "3",
+        "x-oper-type": "operate",
+        "x-resource": "im/interaction"
+      }
+    },
+    "/api/v1/im/message/recall": {
+      "post": {
+        "description": "业务说明：撤回本人在会话中已发送的消息。",
+        "operationId": "postApiV1ImMessageRecall",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImRecallReq"
+              }
+            }
+          },
+          "description": " ImRecallReq 撤回消息请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "撤回消息",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/message/send": {
+      "post": {
+        "description": "业务说明：向会话发送消息，支持文本、图片等消息类型，clientMsgId 用于客户端幂等去重。单聊会话先按好友关系放行，非好友回退共享项目校验。",
+        "operationId": "postApiV1ImMessageSend",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImSendMessageReq"
+              }
+            }
+          },
+          "description": " ImSendMessageReq 发送消息请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImSendMessageResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "发送消息",
+        "tags": [
+          "im/chatlog",
+          "imChatlog"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/chatlog",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/chatlog"
+      }
+    },
+    "/api/v1/im/moment/comment/create": {
+      "post": {
+        "description": "业务说明：对指定动态发表评论，可 @ 其他用户，并向动态发布人推送评论通知。",
+        "operationId": "postApiV1ImMomentCommentCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentCommentCreateHttpReq"
+              }
+            }
+          },
+          "description": " ImMomentCommentCreateHttpReq 发表评论请求（id 为动态 ID，content 为评论内容）",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "发表评论",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/comment/delete": {
+      "post": {
+        "description": "业务说明：删除本人在指定动态下的评论。",
+        "operationId": "postApiV1ImMomentCommentDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentCommentDeleteReq"
+              }
+            }
+          },
+          "description": " ImMomentCommentDeleteReq 删除评论请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除评论",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/create": {
+      "post": {
+        "description": "业务说明：发布朋友圈动态，支持文本与多媒体内容，可设置可见范围（公开/项目/指定人）并 @ 指定用户。",
+        "operationId": "postApiV1ImMomentCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentCreateReq"
+              }
+            }
+          },
+          "description": " ImMomentCreateReq 发布动态请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "发布动态",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/delete": {
+      "post": {
+        "description": "业务说明：删除本人发布的朋友圈动态。",
+        "operationId": "postApiV1ImMomentDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentDeleteReq"
+              }
+            }
+          },
+          "description": " ImMomentDeleteReq 删除动态请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除动态",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/get": {
+      "post": {
+        "description": "业务说明：按动态 ID 查询详情及评论列表。",
+        "operationId": "postApiV1ImMomentGet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentGetReq"
+              }
+            }
+          },
+          "description": " ImMomentGetReq 获取动态详情请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentGetResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取动态详情",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/like": {
+      "post": {
+        "description": "业务说明：对指定动态点赞，返回最新点赞数，并向动态发布人推送点赞通知。",
+        "operationId": "postApiV1ImMomentLike",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentLikeReq"
+              }
+            }
+          },
+          "description": " ImMomentLikeReq 点赞/取消点赞请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentLikeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "点赞动态",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/list": {
+      "post": {
+        "description": "业务说明：分页查询当前用户可见的朋友圈动态列表，支持按发布人、项目过滤。",
+        "operationId": "postApiV1ImMomentList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentGetListReq"
+              }
+            }
+          },
+          "description": " ImMomentGetListReq 查询动态列表请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询动态列表",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/moment/unlike": {
+      "post": {
+        "description": "业务说明：取消对指定动态的点赞，返回最新点赞数。",
+        "operationId": "postApiV1ImMomentUnlike",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImMomentLikeReq"
+              }
+            }
+          },
+          "description": " ImMomentLikeReq 点赞/取消点赞请求",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImMomentLikeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "取消点赞动态",
+        "tags": [
+          "im/moment",
+          "imMoment"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "all",
+        "x-group": "im/moment",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/vision-consents/create": {
+      "post": {
+        "description": "本人明确原会话、摄像头、轨和截止；活Owner复核本人、原连接、能力、隐私及选择后保存独立cameraAI同意。未装配可信Authority时拒绝，不接受图片引用或管理员代签。",
+        "operationId": "postApiV1ImVision-consentsCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImVisionConsentCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImVisionConsentCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "签发本人摄像头到AI同意",
+        "tags": [
+          "im/visionconsent",
+          "imVisionconsent"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "im/visionconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "im/visionconsent"
+      }
+    },
+    "/api/v1/im/vision-consents/get-one": {
+      "post": {
+        "description": "只查询本人原公开元数据；源失联或功能关闭不影响查询，不返回画面或内部来源。",
+        "operationId": "postApiV1ImVision-consentsGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImVisionConsentGetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImVisionConsentGetResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询本人视觉同意",
+        "tags": [
+          "im/visionconsent",
+          "imVisionconsent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "im/visionconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "im/visionconsent"
+      }
+    },
+    "/api/v1/im/vision-consents/revoke": {
+      "post": {
+        "description": "本人按独立Consent修订撤销，原请求重放保持首次结果；不依赖活Owner，后继取帧和模型消费须拒绝被撤销同意。",
+        "operationId": "postApiV1ImVision-consentsRevoke",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImVisionConsentRevokeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImVisionConsentRevokeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "撤销本人视觉同意",
+        "tags": [
+          "im/visionconsent",
+          "imVisionconsent"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/visionconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "im/visionconsent"
+      }
+    }
+  }
+}

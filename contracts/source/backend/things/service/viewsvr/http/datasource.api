@@ -1,0 +1,131 @@
+import "common.api"
+
+@server(
+	group: view/datasource
+	prefix: /api/v1/view/datasource
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "新增数据源"
+	    authType: "admin"
+	    description: "业务说明：在可视化应用中创建新的数据源配置，定义连接类型、配置参数和用途说明。用于数据集和项目的数据接入。"
+	    resource: "viewDatasource"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler create
+	post /create (DatasourceCreateReq) returns ()
+	@doc(
+	    summary: "更新数据源"
+	    authType: "admin"
+	    description: "业务说明：更新可视化数据源的名称、类型或连接配置，用于维护数据接入参数。"
+	    resource: "viewDatasource"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler update
+	post /update (DatasourceUpdateReq) returns ()
+	@doc(
+	    summary: "删除数据源"
+	    authType: "admin"
+	    description: "业务说明：删除可视化应用中的数据源配置。删除前应确认没有数据集继续引用该数据源。"
+	    resource: "viewDatasource"
+	    action: "delete"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (DatasourceDeleteReq) returns ()
+	@doc(
+	    summary: "获取数据源列表"
+	    authType: "admin"
+	    description: "业务说明：分页查询可视化数据源列表，支持按名称、类型和状态筛选。用于数据源管理页展示。"
+	    resource: "viewDatasource"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (DatasourceGetListReq) returns (DatasourceGetListResp)
+	@doc(
+	    summary: "获取数据源详情"
+	    authType: "admin"
+	    description: "业务说明：查询单个可视化数据源的完整配置，用于编辑回显和连接参数查看。"
+	    resource: "viewDatasource"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (DatasourceGetOneReq) returns (DatasourceView)
+	@doc(
+	    summary: "测试数据源连接"
+	    authType: "admin"
+	    description: "业务说明：测试可视化数据源的连接是否可用，返回连接结果和耗时。用于配置校验。"
+	    resource: "viewDatasource"
+	    action: "test"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler test
+	post /test (DatasourceGetOneReq) returns (DatasourceTestResp)
+}
+
+type (
+	DatasourceCreateReq {
+		Name   string `json:"name"`                //数据源名称
+		Type   string `json:"type"`                //类型: http/ws/mock/mysql/postgres
+		Config string `json:"config,optional"`     //配置JSON
+		Desc   string `json:"desc,optional"`       //描述
+	}
+
+	DatasourceUpdateReq {
+		ID     int64  `json:"id,string"`           //数据源id
+		Name   string `json:"name,optional"`       //数据源名称
+		Type   string `json:"type,optional"`       //类型
+		Config string `json:"config,optional"`     //配置JSON
+		Desc   string `json:"desc,optional"`       //描述
+	}
+
+	DatasourceDeleteReq {
+		ID int64 `json:"id,string"`                //数据源id
+	}
+
+	DatasourceGetOneReq {
+		ID int64 `json:"id,string"`                //数据源id
+	}
+
+	DatasourceGetListReq {
+		Page   *PageInfo `json:"page,optional"`    //分页信息
+		Name   string    `json:"name,optional"`    //名称模糊查询
+		Type   string    `json:"type,optional"`    //类型筛选
+		Status int64     `json:"status,optional"`  //状态筛选
+	}
+
+	DatasourceView {
+		ID          int64  `json:"id,string,optional"`       //数据源id
+		TenantCode  string `json:"tenantCode,optional"`      //租户编码
+		Name        string `json:"name,optional"`            //数据源名称
+		Type        string `json:"type,optional"`            //类型
+		Config      string `json:"config,optional"`          //配置JSON
+		Status      int64  `json:"status,optional"`          //状态 1:正常 2:异常
+		Desc        string `json:"desc,optional"`            //描述
+		CreatedTime int64  `json:"createdTime,string,optional"` //创建时间
+		UpdatedTime int64  `json:"updatedTime,string,optional"` //更新时间
+	}
+
+	DatasourceGetListResp {
+		List  []*DatasourceView `json:"list"`           //数据源列表
+		Total int64             `json:"total,optional"` //总数
+		Num   int64             `json:"num,optional"`   //返回数量
+	}
+
+	DatasourceTestResp {
+		Success  bool   `json:"success"`             //是否成功
+		Message  string `json:"message,optional"`    //消息
+		Duration int64  `json:"duration,optional"`   //耗时ms
+	}
+)

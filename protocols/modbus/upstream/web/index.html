@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<!--
+  Modbus 协议设备接入配置页（单个自包含静态 HTML，禁止引入外部 CDN/构建步骤）。
+
+  托管与访问：
+  - 本文件位于 backend/protocol/modbus/web/，由协议服务自托管（CoreProtocolConf.WebDir/WebHandler），
+    apisvr 反代入口：
+      iframe src = /api/v1/things/protocol/web/device/modbus?productID=xx&deviceName=yy
+      iframe src = /api/v1/things/protocol/web/product/modbus?productID=xx
+  - 反代后配置页与平台同源，直接读 cookie 获取登录态，无跨域问题。
+
+  页面结构（按 scope 分发，来自 _template/web/index.html 契约）：
+  1. device scope：Modbus 连接参数表单（与 DeviceFields 对齐，见
+     backend/protocol/modbus/internal/svc/serviceContext.go）：
+     address / mode(rtuovertcp,rtuoverudp,rtu,tcp,tcp+tls,udp) / baudRate / dataBits /
+     stopBits / parity / timeout / duration(采集周期毫秒)。读取/保存走
+     /api/v1/things/device/info/get-one 与 /api/v1/things/device/info/update 的 protocolConf；
+  2. 「连通测试」按钮：以表单当前参数调协议自有接口 protoApi('ping', params)
+     （经同路径 POST + ?__action=ping 由协议服务 WebHandler 分发），展示成功/失败与耗时；
+  3. product scope：点位映射编辑器（表格）：
+     - 物模型属性列表来自 POST /api/v1/things/product/schema/get-list {productID, type:1}
+     - 每个属性可配置：identifier 下拉（只读，来自物模型属性）/ address / registerType
+       (COIL/DISCRETE_INPUT/INPUT_REGISTER/HOLDING_REGISTER) / valueType / bit / bitLen /
+       strLen / byteSwap / wordSwap / multiWrite
+     - 保存时读写产品 protocolConf 的 points key（Point 数组 JSON 字符串，
+       结构见 backend/protocol/modbus/internal/domain/def.go 的 Point，identifier 关联物模型属性）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Modbus 接入配置</title>
+<style>
+  /* 对齐主应用 shadcn 主题(light):变量三元组取自 packages/@core/base/design/src/design-tokens/default.css,
+     此处直接展开为 hsl() 值,保持 iframe 内原生 HTML 与主应用观感统一 */
+  :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(210 6% 21%);
+    --muted: hsl(240 4.8% 95.9%);
+    --muted-foreground: hsl(240 3.8% 46.1%);
+    --primary: hsl(212 100% 45%);
+    --primary-foreground: hsl(0 0% 98%);
+    --secondary: hsl(240 5% 96%);
+    --secondary-foreground: hsl(240 6% 10%);
+    --destructive: hsl(359 100% 65%);
+    --border: hsl(240 5.9% 90%);
+    --input: hsl(240 5.88% 90%);
+    --ring: hsl(222.2 84% 4.9%);
+    --radius: 0.5rem;
+    --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: var(--font-family);
+    margin: 0;
+    padding: 16px;
+    color: var(--foreground);
+    background: var(--background);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  h3 { margin: 0 0 4px; font-size: 16px; font-weight: 600; color: var(--foreground); }
+  p.tip { margin: 0 0 14px; font-size: 13px; color: var(--muted-foreground); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--foreground); }
+  .field input, .field select {
+    width: 100%; padding: 7px 10px;
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    font-size: 13px; color: var(--foreground);
+    background: var(--background);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus, .field select:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px hsl(212 100% 45% / 15%);
+  }
+  .field input::placeholder { color: var(--muted-foreground); }
+  .row { display: flex; gap: 12px; }
+  .row .field { flex: 1; }
+  button {
+    display: inline-flex; align-items: center; justify-content: center;
+    padding: 7px 16px; border: 1px solid transparent; border-radius: var(--radius);
+    background: var(--primary); color: var(--primary-foreground);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    transition: opacity .15s;
+  }
+  button:hover { opacity: .9; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button.secondary { background: var(--secondary); color: var(--secondary-foreground); border-color: var(--border); }
+  .msg { margin-top: 12px; font-size: 13px; }
+  .msg.err { color: var(--destructive); }
+  .msg.ok { color: hsl(144 57% 58%); }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { border-bottom: 1px solid var(--border); padding: 8px 10px; text-align: left; }
+  th { background: var(--muted); font-weight: 600; color: var(--foreground); white-space: nowrap; }
+  td input, td select {
+    width: 100%; padding: 5px 8px;
+    border: 1px solid var(--input); border-radius: 6px;
+    font-size: 12px; color: var(--foreground); background: var(--background);
+    outline: none;
+  }
+  td input:focus, td select:focus { border-color: var(--primary); }
+  td input[type="checkbox"] { width: auto; accent-color: var(--primary); }
+  td .del-btn {
+    padding: 3px 10px; background: transparent; color: var(--destructive);
+    border: 1px solid var(--border); font-size: 12px;
+  }
+  td .del-btn:hover { background: hsl(359 100% 65% / 8%); opacity: 1; }
+  .tools { margin: 12px 0; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .tools span { font-size: 13px; color: var(--muted-foreground); }
+  .empty-tip { padding: 24px; text-align: center; color: var(--muted-foreground); font-size: 13px; }
+</style>
+</head>
+<body>
+<h3 id="title">Modbus 接入配置</h3>
+
+<!-- ============ 设备维度：连接参数表单 ============ -->
+<div id="form-device" hidden>
+  <p class="tip">连接参数保存到设备协议配置（protocolConf），字段与协议注册的 DeviceFields 一致；修改后需等待采集周期生效。</p>
+  <div class="field"><label>地址 address</label><input id="f-address" placeholder="例如 127.0.0.1:502 或串口 /dev/ttyS0"></div>
+  <div class="field"><label>连接模式 mode</label>
+    <select id="f-mode">
+      <option value="rtuovertcp">rtuovertcp（RTU over TCP）</option>
+      <option value="rtuoverudp">rtuoverudp（RTU over UDP）</option>
+      <option value="rtu">rtu（串口）</option>
+      <option value="tcp">tcp</option>
+      <option value="tcp+tls">tcp+tls（需客户端证书，暂不支持页面配置）</option>
+      <option value="udp">udp</option>
+    </select>
+  </div>
+  <div class="row">
+    <div class="field"><label>波特率 baudRate（仅串口）</label><input id="f-baudRate" type="number" placeholder="默认 19200"></div>
+    <div class="field"><label>数据位 dataBits（仅串口）</label><input id="f-dataBits" type="number" placeholder="默认 8"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>停止位 stopBits（仅串口）</label><input id="f-stopBits" type="number" placeholder="默认 1"></div>
+    <div class="field"><label>校验 parity（仅串口，0/1/2）</label><input id="f-parity" type="number" placeholder="0=无 1=偶 2=奇"></div>
+  </div>
+  <div class="row">
+    <div class="field"><label>请求超时 timeout（毫秒，默认 1000）</label><input id="f-timeout" type="number" placeholder="1000"></div>
+    <div class="field"><label>采集周期 duration（毫秒，默认 10000）</label><input id="f-duration" type="number" placeholder="10000"></div>
+  </div>
+  <div class="tools">
+    <button id="btn-ping" class="secondary">连通测试</button>
+    <button id="btn-save">保存</button>
+    <span id="ping-result"></span>
+  </div>
+</div>
+
+<!-- ============ 产品维度：点位映射编辑器 ============ -->
+<div id="form-product" hidden>
+  <p class="tip">
+    为需要采集的物模型属性「启用」并配置 Modbus 点位参数；未启用的属性不参与轮询采集。
+    保存时写入产品协议配置 protocolConf 的 points（仅启用点位）；未配置的属性走旧版物模型扩展配置（extendConfig）回退读取。
+    <br>· 寄存器地址为寄存器/线圈起始地址，0 是合法地址（第一个寄存器）；多个启用的点位地址+类型重复会冲突，保存时校验并提示。
+    <br>· 数据类型按物模型属性类型自动建议；bool 属性建议用「起始位/位长」按位读取。
+    <br>· 字节交换/字交换用于处理大小端序，默认不勾（标准大端）；多寄存器写默认勾选（部分设备写操作要求多寄存器写）。
+  </p>
+  <div class="tools">
+    <button id="btn-save-points">保存点位</button>
+    <button id="btn-clear-points" class="secondary">全部不启用</button>
+    <span id="schema-loading">加载物模型中...</span>
+  </div>
+  <div style="overflow:auto;max-height:520px;">
+    <table>
+      <thead>
+        <tr>
+          <th>启用</th>
+          <th>物模型属性</th>
+          <th>寄存器地址</th>
+          <th>寄存器类型</th>
+          <th>数据类型</th>
+          <th>起始位</th>
+          <th>位长</th>
+          <th>字符串长度</th>
+          <th>字节交换</th>
+          <th>字交换</th>
+          <th>多寄存器写</th>
+        </tr>
+      </thead>
+      <tbody id="points-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div id="msg" class="msg"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- 上下文解析 ----------
+  var scope = location.pathname.indexOf('/web/product/') >= 0 ? 'product' : 'device';
+  var protocolCode = decodeURIComponent(location.pathname.split('/').pop() || '');
+  var query = new URLSearchParams(location.search);
+  var productID = query.get('productID') || '';
+  var deviceName = query.get('deviceName') || '';
+  // app-id 由 iframe 容器组件经 URL query 透传(平台不写 cookie),缺省回退 '2' 保持旧模板兼容
+  var appId = query.get('app-id') || '2';
+  // token 优先取 query(iframe 容器透传主应用 SecureLS 权威 token),回退 cookie;
+  // 生产环境 cookie accessToken 只是 session 副本,标签页重开可能丢失但 SecureLS 仍在
+  var authToken = query.get('token') || '';
+  // tenant-code 优先取 query(iframe 容器透传 sessionStore.tenantCode=用户当前登录租户),
+  // 回退 cookie org-id;cookie org-id 同为 session 副本,重开标签页可能丢失导致 401
+  var tenantCode = query.get('tenant-code') || '';
+
+  // ---------- 登录态(cookie) ----------
+  function getCookie(name) {
+    var m = document.cookie.match(new RegExp('(?:^|; )' + name.replace(/[.$?*|{}()\[\]\\\/\+^]/g, '\\$&') + '=([^;]*)'));
+    return m ? decodeURIComponent(m[1]) : '';
+  }
+  function getToken() {
+    return authToken || getCookie('accessToken');
+  }
+  function getTenantCode() {
+    return tenantCode || getCookie('org-id');
+  }
+  function setCookie(name, value) {
+    document.cookie = name + '=' + encodeURIComponent(value) + '; path=/';
+  }
+
+  // ---------- 平台 API 封装 ----------
+  // 统一 POST；响应头 ithings-set-token 为平台静默续期的新 token，需写回 cookie。
+  function api(path, body) {
+    return fetch(path, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'token': getToken(),
+        'tenant-code': getTenantCode(),
+        'app-id': appId
+      },
+      body: JSON.stringify(body || {})
+    }).then(function (resp) {
+      var newToken = resp.headers.get('ithings-set-token');
+      if (newToken) setCookie('accessToken', newToken);
+      return resp.json();
+    }).then(function (data) {
+      // 平台统一响应包:{code, msg, data};code 非 0/200 视为失败
+      if (data && data.code && data.code !== 0 && data.code !== 200) {
+        throw new Error(data.msg || '请求失败(code=' + data.code + ')');
+      }
+      return data && data.data !== undefined ? data.data : data;
+    });
+  }
+
+  // ---------- 协议自有接口封装 ----------
+  // 经当前 iframe URL + __action 分发到协议服务 WebHandler(apisvr 同路径 POST 反代)。
+  function protoApi(action, params) {
+    var url = location.pathname + '?__action=' + encodeURIComponent(action) +
+      '&productID=' + encodeURIComponent(productID) +
+      (deviceName ? '&deviceName=' + encodeURIComponent(deviceName) : '');
+    return fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params || {})
+    }).then(function (resp) { return resp.json(); });
+  }
+
+  // ---------- UI 辅助 ----------
+  var msgEl = document.getElementById('msg');
+  function showMsg(text, isErr) {
+    msgEl.textContent = text;
+    msgEl.className = 'msg ' + (isErr ? 'err' : 'ok');
+  }
+
+  // 连接参数取值/回填（key 与 DeviceFields 及协议侧 ping 参数一致）
+  var DEV_FIELDS = ['address', 'mode', 'baudRate', 'dataBits', 'stopBits', 'parity', 'timeout', 'duration'];
+  function readForm() {
+    var conf = {};
+    DEV_FIELDS.forEach(function (k) {
+      var el = document.getElementById('f-' + k);
+      if (!el) return;
+      conf[k] = el.value;
+    });
+    return conf;
+  }
+  function fillForm(conf) {
+    conf = conf || {};
+    DEV_FIELDS.forEach(function (k) {
+      var el = document.getElementById('f-' + k);
+      if (!el) return;
+      el.value = (conf[k] !== undefined && conf[k] !== null) ? conf[k] : '';
+    });
+  }
+
+  // ---------- 设备维度：连接参数表单 ----------
+  function initDevice() {
+    document.getElementById('form-device').hidden = false;
+    document.getElementById('title').textContent = 'Modbus 接入配置（设备维度）';
+    // 读取设备既有协议配置
+    api('/api/v1/things/device/info/get-one', { productID: productID, deviceName: deviceName })
+      .then(function (di) {
+        fillForm((di && di.protocolConf) || {});
+      })
+      .catch(function (e) { showMsg('读取设备配置失败: ' + e.message, true); });
+
+    // 连通测试:调协议自有接口 ping(协议服务 WebHandler 执行 NewClient+Open)
+    document.getElementById('btn-ping').onclick = function () {
+      var btn = this;
+      var resultEl = document.getElementById('ping-result');
+      btn.disabled = true;
+      resultEl.textContent = '测试中...';
+      var params = readForm();
+      var start = Date.now();
+      protoApi('ping', params)
+        .then(function (data) {
+          // 协议侧返回 {success, costMs, errMsg} 或 {code,msg,data} 兼容判断
+          var d = (data && data.data !== undefined) ? data.data : data;
+          if (d && d.success) {
+            resultEl.textContent = '连接成功，耗时 ' + d.costMs + ' ms';
+            resultEl.style.color = '#389e0d';
+          } else {
+            resultEl.textContent = '连接失败: ' + (d && d.errMsg ? d.errMsg : (data.msg || '未知错误'));
+            resultEl.style.color = '#d4380d';
+          }
+        })
+        .catch(function (e) {
+          resultEl.textContent = '测试请求失败: ' + e.message;
+          resultEl.style.color = '#d4380d';
+        })
+        .finally(function () { btn.disabled = false; });
+    };
+
+    // 保存:device/info/update 为整体更新,先读后改,只改 protocolConf
+    document.getElementById('btn-save').onclick = function () {
+      api('/api/v1/things/device/info/get-one', { productID: productID, deviceName: deviceName })
+        .then(function (di) {
+          di.protocolConf = Object.assign({}, di.protocolConf, readForm());
+          return api('/api/v1/things/device/info/update', di);
+        })
+        .then(function () { showMsg('保存成功', false); })
+        .catch(function (e) { showMsg('保存失败: ' + e.message, true); });
+    };
+  }
+
+  // ---------- 产品维度：点位映射编辑器 ----------
+  // 常量与 backend/protocol/modbus/internal/domain/def.go 保持一致
+  var REGISTER_TYPES = ['COIL', 'DISCRETE_INPUT', 'INPUT_REGISTER', 'HOLDING_REGISTER'];
+  // valueType 与物模型数据类型 / Point.ValueType 对应,uint8 仅当物模型属性为 bool 时用 bit 位解析
+  var VALUE_TYPES = [
+    { v: 'uint16', label: 'uint16' },
+    { v: 'uint32', label: 'uint32' },
+    { v: 'uint64', label: 'uint64' },
+    { v: 'int16', label: 'int16' },
+    { v: 'int32', label: 'int32' },
+    { v: 'int64', label: 'int64' },
+    { v: 'float32', label: 'float32' },
+    { v: 'float64', label: 'float64' },
+    { v: 'string', label: 'string' }
+  ];
+
+  var properties = [];      // 物模型属性列表(仅 type=1)
+  var points = [];          // 当前点位配置数组(每项为 Point,含 identifier)
+
+  function propByIdentifier(id) {
+    for (var i = 0; i < properties.length; i++) {
+      if (properties[i].identifier === id) return properties[i];
+    }
+    return null;
+  }
+
+  // 根据物模型属性数据类型给出默认 valueType 建议
+  function suggestValueType(prop) {
+    if (!prop || !prop.affordance) return '';
+    var type = '';
+    try { type = (JSON.parse(prop.affordance).define || {}).type || ''; } catch (e) { type = ''; }
+    switch (type) {
+      case 'bool': return 'uint16';    // bool 点位走 bit/bitLen 位读取
+      case 'int': return 'int32';
+      case 'float': return 'float32';
+      case 'string': return 'string';
+      default: return 'uint16';
+    }
+  }
+
+  function escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  // 渲染点位表格;row 为 {enabled, identifier, address, registerType, valueType, bit, bitLen, strLen, byteSwap, wordSwap, multiWrite}
+  function renderPoints() {
+    var tbody = document.getElementById('points-tbody');
+    tbody.innerHTML = '';
+    if (!points.length) {
+      tbody.innerHTML = '<tr><td colspan="11" class="empty-tip">暂无物模型属性，请先在「物模型」Tab 添加属性</td></tr>';
+      return;
+    }
+    points.forEach(function (row, idx) {
+      var tr = document.createElement('tr');
+      // 物模型属性列为只读文本(每属性固定一行),名称带 identifier 便于识别
+      var prop = propByIdentifier(row.identifier);
+      var propLabel = prop
+        ? escapeHtml((prop.name || prop.identifier) + '（' + prop.identifier + '）')
+        : escapeHtml(row.identifier || '');
+      tr.innerHTML =
+        '<td><input data-k="enabled" data-idx="' + idx + '" type="checkbox"' + (row.enabled ? ' checked' : '') + '></td>' +
+        '<td><span style="font-weight:500;">' + propLabel + '</span></td>' +
+        '<td><input data-k="address" data-idx="' + idx + '" type="number" value="' + escapeHtml(row.address) + '"></td>' +
+        '<td><select data-k="registerType" data-idx="' + idx + '">' +
+        REGISTER_TYPES.map(function (t) { return '<option value="' + t + '"' + (row.registerType === t ? ' selected' : '') + '>' + t + '</option>'; }).join('') +
+        '</select></td>' +
+        '<td><select data-k="valueType" data-idx="' + idx + '">' +
+        VALUE_TYPES.map(function (t) { return '<option value="' + t.v + '"' + (row.valueType === t.v ? ' selected' : '') + '>' + t.label + '</option>'; }).join('') +
+        '</select></td>' +
+        '<td><input data-k="bit" data-idx="' + idx + '" type="number" value="' + escapeHtml(row.bit) + '"></td>' +
+        '<td><input data-k="bitLen" data-idx="' + idx + '" type="number" value="' + escapeHtml(row.bitLen) + '"></td>' +
+        '<td><input data-k="strLen" data-idx="' + idx + '" type="number" value="' + escapeHtml(row.strLen) + '"></td>' +
+        '<td><input data-k="byteSwap" data-idx="' + idx + '" type="checkbox"' + (row.byteSwap ? ' checked' : '') + '></td>' +
+        '<td><input data-k="wordSwap" data-idx="' + idx + '" type="checkbox"' + (row.wordSwap ? ' checked' : '') + '></td>' +
+        '<td><input data-k="multiWrite" data-idx="' + idx + '" type="checkbox"' + (row.multiWrite ? ' checked' : '') + '></td>';
+      tbody.appendChild(tr);
+    });
+  }
+
+  // 从表格 DOM 收集当前点位(identifier 为只读列,直接取 points 数组对应项)
+  function collectPoints() {
+    var rows = document.getElementById('points-tbody').children;
+    var list = [];
+    for (var i = 0; i < rows.length; i++) {
+      var row = { identifier: (points[i] && points[i].identifier) || '' };
+      rows[i].querySelectorAll('[data-k]').forEach(function (el) {
+        var k = el.getAttribute('data-k');
+        if (el.type === 'checkbox') {
+          row[k] = el.checked;
+        } else {
+          row[k] = el.value;
+        }
+      });
+      if (!row.identifier) continue;
+      list.push(row);
+    }
+    return list;
+  }
+
+  // 把 DOM 行数据(字符串/布尔)规范化为 Point JSON(数字字段转数字)。
+  // enabled=false 的点位不写入 points(不参与采集);multiWrite 默认 true。
+  function normalizePoint(row) {
+    return {
+      identifier: row.identifier || '',
+      address: parseInt(row.address, 10) || 0,
+      registerType: row.registerType || '',
+      valueType: row.valueType || '',
+      bit: parseInt(row.bit, 10) || 0,
+      bitLen: parseInt(row.bitLen, 10) || 0,
+      strLen: parseInt(row.strLen, 10) || 0,
+      byteSwap: !!row.byteSwap,
+      wordSwap: !!row.wordSwap,
+      multiWrite: row.multiWrite !== undefined ? !!row.multiWrite : true
+    };
+  }
+
+  function initProduct() {
+    document.getElementById('form-product').hidden = false;
+    document.getElementById('title').textContent = 'Modbus 接入配置（产品维度）';
+
+    var loadingEl = document.getElementById('schema-loading');
+    // 读取产品协议配置中的存量点位(points)
+    var pointsPromise = api('/api/v1/things/product/info/get-one', { productID: productID })
+      .then(function (pi) {
+        var conf = (pi && pi.protocolConf) || {};
+        if (conf.points) {
+          var arr = null;
+          try { arr = JSON.parse(conf.points); } catch (e) { arr = null; }
+          if (Array.isArray(arr)) points = arr;
+        }
+      })
+      .catch(function (e) { showMsg('读取产品配置失败: ' + e.message, true); });
+
+    // 读取物模型属性列表(type=1 属性)
+    var schemaPromise = api('/api/v1/things/product/schema/get-list', { productID: productID, type: 1 })
+      .then(function (data) {
+        properties = (data && data.list) || [];
+      })
+      .catch(function (e) { showMsg('读取物模型失败: ' + e.message, true); });
+
+    Promise.all([pointsPromise, schemaPromise]).then(function () {
+      // 合并:以物模型属性列表为准,每属性固定一行;已有 points 按 identifier 对齐(无配置用默认值)。
+      // enabled 默认 false(不启用不采集),multiWrite 默认 true(多数设备写操作要求多寄存器写)。
+      var byId = {};
+      points.forEach(function (p) { if (p.identifier) byId[p.identifier] = p; });
+      points = properties.map(function (prop) {
+        var saved = byId[prop.identifier];
+        return {
+          identifier: prop.identifier,
+          enabled: saved ? !!saved.enabled : false,
+          address: saved ? saved.address : 0,
+          registerType: saved ? saved.registerType : 'HOLDING_REGISTER',
+          valueType: saved ? saved.valueType : suggestValueType(prop),
+          bit: saved ? saved.bit : 0,
+          bitLen: saved ? saved.bitLen : 0,
+          strLen: saved ? saved.strLen : 0,
+          byteSwap: saved ? !!saved.byteSwap : false,
+          wordSwap: saved ? !!saved.wordSwap : false,
+          multiWrite: saved ? (saved.multiWrite !== undefined ? !!saved.multiWrite : true) : true
+        };
+      });
+      loadingEl.textContent = properties.length + ' 个属性';
+      renderPoints();
+    });
+
+    // 表格事件:变更输入即时同步到 points(identifier 只读列,从 points 数组对应项取值)
+    document.getElementById('points-tbody').addEventListener('change', function (e) {
+      var el = e.target;
+      if (!el.hasAttribute('data-k')) return;
+      var idx = parseInt(el.getAttribute('data-idx'), 10);
+      var k = el.getAttribute('data-k');
+      points[idx][k] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+
+    // 清空点位:将所有属性点位重置为「不启用」+ 默认参数(保存后 points 仅启用项)
+    document.getElementById('btn-clear-points').onclick = function () {
+      points = properties.map(function (prop) {
+        return {
+          identifier: prop.identifier,
+          enabled: false,
+          address: 0,
+          registerType: 'HOLDING_REGISTER',
+          valueType: suggestValueType(prop),
+          bit: 0,
+          bitLen: 0,
+          strLen: 0,
+          byteSwap: false,
+          wordSwap: false,
+          multiWrite: true
+        };
+      });
+      renderPoints();
+    };
+
+    // 保存:仅启用点位写入 protocolConf.points,并校验启用的点位地址+类型无冲突
+    document.getElementById('btn-save-points').onclick = function () {
+      var all = collectPoints();
+      var enabled = all.filter(function (r) { return r.enabled; });
+      // 校验启用点位:地址+寄存器类型不能重复(读同一寄存器但类型/数据宽度不同会冲突)
+      var seen = {};
+      var conflict = null;
+      for (var i = 0; i < enabled.length; i++) {
+        var r = enabled[i];
+        var key = (parseInt(r.address, 10) || 0) + ':' + (r.registerType || '');
+        if (seen[key] !== undefined) {
+          conflict = '地址 ' + (parseInt(r.address, 10) || 0) + ' 的 ' + r.registerType +
+            ' 有多个启用点位（' + points[seen[key]].identifier + ' 与 ' + r.identifier + '），请检查是否冲突';
+          break;
+        }
+        seen[key] = i;
+      }
+      if (conflict) { showMsg('保存失败: ' + conflict, true); return; }
+
+      var list = enabled.map(normalizePoint);
+      api('/api/v1/things/product/info/get-one', { productID: productID })
+        .then(function (pi) {
+          pi.protocolConf = Object.assign({}, pi.protocolConf, { points: JSON.stringify(list) });
+          return api('/api/v1/things/product/info/update', pi);
+        })
+        .then(function () { showMsg('保存成功（' + list.length + ' 个启用点位）', false); })
+        .catch(function (e) { showMsg('保存失败: ' + e.message, true); });
+    };
+  }
+
+  if (!getToken()) {
+    showMsg('登录态已失效,请刷新主页面重新登录', true);
+    return;
+  }
+  if (scope === 'product') initProduct(); else initDevice();
+})();
+</script>
+</body>
+</html>

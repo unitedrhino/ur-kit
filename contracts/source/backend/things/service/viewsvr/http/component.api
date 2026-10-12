@@ -1,0 +1,170 @@
+import "common.api"
+
+@server(
+	group: view/component
+	prefix: /api/v1/view/component
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "新增组件"
+	    authType: "admin"
+	    description: "业务说明：创建新的可视化组件，登记组件名称、分类、内容和入口信息。用于组件库建设。"
+	    resource: "viewComponent"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler create
+	post /create (ComponentCreateReq) returns ()
+	@doc(
+	    summary: "更新组件"
+	    authType: "admin"
+	    description: "业务说明：更新组件的基础信息、分类、版本、封面或状态。用于组件维护和发布管理。"
+	    resource: "viewComponent"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler update
+	post /update (ComponentUpdateReq) returns ()
+	@doc(
+	    summary: "删除组件"
+	    authType: "admin"
+	    description: "业务说明：删除组件库中的组件记录。用于清理废弃组件。"
+	    resource: "viewComponent"
+	    action: "delete"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (ComponentDeleteReq) returns ()
+	@doc(
+	    summary: "获取组件列表"
+	    authType: "admin"
+	    description: "业务说明：分页查询组件库列表，支持按名称、分类、状态、来源、创建人、创建时间、更新时间和分组筛选。用于组件选择和管理。"
+	    resource: "viewComponent"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ComponentGetListReq) returns (ComponentGetListResp)
+	@doc(
+	    summary: "复制组件"
+	    authType: "admin"
+	    description: "业务说明：复制现有组件生成新的组件记录，用于快速复用已有组件模板。"
+	    resource: "viewComponent"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler copy
+	post /copy (ComponentCopyReq) returns ()
+	@doc(
+	    summary: "获取组件详情"
+	    authType: "admin"
+	    description: "业务说明：查询单个组件的完整定义和设计内容，用于组件编辑回显。"
+	    resource: "viewComponent"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ComponentGetOneReq) returns (ComponentView)
+	@doc(
+	    summary: "保存组件设计内容"
+	    authType: "admin"
+	    description: "业务说明：保存组件的设计内容 JSON，用于组件设计器编辑后的内容持久化。"
+	    resource: "viewComponent"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler design
+	post /design (ComponentDesignReq) returns ()
+}
+
+type (
+	ComponentCreateReq {
+		ProjectID    int64  `json:"projectID,string,optional"`     //归属物联网项目ID
+		Name        string `json:"name"`                        //组件名称
+		GroupId     int64  `json:"groupId,string,optional"`     //分组id
+		CategoryId  string `json:"categoryId,optional"`         //分类: chart/table/decorate/info/map/other
+		Version     string `json:"version,optional"`            //版本
+		Content     string `json:"content,optional"`            //组合模板JSON
+		Entry       string `json:"entry,optional"`              //组件入口
+		Cover       string `json:"cover,optional"`              //预览图
+		Description string `json:"description,optional"`        //说明
+	}
+
+	ComponentUpdateReq {
+		ID          int64  `json:"id,string"`                   //组件id
+		ProjectID   int64  `json:"projectID,string,optional"`   //归属物联网项目ID
+		Name        string `json:"name,optional"`               //组件名称
+		GroupId     int64  `json:"groupId,string,optional"`     //分组id
+		CategoryId  string `json:"categoryId,optional"`         //分类
+		Version     string `json:"version,optional"`            //版本
+		Content     string `json:"content,optional"`            //组合模板JSON
+		Entry       string `json:"entry,optional"`              //组件入口
+		Cover       string `json:"cover,optional"`              //预览图
+		Description string `json:"description,optional"`        //说明
+		Status      int64  `json:"status,optional"`             //状态 1:上线 2:下线
+	}
+
+	ComponentDeleteReq {
+		ID int64 `json:"id,string"`                      //组件id
+	}
+
+	ComponentGetListReq {
+		Page          *PageInfo  `json:"page,optional"`                 //分页信息
+		ProjectID     int64      `json:"projectID,string,optional"`     //归属物联网项目ID
+		Name          string     `json:"name,optional"`                 //名称模糊查询
+		CategoryId    string     `json:"categoryId,optional"`           //分类筛选
+		Status        int64      `json:"status,optional"`               //状态筛选
+		Source        string     `json:"source,optional"`               //来源筛选 common/private
+		CreatedUserID int64      `json:"createdUserID,string,optional"` //创建者ID筛选
+		CreatedTime   *TimeRange `json:"createdTime,optional"`          //创建时间范围
+		UpdatedTime   *TimeRange `json:"updatedTime,optional"`          //更新时间范围
+		GroupId       int64      `json:"groupId,string,optional"`       //分组筛选
+	}
+
+	ComponentView {
+		ID            int64  `json:"id,string,optional"`            //组件id
+		ProjectID     int64  `json:"projectID,string,optional"`     //归属物联网项目ID
+		TenantCode    string `json:"tenantCode,optional"`           //租户编码
+		Name          string `json:"name,optional"`                 //组件名称
+		GroupId       int64  `json:"groupId,string,optional"`       //分组id
+		CategoryId    string `json:"categoryId,optional"`           //分类
+		Version       string `json:"version,optional"`              //版本
+		Status        int64  `json:"status,optional"`               //状态 1:上线 2:下线
+		Source        string `json:"source,optional"`               //来源 common/private
+		CreatedUserID int64  `json:"createdUserID,string,optional"` //创建者ID
+		Entry         string `json:"entry,optional"`                //组件入口
+		Cover         string `json:"cover,optional"`                //预览图
+		Content       string `json:"content,optional"`              //组合模板JSON
+		Description   string `json:"description,optional"`          //说明
+		CreatedTime   int64  `json:"createdTime,string,optional"`   //创建时间
+		UpdatedTime   int64  `json:"updatedTime,string,optional"`   //更新时间
+	}
+
+	ComponentGetListResp {
+		List  []*ComponentView `json:"list"`           //组件列表
+		Total int64            `json:"total,optional"` //总数
+		Num   int64            `json:"num,optional"`   //返回数量
+	}
+
+	ComponentCopyReq {
+		ID int64 `json:"id,string"` //组件id
+	}
+
+	ComponentGetOneReq {
+		ID int64 `json:"id,string"` //组件id
+	}
+
+	ComponentDesignReq {
+		ID      int64  `json:"id,string"`      //组件id
+		Content string `json:"content"`        //组合模板JSON
+		Cover   string `json:"cover,optional"` //预览图
+	}
+)

@@ -1,0 +1,50 @@
+syntax = "v1"
+
+// NVR 设备端录像接口（GB28181 录像检索）
+
+info(
+    title: "NVR 设备端录像"
+    desc: "GB28181 设备端录像检索"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+// AvNvrRecordItem 设备端录像片段
+type AvNvrRecordItem {
+    ChannelID string `json:"channelID"` // 通道 ID
+    Name      string `json:"name"`      // 录像名称
+    FilePath  string `json:"filePath"`  // 设备端文件路径
+    StartTime int64  `json:"startTime"` // 开始时间（秒级 UNIX 时间戳）
+    EndTime   int64  `json:"endTime"`   // 结束时间（秒级 UNIX 时间戳）
+    Secrecy   int64  `json:"secrecy,string"` // 保密属性
+    Type      string `json:"type"`      // 录像类型：all/time/alarm/manual
+}
+
+type AvNvrRecordQueryReq {
+    ChannelID string `json:"channelID"` // 通道 ID（GB28181 通道）
+    StartTime int64  `json:"startTime"` // 检索开始时间（秒级 UNIX 时间戳）
+    EndTime   int64  `json:"endTime"`   // 检索结束时间（秒级 UNIX 时间戳）
+}
+
+type AvNvrRecordQueryResp {
+    List []*AvNvrRecordItem `json:"list"` // 设备端录像片段列表
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权
+)
+service av-api {
+    @doc(
+        summary: "检索设备端录像"
+        description: "业务说明：通过 GB28181 信令检索 NVR 设备端录像片段列表，按通道与起止时间查询。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvNvrRecordQuery
+    post /api/v1/av/record/nvr/query (AvNvrRecordQueryReq) returns (AvNvrRecordQueryResp)
+}

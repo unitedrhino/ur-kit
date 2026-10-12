@@ -1,0 +1,350 @@
+//--------------------协议管理服务----
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "deviceManage.proto";
+import "productManage.proto";
+
+// ProtocolManageEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message ProtocolManageEmpty {
+}
+
+// ProtocolManageWithID 带ID的消息
+// 定义只包含ID的消息类型
+message ProtocolManageWithID{
+  int64 id = 1; // ID值
+}
+
+// ProtocolManageWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message ProtocolManageWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+service ProtocolManage {
+  //协议列表
+  rpc protocolInfoGetList(ProtocolInfoGetListReq)     returns (ProtocolInfoGetListResp);
+  //协议详情
+  rpc protocolInfoGetOne(ProtocolManageWithIDCode)     returns (ProtocolInfo);
+  //协议创建
+  rpc protocolInfoCreate(ProtocolInfo)     returns (ProtocolManageWithID);
+  //协议更新
+  rpc protocolInfoUpdate(ProtocolInfo)     returns (ProtocolManageEmpty);
+  //协议删除
+  rpc protocolInfoDelete(ProtocolManageWithID)     returns (ProtocolManageEmpty);
+
+  //更新服务状态,只给服务调用
+  rpc protocolServiceUpdate(ProtocolService)returns(ProtocolManageEmpty);
+  rpc protocolServiceDelete(ProtocolManageWithID)returns(ProtocolManageEmpty);
+  rpc protocolServiceGetList(ProtocolServiceGetListReq)returns(ProtocolServiceGetListResp);
+
+  //协议脚本列表
+  rpc protocolScriptGetList(ProtocolScriptGetListReq)     returns (ProtocolScriptGetListResp);
+  //协议脚本详情
+  rpc protocolScriptGetOne(ProtocolManageWithID)     returns (ProtocolScript);
+  //协议脚本创建
+  rpc protocolScriptCreate(ProtocolScript)     returns (ProtocolManageWithID);
+  //协议脚本更新
+  rpc protocolScriptUpdate(ProtocolScript)     returns (ProtocolManageEmpty);
+  //协议脚本删除
+  rpc protocolScriptDelete(ProtocolManageWithID)     returns (ProtocolManageEmpty);
+
+  rpc protocolScriptDebug(ProtocolScriptDebugReq)     returns (ProtocolScriptDebugResp);
+
+
+  //协议脚本设备绑定列表
+  rpc protocolScriptDeviceGetList(ProtocolScriptDeviceGetListReq)     returns (ProtocolScriptDeviceGetListResp);
+  //协议脚本设备绑定详情
+  rpc protocolScriptDeviceGetOne(ProtocolManageWithID)     returns (ProtocolScriptDevice);
+  //协议脚本设备绑定创建
+  rpc protocolScriptDeviceCreate(ProtocolScriptDevice)     returns (ProtocolManageWithID);
+  //协议脚本设备绑定更新
+  rpc protocolScriptDeviceUpdate(ProtocolScriptDevice)     returns (ProtocolManageEmpty);
+  //协议脚本设备绑定删除
+  rpc protocolScriptDeviceDelete(ProtocolManageWithID)     returns (ProtocolManageEmpty);
+
+  rpc protocolScriptBatchImport(ProtocolScriptImportReq) returns(ProtocolImportResp); //产品导入
+  rpc protocolScriptBatchExport(ProtocolScriptExportReq) returns(ProtocolScriptExportResp); //产品导出
+
+  //===== 协议配置管理 =====
+  //协议配置列表
+  rpc protocolConfigGetList(ProtocolConfigGetListReq) returns (ProtocolConfigGetListResp);
+  //协议配置详情
+  rpc protocolConfigGetOne(ProtocolManageWithID) returns (ProtocolConfig);
+  //协议配置创建
+  rpc protocolConfigCreate(ProtocolConfig) returns (ProtocolManageWithID);
+  //协议配置更新
+  rpc protocolConfigUpdate(ProtocolConfig) returns (ProtocolManageEmpty);
+  //协议配置删除
+  rpc protocolConfigDelete(ProtocolManageWithID) returns (ProtocolManageEmpty);
+
+  // 协议运行时配置（启动时按需获取）
+  rpc protocolRuntimeConfigGetOne(ProtocolRuntimeConfigGetReq) returns (ProtocolRuntimeConfigResp);
+
+  //===== 协议容器镜像管理 =====
+  rpc protocolImagePull(ProtocolImagePullReq) returns (ProtocolManageEmpty);
+  rpc protocolContainerInstall(ProtocolContainerInstallReq) returns (ProtocolManageWithID);
+  rpc protocolContainerStop(ProtocolContainerOperateReq) returns (ProtocolManageEmpty);
+  rpc protocolContainerUpdate(ProtocolContainerInstallReq) returns (ProtocolManageEmpty);
+  rpc protocolContainerUninstall(ProtocolContainerUninstallReq) returns (ProtocolManageEmpty);
+  rpc protocolContainerStatus(ProtocolContainerOperateReq) returns (ProtocolContainerStatusResp);
+}
+
+// ProtocolInfo 协议信息
+message ProtocolInfo{
+  int64  id = 1;
+  string  name = 2;
+  string code =3; //  iThings,iThings-thingsboard,wumei,aliyun,huaweiyun,tuya
+  string type =4; //协议类型: 普通设备(默认):normal  音视频:media
+  string  transProtocol = 5; // 传输协议: mqtt,tcp,udp
+  string  desc = 6;
+  repeated string  endpoints = 7;
+  string  etcdKey = 8;
+  int64 isEnableSyncProduct =13; //是否支持主动同步产品信息
+  int64 isEnableSyncDevice =14; //是否支持主动同步设备信息
+  repeated ProtocolConfigField configFields =9; //配置字段列表,没有可以不传
+  reserved 10; //原 configInfos 字段已废弃,迁移至独立的 ProtocolConfig
+  repeated ProtocolConfigField productFields =11; //产品需要的配置字段列表
+  repeated ProtocolConfigField deviceFields =12; //设备需要的配置字段列表
+  string image =15; // 镜像地址
+  string version =16; // 镜像版本
+  int64 containerPort =17; // 容器端口
+  map<string,string> envVars =18; // 环境变量
+  int64 isBuiltin =19; // 是否内置 1:是 2:否
+  string deployStatus =20; // 部署状态: notInstalled/downloaded/running/stopped
+}
+
+// ProtocolConfigField 协议配置字段（与 domain/protocol.ConfigField 一一对应）
+message ProtocolConfigField{
+  int64 id =1;                       //字段ID
+  string group =2;                   //分组名（不传为默认组）
+  string key =3;                     //配置键名
+  string label =4;                   //展示标签
+  bool isRequired =5;                //是否必填
+  int64 sort =6;                     //排序权重
+  string type =7;                    //字段类型: string/int/bool/enum/float/text/password
+  string defaultValue =8;            //默认值
+  string placeholder =9;             //输入提示
+  map<string,string> mapping =10;    //枚举映射（type=enum时有效）
+  string min =11;                    //最小值（type=int/float时有效）
+  string max =12;                    //最大值（type=int/float时有效）
+}
+
+// ProtocolConfigInfo 协议配置信息（已废弃，保留用于兼容旧生成代码）
+message ProtocolConfigInfo{
+  int64 id =1;
+  map<string,string> config =2;
+  string desc =3;
+}
+
+// ProtocolConfig 协议配置实例（独立CRUD）
+message ProtocolConfig{
+  int64 id =1;                                //配置ID
+  int64 protocolID =2;                        //关联协议ID
+  string protocolCode =3;                     //关联协议code
+  map<string,string> config =4;               //配置键值对
+  google.protobuf.StringValue desc =5;        //描述（wrapper，支持清空）
+  int64 createdTime =6;                       //创建时间
+  int64 updatedTime =7;                       //更新时间
+}
+
+// ProtocolConfigGetListReq 协议配置列表查询请求
+message ProtocolConfigGetListReq{
+  PageInfo page =1;                           //分页参数
+  int64 protocolID =2;                        //按协议ID过滤
+  string protocolCode =3;                     //按协议code过滤
+}
+
+// ProtocolConfigGetListResp 协议配置列表查询响应
+message ProtocolConfigGetListResp{
+  repeated ProtocolConfig list =1;
+  int64 total =2;
+}
+
+// ProtocolRuntimeConfigGetReq 协议运行时配置查询请求
+message ProtocolRuntimeConfigGetReq{
+  string protocolCode =1;                     // 协议 code
+}
+
+// ProtocolRuntimeConfigResp 协议运行时配置查询响应
+message ProtocolRuntimeConfigResp{
+  string protocolCode =1;                     // 协议 code
+  string configJson =2;                       // 运行配置 JSON
+}
+
+// ProtocolInfoGetListReq 协议列表查询请求
+message ProtocolInfoGetListReq{
+  PageInfo page = 1;
+  string  name = 2;
+  string  code =3; //  iThings,iThings-thingsboard,wumei,aliyun,huaweiyun,tuya
+  string type =4; //协议类型
+  string  transProtocol = 5; // 传输协议: mqtt,tcp,udp
+  repeated string notCodes =6; //排除的协议包
+  repeated string  codes =7;
+}
+
+// ProtocolInfoGetListResp 协议列表查询响应
+message ProtocolInfoGetListResp{
+  repeated ProtocolInfo list = 1;
+  int64 total = 2;
+}
+
+// ProtocolService 协议服务
+message ProtocolService {
+  int64  id = 1;
+  string code =2; //协议code
+  string ip =3; // 协议服务的ip地址
+  int64 port =4; //监听的端口,如果没有填0即可
+  int64 status =5; //服务状态
+  int64 updatedTime =6; //更新时间
+  int64 createdTime = 7; //首次加入时间
+  string containerID =8; // Docker容器ID
+  string image =9; // 实际运行的镜像
+  int64 webPort =10; // 协议配置页 web 端口(协议服务自托管静态配置页),为0表示未提供
+}
+
+// ProtocolServiceGetListReq 协议服务列表查询请求
+message ProtocolServiceGetListReq{
+  PageInfo page = 1;
+  string  code =2; //  iThings,iThings-thingsboard,wumei,aliyun,huaweiyun,tuya
+}
+
+// ProtocolServiceGetListResp 协议服务列表查询响应
+message ProtocolServiceGetListResp{
+  repeated ProtocolService list = 1;
+  int64 total = 2;
+}
+
+// ProtocolScript 协议脚本
+message ProtocolScript{
+  string tenantCode =11; //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+  int64  id = 1;
+  string  name = 2; //名称
+  int64 triggerDir =3; //1:up 2:down
+  int64 triggerTimer =4; //收到前处理1:before 2:after
+  string triggerHandle =5; //对应 mqtt topic的第一个 thing ota config 等等
+  string triggerType =6; // 操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+  google.protobuf.StringValue  desc = 7; //描述
+  string script =8; //脚本内容
+  int64 status =9; //状态:是否启用
+  int64 createdTime = 10; //创建时间
+}
+
+// ProtocolScriptGetListReq 协议脚本列表查询请求
+message ProtocolScriptGetListReq{
+  PageInfo page = 1;
+  string  name = 2;
+  int64 triggerDir =3; //1:up 2:down
+  int64 triggerTimer =4; //收到前处理1:before 2:after
+  string triggerHandle =5;
+  string triggerType =6;
+  int64 status =7; //状态:是否启用
+}
+
+// ProtocolScriptGetListResp 协议脚本列表查询响应
+message ProtocolScriptGetListResp{
+  repeated ProtocolScript list = 1;
+  int64 total = 2;
+}
+
+// ProtocolScriptDebugReq 协议脚本调试请求
+message ProtocolScriptDebugReq{
+  int64 triggerDir =2; //1:up 2:down
+  int64 triggerTimer =3; //收到前处理1:before 2:after
+  string script =6; //脚本内容
+  PublishMsg req =8; //请求
+  PublishMsg resp =9; //回复
+}
+
+// ProtocolScriptDebugResp 协议脚本调试响应
+message ProtocolScriptDebugResp{
+  PublishMsg out =1;
+  repeated string logs =2;
+}
+
+// ProtocolScriptDevice 协议脚本设备绑定
+message ProtocolScriptDevice{
+  string tenantCode =12; //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+  int64  id = 1;
+  int64 triggerSrc =2; //产品:1 设备:2
+  string productID =3;
+  string deviceName =4;
+  int64 scriptID = 5; //脚本对应的ID
+  int64 priority =6; //执行优先级 大于0
+  int64 status =7; //状态:是否启用
+  int64 createdTime = 8; //创建时间
+  ProtocolScript script =9; //脚本信息
+  ProductInfo product = 10; //withDevice时,绑定的是产品返回
+  DeviceInfo device =11; //withDevice时,绑定的是设备返回
+}
+
+// ProtocolScriptDeviceGetListReq 协议脚本设备绑定列表查询请求
+message ProtocolScriptDeviceGetListReq{
+  PageInfo page = 1;
+  int64 triggerSrc = 2; //product:1 device:2
+  string productID = 3; //
+  string deviceName = 4; //
+  int64 status = 5; //状态:是否启用
+  int64 scriptID = 6; //脚本对应的ID
+  bool withDevice = 7; //同时返回产品或设备信息
+  bool withScript =8; // 同时返回脚本信息
+}
+
+// ProtocolScriptDeviceGetListResp 协议脚本设备绑定列表查询响应
+message ProtocolScriptDeviceGetListResp{
+  repeated ProtocolScriptDevice list = 1;
+  int64 total = 2;
+}
+
+// ProtocolScriptImportReq 协议脚本导入请求
+message ProtocolScriptImportReq{
+  string scriptsFile =1; //协议脚本数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProtocolScriptExportReq 协议脚本导出请求
+message  ProtocolScriptExportReq{
+    repeated int64 ids = 5; //标识符列表
+}
+
+// ProtocolScriptExportResp 协议脚本导出响应
+message  ProtocolScriptExportResp{
+  string scriptsFile =1; //协议脚本数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProtocolImportResp 导入响应
+message ProtocolImportResp{
+  int64 total =1; //导入总接口数
+  int64  errCount =2; //失败数
+  int64  ignoreCount =3; //忽略数
+  int64  succCount =4; //成功数
+}
+
+//===== 协议容器镜像管理消息 =====
+message ProtocolImagePullReq{
+  int64 protocolID =1; // 协议ID
+}
+
+message ProtocolContainerInstallReq{
+  int64 protocolID =1; // 协议ID
+  string version =2; // 指定版本，空则使用默认
+}
+
+message ProtocolContainerOperateReq{
+  int64 protocolID =1; // 协议ID
+}
+
+message ProtocolContainerUninstallReq{
+  int64 protocolID =1; // 协议ID
+  bool removeImage =2; // 是否同时删除镜像
+}
+
+message ProtocolContainerStatusResp{
+  string status =1; // notInstalled / downloaded / running / stopped
+  string containerID =2;
+  string image =3;
+}

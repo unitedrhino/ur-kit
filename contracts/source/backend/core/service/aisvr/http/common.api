@@ -1,0 +1,22 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-共享类型"
+	desc:    "AI Common Types"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 共享类型定义 ----
+type PageInfo {
+	page     int64 `json:"page,optional"`     // 页码（从1开始）
+	pageSize int64 `json:"pageSize,optional"` // 每页大小
+}
+
+type WithID {
+	id int64 `json:"id"` // 资源ID
+}
+
+type WithStringID {
+	id string `json:"id"` // 资源字符串ID
+}

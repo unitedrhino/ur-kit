@@ -1,0 +1,176 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "",
+    "version": ""
+  },
+  "schemes": [
+    "http",
+    "https"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/iot/tool/ntp": {
+      "get": {
+        "operationId": "getIotToolNtp",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "default": "200",
+                  "title": "返回code"
+                },
+                "msg": {
+                  "type": "string",
+                  "title": "返回的消息"
+                },
+                "data": {
+                  "$ref": "#/definitions/WumeiNtpResp"
+                }
+              }
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "deviceSendTime",
+            "in": "query",
+            "required": true,
+            "type": "integer",
+            "format": "int64",
+            "schema": {}
+          }
+        ],
+        "tags": [
+          "ykwl"
+        ]
+      }
+    },
+    "/wumei/database/init": {
+      "get": {
+        "operationId": "getWumeiDatabaseInit",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "default": "200",
+                  "title": "返回code"
+                },
+                "msg": {
+                  "type": "string",
+                  "title": "返回的消息"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ykwl"
+        ]
+      }
+    },
+    "/wumei/database/init2": {
+      "get": {
+        "operationId": "getWumeiDatabaseInit2",
+        "responses": {
+          "200": {
+            "description": "A successful response.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "code": {
+                  "type": "integer",
+                  "default": "200",
+                  "title": "返回code"
+                },
+                "msg": {
+                  "type": "string",
+                  "title": "返回的消息"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "ykwl"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Request": {
+      "type": "object",
+      "properties": {},
+      "title": "Request"
+    },
+    "Response": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string"
+        }
+      },
+      "title": "Response",
+      "required": [
+        "message"
+      ]
+    },
+    "WumeiNtpReq": {
+      "type": "object",
+      "properties": {
+        "deviceSendTime": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "WumeiNtpReq",
+      "required": [
+        "deviceSendTime"
+      ]
+    },
+    "WumeiNtpResp": {
+      "type": "object",
+      "properties": {
+        "deviceSendTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "serverRecvTime": {
+          "type": "integer",
+          "format": "int64"
+        },
+        "serverSendTime": {
+          "type": "integer",
+          "format": "int64"
+        }
+      },
+      "title": "WumeiNtpResp",
+      "required": [
+        "deviceSendTime",
+        "serverRecvTime",
+        "serverSendTime"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "apiKey": {
+      "type": "apiKey",
+      "description": "Enter JWT Bearer token **_only_**",
+      "name": "Authorization",
+      "in": "header"
+    }
+  }
+}

@@ -1,0 +1,133 @@
+info (
+	title:   "租户续期模块"
+	desc:    "租户续期管理"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/renewal
+	prefix:           /api/v1/system/tenant/renewal
+	accessCodePrefix: "systemTenantManage"
+	accessNamePrefix: "租户续期"
+	accessGroup:      "租户管理"
+	defaultNeedAuth:  "true"
+	defaultAuthType:  "platform"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:    "获取续期列表"
+		description: "业务说明：查询企业与应用的续期列表，支持状态、关键字、到期天数过滤。用于续期管理页面与顶部到期提醒。"
+		authType:   "admin"
+		group: "system/tenant/renewal"
+		resource: "system/tenant/renewal"
+		action: "view"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (RenewalListReq) returns (RenewalListResp)
+
+	@doc (
+		summary:    "续费"
+		description: "业务说明：使用授权码对指定企业或应用进行续费或扩容。企业套餐授权码会刷新企业套餐信息，扩容授权码会叠加支持的企业配额。租户管理员只能续费自己的租户，平台管理员可指定 tenantCode 为任意租户续费。"
+		authType:   "admin"
+		group: "system/tenant/renewal"
+		resource: "system/tenant/renewal"
+		action: "renew"
+		recordLogMode: "1"
+	)
+	@handler renew
+	post /renew (RenewalRenewReq) returns (RenewalRenewResp)
+
+	@doc (
+		summary: "直接授权"
+		description: "业务说明：平台管理员直接选择商品或套餐授权给指定租户，无需生成 License 码。支持 plan/subscription/quotaRecharge/balanceTopup 类型，支持数量倍数。plan 类型不同商品需要确认替换。"
+		authType: "platform"
+		group: "system/tenant/renewal"
+		resource: "system/tenant/renewal"
+		action: "renew"
+		recordLogMode: "1"
+	)
+	@handler directGrant
+	post /direct-grant (RenewalDirectGrantReq) returns (RenewalDirectGrantResp)
+}
+
+type (
+	RenewalListReq {
+		Page             *PageInfo `json:"page,optional"` // 分页信息
+		TenantCode       string    `json:"tenantCode,optional"` // 指定租户编码，仅平台管理员可传
+		TargetType       string    `json:"targetType,optional"` // 续期对象类型：all 全部 tenant 企业 app 应用
+		Status           string    `json:"status,optional"` // 到期状态：all 全部 normal 正常 expiring 即将到期 expired 已过期
+		Keyword          string    `json:"keyword,optional"` // 关键字，按企业名、应用名或租户编码模糊匹配
+		ExpireWithinDays int64     `json:"expireWithinDays,optional"` // 到期天数筛选，传 30 表示仅返回 30 天内到期数据
+	}
+	RenewalItem {
+		TargetType  string            `json:"targetType"` // 续期对象类型：tenant 企业 app 应用
+		TargetID    string            `json:"targetID"` // 续期对象标识，企业为 tenantCode，应用为 tenantAppID
+		TenantCode  string            `json:"tenantCode"` // 所属租户编码
+		AppID       int64             `json:"appID,string"` // 应用ID，企业项返回 0
+		AppCode     string            `json:"appCode"` // 应用编码，企业项为空
+		TargetName  string            `json:"targetName"` // 展示名称，企业为企业名，应用为应用名
+		PackageCode string            `json:"packageCode"` // 当前套餐编码
+		PackageName string            `json:"packageName"` // 当前套餐名称
+		ExpireTime  int64             `json:"expireTime,string"` // 到期时间，毫秒时间戳
+		RemainDays  int64             `json:"remainDays"` // 剩余天数，已过期时为负数或 0
+		Status      string            `json:"status"` // 到期状态：normal expiring expired
+		Quota       map[string]string `json:"quota"` // 当前配额快照，应用项默认空对象
+		Usage       map[string]string `json:"usage"` // 当前用量快照，应用项默认空对象
+		Renewable   bool              `json:"renewable"` // 是否允许续费
+		Trialing    bool              `json:"trialing"` // 是否处于试用期
+		Categories  []string          `json:"categories,optional"` // 来源类别：plan / subscription / quotaRecharge / balanceTopup
+		GrantItems  []*GrantItem      `json:"grantItems,optional"` // 授权项快照（应用类型有效）
+	}
+	GrantItem {
+		GrantType  string `json:"grantType"` // app / tenantQuota
+		GrantKey   string `json:"grantKey"`
+		GrantValue string `json:"grantValue"`
+	}
+	RenewalListResp {
+		List []*RenewalItem `json:"list"` // 续期列表
+		PageResp
+	}
+	RenewalRenewReq {
+		LicenseCode    string `json:"licenseCode"` // 授权码
+		TargetType     string `json:"targetType"` // 续期对象类型：tenant 企业 app 应用
+		TenantCode     string `json:"tenantCode,optional"` // 所属租户编码，平台管理员可显式指定
+		TargetID       string `json:"targetID"` // 续期对象标识，企业为 tenantCode，应用为 tenantAppID
+		ConfirmReplace bool   `json:"confirmReplace,optional"` // 确认替换不同套餐（plan类型不同商品时需要）
+	}
+	RenewalRenewResp {
+		TargetType     string            `json:"targetType"` // 续期对象类型
+		TargetID       string            `json:"targetID"` // 续期对象标识
+		OldExpireTime  int64             `json:"oldExpireTime,string"` // 续费前到期时间，毫秒时间戳
+		NewExpireTime  int64             `json:"newExpireTime,string"` // 续费后到期时间，毫秒时间戳
+		PackageCode    string            `json:"packageCode"` // 生效的套餐编码
+		PackageName    string            `json:"packageName"` // 生效的套餐名称
+		NewQuota       map[string]string `json:"newQuota"` // 续费后的最新配额快照
+		Renewed        bool              `json:"renewed"` // 是否续费成功
+		NeedsConfirm   bool              `json:"needsConfirm,optional"` // 是否需要用户确认替换
+		ConfirmMessage string            `json:"confirmMessage,optional"` // 确认提示消息
+	}
+	RenewalDirectGrantReq {
+		TenantCode     string `json:"tenantCode"` // 租户编码
+		SourceType     string `json:"sourceType"` // 来源类型：product 商品 package 套餐
+		SourceID       int64  `json:"sourceID,string"` // 来源ID
+		SkuCode        string `json:"skuCode,optional"` // SKU编码，sourceType=product时必填
+		Count          int64  `json:"count,optional"` // 数量倍数，默认1
+		ConfirmReplace bool   `json:"confirmReplace,optional"` // 确认替换不同套餐
+	}
+	RenewalDirectGrantResp {
+		TargetType     string            `json:"targetType"` // 续期对象类型
+		TargetID       string            `json:"targetID"` // 续期对象标识
+		OldExpireTime  int64             `json:"oldExpireTime,string"` // 续费前到期时间，毫秒时间戳
+		NewExpireTime  int64             `json:"newExpireTime,string"` // 续费后到期时间，毫秒时间戳
+		PackageCode    string            `json:"packageCode"` // 生效的套餐编码
+		PackageName    string            `json:"packageName"` // 生效的套餐名称
+		NewQuota       map[string]string `json:"newQuota"` // 续费后的最新配额快照
+		Granted        bool              `json:"granted"` // 是否授权成功
+		NeedsConfirm   bool              `json:"needsConfirm,optional"` // 是否需要用户确认替换
+		ConfirmMessage string            `json:"confirmMessage,optional"` // 确认提示消息
+	}
+)

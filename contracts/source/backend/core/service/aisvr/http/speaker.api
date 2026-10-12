@@ -1,0 +1,183 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-声纹管理"
+	desc:    "AI Speaker Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 声纹特征向量类型定义 ----
+
+type SpeakerEmbeddingInfo {
+	ID            int64  `json:"id,optional"` // 声纹ID
+	tenantCode    string `json:"tenantCode,optional"` // 租户编码
+	cloneGroupID  int64  `json:"cloneGroupID"` // 所属Clone组ID
+	speakerName   string `json:"speakerName"` // 说话人名称
+	embedding     string `json:"embedding,optional"` // 声纹特征向量（JSON数组，仅查询时返回）
+	audioPath     string `json:"audioPath,optional"` // 原始音频存储路径
+	personaPrompt string `json:"personaPrompt,optional"` // 个性化提示词
+	status        int64  `json:"status,string,optional"` // 状态 1-启用 2-禁用
+	createdTime   int64  `json:"createdTime,optional"` // 创建时间
+	updatedTime   int64  `json:"updatedTime,optional"` // 更新时间
+}
+
+type SpeakerEmbeddingGetListReq {
+	page         PageInfo `json:"page"` // 分页信息
+	cloneGroupID int64    `json:"cloneGroupID"` // 按Clone组过滤
+	speakerName  string   `json:"speakerName,optional"` // 说话人名称模糊搜索
+	status       int64    `json:"status,optional"` // 状态过滤
+}
+
+type SpeakerEmbeddingGetListResp {
+	list  []SpeakerEmbeddingInfo `json:"list"` // 声纹列表
+	total int64                  `json:"total"` // 总数
+}
+
+type SpeakerEmbeddingDeleteReq {
+	ID int64 `json:"id"` // 声纹ID
+}
+
+// ---- 声纹提取类型定义 ----
+
+type SpeakerExtractReq {
+	audioBase64 string `json:"audioBase64"` // 音频数据（Base64编码的PCM或WAV）
+	sampleRate  int64  `json:"sampleRate,optional"` // 采样率（默认16000）
+}
+
+type QualityCheck {
+	name      string  `json:"name"`      // 检查项名称
+	value     float32 `json:"value"`     // 实际值
+	threshold float32 `json:"threshold"` // 阈值
+	passed    bool    `json:"passed"`    // 是否通过
+	message   string  `json:"message,optional"` // 说明
+}
+
+type QualityInfo {
+	score   float32         `json:"score"`           // 质量分数
+	level   string          `json:"level"`           // 质量等级
+	passed  bool            `json:"passed"`          // 是否通过
+	message string          `json:"message,optional"` // 说明
+	checks  []QualityCheck  `json:"checks,optional"` // 检查项列表
+}
+
+type SpeakerExtractResp {
+	embedding         []float32     `json:"embedding"`                   // 声纹特征向量（192维）
+	audioQuality      *QualityInfo  `json:"audioQuality,optional"`      // 音频质量
+	embeddingQuality  *QualityInfo  `json:"embeddingQuality,optional"`  // 声纹向量质量
+}
+
+// ---- 声纹导入类型定义 ----
+
+type SpeakerImportItem {
+	speakerName   string    `json:"speakerName"` // 说话人名称
+	embedding     []float32 `json:"embedding"` // 声纹特征向量（192维）
+	personaPrompt string    `json:"personaPrompt,optional"` // 个性化提示词
+	audioBase64   string    `json:"audioBase64,optional"` // 音频数据（Base64编码，可选）
+}
+
+type SpeakerImportReq {
+	cloneGroupID int64              `json:"cloneGroupID"` // Clone组ID
+	speakers     []SpeakerImportItem `json:"speakers"` // 声纹列表
+}
+
+type SpeakerImportResp {
+	imported int64 `json:"imported"` // 成功导入数量
+	failed   int64 `json:"failed"` // 失败数量
+}
+
+// ---- 声纹特征向量管理服务定义 ----
+@server (
+	group:            ai/speakerEmbedding
+	prefix:           /api/v1/ai/speaker/embedding
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiSpeakerManage"
+	accessNamePrefix: "声纹特征向量管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "注册声纹"
+		description: "业务说明：为指定Clone组注册新的声纹特征向量。需要提供说话人名称和声纹向量数据（192维float32数组的JSON）。同一Clone组内说话人名称不可重复。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "create"
+		group: "ai/speaker/embedding"
+		recordLogMode: "2"
+	)
+	@handler speakerEmbeddingCreate
+	post /create (SpeakerEmbeddingInfo) returns (WithID)
+
+	@doc(
+		summary: "更新声纹"
+		description: "业务说明：修改声纹的说话人名称、个性化提示词、状态等。部分更新，空值字段不修改。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "update"
+		group: "ai/speaker/embedding"
+		recordLogMode: "2"
+	)
+	@handler speakerEmbeddingUpdate
+	post /update (SpeakerEmbeddingInfo)
+
+	@doc(
+		summary: "删除声纹"
+		description: "业务说明：删除指定的声纹特征向量。删除后该说话人将无法被声纹识别。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "delete"
+		group: "ai/speaker/embedding"
+		recordLogMode: "2"
+	)
+	@handler speakerEmbeddingDelete
+	post /delete (SpeakerEmbeddingDeleteReq)
+
+	@doc(
+		summary: "获取声纹详情"
+		description: "业务说明：根据声纹ID查询完整信息，包括说话人名称、声纹向量、个性化提示词等。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "view"
+		group: "ai/speaker/embedding"
+		recordLogMode: "1"
+	)
+	@handler speakerEmbeddingGetOne
+	post /get-one (WithID) returns (SpeakerEmbeddingInfo)
+
+	@doc(
+		summary: "获取声纹列表"
+		description: "业务说明：分页查询声纹列表，支持按Clone组、说话人名称、状态过滤。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "view"
+		group: "ai/speaker/embedding"
+		recordLogMode: "1"
+	)
+	@handler speakerEmbeddingGetList
+	post /get-list (SpeakerEmbeddingGetListReq) returns (SpeakerEmbeddingGetListResp)
+
+	@doc(
+		summary: "提取声纹特征向量"
+		description: "业务说明：从音频数据中提取声纹特征向量（192维）。音频数据支持PCM或WAV格式，采样率建议16kHz。提取的向量可用于声纹注册或声纹识别比对。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "view"
+		group: "ai/speaker/embedding"
+		recordLogMode: "1"
+	)
+	@handler speakerExtract
+	post /extract (SpeakerExtractReq) returns (SpeakerExtractResp)
+
+	@doc(
+		summary: "批量导入声纹"
+		description: "业务说明：批量导入声纹特征向量到指定Clone组。支持直接提供embedding向量或音频数据（自动提取）。"
+		authType: "admin"
+		resource: "ai/speaker/embedding"
+		action: "create"
+		group: "ai/speaker/embedding"
+		recordLogMode: "2"
+	)
+	@handler speakerImport
+	post /import (SpeakerImportReq) returns (SpeakerImportResp)
+}

@@ -1,0 +1,113 @@
+info (
+	title:   "资讯管理模块"
+	desc:    "资讯的创建、更新、删除、查询等管理"
+	author:  "Claude"
+	email:   "noreply@anthropic.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/notify/news
+	prefix:           /api/v1/system/notify/news
+	accessCodePrefix: "systemNotifyNews"
+	accessNamePrefix: "资讯管理"
+	accessGroup:      "通知管理"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "创建资讯"
+		description: "业务说明：创建新的资讯文章，包括标题、封面图、正文内容（HTML格式）、摘要、跳转链接、发布时间、过期时间、状态等属性。用于发布系统公告、新闻动态、帮助文档等内容，支持草稿和发布状态管理。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/news"
+		resource: "system/notify/news"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (NotifyNews) returns (WithID)
+
+	@doc(
+		summary: "获取资讯详情"
+		description: "业务说明：根据ID获取资讯文章的完整信息，包括标题、封面图、正文内容、摘要、跳转链接、发布状态、时间等所有字段。用于资讯编辑页面的数据加载或资讯详情页展示。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/news"
+		resource: "system/notify/news"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler info
+	post /info (WithID) returns (NotifyNews)
+
+	@doc(
+		summary: "更新资讯"
+		description: "业务说明：修改资讯文章的内容或状态，包括标题、封面图、正文、摘要、跳转链接、发布时间、过期时间、状态等。支持从草稿状态发布、从已发布状态下架等状态流转操作。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/news"
+		resource: "system/notify/news"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (NotifyNews) returns ()
+
+	@doc(
+		summary: "删除资讯"
+		description: "业务说明：删除指定的资讯文章，删除后用户端将无法查看该资讯。用于清理过期或不再需要的资讯内容，管理员权限。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/news"
+		resource: "system/notify/news"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID) returns ()
+
+	@doc(
+		summary: "获取资讯列表"
+		description: "业务说明：分页查询资讯文章列表，支持按标题模糊搜索、状态筛选、发布时间范围筛选。用于资讯管理页面的列表展示，管理员可查看所有状态的资讯（草稿、已发布、已下架）。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/news"
+		resource: "system/notify/news"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler list
+	post /list (NotifyNewsListReq) returns (NotifyNewsListResp)
+}
+
+type (
+	// 资讯信息
+	NotifyNews {
+		ID          int64   `json:"id,string,optional"`           // 资讯ID
+		Title       string  `json:"title"`                         // 标题
+		CoverImage  string  `json:"coverImage,optional,omitempty"` // 封面图URL
+		Body        string  `json:"body"`                          // 正文内容（HTML格式）
+		Summary     string  `json:"summary,optional,omitempty"`    // 摘要
+		ActionURL   string  `json:"actionURL,optional,omitempty"`  // 跳转链接
+		NotifyTime  int64   `json:"notifyTime,string,optional"`    // 发布时间（毫秒时间戳）
+		ExpireTime  int64   `json:"expireTime,string,optional"`    // 过期时间（毫秒时间戳）
+		Status      int64   `json:"status,string,optional"`        // 状态 1:草稿 2:已发布 3:已下架
+		CreatedTime int64   `json:"createdTime,optional"`          // 创建时间，只读
+	}
+
+	// 资讯列表请求
+	NotifyNewsListReq {
+		Page         *PageInfo `json:"page,optional"`         // 分页信息
+		Title        string    `json:"title,optional"`        // 标题模糊搜索
+		Status       int64     `json:"status,string,optional"`      // 状态筛选
+		NotifyTimeStart int64  `json:"notifyTimeStart,optional"` // 发布时间开始
+		NotifyTimeEnd   int64  `json:"notifyTimeEnd,optional"`   // 发布时间结束
+	}
+
+	// 资讯列表响应
+	NotifyNewsListResp {
+		List []*NotifyNews `json:"list"` // 资讯列表
+		PageResp
+	}
+)

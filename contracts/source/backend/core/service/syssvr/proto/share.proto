@@ -1,0 +1,124 @@
+syntax = "proto3";
+option go_package = "/sys";
+
+package sys;
+
+
+
+// Point 地理位置坐标
+// 定义地理位置的经纬度坐标
+message Point{
+  double  longitude = 1;//经度
+  double  latitude = 2;//纬度
+}
+
+// PageInfo 分页信息
+// 定义分页查询的参数
+message PageInfo {
+    int64 page = 1; //页码（从1开始）
+    int64 size = 2; //每页条数
+    //排序信息
+    repeated OrderBy orders = 3; //排序规则列表
+    message OrderBy {
+        //排序的字段名
+        string field = 1; //排序字段名
+        //排序方式：1:从久到近排序 2:时间从近到久排序
+        int64 sort = 2; //排序方式（1:升序，2:降序）
+    }
+}
+
+// Compare 比较条件
+// 定义查询条件的比较操作
+message Compare{
+  string CmpType =1;//比较类型（"=":相等，"!=":不相等，">":大于，">=":大于等于，"<":小于，"<=":小于等于，"like":模糊查询）
+  string value =2;//比较值
+  string castTo =3; //参数类型转换（int:整数，float:浮点数，string:字符串）
+}
+
+// CompareString 字符串比较条件
+// 定义字符串类型的比较条件
+message CompareString{
+  string CmpType =1;//比较类型（"=":相等，"!=":不相等，">":大于，">=":大于等于，"<":小于，"<=":小于等于，"like":模糊查询）
+  string value =2;//比较值
+}
+
+// CompareInt64 整数比较条件
+// 定义整数类型的比较条件
+message CompareInt64{
+  string CmpType =1;//比较类型（"=":相等，"!=":不相等，">":大于，">=":大于等于，"<":小于，"<=":小于等于，"like":模糊查询）
+  int64 value =2;//比较值
+}
+
+// Attachment 附件信息
+// 定义文件附件的基本信息
+message Attachment{
+  int64 id = 1; // 附件ID，前端自己生成，不重复即可
+  string fileName = 3; // 文件名（只读）
+  string fileUrl = 5; // 访问URL（只读）
+  string filePath = 6;//文件路径，更新时传递
+  string useBy =7;//用途说明（选填）
+}
+
+// ThirdAppConfig 第三方应用配置
+// 定义与第三方应用集成时的认证信息
+message ThirdAppConfig {
+  string appID =1; //应用ID
+  string appKey=2;//应用密钥（微信小程序无需填写）
+  string appSecret=3; //应用密钥
+}
+
+
+// NativeConfig 原生应用配置
+// 定义原生应用的版本和文件信息
+message NativeConfig {
+  string version =1;// 应用版本号
+  string versionDesc=2;//版本更新说明
+  string filePath=3;// 文件下载路径
+
+}
+
+// ThirdEmail 第三方邮箱配置
+// 定义第三方邮箱服务的连接和认证信息
+message ThirdEmail {
+  string From    =1;// 发件人邮箱地址
+  string Host    =2;// 邮箱服务器地址（例如：smtp.qq.com）
+  string Secret  =3;// 登录密钥（建议使用SMTP专用密钥，而非邮箱密码）
+  string Nickname=4;// 发件人昵称
+  int64 Port     =5;// 邮箱服务器端口（大多为465）
+  int64 IsSSL    =6;// 是否开启SSL加密（1:是，2:否）
+}
+
+// ThirdSms 第三方短信配置
+// 定义第三方短信服务的连接和认证信息
+message ThirdSms {
+  string type =1;//短信服务商类型（ali:阿里云短信，tencent:腾讯云短信）
+  string accessKeyID =2;//访问密钥ID
+  string accessKeySecret =3;//访问密钥密钥
+  string appID = 4;//应用ID
+  string appKey = 5;//应用密钥
+}
+
+// SendOption 发送选项配置
+// 定义消息发送时的超时、重试等控制参数
+message SendOption {
+  int64  timeoutToFail = 1;//超时失败时间（毫秒）
+  int64  requestTimeout = 2;//请求超时时间（毫秒），超时后会进行重试
+  int64  retryInterval = 3;//重试间隔时间（毫秒）
+}
+
+// AuthApiInfo 认证API信息
+// 定义认证API的路由和方法
+message AuthApiInfo{
+  string route = 1; // API路由路径
+  string method = 2; // HTTP请求方法（大写）
+}
+
+
+message DateRange{
+  string start = 1; // 开始日期
+  string end = 2; // 结束日期
+}
+message TimeRange{
+  int64 start = 1; // 开始时间戳（毫秒）
+  int64 end = 2;   // 结束时间戳（毫秒）
+}

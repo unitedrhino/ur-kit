@@ -1,0 +1,98 @@
+syntax = "v1"
+
+import "common.api" //公共结构体定义
+
+@server (
+	group:      mqtt
+	prefix:     /api/v1/mqtt/api/v5
+	middleware: CheckTokenWare
+)
+service mqtt {
+	@doc (
+		summary:       "批量订阅"
+		description:   "业务说明：为指定 MQTT 客户端批量增加订阅主题，用于协议网关按设备在线状态动态调整客户端订阅列表。"
+		authType:      "admin"
+		resource:      "mqttClient"
+		action:        "update"
+		group:         "things/mqtt/client"
+		recordLogMode: "1"
+	)
+	@handler subscribeBulk
+	post /clients/:clientID/subscribe/bulk (SubscribeBulkReq) returns (SubscribeBulkReq)
+
+	@doc (
+		summary:       "批量取消订阅"
+		description:   "业务说明：为指定 MQTT 客户端批量移除订阅主题，用于协议网关在设备离线或解绑后回收不再需要的订阅。"
+		authType:      "admin"
+		resource:      "mqttClient"
+		action:        "update"
+		group:         "things/mqtt/client"
+		recordLogMode: "1"
+	)
+	@handler unsubscribeBulk
+	post /clients/:clientID/unsubscribe/bulk (SubscribeBulkReq) returns (SubscribeBulkReq)
+
+	@doc (
+		summary:       "获取订阅topic列表"
+		description:   "业务说明：查询指定 MQTT 客户端当前持有的订阅主题列表，用于协议网关在增量订阅前判断已有订阅状态。"
+		authType:      "admin"
+		resource:      "mqttClient"
+		action:        "view"
+		group:         "things/mqtt/client"
+		recordLogMode: "1"
+	)
+	@handler subscriptions
+	get /clients/:clientID/subscriptions returns (SubscribeBulkReq)
+
+	@doc (
+		summary:       "获取客户端列表"
+		description:   "业务说明：分页查询 dmsvr 当前内置 MQTT 在线客户端列表，支持按用户名过滤，用于协议服务查询在线网关客户端并做订阅管理。"
+		authType:      "admin"
+		resource:      "mqttClient"
+		action:        "view"
+		group:         "things/mqtt/client"
+		recordLogMode: "1"
+	)
+	@handler clients
+	get /clients (ClientsReq) returns (GetClientsResp)
+}
+
+type (
+	SubscribeBulkReq {
+		Topic string `json:"topic"`
+		Qos   int    `json:"qos,optional"`
+		Nl    int    `json:"nl,optional"`
+		Rap   int    `json:"rap,optional"`
+		Rh    int    `json:"rh,optional"`
+	}
+	UnsubscribeBulkReq  {}
+	ClientsReq {
+		Username string `json:"username,optional" form:"username,optional"`
+		Page     int    `json:"page,optional" form:"page,optional"`
+		Limit    int    `json:"limit,optional" form:"limit,optional"`
+	}
+	GetClientsData {
+		CreatedAt      string  `json:"created_at"`
+		Connected      bool    `json:"connected"`
+		IpAddress      string  `json:"ip_address"`
+		ProtoVer       int     `json:"proto_ver"`
+		Mountpoint     string  `json:"mountpoint"`
+		ProtoName      string  `json:"proto_name"`
+		Port           int     `json:"port"`
+		ConnectedAt    string  `json:"connected_at"`
+		ExpiryInterval int     `json:"expiry_interval"`
+		Username       *string `json:"username"`
+		Keepalive      int     `json:"keepalive"`
+		Clientid       string  `json:"clientid"`
+	}
+	GetClientsResp {
+		Data []GetClientsData `json:"data"`
+		Meta GetClientsMeta   `json:"meta"`
+	}
+	GetClientsMeta {
+		Count int64 `json:"count"`
+		Limit int   `json:"limit"`
+		Page  int   `json:"page"`
+	}
+)
+

@@ -1,0 +1,193 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡资费组"
+    desc: "物联卡资费组 CRUD"
+    version: "v1"
+)
+
+type (
+    CardPackage {
+        ID        int64   `json:"id,string"`
+        PackageID string  `json:"packageId"`
+        Name      string  `json:"name"`
+        CreateTime string `json:"createTime,optional"`
+        ErrorSo   float64 `json:"errorSo,optional"`
+        CardCount int64   `json:"cardCount,optional"`
+        ReferenceCount int64 `json:"referenceCount"`
+        Removable bool `json:"removable"`
+        Reason string `json:"reason,optional"`
+    }
+
+    CardPackageCreateReq {
+        PackageID string  `json:"packageId"`
+        Name      string  `json:"name"`
+        ErrorSo   float64 `json:"errorSo,optional"`
+    }
+
+    CardPackageUpdateReq {
+        ID        int64   `json:"id,string"`
+        PackageID string  `json:"packageId,optional"`
+        Name      string  `json:"name,optional"`
+        ErrorSo   float64 `json:"errorSo,optional"`
+    }
+
+    CardPackageGetListReq {
+        PageInfo
+        PackageID string `json:"packageId,optional"`
+        Name      string `json:"name,optional"`
+    }
+
+    CardPackageGetListResp {
+        PageResp
+        List []*CardPackage `json:"list"`
+    }
+
+    CardPackageGetOptionResp {
+        List []*CardPackageOption `json:"list"`
+    }
+
+    // CardPackageGetOptionReq 按当前选择的通道反向缩小平台资费组选项。
+    CardPackageGetOptionReq {
+        RouteID int64 `json:"routeId,string,optional"`
+    }
+
+    CardPackageOption {
+        PackageID string `json:"packageId"`
+        Name      string `json:"name"`
+    }
+
+    // CardPackageRouteGetListReq 查询一个平台资费组可见及已选的通道。
+    CardPackageRouteGetListReq {
+        PageInfo
+        PackageID string `json:"packageId"`        // PackageID 是当前企业平台资费组业务编号。
+        Keyword   string `json:"keyword,optional"` // Keyword 按通道编号或名称模糊筛选。
+    }
+
+    // CardPackageRouteItem 返回平台资费组侧的通道关系状态。
+    CardPackageRouteItem {
+        RouteID       int64  `json:"routeId,string"`      // RouteID 是通道主键。
+        RouteCode     string `json:"routeCode"`           // RouteCode 是通道业务编号。
+        RouteName     string `json:"routeName"`           // RouteName 是通道名称。
+        Selected      bool   `json:"selected"`            // Selected 表示当前平台资费组是否已关联该通道。
+        ReferenceCount int64 `json:"referenceCount"`      // ReferenceCount 是同时引用该组合的活动卡数量。
+        Removable     bool   `json:"removable"`           // Removable 表示已选关系是否允许移除。
+        Reason        string `json:"reason,optional"`     // Reason 是关系不可移除时的稳定原因。
+    }
+
+    // CardPackageRouteGetListResp 返回平台资费组侧分页关系列表。
+    CardPackageRouteGetListResp {
+        PageResp
+        List []*CardPackageRouteItem `json:"list"` // List 是当前分页可见的通道关系状态。
+    }
+
+    // CardPackageRouteReplaceReq 原子替换一个平台资费组的全部通道关系。
+    CardPackageRouteReplaceReq {
+        PackageID string  `json:"packageId"`       // PackageID 是当前企业平台资费组业务编号。
+        RouteIDs  []int64 `json:"routeIds,string"` // RouteIDs 是替换后的通道主键集合，空集合表示清空。
+    }
+)
+
+@server(
+    group: card/packageGroup
+    prefix: /api/v1/things/card/package
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "新增资费组"
+        description: "业务说明：新增资费组"
+        authType: "admin"
+        resource: "card"
+        action: "create"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (CardPackageCreateReq) returns (WithID)
+
+    @doc(
+        summary: "更新资费组"
+        description: "业务说明：更新资费组"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (CardPackageUpdateReq) returns ()
+
+    @doc(
+        summary: "删除资费组"
+        description: "业务说明：删除资费组"
+        authType: "admin"
+        resource: "card"
+        action: "delete"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取资费组详情"
+        description: "业务说明：获取资费组详情"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardPackage)
+
+    @doc(
+        summary: "获取资费组列表"
+        description: "业务说明：获取资费组列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardPackageGetListReq) returns (CardPackageGetListResp)
+
+    @doc(
+        summary: "获取资费组下拉选项"
+        description: "业务说明：获取资费组下拉选项"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOption
+    post /get-option (CardPackageGetOptionReq) returns (CardPackageGetOptionResp)
+
+    @doc(
+        summary: "获取平台资费组关联通道"
+        description: "业务说明：分页查询当前企业指定平台资费组可见的通道，返回已选状态、组合引用数及可移除原因"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler routeGetList
+    post /route/get-list (CardPackageRouteGetListReq) returns (CardPackageRouteGetListResp)
+
+    @doc(
+        summary: "替换平台资费组关联通道"
+        description: "业务说明：在当前企业内原子替换指定平台资费组的全部通道关系，空集合表示清空可移除关系"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler routeReplace
+    post /route/replace (CardPackageRouteReplaceReq) returns (CardRoutePackageReplaceResp)
+}

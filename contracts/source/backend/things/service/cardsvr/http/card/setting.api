@@ -1,0 +1,102 @@
+syntax = "v1"
+
+info(
+    title: "物联卡设置"
+    desc: "企业默认设置与单卡覆盖设置"
+    version: "v1"
+)
+
+type (
+    // CardSettingValue 描述经过校验的轮询与告警配置。
+    CardSettingValue {
+        PollingEnabled         bool  `json:"pollingEnabled"`         // 是否启用轮询
+        PollingIntervalMinutes int64 `json:"pollingIntervalMinutes"` // 轮询间隔，5~1440 分钟
+        UsageThresholdPercent  int64 `json:"usageThresholdPercent"`  // 用量告警阈值，1~100
+        AlertEnabled           bool  `json:"alertEnabled"`           // 是否启用告警
+    }
+
+    // CardSettingResp 返回设置作用域、结构化配置和乐观版本。
+    CardSettingResp {
+        ScopeType  string           `json:"scopeType"`          // tenant 或 card
+        ScopeID    string           `json:"scopeId,optional"`   // card 作用域为 ICCID
+        Setting    CardSettingValue `json:"setting"`            // 结构化设置
+        Version    int64            `json:"version"`            // 乐观版本
+        IsDefault  bool             `json:"isDefault"`          // 是否使用系统默认值
+        UpdatedTime string          `json:"updatedTime,optional"` // 更新时间
+    }
+
+    // CardSettingEffectiveReq 查询租户与卡级合并设置。
+    CardSettingEffectiveReq {
+        Iccid string `json:"iccid"` // SIM 卡号
+    }
+
+    // CardSettingUpdateReq 全量替换指定作用域设置。
+    CardSettingUpdateReq {
+        ScopeType string           `json:"scopeType"`          // tenant 或 card
+        ScopeID   string           `json:"scopeId,optional"`   // card 作用域必须为 ICCID
+        Setting   CardSettingValue `json:"setting"`            // 经校验的完整设置
+        Version   int64            `json:"version"`            // 现有记录版本；首次创建传 0
+    }
+
+    // CardSettingResetReq 恢复指定作用域默认设置。
+    CardSettingResetReq {
+        ScopeType string `json:"scopeType"`        // tenant 或 card
+        ScopeID   string `json:"scopeId,optional"` // card 作用域必须为 ICCID
+        Version   int64  `json:"version"`          // 当前乐观版本
+    }
+)
+
+@server(
+    group: card/setting
+    prefix: /api/v1/things/card/setting
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "查询企业默认卡设置"
+        description: "业务说明：查询当前企业设置，不存在时返回稳定系统默认值"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one () returns (CardSettingResp)
+
+    @doc(
+        summary: "查询卡有效设置"
+        description: "业务说明：按 ICCID 合并企业默认设置与卡级覆盖设置"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getEffective
+    post /get-effective (CardSettingEffectiveReq) returns (CardSettingResp)
+
+    @doc(
+        summary: "更新卡设置"
+        description: "业务说明：按乐观版本全量更新企业默认或卡级设置"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (CardSettingUpdateReq) returns (CardSettingResp)
+
+    @doc(
+        summary: "恢复默认卡设置"
+        description: "业务说明：租户作用域恢复系统默认，卡作用域删除覆盖并回退企业默认"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler reset
+    post /reset (CardSettingResetReq) returns (CardSettingResp)
+}

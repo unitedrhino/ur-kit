@@ -1,0 +1,183 @@
+info(
+    title: "Hook扩展管理模块"
+    desc: "Hook Server注册与Capability声明管理"
+    author: "杨磊"
+    email: "603785348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: system/hook/server
+    prefix: /api/v1/system/hook/server
+    accessCodePrefix: "systemHookServerManage"
+    accessNamePrefix: "Hook服务管理"
+    accessGroup: "拓展管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "新增Hook服务"
+        description: "业务说明：注册外部Hook服务，配置服务端点、认证方式、超时重试策略等。Hook服务用于扩展平台业务逻辑，如数据过滤、事件通知、业务校验等。创建后可通过能力接口声明具体Hook点。"
+        authType: "platform"
+        group: "system/hook/server"
+        resource: "system/hook/server"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (HookServerInfo) returns (WithID)
+    @doc(
+        summary: "更新Hook服务"
+        description: "业务说明：修改已注册的Hook服务配置，支持更新名称、端点、认证配置、超时策略、失败策略等。部分更新，空值字段不修改。状态变更立即生效。"
+        authType: "platform"
+        group: "system/hook/server"
+        resource: "system/hook/server"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (HookServerInfo) returns ()
+    @doc(
+        summary: "删除Hook服务"
+        description: "业务说明：删除Hook服务注册记录。删除前需确保没有能力声明引用该服务，否则删除失败。删除后该服务的所有Hook调用将停止。"
+        authType: "platform"
+        group: "system/hook/server"
+        resource: "system/hook/server"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+    @doc(
+        summary: "获取Hook服务详情"
+        description: "业务说明：根据服务ID查询完整的Hook服务配置信息，包括端点、认证配置、超时重试策略、关联的能力列表等。用于编辑回显、配置查看等场景。"
+        authType: "platform"
+        group: "system/hook/server"
+        resource: "system/hook/server"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (HookServerInfo)
+    @doc(
+        summary: "获取Hook服务列表"
+        description: "业务说明：分页查询Hook服务列表，支持按名称、状态筛选。用于Hook服务管理页面展示。返回结果包含服务基本信息和关联能力数量。"
+        authType: "platform"
+        group: "system/hook/server"
+        resource: "system/hook/server"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (HookServerGetListReq) returns (HookServerGetListResp)
+}
+
+@server(
+    group: system/hook/capability
+    prefix: /api/v1/system/hook/capability
+    accessCodePrefix: "systemHookCapabilityManage"
+    accessNamePrefix: "Hook能力管理"
+    accessGroup: "拓展管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "新增Hook能力"
+        description: "业务说明：声明Hook服务支持的能力点，由code和subCode组成能力标识。code标识业务场景（如dataFilter、userSubscribe），subCode标识具体子场景。业务代码通过code+subCode调用对应Hook服务。"
+        authType: "platform"
+        group: "system/hook/capability"
+        resource: "system/hook/capability"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (HookCapabilityInfo) returns (WithID)
+    @doc(
+        summary: "更新Hook能力"
+        description: "业务说明：修改已声明的Hook能力配置，支持更新描述、关联服务等。code和subCode通常不可修改以保持业务引用稳定性。"
+        authType: "platform"
+        group: "system/hook/capability"
+        resource: "system/hook/capability"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (HookCapabilityInfo) returns ()
+    @doc(
+        summary: "删除Hook能力"
+        description: "业务说明：删除Hook能力声明。删除后业务代码调用该能力将找不到对应服务，可能导致功能降级或失败。建议先下线相关业务流程再删除。"
+        authType: "platform"
+        group: "system/hook/capability"
+        resource: "system/hook/capability"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+    @doc(
+        summary: "获取Hook能力列表"
+        description: "业务说明：分页查询Hook能力列表，支持按服务ID、code、subCode筛选。用于能力管理页面、服务能力绑定等场景。返回能力标识和关联服务信息。"
+        authType: "platform"
+        group: "system/hook/capability"
+        resource: "system/hook/capability"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (HookCapabilityGetListReq) returns (HookCapabilityGetListResp)
+}
+
+type (
+    HookServerInfo {
+        ID         int64             `json:"id,string,optional"`     // 服务ID
+        TenantCode string            `json:"tenantCode,optional"`    // 租户编码：common=全平台可用，其余=仅该租户（创建时默认 common）
+        Name       string            `json:"name,optional"`          // 服务名称（租户内唯一）
+        Desc       string            `json:"desc,optional"`          // 描述
+        Endpoint   string            `json:"endpoint,optional"`      // 服务端点URL
+        AuthType   string            `json:"authType,optional"`      // 鉴权类型 none/hmac/custom
+        AuthConfig map[string]string `json:"authConfig,optional"`    // 鉴权配置，hmac 时为 {"secret":"xxx"}
+        Headers    map[string]string `json:"headers,optional"`       // 自定义请求头（authType=custom 时使用）
+        Status     int64             `json:"status,optional"`        // 状态 1:启用 2:禁用
+        TimeoutSec int64             `json:"timeoutSec,optional"`    // 超时秒数
+        MaxRetry   int64             `json:"maxRetry,optional"`      // 最大重试次数
+        FailPolicy string            `json:"failPolicy,optional"`    // 失败策略 fail/ignore
+        Capabilities []*HookCapabilityInfo `json:"capabilities,optional"` // 关联的能力列表
+    }
+
+    HookServerGetListReq {
+        Page       *PageInfo `json:"page,optional"`       // 分页参数
+        Name       string    `json:"name,optional"`       // 服务名称筛选
+        Status     int64     `json:"status,optional"`     // 状态筛选
+        TenantCode string    `json:"tenantCode,optional"` // 租户编码筛选
+    }
+
+    HookServerGetListResp {
+        PageResp
+        List []*HookServerInfo `json:"list"` // 服务列表
+    }
+
+    HookCapabilityInfo {
+        ID       int64  `json:"id,string,optional"`       // 能力ID
+        ServerID int64  `json:"serverID,string,optional"`  // 关联服务ID
+        Code     string `json:"code,optional"`             // 能力编码
+        SubCode  string `json:"subCode,optional"`          // 子编码
+        Kind     string `json:"kind,optional"`             // 能力类型 sync=同步扩展点 async=异步事件通知（说明性元数据，默认 sync）
+        Desc     string `json:"desc,optional"`             // 描述
+    }
+
+    HookCapabilityGetListReq {
+        Page     *PageInfo `json:"page,optional"`       // 分页参数
+        ServerID int64     `json:"serverID,optional"`   // 服务ID筛选
+        Code     string    `json:"code,optional"`       // 能力编码筛选
+        SubCode  string    `json:"subCode,optional"`    // 子编码筛选
+    }
+
+    HookCapabilityGetListResp {
+        PageResp
+        List []*HookCapabilityInfo `json:"list"` // 能力列表
+    }
+)

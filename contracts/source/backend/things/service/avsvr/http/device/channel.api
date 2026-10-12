@@ -1,0 +1,181 @@
+syntax = "v1"
+
+// 音视频通道管理接口
+
+info(
+    title: "音视频通道管理"
+    desc: "音视频设备通道的增删改查、启停、码流管理"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvDeviceChannelConfig {
+    SourceURL      string `json:"source_url,optional"`     // 拉流源地址（RTSP），与 owl config.source_url 对齐
+    Transport      int64  `json:"transport,optional,string"` // 拉流传输方式：0=tcp，1=udp（仅 RTSP 有效）
+    TimeoutS       int64  `json:"timeout_s,optional"`      // 拉流超时秒数，默认 10
+    Enabled        bool   `json:"enabled,optional"`        // 是否启用，与 owl config.enabled 对齐
+    IsAuthDisabled bool   `json:"is_auth_disabled,optional"` // RTMP 推流是否禁用鉴权，与 owl config.is_auth_disabled 对齐
+    PushedAt       int64  `json:"pushed_at,optional"`      // RTMP 最后推流时间（Unix 秒），与 owl config.pushed_at 对齐
+    StoppedAt      int64  `json:"stopped_at,optional"`     // RTMP 最后停流时间（Unix 秒），与 owl config.stopped_at 对齐
+    PushAddr       string `json:"push_addr,optional"`      // RTMP 推流地址，与 owl config.push_addr 对齐
+}
+
+type AvDeviceChannel {
+    ChannelID    string                   `json:"channelID"`              // 通道 ID
+    DeviceID     string                   `json:"deviceID"`               // 所属设备 ID
+    ChannelName  string                   `json:"channelName"`            // 通道名称
+    ChannelNo    int64                    `json:"channelNo"`              // 通道号
+    ChannelType  string                   `json:"channelType,optional"`   // 通道类型：rtsp/rtmp/gb28181/onvif
+    Enabled      bool                     `json:"enabled"`                // 是否启用
+    App          string                   `json:"app,optional"`           // 应用名（RTMP/RTSP）
+    Stream       string                   `json:"stream,optional"`        // 流 ID（RTMP/RTSP）
+    SourceURL    string                   `json:"sourceURL,optional"`     // 拉流源地址（RTSP）
+    ProfileToken string                   `json:"profileToken,optional"`  // ONVIF 媒体 Profile Token
+    AuthDisabled bool                     `json:"authDisabled,optional"`  // RTMP 推流是否禁用鉴权
+    PushURL      string                   `json:"pushURL,optional"`       // RTMP 推流地址（后端生成）
+    Config       AvDeviceChannelConfig    `json:"config,optional"`        // 扩展配置
+    Status       string                   `json:"status"`                 // 在线状态
+    LiveStatus   string                   `json:"liveStatus,optional"`    // 直播状态
+    RecordStatus string                   `json:"recordStatus,optional"`  // 录像状态
+    RecordMode   string                   `json:"recordMode,optional"`    // 录像模式：always（始终录像）/ai（AI 告警触发）/none（关闭）；历史兼容值 off 视同 none
+    CreatedTime  int64                    `json:"createdTime"`            // 创建时间
+}
+
+type AvDeviceChannelCreateReq {
+    DeviceID     string                  `json:"deviceID,optional"`       // 设备 ID（与 deviceName 二选一）
+    DeviceName   string                  `json:"deviceName,optional"`     // 设备名称，传入时自动创建对应协议设备（owl 语义）
+    ChannelName  string                  `json:"channelName,optional"`    // 通道名称/备注，为空时按 owl 规则默认
+    ChannelNo    int64                   `json:"channelNo,optional"`      // 通道号
+    ChannelType  string                  `json:"channelType,optional"`    // 通道类型：rtsp/rtmp/gb28181/onvif
+    Enabled      bool                    `json:"enabled,optional"`        // 是否启用，默认 true
+    App          string                  `json:"app,optional"`            // 应用名（RTMP/RTSP）
+    Stream       string                  `json:"stream,optional"`         // 流 ID（RTMP/RTSP）
+    SourceURL    string                  `json:"sourceURL,optional"`      // 拉流源地址（RTSP），兼容顶层与 config.source_url
+    AuthDisabled bool                    `json:"authDisabled,optional"`   // RTMP 推流是否禁用鉴权，兼容顶层与 config.is_auth_disabled
+    Config       AvDeviceChannelConfig   `json:"config,optional"`         // 扩展配置（owl 语义优先）
+}
+
+type AvDeviceChannelUpdateReq {
+    ChannelID    string                  `json:"channelID"`               // 通道 ID
+    DeviceID     string                  `json:"deviceID,optional"`       // 所属设备 ID（可选变更）
+    ChannelName  string                  `json:"channelName,optional"`    // 通道名称
+    ChannelNo    int64                   `json:"channelNo,optional"`      // 通道号
+    ChannelType  string                  `json:"channelType,optional"`    // 通道类型：rtsp/rtmp/gb28181/onvif
+    Enabled      bool                    `json:"enabled,optional"`        // 是否启用
+    App          string                  `json:"app,optional"`            // 应用名（RTMP/RTSP）
+    Stream       string                  `json:"stream,optional"`         // 流 ID（RTMP/RTSP）
+    SourceURL    string                  `json:"sourceURL,optional"`      // 拉流源地址（RTSP）
+    AuthDisabled bool                    `json:"authDisabled,optional"`   // RTMP 推流是否禁用鉴权
+    Config       AvDeviceChannelConfig   `json:"config,optional"`         // 扩展配置
+}
+
+type AvDeviceChannelDeleteReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+type AvDeviceChannelGetOneReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+type AvDeviceChannelGetListReq {
+    PageInfo
+    DeviceID    string `json:"deviceID,optional"`     // 按设备过滤
+    ChannelName string `json:"channelName,optional"` // 按名称模糊查询
+    ChannelType string `json:"channelType,optional"` // 按通道类型过滤：rtsp/rtmp/gb28181/onvif
+    Status      string `json:"status,optional"`       // 按状态过滤
+}
+
+type AvDeviceChannelGetListResp {
+    PageResp
+}
+
+// AvDeviceChannelSetRecordModeReq 设置通道录像模式请求
+type AvDeviceChannelSetRecordModeReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+    Mode      string `json:"mode"`      // 录像模式：always（始终录像）/ai（AI 告警触发）/none（关闭）；历史兼容值 off 视同 none
+}
+
+// AvDeviceChannelSetRecordModeResp 设置通道录像模式响应
+type AvDeviceChannelSetRecordModeResp {
+    ChannelID  string `json:"channelID"`  // 通道 ID
+    RecordMode string `json:"recordMode"` // 当前录像模式
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "创建音视频通道"
+        description: "业务说明：创建一条音视频设备通道，支持 RTSP/RTMP/GB28181/ONVIF 等协议。传入 deviceName 时可自动创建对应协议设备。"
+        authType: "admin"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelCreate
+    post /api/v1/av/device/channel/create (AvDeviceChannelCreateReq) returns (AvDeviceChannel)
+
+    @doc(
+        summary: "更新音视频通道"
+        description: "业务说明：按通道 ID 更新音视频通道信息，支持部分字段更新。"
+        authType: "admin"
+        resource: "av"
+        action: "update"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelUpdate
+    post /api/v1/av/device/channel/update (AvDeviceChannelUpdateReq) returns (AvDeviceChannel)
+
+    @doc(
+        summary: "删除音视频通道"
+        description: "业务说明：按通道 ID 删除音视频通道及其关联配置。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelDelete
+    post /api/v1/av/device/channel/delete (AvDeviceChannelDeleteReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取音视频通道详情"
+        description: "业务说明：按通道 ID 查询单条音视频通道详情。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelGetOne
+    post /api/v1/av/device/channel/get-one (AvDeviceChannelGetOneReq) returns (AvDeviceChannel)
+
+    @doc(
+        summary: "获取音视频通道列表"
+        description: "业务说明：按设备、名称、状态等条件分页查询音视频通道列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelGetList
+    post /api/v1/av/device/channel/get-list (AvDeviceChannelGetListReq) returns (AvDeviceChannelGetListResp)
+
+    @doc(
+        summary: "设置通道录像模式"
+        description: "业务说明：设置指定通道的录像模式，可选 always/ai/none。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceChannelSetRecordMode
+    post /api/v1/av/device/channel/record_mode (AvDeviceChannelSetRecordModeReq) returns (AvDeviceChannelSetRecordModeResp)
+}

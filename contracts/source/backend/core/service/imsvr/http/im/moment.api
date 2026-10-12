@@ -1,0 +1,113 @@
+info(
+	title: "IM 朋友圈"
+	desc: "朋友圈动态的发布、查询、删除与点赞评论互动"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/moment
+	prefix: /api/v1/im
+	accessCodePrefix: "imMoment"
+	accessNamePrefix: "IM朋友圈"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "发布动态"
+		description: "业务说明：发布朋友圈动态，支持文本与多媒体内容，可设置可见范围（公开/项目/指定人）并 @ 指定用户。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /moment/create (ImMomentCreateReq) returns (ImMomentCreateResp)
+
+	@doc(
+		summary: "查询动态列表"
+		description: "业务说明：分页查询当前用户可见的朋友圈动态列表，支持按发布人、项目过滤。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler list
+	post /moment/list (ImMomentGetListReq) returns (ImMomentGetListResp)
+
+	@doc(
+		summary: "获取动态详情"
+		description: "业务说明：按动态 ID 查询详情及评论列表。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler get
+	post /moment/get (ImMomentGetReq) returns (ImMomentGetResp)
+
+	@doc(
+		summary: "删除动态"
+		description: "业务说明：删除本人发布的朋友圈动态。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /moment/delete (ImMomentDeleteReq)
+
+	@doc(
+		summary: "点赞动态"
+		description: "业务说明：对指定动态点赞，返回最新点赞数，并向动态发布人推送点赞通知。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler like
+	post /moment/like (ImMomentLikeReq) returns (ImMomentLikeResp)
+
+	@doc(
+		summary: "取消点赞动态"
+		description: "业务说明：取消对指定动态的点赞，返回最新点赞数。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler unlike
+	post /moment/unlike (ImMomentLikeReq) returns (ImMomentLikeResp)
+
+	@doc(
+		summary: "发表评论"
+		description: "业务说明：对指定动态发表评论，可 @ 其他用户，并向动态发布人推送评论通知。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler commentCreate
+	post /moment/comment/create (ImMomentCommentCreateHttpReq) returns (ImMomentCreateResp)
+
+	@doc(
+		summary: "删除评论"
+		description: "业务说明：删除本人在指定动态下的评论。"
+		authType: "all"
+		group: "im/moment"
+		resource: "im/moment"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler commentDelete
+	post /moment/comment/delete (ImMomentCommentDeleteReq)
+}

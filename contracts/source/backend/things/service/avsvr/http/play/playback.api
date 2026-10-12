@@ -1,0 +1,113 @@
+syntax = "v1"
+
+// 历史回放与录像下载接口（GB28181 设备端录像）
+
+info(
+    title: "历史回放"
+    desc: "GB28181 设备端录像回放控制与录像下载"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvPlaybackStartReq {
+    ChannelID string `json:"channelID"` // 通道 ID（GB28181 通道）
+    StartTime int64  `json:"startTime"` // 回放开始时间（秒级 UNIX 时间戳）
+    EndTime   int64  `json:"endTime"`   // 回放结束时间（秒级 UNIX 时间戳）
+}
+
+type AvPlaybackControlReq {
+    ChannelID string  `json:"channelID"`        // 通道 ID
+    Action    string  `json:"action"`           // 控制动作：pause/resume/seek/scale
+    SeekTime  int64   `json:"seekTime,optional"` // 拖动目标位置（秒偏移，action=seek 时使用）
+    Scale     float64 `json:"scale,optional"`    // 倍速（action=scale 时使用，如 0.25/0.5/1/2/4）
+    CallID    string  `json:"callID,optional"`   // 回放会话 CallID（并发回放多会话时精确指定控制目标）
+}
+
+type AvPlaybackStopReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+type AvDownloadStartReq {
+    ChannelID string  `json:"channelID"`       // 通道 ID（GB28181 通道）
+    StartTime int64   `json:"startTime"`       // 下载开始时间（秒级 UNIX 时间戳）
+    EndTime   int64   `json:"endTime"`         // 下载结束时间（秒级 UNIX 时间戳）
+    Speed     float64 `json:"speed,optional"`  // 下载倍速，默认 4
+}
+
+type AvDownloadProgressReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+    StartTime int64  `json:"startTime"` // 下载开始时间（秒级 UNIX 时间戳，与 download/start 一致）
+    EndTime   int64  `json:"endTime"`   // 下载结束时间（秒级 UNIX 时间戳，与 download/start 一致）
+}
+
+type AvDownloadProgressResp {
+    Progress float64 `json:"progress"` // 下载进度（0~1）
+    Finished bool    `json:"finished"` // 是否已完成
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权
+)
+service av-api {
+    @doc(
+        summary: "启动历史回放"
+        description: "业务说明：按通道与起止时间启动 GB28181 设备端录像历史回放，返回各协议播放地址。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlaybackStart
+    post /api/v1/av/playback/start (AvPlaybackStartReq) returns (AvPlayStreamInfo)
+
+    @doc(
+        summary: "回放控制"
+        description: "业务说明：对进行中的历史回放发送控制信令，支持暂停、恢复、拖动与倍速。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlaybackControl
+    post /api/v1/av/playback/control (AvPlaybackControlReq) returns (EmptyResp)
+
+    @doc(
+        summary: "停止历史回放"
+        description: "业务说明：停止指定通道的历史回放流并清理回放会话。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlaybackStop
+    post /api/v1/av/playback/stop (AvPlaybackStopReq) returns (EmptyResp)
+
+    @doc(
+        summary: "启动录像下载"
+        description: "业务说明：按通道与起止时间启动 GB28181 设备端录像下载，设备推流至媒体服务器落盘为 MP4。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDownloadStart
+    post /api/v1/av/playback/download/start (AvDownloadStartReq) returns (EmptyResp)
+
+    @doc(
+        summary: "查询录像下载进度"
+        description: "业务说明：查询进行中的设备端录像下载进度，进度按媒体流已收时长占比计算。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDownloadProgress
+    post /api/v1/av/playback/download/progress (AvDownloadProgressReq) returns (AvDownloadProgressResp)
+}

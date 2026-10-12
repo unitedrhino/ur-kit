@@ -1,0 +1,19 @@
+info (
+	title:   "IM 即时通讯模块（imsvr）"
+	desc:    "即时通讯（会话/消息/朋友圈/好友）REST 接口聚合，路由前缀 /api/v1/im，由 imsvr 直接提供"
+	author:  "yl"
+	email:   "603785348@qq.com"
+	version: "v1"
+)
+
+import "common.api" // 公共结构体定义
+import "im/types.api" // IM 公共类型定义
+import "im/conversation.api" // IM 会话管理
+import "im/chatlog.api" // IM 消息管理
+import "im/moment.api" // IM 朋友圈
+import "im/friend.api" // IM 好友管理
+import "im/call.api" // IM 音视频通话
+import "im/channel.api" // IM 渠道绑定（阶段 3）
+import "im/interaction.api" // 新应用信令传输与持久事件确认
+import "im/contextConsent.api" // 本人完成文本的显式授权，不自动开启上下文分享。
+import "im/visionConsent.api" // 本人摄像头到AI的独立同意，不复用文本或IPC授权。

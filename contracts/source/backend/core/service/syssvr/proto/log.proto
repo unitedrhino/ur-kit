@@ -1,0 +1,103 @@
+//--------------------日志管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message LogEmpty{
+}
+
+service Log {
+  rpc loginLogGetList(LoginLogGetListReq) returns (LoginLogGetListResp); //获取登录日志列表（支持分页和过滤）
+  rpc operLogGetList(OperLogGetListReq) returns (OperLogGetListResp);    //获取操作日志列表（支持分页和过滤）
+  rpc loginLogCreate(LoginLogCreateReq) returns(LogEmpty);         //创建登录日志记录
+  rpc operLogCreate(OperLogCreateReq) returns(LogEmpty);           //创建操作日志记录
+}
+
+message LoginLogGetListReq{
+  PageInfo page       = 1;  // 分页信息（只获取一个则不填）
+  int64  appID = 2; // 应用编码
+  string ipAddr = 3;        // 登录IP地址
+  string loginLocation = 4; // 登录地点
+  DateRange date = 5;       // 时间范围
+  int64  userID = 6;        // 用户id
+  string userName = 7;      // 登录账号
+  int64 code = 8;           // 登录状态（200:成功，其它:失败）
+}
+message LoginLogGetListResp{
+  repeated LoginLogInfo list = 1; // 登录日志列表
+  int64 total = 2; // 总记录数
+}
+message OperLogGetListReq{
+  PageInfo page       = 1; // 分页信息（只获取一个则不填）
+  string operName     = 2; // 按操作名称查找
+  string operUserName = 3; // 按操作人员名称查找
+  string operType     = 4; // 操作类型（create/update/delete/get/other）
+  int64  appID = 5;        // 应用编码
+  int64  code = 6;         // 操作状态（200:成功，其它:失败）
+  int64  operUserID = 7;   // 用户id
+  string authType = 8;     // 认证方式（user/open）
+  string accessKey = 9;    // open token 的 accessKey
+}
+message OperLogGetListResp{
+  repeated OperLogInfo list = 1; // 操作日志列表
+  int64 total = 2; // 总记录数
+}
+message LoginLogCreateReq{
+  int64  userID = 1;        // 用户id
+  string userName = 2;      // 登录账号
+  string ipAddr = 3;        // 登录IP地址
+  string loginLocation = 4; // 登录地点
+  string browser = 5;       // 浏览器
+  string os = 6;            // 操作系统
+  int64 code = 7;           // 登录状态（200:成功，其它:失败）
+  string msg = 8;           // 提示消息
+  int64  appID = 9;         // 应用编码
+}
+message OperLogCreateReq{
+  int64  userID = 1;                // 用户id
+  string operUserName = 2;          // 操作人员名称
+  string operName = 3;              // 操作名称
+  string operType = 4;              // 操作类型（create/update/delete/get/other）
+  string uri = 5;                   // 请求地址
+  string route = 6;                 // 接口路由
+  string operIpAddr = 7;            // 操作主机地址
+  string operLocation = 8;          // 操作地点
+  string req = 9;                   // 请求参数
+  string resp = 10;                 // 返回参数
+  int64  code = 11;                 // 返回状态（200:成功，其它:失败）
+  string msg = 12;                  // 提示消息
+  int64  appID = 13;                // 应用编码
+  string authType = 14;             // 认证方式（user/open）
+  string accessKey = 15;            // open token 的 accessKey
+}
+message LoginLogInfo {
+  int64  userID = 1;        // 用户id
+  string userName = 2;      // 登录账号
+  string ipAddr = 3;        // 登录IP地址
+  string loginLocation = 4; // 登录地点
+  string browser = 5;       // 浏览器
+  string os = 6;            // 操作系统
+  int64 code = 7;           // 登录状态（200:成功，其它:失败）
+  string msg = 8;           // 提示消息
+  int64  createdTime = 9;   // 登录时间（毫秒时间戳）
+  int64  appID = 10;        // 应用编码
+}
+message OperLogInfo {
+    int64  userID = 1;                // 用户id
+    string operUserName = 2;          // 操作人员名称
+    string operName = 3;              // 操作名称
+    string operType = 4;              // 操作类型（create/update/delete/get/other）
+    string uri = 5;                   // 请求地址
+    string operIpAddr = 6;            // 操作主机地址
+    string operLocation = 7;          // 操作地点
+    string req = 8;                   // 请求参数
+    string resp = 9;                  // 返回参数
+    int64  code = 10;                 // 操作状态（200:成功，其它:失败）
+    string msg = 11;                  // 提示消息
+    int64  createdTime = 12;          // 操作时间（毫秒时间戳）
+    int64  appID = 13;                // 应用编码
+    string authType = 14;             // 认证方式（user/open）
+    string accessKey = 15;            // open token 的 accessKey
+}

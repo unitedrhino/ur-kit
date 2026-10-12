@@ -1,0 +1,97 @@
+info (
+	title:   "租户信息管理"
+	desc:    "租户信息的增删改查、转让"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/info
+	prefix:           /api/v1/system/tenant/info
+	accessCodePrefix: "systemTenantManage"
+	accessNamePrefix: "租户管理"
+	accessGroup:      "租户管理"
+	defaultAuthType:  "platform"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary: "添加租户"
+		description: "业务说明：创建新的租户实体，设置租户名称、编码、状态等基本信息。已登录用户可为自己创建首个企业，平台管理员也可用于平台管理后台的租户开通功能。"
+	    authType: "all"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (TenantInfo) returns (WithIDOrCode)
+
+	@doc (
+		summary: "获取租户列表"
+		description: "业务说明：分页查询租户列表，支持按名称、编码、状态过滤。平台管理员可查看所有租户，普通租户管理员只能查看自己租户。用于租户管理列表页。"
+	    authType: "platform"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantInfoGetListReq) returns (TenantInfoGetListResp)
+
+	@doc (
+		summary:    "获取租户详情"
+		description: "业务说明：查询单个租户的完整信息，包括名称、编码、状态、所有者等。用于租户详情页展示、编辑表单初始化。租户管理员可查看自己租户，平台管理员可查看任意租户。"
+		authType:   "admin"
+		accessCode: "systemTenantManageGetOneOne"
+		accessName: "获取租户信息"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithIDOrCode) returns (TenantInfo)
+
+	@doc (
+		summary:    "更新租户"
+		description: "业务说明：修改租户的基本信息，如名称、状态、联系人等。租户管理员可更新自己租户，平台管理员可更新任意租户。用于租户编辑功能。"
+		authType:   "admin"
+		accessCode: "systemTenantManageUpdateOne"
+		accessName: "更新租户信息"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (TenantInfo)
+
+	@doc (
+		summary: "删除租户"
+		description: "业务说明：删除租户实体及其关联数据（用户、角色、配置等）。仅平台管理员可操作，用于平台管理后台的租户注销功能。删除前需确保租户下无活跃资源。"
+	    authType: "platform"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithIDOrCode)
+
+	@doc (
+		summary:    "转让租户"
+		description: "业务说明：将租户所有权转让给其他用户。支持两种模式：不传tenantCode时为自助转让，仅当前租户所有者可操作；携带tenantCode时为强制转让，仅平台管理员可操作，可将任意租户转让给该租户下的启用成员，用于原所有者失联等平台管理场景。转让后原所有者变为普通成员，新所有者获得企业主身份并自动补齐该租户管理员角色。"
+		authType:   "admin"
+		accessCode: "systemTenantManageTransfer"
+		accessName: "转让租户所有权（仅所有者）"
+		group: "system/tenant/info"
+		resource: "system/tenant/info"
+		action: "transfer"
+		recordLogMode: "1"
+	)
+	@handler transfer
+	post /transfer (TenantInfoTransferReq)
+}

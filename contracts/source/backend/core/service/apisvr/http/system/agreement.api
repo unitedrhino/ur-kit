@@ -1,0 +1,130 @@
+info(
+    title: "协议管理模块"
+    desc: "协议库管理"
+    author: "L"
+    email: "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+@server(
+    group: system/agreement
+    prefix: /api/v1/system/agreement
+    accessCodePrefix: "systemAgreement"
+    accessNamePrefix: "协议"
+    accessGroup: "协议管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "创建协议"
+        description: "业务说明：创建独立协议模板。协议内容由前端以 HTML 形式提交，支持模板变量【{{.appName}}】、【{{.tenantName}}】、【{{.platformName}}】用于后续按应用与企业上下文渲染。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (Agreement) returns (WithID)
+
+    @doc(
+        summary: "获取协议列表"
+        description: "业务说明：分页查询协议库，支持按编码、名称、标题、状态和绑定应用过滤。协议编码在协议库内允许重复。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (AgreementGetListReq) returns (AgreementGetListResp)
+
+    @doc(
+        summary: "获取协议详情"
+        description: "业务说明：获取独立协议的完整详情，返回协议 HTML 内容模板，用于编辑页回填。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (Agreement)
+
+    @doc(
+        summary: "更新协议"
+        description: "业务说明：更新协议的基础信息、HTML 内容与状态。协议编码在协议库内允许重复。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (Agreement) returns ()
+
+    @doc(
+        summary: "删除协议"
+        description: "业务说明：删除指定协议，并同步清理关联的应用绑定关系。删除后不可恢复。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "预览渲染协议"
+        description: "业务说明：根据应用、企业和平台上下文预渲染协议 HTML 模板，替换变量后返回最终 HTML。"
+        authType: "platform"
+        group: "system/agreement"
+        resource: "system/agreement"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler previewRender
+    post /preview-render (AgreementPreviewRenderReq) returns (AgreementPreviewRenderResp)
+}
+
+type (
+    Agreement {
+        ID int64 `json:"id,string,optional"`
+        Code string `json:"code,optional"`
+        Name string `json:"name,optional"`
+        Title string `json:"title,optional"`
+        Content string `json:"content,optional"`
+        Status int64 `json:"status,optional"`
+        Remark string `json:"remark,optional"`
+        CreatedTime int64 `json:"createdTime,string,optional"`
+        UpdatedTime int64 `json:"updatedTime,string,optional"`
+    }
+
+    AgreementGetListReq {
+        Page *PageInfo `json:"page,optional"`
+        Code string `json:"code,optional"`
+        Name string `json:"name,optional"`
+        Title string `json:"title,optional"`
+        Status int64 `json:"status,optional"`
+        AppID int64 `json:"appID,string,optional"`
+    }
+
+    AgreementGetListResp {
+        List []*Agreement `json:"list"`
+        PageResp
+    }
+
+    AgreementPreviewRenderReq {
+        ID int64 `json:"id,string,optional"`
+        AppID int64 `json:"appID,string,optional"`
+        TenantCode string `json:"tenantCode,optional"`
+        Content string `json:"content,optional"`
+    }
+
+    AgreementPreviewRenderResp {
+        Content string `json:"content"`
+    }
+)

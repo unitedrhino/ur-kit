@@ -1,0 +1,173 @@
+info (
+	title:   "设备分组"
+	desc:    "设备分组"
+	author:  "lbs"
+	email:   "174805676@qq.com"
+	version: "v1"
+)
+
+@server (
+	group:            things/group/info
+	prefix:           /api/v1/things/group/info
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+	accessCodePrefix: "thingsDeviceGroup"
+	accessNamePrefix: "设备分组"
+	accessGroup:      "设备管理"
+)
+service api {
+	@doc(
+	    summary: "创建分组"
+	    description: "业务说明：创建设备分组，用于批量管理和分类设备。分组可设置父分组实现层级结构，绑定产品和区域限制分组内设备范围。分组用途可通过purpose字段自定义"
+	    authType: "admin"
+	    group: "things/group/info"
+	    resource: "things/group/info"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler create
+	post /create (GroupInfo) returns (WithID)
+
+	@doc(
+	    summary: "获取分组列表"
+	    description: "业务说明：分页查询设备分组列表。支持按区域、父分组、产品、名称过滤。返回分组基本信息、设备数量统计、层级关系。可加载子分组树形结构"
+	    authType: "admin"
+	    group: "things/group/info"
+	    resource: "things/group/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (GroupInfoGetListReq) returns (GroupInfoGetListResp)
+
+	@doc(
+	    summary: "获取分组详情信息"
+	    description: "业务说明：根据分组ID查询分组完整信息。返回分组名称、描述、产品绑定、设备列表、层级路径。可选择同时加载子分组列表"
+	    authType: "admin"
+	    group: "things/group/info"
+	    resource: "things/group/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (GroupInfoGetOneReq) returns (GroupInfo)
+
+	@doc(
+	    summary: "更新分组信息"
+	    description: "业务说明：修改分组名称、描述、父分组、区域绑定等属性。支持部分更新，空值字段保持原值不变。分组内的设备关系需通过分组设备接口单独管理"
+	    authType: "admin"
+	    group: "things/group/info"
+	    resource: "things/group/info"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler update
+	post /update (GroupInfo)
+
+	@doc(
+	    summary: "删除分组"
+	    description: "业务说明：删除设备分组。删除后分组内的设备关系同步解除，设备本身不受影响。如分组有子分组，需先删除子分组"
+	    authType: "admin"
+	    group: "things/group/info"
+	    resource: "things/group/info"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+}
+
+@server (
+	group:      things/group/device
+	prefix:     /api/v1/things/group/device
+	middleware: CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "添加分组设备"
+	    description: "业务说明：批量将设备添加到分组。一个设备可属于多个分组。添加后设备可通过分组进行批量操作【如批量控制、批量查询】"
+	    authType: "admin"
+	    group: "things/group/device"
+	    resource: "things/group/device"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler batchCreate
+	post /batch-create (GroupDeviceBatchSaveReq)
+
+	@doc(
+	    summary: "更新分组设备"
+	    description: "业务说明：批量更新分组内的设备列表。传入的设备列表会完全替换原有设备关系。用于分组设备成员调整"
+	    authType: "admin"
+	    group: "things/group/device"
+	    resource: "things/group/device"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler batchUpdate
+	post /batch-update (GroupDeviceBatchSaveReq)
+
+	@doc(
+	    summary: "删除分组设备"
+	    description: "业务说明：批量从分组中移除设备。移除后设备不再属于该分组，设备本身配置和数据不受影响"
+	    authType: "admin"
+	    group: "things/group/device"
+	    resource: "things/group/device"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler batchDelete
+	post /batch-delete (GroupDeviceBatchDeleteReq)
+}
+
+type (
+	GroupInfo {
+		ID          int64             `json:"id,string,optional"` //分组ID
+		IDPath      string            `json:"idPath,optional"` //分组ID路径
+		Purpose     string            `json:"purpose,optional"` //用途 不填默认为default
+		ParentID    int64             `json:"parentID,string,optional"` //父组ID
+		ProjectID   int64             `json:"projectID,string,optional,omitempty"` //项目ID
+		AreaID      int64             `json:"areaID,string,optional,omitempty"` //区域ID
+		Name        string            `json:"name,optional"` //分组名称
+		ProductID   string            `json:"productID,optional"` //产品ID
+		ProductName string            `json:"productName,optional,omitempty"` //产品ID
+		CreatedTime int64             `json:"createdTime,string,optional"` //创建时间
+		Desc        string            `json:"desc,optional,omitempty"` //分组描述
+		DeviceCount int64             `json:"deviceCount,optional,omitempty"` //设备数量统计
+		IsLeaf      int64             `json:"isLeaf,optional"`
+		Tags        map[string]string `json:"tags,optional,omitempty"` //分组tag
+		Files       map[string]string `json:"files,optional,omitempty"` //key 是用途, value是文件的路径,
+		Devices     []*DeviceCore     `json:"devices,optional,omitempty"`
+		Children    []*GroupInfo      `json:"children,optional,omitempty"`
+	}
+	GroupInfoGetOneReq {
+		ID           int64  `json:"id,string"` // id
+		Purpose      string `json:"purpose,optional"` //用途 不填默认为default
+		WithChildren bool   `json:"withChildren,optional"`
+	}
+	GroupInfoGetListReq {
+		Page      *PageInfo `json:"page,optional"` //分页信息 只获取一个则不填
+		AreaID    int64     `json:"areaID,string,optional"` //区域ID
+		ParentID  int64     `json:"parentID,string,optional"` //父组ID
+		ProductID string    `json:"productID,optional"` //产品ID
+		Name      string    `json:"name,optional"` //分组名称
+		Tags      map[string]string    `json:"tags,optional"` //分组tag
+		Purpose   string    `json:"purpose,optional"` //用途 不填默认为default
+	}
+	GroupInfoGetListResp {
+		List []*GroupInfo `json:"list"` //分组信息
+		PageResp
+	}
+	GroupDeviceBatchSaveReq {
+		GroupID int64         `json:"groupID,string"` //分组ID
+		List    []*DeviceCore `json:"list,optional"` //分组tag
+	}
+	GroupDeviceBatchDeleteReq {
+		GroupID int64         `json:"groupID,string"` //分组ID
+		List    []*DeviceCore `json:"list,optional"` //分组tag
+	}
+)
+

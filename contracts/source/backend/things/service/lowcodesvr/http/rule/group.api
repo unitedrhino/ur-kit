@@ -1,0 +1,97 @@
+syntax = "v1"
+
+@server (
+	group:      lowcode/rule/chain/group
+	prefix:     /api/v1/lowcode/rule/chain/group
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "添加规则链分组"
+	    description: "业务说明：添加规则链分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler create
+	post /create (RuleChainGroup) returns (WithIDStr)
+
+	@doc(
+	    summary: "获取规则链分组列表"
+	    description: "业务说明：获取规则链分组列表"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (RuleChainGroupGetListReq) returns (RuleChainGroupGetListResp)
+
+	@doc(
+	    summary: "获取规则链分组信息"
+	    description: "业务说明：获取规则链分组信息"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (RuleChainGroupGetOneReq) returns (RuleChainGroup)
+
+	@doc(
+	    summary: "更新规则链分组"
+	    description: "业务说明：更新规则链分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler update
+	post /update (RuleChainGroup)
+
+	@doc(
+	    summary: "删除规则链分组"
+	    description: "业务说明：删除规则链分组"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithIDStr)
+}
+
+type (
+	// RuleChainGroup 定义规则链
+	RuleChainGroup {
+		ID          int64             `json:"id,string,optional"` //分组的标识符
+		ParentID    int64             `json:"parentID,string,optional"` //父级的ID
+		IDPath      string            `json:"idPath,optional"` //id路径
+		Name        string            `json:"name,optional"` //分组的名称
+		Desc        *string           `json:"desc,optional"`
+		ChainCount  int64             `json:"chainCount,optional"` //只读,分组下的规则链数量
+		CreatedTime int64             `json:"createdTime,string,optional"`
+		UpdatedTime int64             `json:"updatedTime,optional"`
+		Children    []*RuleChainGroup `json:"children,optional,omitempty"`
+	}
+	RuleChainGroupGetOneReq {
+		ID           int64 `json:"id,string"` //分组的标识符
+		WithChildren bool  `json:"withChildren,optional"` //同时返回子分组
+	}
+	RuleChainGroupGetListReq {
+		Page     *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		Name     string    `json:"name,optional"` //规则链分组的名称
+		ParentID int64     `json:"parentID,string,optional"` //父级的ID
+	}
+	RuleChainGroupGetListResp {
+		List []*RuleChainGroup `json:"list"` // 列表数据
+		PageResp
+	}
+)
+

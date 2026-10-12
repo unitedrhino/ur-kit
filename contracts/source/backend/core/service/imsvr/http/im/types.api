@@ -1,0 +1,509 @@
+info(
+	title: "IM 模块公共类型定义"
+	desc: "即时通讯（会话/消息/朋友圈/好友）请求响应结构体，字段命名与 IM proto 保持一致"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+type(
+	// ImParticipant 会话参与者
+	ImParticipant {
+		Type string `json:"type"` // 参与者类型：user / device / ai
+		Id   string `json:"id"`   // 参与者 ID
+	}
+
+	// ImConversationCreateReq 创建会话请求
+	ImConversationCreateReq {
+		Type         string          `json:"type"` // 会话类型：single / group
+		Name         string          `json:"name,optional"` // 会话名称（群聊必填）
+		Participants []ImParticipant `json:"participants"`  // 参与者列表
+	}
+
+	// ImConversationCreateResp 创建会话响应
+	ImConversationCreateResp {
+		Id int64 `json:"id"` // 会话 ID
+	}
+
+	// ImConversationCreateAIReq 创建 AI 会话请求
+	ImConversationCreateAIReq {
+		CloneId int64 `json:"cloneId"` // AI 分身（Clone）ID
+	}
+
+	// ImConversationAddMembersReq 群聊邀请成员请求
+	ImConversationAddMembersReq {
+		ConversationId int64           `json:"conversationId"` // 会话 ID
+		Participants   []ImParticipant `json:"participants"`   // 被邀请的参与者列表
+	}
+
+	// ImConversationAddMembersResp 群聊邀请成员响应
+	ImConversationAddMembersResp {
+		Id int64 `json:"id"` // 会话 ID
+	}
+
+	// ImConversationRemoveMemberReq 群聊移除/退出成员请求
+	ImConversationRemoveMemberReq {
+		ConversationId  int64  `json:"conversationId"`  // 会话 ID
+		ParticipantType string `json:"participantType"` // 参与者类型
+		ParticipantId   string `json:"participantId"`   // 参与者 ID
+	}
+
+	// ImConversationTransferOwnerReq 群聊转让群主请求
+	ImConversationTransferOwnerReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+		NewOwnerID     int64 `json:"newOwnerID"`     // 新群主用户 ID
+	}
+
+	// ImConversationMuteMemberReq 群聊禁言/取消禁言成员请求
+	ImConversationMuteMemberReq {
+		ConversationId  int64  `json:"conversationId"`  // 会话 ID
+		ParticipantType string `json:"participantType"` // 参与者类型
+		ParticipantId   string `json:"participantId"`   // 参与者 ID
+		IsMuted         int64  `json:"isMuted"`         // 是否禁言：1 禁言 / 0 取消禁言
+	}
+
+	// ImConversationDisbandReq 群聊解散请求
+	ImConversationDisbandReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+	}
+
+	// ImConversationSetAdminReq 群聊设置/取消管理员请求
+	ImConversationSetAdminReq {
+		ConversationId  int64  `json:"conversationId"`  // 会话 ID
+		ParticipantType string `json:"participantType"` // 参与者类型
+		ParticipantId   string `json:"participantId"`   // 参与者 ID
+		IsAdmin         int64  `json:"isAdmin"`         // 是否管理员：1 设置 / 0 取消
+	}
+
+	// ImConversationMemberInfo 会话成员信息
+	ImConversationMemberInfo {
+		ParticipantType string `json:"participantType"` // 参与者类型
+		ParticipantId   string `json:"participantId"`   // 参与者 ID
+		Role            string `json:"role"`            // 角色：owner / admin / member
+		GroupNickname   string `json:"groupNickname"`   // 群昵称
+		IsMuted         int64  `json:"isMuted"`         // 是否被禁言
+		JoinedTime      int64  `json:"joinedTime"`      // 加入时间
+		// 以下为用户基础信息，由 apisvr 通过 syssvr 富化；非 user 类型参与者或用户不存在时为空
+		UserName string `json:"userName"` // 用户名
+		NickName string `json:"nickName"` // 昵称
+		Avatar   string `json:"avatar"`   // 头像
+	}
+
+	// ImConversationGetMembersReq 获取会话成员列表请求
+	ImConversationGetMembersReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+	}
+
+	// ImConversationGetMembersResp 获取会话成员列表响应
+	ImConversationGetMembersResp {
+		List []*ImConversationMemberInfo `json:"list"` // 成员列表
+	}
+
+	// ImConversationUpdateSettingReq 更新会话设置请求（置顶/免打扰/删除）
+	ImConversationUpdateSettingReq {
+		ConversationId int64 `json:"conversationId"`    // 会话 ID
+		IsPinned       int64 `json:"isPinned,optional"` // 是否置顶
+		IsMuted        int64 `json:"isMuted,optional"`  // 是否免打扰
+		IsDeleted      int64 `json:"isDeleted,optional"` // 是否删除（退出会话列表）
+	}
+
+	// ImConversationGetListReq 获取会话列表请求
+	ImConversationGetListReq {
+		Page     int64 `json:"page,default=1"`      // 页码
+		PageSize int64 `json:"pageSize,default=20"` // 每页大小
+	}
+
+	// ImConversationInfo 会话信息
+	ImConversationInfo {
+		Id             int64  `json:"id"`              // 会话 ID
+		Type           string `json:"type"`            // 会话类型
+		Name           string `json:"name"`            // 会话名称
+		Avatar         string `json:"avatar"`          // 会话头像
+		OwnerID        int64  `json:"ownerID"`         // 群主用户 ID
+		Status         int64  `json:"status"`          // 会话状态
+		LastMsgID      int64  `json:"lastMsgID"`       // 最后一条消息 ID
+		LastMsgTime    int64  `json:"lastMsgTime"`     // 最后一条消息时间
+		LastMsgContent string `json:"lastMsgContent"`  // 最后一条消息内容摘要
+		UnreadCount    int64  `json:"unreadCount"`     // 未读消息数
+		LastReadMsgID  int64  `json:"lastReadMsgID"`   // 已读到的消息 ID
+		IsPinned       int64  `json:"isPinned"`        // 是否置顶
+		IsMuted        int64  `json:"isMuted"`         // 是否免打扰
+		CreatedTime    int64  `json:"createdTime"`     // 创建时间
+		UpdatedTime    int64  `json:"updatedTime"`     // 更新时间
+	}
+
+	// ImConversationGetListResp 会话列表响应
+	ImConversationGetListResp {
+		List  []*ImConversationInfo `json:"list"`  // 会话列表
+		Total int64                 `json:"total"` // 总数
+	}
+
+	// ImConversationGetByParticipantsReq 按参与者查询单聊会话
+	ImConversationGetByParticipantsReq {
+		UserID1 int64 `json:"userID1"` // 用户 1 ID
+		UserID2 int64 `json:"userID2"` // 用户 2 ID
+	}
+
+	// ImConversationGetReq 获取会话详情请求
+	ImConversationGetReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+	}
+
+	// ImConversationGetResp 获取会话详情响应
+	ImConversationGetResp {
+		Info *ImConversationInfo `json:"info"` // 会话信息
+	}
+
+	// ImMessageInfo 消息信息
+	ImMessageInfo {
+		Id             int64  `json:"id"`             // 消息 ID
+		Seq            int64  `json:"seq"`            // 会话内序号
+		ConversationId int64  `json:"conversationId"` // 会话 ID
+		ClientMsgId    string `json:"clientMsgId"`    // 客户端消息 ID（幂等去重）
+		SenderType     string `json:"senderType"`     // 发送者类型
+		SenderId       string `json:"senderId"`       // 发送者 ID
+		MsgType        string `json:"msgType"`        // 消息类型
+		Content        string `json:"content"`        // 消息内容
+		Extra          string `json:"extra"`          // 扩展字段
+		Status         int64  `json:"status"`         // 消息状态
+		SendTime       int64  `json:"sendTime"`       // 发送时间
+		IsAtAll        int64  `json:"isAtAll"`        // 是否 @ 全体成员
+		MentionUserIDs []int64 `json:"mentionUserIDs"` // @ 的用户列表
+	}
+
+	// ImSendMessageReq 发送消息请求
+	ImSendMessageReq {
+		ConversationId int64   `json:"conversationId"`       // 会话 ID
+		ClientMsgId    string  `json:"clientMsgId,optional"` // 客户端消息 ID
+		MsgType        string  `json:"msgType"`              // 消息类型
+		Content        string  `json:"content"`              // 消息内容
+		Extra          string  `json:"extra,optional"`       // 扩展字段
+		IsAtAll        int64   `json:"isAtAll,optional"`     // 是否 @ 全体成员
+		MentionUserIDs []int64 `json:"mentionUserIDs,optional"` // @ 的用户列表
+	}
+
+	// ImSendMessageResp 发送消息响应
+	ImSendMessageResp {
+		Id       int64 `json:"id"`       // 消息 ID
+		Seq      int64 `json:"seq"`      // 会话内序号
+		SendTime int64 `json:"sendTime"` // 发送时间
+	}
+
+	// ImMarkReadReq 标记已读请求
+	ImMarkReadReq {
+		ConversationId int64 `json:"conversationId"`    // 会话 ID
+		ReadSeq        int64 `json:"readSeq,optional"` // 已读到的序号
+	}
+
+	// ImRecallReq 撤回消息请求
+	ImRecallReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+		MsgId          int64 `json:"msgId"`          // 消息 ID
+	}
+
+	// ImMessageGetListReq 消息列表请求
+	ImMessageGetListReq {
+		ConversationId int64 `json:"conversationId"`      // 会话 ID
+		Page           int64 `json:"page,default=1"`      // 页码
+		PageSize       int64 `json:"pageSize,default=20"` // 每页大小
+	}
+
+	// ImMessageSearchReq 搜索聊天记录请求
+	ImMessageSearchReq {
+		ConversationId int64  `json:"conversationId,optional"` // 会话 ID（可选，限定单个会话）
+		Keyword        string `json:"keyword"`                 // 搜索关键词
+		Page           int64  `json:"page,default=1"`          // 页码
+		PageSize       int64  `json:"pageSize,default=20"`     // 每页大小
+	}
+
+	// ImMessageGetListResp 消息列表响应
+	ImMessageGetListResp {
+		List  []*ImMessageInfo `json:"list"`  // 消息列表
+		Total int64            `json:"total"` // 总数
+	}
+
+	// ImMessageSyncReq 增量同步消息请求
+	ImMessageSyncReq {
+		ConversationId int64 `json:"conversationId"`   // 会话 ID
+		LastSeq        int64 `json:"lastSeq,optional"` // 本地已同步的最大消息序号，0 表示全量
+		Limit          int64 `json:"limit,optional"`   // 单次拉取上限，默认 100，封顶 500
+	}
+
+	// ImMessageSyncResp 增量同步消息响应
+	ImMessageSyncResp {
+		List      []*ImMessageInfo `json:"list"`      // 消息列表（按 seq 升序）
+		LatestSeq int64            `json:"latestSeq"` // 会话当前最新序号
+		HasMore   bool             `json:"hasMore"`   // 是否还有更多消息待拉取
+	}
+
+	// ImRecalcUnreadReq 未读数对账请求
+	ImRecalcUnreadReq {
+		ConversationId int64 `json:"conversationId"` // 会话 ID
+	}
+
+	// ImRecalcUnreadResp 未读数对账响应
+	ImRecalcUnreadResp {
+		UnreadCount int64 `json:"unreadCount"` // 对账后的未读数
+	}
+
+	// ImMomentMedia 朋友圈媒体元数据
+	ImMomentMedia {
+		Type     string `json:"type"`     // 媒体类型：image/video/voice/file
+		URL      string `json:"url"`      // 媒体地址
+		Thumb    string `json:"thumb"`    // 缩略图地址
+		Size     int64  `json:"size"`     // 文件大小
+		Duration int64  `json:"duration"` // 音视频时长（秒）
+		Name     string `json:"name"`     // 文件名
+	}
+
+	// ImMomentCreateReq 发布动态请求
+	ImMomentCreateReq {
+		Content        string          `json:"content"`        // 文本内容
+		MediaList      []ImMomentMedia `json:"mediaList"`      // 媒体列表
+		Visibility     int64           `json:"visibility"`     // 可见范围：0 公开 / 1 项目 / 2 指定人
+		ProjectIDs     []int64         `json:"projectIDs"`     // 可见项目列表（visibility=1 时生效）
+		VisibleUserIDs []int64         `json:"visibleUserIDs"` // 可见用户列表（visibility=2 时生效）
+		MentionUserIDs []int64         `json:"mentionUserIDs"` // @ 的用户列表
+	}
+
+	// ImMomentCreateResp 发布动态响应
+	ImMomentCreateResp {
+		Id int64 `json:"id"` // 动态 ID
+	}
+
+	// ImMomentInfo 动态信息
+	ImMomentInfo {
+		Id             int64           `json:"id"`             // 动态 ID
+		UserID         int64           `json:"userID"`         // 发布人用户 ID
+		Content        string          `json:"content"`        // 文本内容
+		MediaList      []ImMomentMedia `json:"mediaList"`      // 媒体列表
+		Visibility     int64           `json:"visibility"`     // 可见范围
+		ProjectIDs     []int64         `json:"projectIDs"`     // 可见项目列表
+		VisibleUserIDs []int64         `json:"visibleUserIDs"` // 可见用户列表
+		MentionUserIDs []int64         `json:"mentionUserIDs"` // @ 的用户列表
+		Status         int64           `json:"status"`         // 动态状态
+		LikeCount      int64           `json:"likeCount"`      // 点赞数
+		CommentCount   int64           `json:"commentCount"`   // 评论数
+		IsLiked        bool            `json:"isLiked"`        // 当前用户是否已点赞
+		CreatedTime    int64           `json:"createdTime"`    // 创建时间
+		UpdatedTime    int64           `json:"updatedTime"`    // 更新时间
+	}
+
+	// ImMomentCommentInfo 评论信息
+	ImMomentCommentInfo {
+		Id             int64   `json:"id"`             // 评论 ID
+		MomentID       int64   `json:"momentID"`       // 动态 ID
+		UserID         int64   `json:"userID"`         // 评论人用户 ID
+		Content        string  `json:"content"`        // 评论内容
+		MentionUserIDs []int64 `json:"mentionUserIDs"` // @ 的用户列表
+		Status         int64   `json:"status"`         // 评论状态
+		CreatedTime    int64   `json:"createdTime"`    // 创建时间
+		UpdatedTime    int64   `json:"updatedTime"`    // 更新时间
+	}
+
+	// ImMomentGetListReq 查询动态列表请求
+	ImMomentGetListReq {
+		Page            int64 `json:"page,default=1"`           // 页码
+		PageSize        int64 `json:"pageSize,default=20"`      // 每页大小
+		FilterUserID    int64 `json:"filterUserID,optional"`    // 按发布人过滤
+		FilterProjectID int64 `json:"filterProjectID,optional"` // 按项目过滤
+	}
+
+	// ImMomentGetListResp 查询动态列表响应
+	ImMomentGetListResp {
+		List  []*ImMomentInfo `json:"list"`  // 动态列表
+		Total int64           `json:"total"` // 总数
+	}
+
+	// ImMomentGetReq 获取动态详情请求
+	ImMomentGetReq {
+		Id int64 `json:"id"` // 动态 ID
+	}
+
+	// ImMomentGetResp 动态详情响应
+	ImMomentGetResp {
+		Info     *ImMomentInfo          `json:"info"`     // 动态信息
+		Comments []*ImMomentCommentInfo `json:"comments"` // 评论列表
+	}
+
+	// ImMomentDeleteReq 删除动态请求
+	ImMomentDeleteReq {
+		Id int64 `json:"id"` // 动态 ID
+	}
+
+	// ImMomentLikeReq 点赞/取消点赞请求
+	ImMomentLikeReq {
+		Id int64 `json:"id"` // 动态 ID
+	}
+
+	// ImMomentLikeResp 点赞/取消点赞响应
+	ImMomentLikeResp {
+		LikeCount int64 `json:"likeCount"` // 最新点赞数
+	}
+
+	// ImMomentCommentCreateReq 评论内容结构
+	ImMomentCommentCreateReq {
+		Content        string  `json:"content"`        // 评论内容
+		MentionUserIDs []int64 `json:"mentionUserIDs"` // @ 的用户列表
+	}
+
+	// ImMomentCommentCreateHttpReq 发表评论请求（id 为动态 ID，content 为评论内容）
+	ImMomentCommentCreateHttpReq {
+		Id      int64                   `json:"id"`      // 动态 ID
+		Content ImMomentCommentCreateReq `json:"content"` // 评论内容
+	}
+
+	// ImMomentCommentDeleteReq 删除评论请求
+	ImMomentCommentDeleteReq {
+		MomentID  int64 `json:"momentID"`  // 动态 ID
+		CommentID int64 `json:"commentID"` // 评论 ID
+	}
+
+	// ImFriendApplyReq 发起好友申请请求
+	ImFriendApplyReq {
+		RecvUserID int64  `json:"recvUserID"`       // 被申请人用户 ID
+		ReqMsg     string `json:"reqMsg,optional"` // 申请附言
+	}
+
+	// ImFriendApplyResp 发起好友申请响应
+	ImFriendApplyResp {
+		Id int64 `json:"id"` // 申请记录 ID
+	}
+
+	// ImFriendHandleReq 处理好友申请请求
+	ImFriendHandleReq {
+		RequestID    int64  `json:"requestID"`          // 申请记录 ID
+		HandleResult int64  `json:"handleResult"`       // 处理结果：1 同意 / 2 拒绝
+		HandleMsg    string `json:"handleMsg,optional"` // 处理附言
+	}
+
+	// ImFriendDeleteReq 删除好友请求
+	ImFriendDeleteReq {
+		FriendUserID int64 `json:"friendUserID"` // 好友用户 ID
+	}
+
+	// ImFriendInfo 好友信息（含用户资料）
+	ImFriendInfo {
+		Id           int64  `json:"id"`           // 记录 ID
+		UserID       int64  `json:"userID"`       // 当前用户 ID
+		FriendUserID int64  `json:"friendUserID"` // 好友用户 ID
+		Remark       string `json:"remark"`       // 好友备注
+		NickName     string `json:"nickName"`     // 好友昵称
+		Avatar       string `json:"avatar"`       // 好友头像
+		CreatedTime  int64  `json:"createdTime"`  // 创建时间
+	}
+
+	// ImFriendGetListReq 获取好友列表请求
+	ImFriendGetListReq {
+		Page     int64 `json:"page,default=1"`       // 页码
+		PageSize int64 `json:"pageSize,default=200"` // 每页大小
+	}
+
+	// ImFriendGetListResp 获取好友列表响应
+	ImFriendGetListResp {
+		List  []*ImFriendInfo `json:"list"`  // 好友列表
+		Total int64           `json:"total"` // 总数
+	}
+
+	// ImFriendRequestInfo 好友申请信息（含用户资料）
+	ImFriendRequestInfo {
+		Id               int64  `json:"id"`               // 申请记录 ID
+		ReqUserID        int64  `json:"reqUserID"`        // 申请人用户 ID
+		ReqUserNickName  string `json:"reqUserNickName"`  // 申请人昵称
+		ReqUserAvatar    string `json:"reqUserAvatar"`    // 申请人头像
+		RecvUserID       int64  `json:"recvUserID"`       // 被申请人用户 ID
+		RecvUserNickName string `json:"recvUserNickName"` // 被申请人昵称
+		RecvUserAvatar   string `json:"recvUserAvatar"`   // 被申请人头像
+		ReqMsg           string `json:"reqMsg"`           // 申请附言
+		HandleResult     int64  `json:"handleResult"`     // 处理结果：0 待处理 / 1 同意 / 2 拒绝
+		HandleMsg        string `json:"handleMsg"`        // 处理附言
+		CreatedTime      int64  `json:"createdTime"`      // 创建时间
+		UpdatedTime      int64  `json:"updatedTime"`      // 更新时间
+	}
+
+	// ImFriendRequestGetListReq 获取好友申请列表请求
+	ImFriendRequestGetListReq {
+		Direction    int64 `json:"direction"`              // 方向：0 我收到的 / 1 我发起的
+		HandleResult int64 `json:"handleResult,default=-1"` // 处理结果过滤：-1 全部
+		Page         int64 `json:"page,default=1"`          // 页码
+		PageSize     int64 `json:"pageSize,default=20"`     // 每页大小
+	}
+
+	// ImFriendRequestGetListResp 获取好友申请列表响应
+	ImFriendRequestGetListResp {
+		List  []*ImFriendRequestInfo `json:"list"`  // 申请列表
+		Total int64                  `json:"total"` // 总数
+	}
+
+	// ImCallSignalReq 通话信令请求（音视频通话，type 决定语义）
+	ImCallSignalReq {
+		Type           string   `json:"type"`                     // 信令类型：call_invite/call_accept/call_reject/call_cancel/call_end/call_heartbeat/group_invite/group_join/group_leave/media_state
+		CallId         string   `json:"callId,optional"`          // 通话 ID（invite 类信令为空，由服务端生成）
+		CallType       string   `json:"callType,optional"`        // 通话媒体类型：voice / video
+		ConversationId int64    `json:"conversationId,optional"`  // 关联的 IM 会话 ID
+		CalleeId       string   `json:"calleeId,optional"`        // 1:1 被叫用户 ID
+		Members        []string `json:"members,optional"`         // 群通话邀请成员用户 ID 列表
+		To             string   `json:"to,optional"`              // media_state 定向目标用户 ID（空=1:1 对端/群通话全员）
+		Payload        string   `json:"payload,optional"`         // 扩展 JSON（media_state 的 mute/video 状态等）
+	}
+
+	// ImCallSignalResp 通话信令响应
+	ImCallSignalResp {
+		CallId        string  `json:"callId"`        // 通话 ID
+		State         string  `json:"state"`         // 通话状态：inviting / connected / ended / active / left
+		Event         string  `json:"event"`         // 对应下行事件名（created / busy / group.roster 等）
+		Payload       string  `json:"payload"`       // 下行 payload JSON（含 members、duration 等）
+		NotifyUserIDs []int64 `json:"notifyUserIDs"` // 本次信令已通知的用户 ID 列表
+		ZlmPushURL    string  `json:"zlmPushUrl"`    // 当前用户推流地址（invite/accept/group_invite/group_join 时返回）
+		ZlmServer     string  `json:"zlmServer"`     // ZLM SDP 交换地址（前端 play 用）
+	}
+
+	// ==================== 渠道绑定（阶段 3：设备接入与渠道统一） ====================
+
+	// ImChannelBindReq 绑定渠道端点请求
+	ImChannelBindReq {
+		ChannelType string `json:"channelType"`           // 渠道类型：device / ...
+		ChannelId   string `json:"channelId"`             // 渠道标识（device 为 {productID}:{deviceName}）
+		ChannelName string `json:"channelName,optional"`  // 渠道展示名（设备名称）
+	}
+
+	// ImChannelUnbindReq 解绑渠道端点请求
+	ImChannelUnbindReq {
+		Id int64 `json:"id"` // 绑定记录 ID
+	}
+
+	// ImChannelBindInfo 渠道端点绑定信息
+	ImChannelBindInfo {
+		Id          int64  `json:"id"`          // 绑定记录 ID
+		UserId      int64  `json:"userId"`      // 绑定用户 ID
+		ChannelType string `json:"channelType"` // 渠道类型
+		ChannelId   string `json:"channelId"`   // 渠道标识
+		ChannelName string `json:"channelName"` // 渠道展示名
+		IsMuted     int64  `json:"isMuted"`     // 端点级免打扰：0-下发 1-不下发
+		CreatedTime int64  `json:"createdTime"` // 绑定时间（Unix 秒）
+	}
+
+	// ImChannelBindGetListResp 渠道绑定列表响应
+	ImChannelBindGetListResp {
+		List []*ImChannelBindInfo `json:"list"` // 绑定列表
+	}
+
+	// ImChannelBindSetMuteReq 设置端点级免打扰请求
+	ImChannelBindSetMuteReq {
+		Id      int64 `json:"id"`      // 绑定记录 ID
+		IsMuted int64 `json:"isMuted"` // 0-下发 1-免打扰
+	}
+
+	// ImCallActiveReq 查询群通话进行状态请求
+	ImCallActiveReq {
+		ConversationId int64 `form:"conversationId"` // 群聊会话 ID
+	}
+
+	// ImCallActiveResp 查询群通话进行状态响应
+	ImCallActiveResp {
+		Active          bool     `json:"active"`          // 是否有进行中的通话
+		CallId          string   `json:"callId"`          // 通话 ID
+		CallType        string   `json:"callType"`        // 通话媒体类型：voice / video
+		ParticipantIds  []string `json:"participantIds"`  // 当前参与者用户 ID 列表
+	}
+)

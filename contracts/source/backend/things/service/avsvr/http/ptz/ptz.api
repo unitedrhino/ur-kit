@@ -1,0 +1,97 @@
+syntax = "v1"
+
+// 云台控制接口（国标/通用）
+
+info(
+    title: "云台控制"
+    desc: "设备云台方向、缩放、光圈、聚焦等控制"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvPtzControlReq {
+    ChannelID string  `json:"channelID"`      // 通道 ID
+    Action    string  `json:"action"`         // 动作类型：continuous/stop/preset
+    Direction string  `json:"direction,optional"` // 连续移动方向：left/right/up/down/zoomIn/zoomOut
+    Speed     float64 `json:"speed,optional"` // 速度 0-1，默认 0.5
+    PresetOp  string  `json:"presetOp,optional"`  // 预置位操作：set/call/delete（Action=preset 时使用）
+}
+
+type AvPtzPresetReq {
+    ChannelID  string `json:"channelID"`       // 通道 ID
+    PresetID   int64  `json:"presetID"`        // 预置位编号
+    PresetName string `json:"presetName,optional"` // 预置位名称
+}
+
+type AvPtzCruiseReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+    CruiseID  int64  `json:"cruiseID"`  // 巡航组号
+    Enable    bool   `json:"enable"`     // 启用/停止
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "云台控制"
+        description: "业务说明：控制指定通道云台连续移动、停止或预置位操作。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPtzControl
+    post /api/v1/av/ptz/control (AvPtzControlReq) returns (EmptyResp)
+
+    @doc(
+        summary: "设置云台预置位"
+        description: "业务说明：为指定通道设置预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPtzPresetSet
+    post /api/v1/av/ptz/preset/set (AvPtzPresetReq) returns (EmptyResp)
+
+    @doc(
+        summary: "删除云台预置位"
+        description: "业务说明：按预置位编号删除指定通道的预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPtzPresetDel
+    post /api/v1/av/ptz/preset/del (AvPtzPresetReq) returns (EmptyResp)
+
+    @doc(
+        summary: "调用云台预置位"
+        description: "业务说明：按预置位编号调用指定通道的预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPtzPresetCall
+    post /api/v1/av/ptz/preset/call (AvPtzPresetReq) returns (EmptyResp)
+
+    @doc(
+        summary: "云台巡航控制"
+        description: "业务说明：启动或停止指定通道的云台巡航组。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPtzCruise
+    post /api/v1/av/ptz/cruise (AvPtzCruiseReq) returns (EmptyResp)
+}

@@ -1,0 +1,99 @@
+{
+    "name" : "联犀Iot",
+    "appid" : "__UNI__CEDF48D",
+    "description" : "联犀Iot 多端应用",
+    "versionName" : "1.0.0",
+    "versionCode" : "100",
+    "transformPx" : false,
+    "app-plus" : {
+        "usingComponents" : true,
+        "nvueStyleCompiler" : "uni-app",
+        "compilerVersion" : 3,
+        "splashscreen" : {
+            "alwaysShowBeforeRender" : true,
+            "waiting" : true,
+            "autoclose" : true,
+            "delay" : 0
+        },
+        "modules" : {
+            "Barcode" : {},
+            "Bluetooth" : {},
+            "Record" : {},
+            "Geolocation" : {}
+        },
+        "distribute" : {
+            "icons" : {
+                "android" : {
+                    "hdpi" : "appRes/icons/72x72.png",
+                    "xhdpi" : "appRes/icons/96x96.png",
+                    "xxhdpi" : "appRes/icons/144x144.png",
+                    "xxxhdpi" : "appRes/icons/192x192.png"
+                },
+                "ios" : {
+                    "appstore" : "appRes/icons/1024x1024.png"
+                }
+            },
+            "android" : {
+                "permissions" : [
+                    "<uses-permission android:name=\"android.permission.BLUETOOTH\"/>",
+                    "<uses-permission android:name=\"android.permission.BLUETOOTH_ADMIN\"/>",
+                    "<uses-permission android:name=\"android.permission.BLUETOOTH_SCAN\"/>",
+                    "<uses-permission android:name=\"android.permission.BLUETOOTH_CONNECT\"/>",
+                    "<uses-permission android:name=\"android.permission.CAMERA\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_FINE_LOCATION\"/>",
+                    "<uses-permission android:name=\"android.permission.ACCESS_COARSE_LOCATION\"/>",
+                    "<uses-permission android:name=\"android.permission.RECORD_AUDIO\"/>",
+                    "<uses-permission android:name=\"android.permission.INTERNET\"/>"
+                ]
+            },
+            "ios" : {
+                "privacyDescription" : {
+                    "NSBluetoothAlwaysUsageDescription" : "用于设备配网和连接",
+                    "NSBluetoothPeripheralUsageDescription" : "用于设备配网和连接",
+                    "NSLocationWhenInUseUsageDescription" : "用于设备定位和地图展示",
+                    "NSMicrophoneUsageDescription" : "用于声纹录入录音"
+                }
+            }
+        }
+    },
+    "quickapp" : {},
+    "mp-weixin" : {
+        "appid" : "wx7d1211b720fbf6b2",
+        "setting" : {
+            "urlCheck" : false,
+            "es6" : true,
+            "postcss" : true,
+            "minified" : true
+        },
+        "usingComponents" : true,
+        "lazyCodeLoading" : "requiredComponents",
+        "requiredPrivateInfos" : [ "getLocation" ],
+        "permission" : {
+            "scope.userLocation" : {
+                "desc" : "用于蓝牙配网获取 Wi-Fi 名称、记录家庭或设备安装位置"
+            },
+            "scope.bluetooth" : {
+                "desc" : "用于蓝牙配网时发现、连接附近设备并下发网络配置"
+            }
+        }
+    },
+    "mp-alipay" : {
+        "usingComponents" : true
+    },
+    "mp-baidu" : {
+        "usingComponents" : true
+    },
+    "mp-toutiao" : {
+        "usingComponents" : true
+    },
+    "h5" : {
+        "router" : {
+            "mode" : "hash"
+        },
+        "title" : "联犀Iot"
+    },
+    "uniStatistics" : {
+        "enable" : false
+    },
+    "vueVersion" : "3"
+}

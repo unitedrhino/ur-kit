@@ -1,0 +1,49 @@
+info (
+	title:   "用户应用管理"
+	desc:    "用户应用相关接口"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+type (
+	UserSelfAppGetListReq {
+		NotAppID int64 `json:"notAppID,string,optional"` // 排除指定应用ID（如排除控制台大厅 77）
+	}
+)
+
+@server (
+	group:           system/user/self
+	prefix:          /api/v1/system/user/self
+	accessCode:      "systemUserSelf"
+	accessName:      "用户基础操作"
+	accessGroup:     "用户管理"
+	defaultAuthType: "all"
+	defaultNeedAuth: "false"
+	middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取用户应用列表"
+	    description: "业务说明：获取当前登录用户可访问的应用列表，根据用户所在租户的应用开通情况过滤。返回应用基本信息包括应用ID、名称等。用于应用选择器、用户可用应用展示等场景。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler appGetList
+	post /app/get-list (UserSelfAppGetListReq) returns (TenantAppGetListResp)
+
+	@doc(
+	    summary: "获取用户应用详情"
+	    description: "业务说明：获取指定应用的详细信息，包括应用ID、名称、拥有该应用的租户列表等。用于查看应用详情、了解应用覆盖的租户范围等场景。需指定应用ID和类型（应用/小程序）。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler appGetOne
+	post /app/get-one (UserSelfAppGetOneReq) returns (UserSelfAppGetOneResp)
+}

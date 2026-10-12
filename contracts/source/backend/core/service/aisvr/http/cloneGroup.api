@@ -1,0 +1,113 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-Clone组管理"
+	desc:    "AI CloneGroup Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- Clone组类型定义 ----
+
+type CloneGroupInfo {
+	ID             int64  `json:"id,string,optional"` // Clone组ID，字符串避免浏览器精度丢失
+	tenantCode     string `json:"tenantCode,optional"` // 租户编码
+	agentGroupID   int64  `json:"agentGroupID"` // 关联AgentGroup ID
+	thirdID        string `json:"thirdID,optional"` // 第三方业务ID（如 projectID）
+	code           string `json:"code"` // Clone组编码
+	name           string `json:"name"` // Clone组名称
+	description    string `json:"description,optional"` // 描述
+	ttsConfigID    string `json:"ttsConfigID,optional"` // 组级TTS配置ID
+	voiceParams    string `json:"voiceParams,optional"` // 组级语音参数（JSON字符串）
+	isDefault      int64  `json:"isDefault,string,optional"` // 是否默认组 1-是 2-否
+	status         int64  `json:"status,string,optional"` // 状态 1-启用 2-禁用
+	authType       string `json:"authType,optional"` // 权限类型
+	agentGroupName string `json:"agentGroupName,optional"` // 关联AgentGroup名称
+	createdTime    int64  `json:"createdTime,optional"` // 创建时间
+	updatedTime    int64  `json:"updatedTime,optional"` // 更新时间
+}
+
+type CloneGroupGetListReq {
+	page         PageInfo `json:"page"` // 分页信息
+	agentGroupID int64    `json:"agentGroupID,optional"` // 按AgentGroup ID过滤
+	thirdID      string   `json:"thirdID,optional"` // 按第三方业务ID过滤
+	name         string   `json:"name,optional"` // 名称模糊搜索
+	status       int64    `json:"status,optional"` // 状态过滤
+}
+
+type CloneGroupGetListResp {
+	list  []CloneGroupInfo `json:"list"` // Clone组列表
+	total int64            `json:"total"` // 总数
+}
+
+// ---- Clone组管理服务定义 ----
+@server (
+	group:            ai/cloneGroup
+	prefix:           /api/v1/ai/clone-group
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "admin"
+	accessCodePrefix: "aiCloneGroupManage"
+	accessNamePrefix: "Clone组管理"
+	accessGroup:      "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建Clone组"
+		description: "业务说明：为指定AgentGroup创建Clone组，Clone组可绑定TTS配置和声纹组。每个AgentGroup自动拥有一个默认组（isDefault=1），不可删除。新建Clone组时自动分配code。"
+		authType: "admin"
+		resource: "ai/clone-group"
+		action: "create"
+		group: "ai/clone-group"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (CloneGroupInfo) returns (WithID)
+
+	@doc(
+		summary: "更新Clone组"
+		description: "业务说明：修改Clone组的名称、描述、TTS配置、语音参数等。部分更新，空值字段不修改。默认组不可修改isDefault字段。"
+		authType: "admin"
+		resource: "ai/clone-group"
+		action: "update"
+		group: "ai/clone-group"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (CloneGroupInfo)
+
+	@doc(
+		summary: "删除Clone组"
+		description: "业务说明：删除指定的Clone组。默认组（isDefault=1）不可删除。删除前需确保组内没有关联的Clone和声纹组。"
+		authType: "admin"
+		resource: "ai/clone-group"
+		action: "delete"
+		group: "ai/clone-group"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "获取Clone组详情"
+		description: "业务说明：根据Clone组ID查询完整信息，包括TTS配置、语音参数、是否默认组等。"
+		authType: "admin"
+		resource: "ai/clone-group"
+		action: "view"
+		group: "ai/clone-group"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (CloneGroupInfo)
+
+	@doc(
+		summary: "获取Clone组列表"
+		description: "业务说明：分页查询Clone组列表，支持按AgentGroup ID、名称、状态过滤。返回结果按创建时间倒序排列。"
+		authType: "all"
+		resource: "ai/clone-group"
+		action: "view"
+		group: "ai/clone-group"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (CloneGroupGetListReq) returns (CloneGroupGetListResp)
+}

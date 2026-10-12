@@ -1,0 +1,6 @@
+syntax = "v1"
+
+import "rule/chain.api"
+import "rule/group.api"
+import "rule/other.api"
+

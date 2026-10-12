@@ -1,0 +1,77 @@
+info(
+	title: "IM 好友管理"
+	desc: "好友申请、申请处理、好友列表与删除，好友关系为全局双向（跨租户）"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/friend
+	prefix: /api/v1/im
+	accessCodePrefix: "imFriend"
+	accessNamePrefix: "IM好友"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "发起好友申请"
+		description: "业务说明：向指定用户发起好友申请，可附申请留言，申请通过后双方建立双向好友关系。"
+		authType: "all"
+		group: "im/friend"
+		resource: "im/friend"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler apply
+	post /friend/apply (ImFriendApplyReq) returns (ImFriendApplyResp)
+
+	@doc(
+		summary: "处理好友申请"
+		description: "业务说明：被申请人处理好友申请，同意则双方成为好友，拒绝则申请关闭。"
+		authType: "all"
+		group: "im/friend"
+		resource: "im/friend"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler handle
+	post /friend/handle (ImFriendHandleReq) returns (Empty)
+
+	@doc(
+		summary: "删除好友"
+		description: "业务说明：删除指定好友，双向好友关系同时解除。"
+		authType: "all"
+		group: "im/friend"
+		resource: "im/friend"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /friend/delete (ImFriendDeleteReq) returns (Empty)
+
+	@doc(
+		summary: "获取好友列表"
+		description: "业务说明：分页查询当前用户的好友列表，含好友昵称、头像等用户资料。"
+		authType: "all"
+		group: "im/friend"
+		resource: "im/friend"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler list
+	post /friend/get-list (ImFriendGetListReq) returns (ImFriendGetListResp)
+
+	@doc(
+		summary: "获取好友申请列表"
+		description: "业务说明：分页查询好友申请列表，支持按方向（我收到的/我发起的）与处理结果过滤，含双方用户资料。"
+		authType: "all"
+		group: "im/friend"
+		resource: "im/friend"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler requestList
+	post /friend/request/get-list (ImFriendRequestGetListReq) returns (ImFriendRequestGetListResp)
+}

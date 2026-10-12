@@ -1,0 +1,48 @@
+// 设备会话附件元数据控制；原件仅通过短期私有OSS签名PUT传输。
+syntax = "proto3";
+package ai;
+option go_package = "/ai";
+
+// DeviceContentPrepareRequest 使用原可信身份，不接受正文自报owner/tenant或对象键。
+message DeviceContentPrepareRequest {
+  string session_id = 1; // 已建立的原AI会话，不接受已过期会话。
+  string subject = 2; // 已鉴权设备主体device:product:device，不替代权限。
+  int64 connection_epoch = 3; // 原可信连接代次，必须是正安全整数。
+  string request_id = 4; // 会话内上传幂等键，同键不得变更内容元数据。
+  string name = 5; // 原文件显示名，不得作为存储路径。
+  string mime_type = 6; // 声明MIME，完成时必须与真实格式一致。
+  int64 size = 7; // 原件精确字节数，完成时回读核验。
+  string sha256 = 8; // 原件小写SHA256，完成时回读核验。
+}
+// DeviceContentPrepareResponse 不返回内部lease、nonce或独立ObjectKey字段。
+message DeviceContentPrepareResponse {
+  string content_ref = 1; // 服务端登记的artifact_引用。
+  string type = 2; // image/file，不表示模型已消费。
+  string mime_type = 3; // 原MIME声明，未ready前尚待真实校验。
+  string status = 4; // uploading/ready；Ready重放不签发新URL。
+  string upload_url = 5; // 仅uploading的短期私有签名PUT地址，不得日志。
+  string upload_receipt = 6; // 原租约独立加密opaque收据，不得日志或复用到新租约。
+  int64 expires_at = 7; // 毫秒，绝不超过原会话与上传租约。
+}
+// DeviceContentCompleteRequest 只确认原收据，不能提交URL/原件或替换租约。
+message DeviceContentCompleteRequest {
+  string session_id = 1; // 收据对应的原AI会话。
+  string subject = 2; // 收据对应的原已鉴权设备主体。
+  int64 connection_epoch = 3; // 收据对应的原正安全整数连接代次。
+  string content_ref = 4; // 原登记引用，不接受任意URL或对象键。
+  string upload_receipt = 5; // 原上传opaque收据；解密不替代当前权限复核。
+}
+// DeviceContentCompleteResponse ready只代表服务端实际原件验证完成，不是模型读取。
+message DeviceContentCompleteResponse {
+  string content_ref = 1; // 实际完成的原登记引用。
+  string type = 2; // 实际image/file模态。
+  string mime_type = 3; // 原件真实验证通过的MIME。
+  string status = 4; // 仅ready，不承诺模型已读取。
+}
+// DeviceContent 只承载设备原会话范围的上传元数据，不搬运原件或创造MQTT method。
+service DeviceContent {
+  // Prepare 申请短期私有PUT，不支持实际签名的Local与缺收据密钥配置明确拒绝。
+  rpc Prepare(DeviceContentPrepareRequest) returns (DeviceContentPrepareResponse);
+  // Complete 回读真实私有原件并重核原会话、主人、连接及活模型流。
+  rpc Complete(DeviceContentCompleteRequest) returns (DeviceContentCompleteResponse);
+}

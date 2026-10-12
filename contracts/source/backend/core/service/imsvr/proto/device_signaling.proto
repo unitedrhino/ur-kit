@@ -1,0 +1,366 @@
+// 文件说明：设备接入服务到统一会话服务的内部RPC；身份和模型绑定只能由接入鉴权层填充。
+syntax = "proto3";
+package im;
+option go_package = "/im";
+import "device_delivery.proto";
+
+// DeviceSignalingRequest 不接受原始Topic或任意企业字段，企业来自内部调用上下文。
+message DeviceSignalingRequest {
+  string subject = 1; // 已验证的device:productID:deviceName主体。
+  string route = 2; // signaling或message，设备报文严格按方向校验。
+  bytes payload = 3; // 原始JSON信封，不含媒体帧或供应商凭据。
+  bytes capability_report = 4; // sessionCreate时由接入层能力缓存提供的完整已验证上行信封。
+  string agent_id = 5; // 接入层产品/Clone授权确定的Agent ID十进制字符串，非设备自报。
+  string clone_id = 6; // 接入层设备绑定Clone ID十进制字符串，无绑定为0。
+  string owner_user_id = 7; // 创建、焦点原回执或首次空闲证明时接入层验证的绑定用户ID；其余请求为空。
+  int64 connection_epoch = 8; // AI创建时冻结原连接；焦点回执/首次空闲证明取当前连接，由DMS鉴权填充，不进入设备JSON。
+  int64 observed_at = 9; // 仅首次空闲证明携带DMS本次接收Unix毫秒，不接受设备自报或用于Owner续租。
+  int64 authenticated_connection_epoch = 10; // DMS已鉴权当前接入旁证；新门铃源上行须与原组同代，旧绑定字段/设备JSON不变，不能据此重绑AI。
+  string authenticated_connection_instance = 11; // 内置Broker原socket一次32位小写hex；仅可信接入上下文填充，非空时10取原建立点而非当前缓存时间；不是持久恢复许可。
+}
+
+// DeviceSignalingResponse 仅表示受理已持久提交；首轮下行由可靠outbox执行。
+message DeviceSignalingResponse {
+  bytes payload = 1; // 原应答供幂等重投使用，含短效媒体参数，不得记日志。
+  bool replay = 2; // true仅为原应答重放，不重新分配模型。
+  AIControlSnapshotDeliveryBinding ai_control_snapshot_binding = 3; // 仅AI sessionSync成功应答：原已释放快照的持久媒体选择；重投仍核原socket，不以当前能力重新选择。
+  bool ai_endpoint_recovery_baseline_confirmed = 4; // 仅本次当前AI公开腿私有恢复已持久确认原released后的真实新基线（含精确原重投）；DMS专用同修订缓存CAS旁证，不进入设备JSON，不表示取得或采集许可。
+}
+
+// DeviceSignaling 是内部设备受理端口，不向设备开放gRPC访问。
+service DeviceSignaling {
+	rpc TriggerDoorbell(TriggerDoorbellRequest) returns (TriggerDoorbellResponse); // 原已鉴权物模型事件触发同主人多端邀请，不表示接听或连通。
+  rpc Handle(DeviceSignalingRequest) returns (DeviceSignalingResponse); // 校验可信身份后创建或控制会话。
+  rpc GetToolDevice(DeviceToolBindingRequest) returns (DeviceToolBindingResponse); // 当前用户反查有效AI会话设备，不返回媒体凭据。
+  rpc AuthorizeDeviceContent(DeviceContentAuthorizationRequest) returns (DeviceContentAuthorizationResponse); // 每次附件上传/消费只读核原活Owner；DMS归属和AISVR活流nonce仍须独立复核。
+  rpc AuthorizeAIControlBinding(AIControlBindingAuthorizationRequest) returns (AIControlBindingAuthorizationResponse); // 原AISVR模型流只读核已提交当前控制绑定及fresh DMS，不迁移模型或设备权限。
+  rpc ControlSourceTrack(IPCSourceControlRequest) returns (IPCSourceControlResponse); // 可信服务受理源控制，实际结果由设备回执确认。
+  rpc StopCameraSource(CameraSourceSafetyRequest) returns (CameraSourceSafetyResponse); // DMS已核验隐私/撤权后立即关闭本节点同原连接全部预览与对讲；不向设备开放。
+  rpc InviteMediaPlayback(PlaybackInvitationRequest) returns (PlaybackInvitationResponse); // 原用户AI会话反查设备后创建文件子会话，不允许自报目标身份或授权期限。
+  rpc InspectMediaPlaybackInvitation(PlaybackInvitationRequest) returns (PlaybackInvitationQueryResponse); // 只读原邀请操作恢复子会话，不依赖调用方收到子ID，不重做邀请。
+  rpc InspectMediaPlayback(PlaybackStatusRequest) returns (PlaybackStatusResponse); // 原用户查询关联子会话的已收录事实，不分配媒体、续租或假报工具完成。
+  rpc ControlMediaPlayback(PlaybackControlRequest) returns (PlaybackControlResponse); // 可信原用户提交独立文件控制；受理不等于设备执行成功。
+  rpc ControlFocus(FocusControlRequest) returns (FocusControlResponse); // 原用户AI绑定内提交焦点控制或只读重放；取得资源只认原设备回执。
+  rpc InspectOutputFocus(OutputFocusInspectionRequest) returns (OutputFocusInspectionResponse); // 按原AI绑定只读焦点事实与原操作结果，不重新授权或控制设备。
+  rpc InviteLiveBroadcast(LiveInvitationRequest) returns (LiveInvitationResponse); // 原AI用户选择可信节目，创建独立接收腿；不是播放证明。
+  rpc InspectLiveBroadcastInvitation(LiveInvitationRequest) returns (LiveInvitationQueryResponse); // 原邀请token只读恢复，不订阅源或刷新许可。
+  rpc InspectLiveBroadcast(LiveStatusRequest) returns (LiveStatusResponse); // 只读已收录的网络与独立轨事实，历史active不表示当前焦点。
+  rpc ControlLiveTrack(LiveControlRequest) returns (LiveControlResponse); // 原接收轨resume/pause/stop，完整焦点授权由实际Owner复核。
+}
+
+// AIControlBindingAuthorizationRequest 仅回查原同设备AI会话的已提交范围；不能借此完成跨设备接续。
+message AIControlBindingAuthorizationRequest {
+  string session_id = 1; // 原模型会话。
+  string subject = 2; // 原已鉴权设备，必须与原Binding同主体。
+  int64 connection_epoch = 3; // 拟启用范围必须已在IM事务提交。
+  uint64 endpoint_epoch = 4; // 平台当前公开代次，不能由AISVR升代。
+  string connection_instance = 5; // 拟启用的真实socket实例。
+  string target_subject = 6; // 独立handoff目标设备；原subject仍是模型anchor。
+  string handoff_id = 7; // 已持久等待模型ACK的正式接续操作，三字段必须同时存在。
+  string endpoint_session_id = 8; // 目标公开腿；不改变原模型会话身份。
+  string request_id = 9; // 原同序模型更新请求，须与持久waitingModel原意图逐值一致。
+}
+
+// AIControlBindingAuthorizationResponse 是两秒内只读旁证，不是新的持久授权或上传票据。
+message AIControlBindingAuthorizationResponse {
+  string session_id = 1; // 精确回执原模型会话。
+  string subject = 2; // 精确原设备。
+  int64 owner_user_id = 3; // 原主人，来自正式IM原Binding。
+  int64 connection_epoch = 4; // 已提交且经当前DMS复验的物理代次。
+  uint64 endpoint_epoch = 5; // 已提交公开代次。
+  string connection_instance = 6; // 经当前DMS复验的socket实例。
+  int64 expires_at = 7; // 自本次核验开始最多两秒，不续业务会话。
+  string target_subject = 8; // 精确目标设备；原subject回显anchor。
+  string handoff_id = 9; // 精确回显原接续操作，普通恢复为空。
+  string endpoint_session_id = 10; // 精确目标公开腿，不能从未提交邀请构造。
+  string request_id = 11; // 精确回显已核持久原模型更新请求。
+}
+
+// CameraSourceSafetyRequest 来自可信DMS属性或授权变更入口，不接收设备自由原因或全企业范围。
+message CameraSourceSafetyRequest {
+  string subject = 1; // 已鉴权设备主体，停止其全部相机预览及对讲，不影响档案回放。
+  int64 connection_epoch = 2; // 触发事实的真实DMS连接代次，不能借旧消息停止新连接资源。
+  string cause = 3; // 固定privacyEnabled或permissionRevoked；正文不能指定任意终态。
+}
+
+// CameraSourceSafetyResponse 只报告本节点实际关闭并保存的原Owner；不表示设备播放停止或下行已经送达。
+message CameraSourceSafetyResponse {
+  int32 stopped_count = 1; // 实际原Owner关闭且终态持久成功数，零表示没有匹配本节点活资源。
+  int32 canceled_creations = 2; // 同目标在途创建已设置取消屏障数，不伪装为已建立或已持久释放。
+}
+
+// DeviceContentAuthorizationRequest 仅内部服务传入原已鉴权端范围，企业与主人仍取调用上下文。
+message DeviceContentAuthorizationRequest {
+  string session_id = 1; // 原已建立AI会话，不是IPC/人工/文件子腿。
+  string subject = 2; // 已鉴权设备主体，不能借其他设备会话。
+  int64 connection_epoch = 3; // 原可信DMS连接代次；0不授予附件权限。
+}
+
+// DeviceContentAuthorizationResponse 为当前核权事实，不是永久上传票据；实际IO前后与消费前须重核。
+message DeviceContentAuthorizationResponse {
+  string session_id = 1; // 原已建立会话。
+  string subject = 2; // 原设备主体。
+  int64 owner_user_id = 3; // 原会话主人，不能由管理员替代。
+  int64 connection_epoch = 4; // 原接入代次，与当前DMS复核结果必须相同。
+  int64 expires_at = 5; // 原固定业务截止，不续租或延长许可。
+  repeated string input_modalities = 6; // 实际设备和模型协商交集，不根据上传能力扩权。
+}
+
+// LiveInvitationRequest 只由可信编排传入；模型仅选择固定节目，不提供URL、源代次或设备身份。
+message LiveInvitationRequest {
+  string parent_session_id = 1; // 服务注入当前原用户有效AI父会话。
+  string msg_token = 2; // 原幂等意图token，调用超时不能换token重做。
+  string program_ref = 3; // 固定目录获准的不透明节目引用，不是文件contentRef。
+}
+
+// LiveInvitationResponse 仅为原邀请持久受理，网络连接和设备实际输出分别观察。
+message LiveInvitationResponse {
+  string session_id = 1; // 独立接收子会话，重放保持原ID。
+  string state = 2; // negotiating/established/ended，不能按established补actualactive。
+  bool replay = 3; // 原意图只读重放，不更新原有限许可。
+  uint64 media_revision = 4; // 原持久创建快照的媒体代次，不授予新协商、开流或焦点许可。
+  repeated LiveInvitationTrack tracks = 5; // 原邀请获准的完整接收轨组，仅标识与类型，不是实际输出状态。
+}
+
+// LiveInvitationQueryResponse 查询恢复原操作，unknown不是未执行或重新邀请许可。
+message LiveInvitationQueryResponse {
+  string status = 1; // unknown/recorded。
+  LiveInvitationResponse invitation = 2; // 仅recorded提供已核验原邀请。
+}
+
+// LiveStatusRequest 原用户查询同父原腿，不从客户端主体字段决定权限。
+message LiveStatusRequest {
+  string parent_session_id = 1; // 原AI父绑定，终止或换连接后拒绝。
+  string session_id = 2; // 原独立节目腿。
+  optional string msg_token = 3; // 省略不读取控制历史，提供时只读原trackControl账本。
+}
+
+// LiveStatusResponse 当前已收录媒体与历史控制分开，查询不授予输出或延长节目时限。
+message LiveStatusResponse {
+  string session_id = 1; // 已核验原节目腿。
+  string session_state = 2; // 逻辑状态，不是设备播放状态。
+  uint64 media_revision = 3; // 原媒体代次，当前核心只支持1。
+  repeated LiveObservedTrack tracks = 4; // 仅已收到原成功ACK的轨，未观察轨缺省而非paused。
+  LiveControlResponse operation = 5; // 仅指定原token且账本存在时提供历史，不替代当前焦点。
+}
+
+// LiveControlRequest 只控制原已接收轨，不能扩组、换源、续期或改变输出优先级。
+message LiveControlRequest {
+  string parent_session_id = 1; // 服务注入原AI父会话。
+  string session_id = 2; // 原节目腿，不允许复用文件播放器ID。
+  string msg_token = 3; // 原固定控制token，同值新意图仍使用新token。
+  string track_id = 4; // 原邀请中的broadcast-out/broadcast-video-out。
+  string operation = 5; // resume/pause/stop；resume必须当前完整原组实际焦点。
+  uint64 media_revision = 6; // 与原协商相同，旧代次不确认新轨。
+}
+
+// LiveControlResponse pending/unknown均不是成功或未执行；completed保留原设备码和事实。
+message LiveControlResponse {
+  string session_id = 1; // 原目标节目腿。
+  string status = 2; // pending/completed/unknown。
+  bool replay = 3; // 相同原请求只读重放，不重新调用驱动或刷新期限。
+  optional int64 code = 4; // 仅completed携带，不将Broker受理合成200。
+  LiveObservedTrack actual = 5; // 仅成功原回执携带；失败不能编造paused/stopped。
+  string reason = 6; // 仅失败原回执的固定脱敏分类，不透传自由文本。
+}
+
+// LiveObservedTrack 原操作已发生的成功事实；当前是否允许输出仍由独立焦点租约决定。
+message LiveObservedTrack {
+  string track_id = 1; // 原完整接收组内的唯一轨ID。
+  string state = 2; // active/paused/stopped，不能从媒体Connected推断。
+  uint64 media_revision = 3; // 原媒体代次，不是逻辑会话CAS。
+}
+
+// TriggerDoorbellRequest只由已鉴权DMS事件入口填充，不能作为设备signaling报文或普通应用接口。
+message TriggerDoorbellRequest {
+  string subject = 1; // 已解析并核验的真实device:productID:deviceName，禁止网关代报。
+  int64 connection_epoch = 2; // 设备服务读取的当前真实LastLogin代次。
+  string source_event_id = 3; // 原物模型msgToken，空值不能临时生成UUID替代。
+  int64 observed_at = 4; // MQTT接入固化的首次收到毫秒时间，重试不刷新。
+}
+
+// TriggerDoorbellResponse仅表示呼叫组和原候选邀请持久提交，不是媒体或实际设备播放完成。
+message TriggerDoorbellResponse {
+  string call_group_id = 1; // 原呼叫组，重放不重新分配。
+  string state = 2; // ringing/answered/ended，answered仍须实际媒体建立。
+  bool replay = 3; // 原来源、连接和事件重放。
+  int32 candidate_count = 4; // 同主人原独立应用候选数，最多32，不返回其他用户身份。
+}
+
+// FocusControlRequest仅由可信编排服务提供；模型不能指定身份、优先级、资源组或授权期限。
+message FocusControlRequest {
+  string parent_session_id = 1; // 服务注入的当前有效AI父会话。
+  string session_id = 2; // 原AI会话本身或已接听的原文件子会话。
+  string msg_token = 3; // 原操作固定幂等token，查询/重试必须保持完整原请求。
+  int64 connection_epoch = 4; // 服务从真实连接或原子邀请取得，当前DMS必须再预检同代次。
+  string focus_id = 5; // 服务保存的原焦点租约，不能从模型文字改挂其他会话。
+  string operation = 6; // acquire/suspend/restore/release。
+  uint64 expected_revision = 7; // 连接内实际资源水位，不是逻辑会话CAS。
+  optional uint64 expires_at = 8; // 仅取得/恢复提供固定业务截止，不得在重试时按当前时间刷新。
+}
+
+// FocusControlResponse仅反映原操作账本；pending/unknown不是取得或释放证明。
+message FocusControlResponse {
+  string session_id = 1; // 已核验的原目标会话。
+  string focus_id = 2; // 原焦点租约，不创建播放器或媒体轨。
+  string status = 3; // pending/completed/unknown；completed仍需原code及完整结果。
+  bool replay = 4; // 原操作只读重放，不再授权、投递或延长许可。
+  optional int64 code = 5; // 仅completed携带原设备回执码，不合成执行成功。
+  FocusObservedResult result = 6; // 仅原completed回执携带；拒绝目标组不是实际占用。
+}
+
+// FocusObservedResult投影原回执，不表示查询时资源仍在使用或允许恢复。
+message FocusObservedResult {
+  string state = 1; // acquired/suspended/restored/released/denied。
+  uint64 revision = 2; // 原回执水位，denied不推进云端实际占用。
+  repeated string resources = 3; // 原完整申请组，成功不能只返回其中一项。
+  string reason = 4; // 仅denied携带固定脱敏原因，不透传自由日志。
+}
+
+// OutputFocusInspectionRequest 只读目标原绑定；用户与企业来自内部鉴权上下文。
+message OutputFocusInspectionRequest {
+  string parent_session_id = 1; // 当前有效AI父会话，不接受设备身份替代。
+  optional string session_id = 2; // 省略查询父自身；提供时仅允许同父、同主人及同设备的文件子会话。
+  optional string msg_token = 3; // 服务保存的原控制token；省略不查询原操作，不能让模型指定授权字段。
+}
+
+// OutputFocusInspectionResponse 分开呈现原目标范围、当前观察和原操作历史，任何查询均不授予输出权限。
+message OutputFocusInspectionResponse {
+  string parent_session_id = 1; // 已校验的原AI父会话。
+  string session_id = 2; // 原目标会话，不创建新焦点或播放器。
+  string session_state = 3; // 原逻辑会话状态，不等于实际播放状态。
+  repeated string required_resources = 4; // 从原绑定或邀请派生的完整必需资源组。
+  int64 business_deadline = 5; // 原固定业务截止Unix毫秒，查询不刷新期限。
+  OutputFocusCurrent current = 6; // 当前代次复核后的观察；unknown不是空闲或允许恢复。
+  FocusControlResponse operation = 7; // 仅请求原token时提供独立历史结果，不能替代当前观察。
+}
+
+// OutputFocusCurrent 仅反映原连接已收录的资源事实，历史水位和租约不是当前可执行许可。
+message OutputFocusCurrent {
+  string status = 1; // recorded仅表示有原持久记录；unknown表示缺少原记录，二者均不授予资源。
+  int64 connection_epoch = 2; // 原创建时冻结的真实连接代次；旧快照无代次时为0且unknown。
+  string state = 3; // ready须经原代次预检且Owner和业务期限有效；unknown中的租约仅为历史，不表示空闲。
+  optional uint64 resource_revision = 4; // 原连接全局实际资源水位；缺省不能解释为0。
+  repeated string managed_resources = 5; // 原连接声明的完整管理组，不扩充设备能力。
+  optional bool control_pending = 6; // 原连接操作是否尚待原回执；缺省为未知。
+  repeated OutputFocusLease leases = 7; // 仅返回原目标的原租约，unknown时仍只能作为历史事实。
+  bool release_only = 8; // 内部只关闭资格：父有效、终态Live保留窗、原连接预检及原held整组均成立；state仍unknown，不可取得/恢复，不向模型暴露。
+}
+
+// OutputFocusLease 投影原目标的已持久租约，不暴露其他业务会话或允许重建授权。
+message OutputFocusLease {
+  string focus_id = 1; // 原焦点租约ID，不能由查询创建或改挂目标。
+  repeated string resources = 2; // 原完整资源申请组。
+  uint64 expires_at = 3; // 原设备协议的固定截止Unix毫秒，不据查询时刻续期。
+  FocusObservedResult actual = 4; // 原严格关联的实际回执；缺省表示尚无事实。
+}
+
+// PlaybackControlRequest 仅允许控制原邀请的文件实例；身份/源/焦点期限从可信绑定取得。
+message PlaybackControlRequest {
+  string parent_session_id = 1; // 服务注入的当前有效AI父会话。
+  string session_id = 2; // 原邀请的文件子会话，不接受模型自报设备。
+  string msg_token = 3; // 服务固定的原操作幂等token，未知结果不得换token重做。
+  string operation = 4; // load/play/pause/seek/setRate/stop。
+  uint64 expected_revision = 5; // 实际播放器水位；首次load为0，非逻辑会话CAS。
+  optional uint64 position_ms = 6; // 仅seek必填，0为合法起点。
+  optional double rate = 7; // 仅setRate必填，0.5/1/1.5/2。
+}
+
+// PlaybackControlResponse 仅反映持久账本受理；设备结果由原token查询取得。
+message PlaybackControlResponse {
+  string session_id = 1; // 原子会话，不创建新播放器。
+  string status = 2; // pending/completed/unknown；completed仍需查原code确定成功/失败。
+  bool replay = 3; // 原命令只读重放，不授权/投递/续期或重做设备输出。
+}
+
+// PlaybackStatusRequest 来自可信工具上下文；公开子会话ID不能替代原AI父绑定授权。
+message PlaybackStatusRequest {
+  string parent_session_id = 1; // 服务注入的当前有效AI父会话。
+  string session_id = 2; // InviteMediaPlayback返回的原文件子会话。
+  string msg_token = 3; // 可选原控制token；由服务保存并注入，不用最新播放器状态代替该操作回执。
+}
+
+// PlaybackStatusResponse 是查询时的持久观察，不证明当前仍在出声或物理播放已完成。
+message PlaybackStatusResponse {
+  string session_id = 1; // 核验后的原文件子会话。
+  string state = 2; // negotiating/established/ended，仅逻辑会话状态。
+  PlaybackObservedState actual = 3; // 最近严格收录的播放事实；缺省表示尚无实际事实，不能用邀请受理补造。
+  bool session_lease_valid = 4; // 查询时子租约及内容/业务期限仍有效；不是设备当前输出证明。
+  bool control_pending = 5; // 尚有未收录回执的原命令，可能已超时，不能推断未执行或换token重试。
+  PlaybackObservedRelease release = 6; // 独立整组释放已收录时才存在；缺省为未知，不按ended补造。
+  PlaybackObservedOperation operation = 7; // 仅指定原控制token且已有对应账本时存在，不从自主事件推断工具完成。
+}
+
+// PlaybackObservedOperation 独立查询原控制账本；pending/unknown均不能作为执行成功或未执行证明。
+message PlaybackObservedOperation {
+  string status = 1; // pending/completed/unknown；期限耗尽但无回执为unknown。
+  optional int64 code = 2; // 仅completed携带设备原回执码；受理或超时不能合成200。
+  PlaybackObservedState actual = 3; // 原成功回执事实，可能早于当前actual；失败回执不携带成功状态。
+  string reason = 4; // 原失败回执的固定脱敏原因，不透传自由设备日志。
+}
+
+// PlaybackObservedState 只投影已验证的设备事实，不返回Owner、URL、内容许可或自由日志。
+message PlaybackObservedState {
+  string playback_id = 1; // 原固定播放器。
+  string state = 2; // loaded/playing/paused/seeking/ended/stopped/failed。
+  uint64 revision = 3; // 实际播放器水位，不是逻辑会话CAS；不超过JSON安全整数。
+  uint64 position_ms = 4; // 非failed的实际位置，零合法。
+  double rate = 5; // 非failed的实际速率，0.5/1/1.5/2。
+  optional uint64 duration_ms = 6; // 未知时缺省；不能将缺省当作零时长。
+  string reason = 7; // 仅failed携带已验证的固定脱敏原因。
+}
+
+// PlaybackObservedRelease 仅反映服务已关联原平台终态并收录设备实际整组释放。
+message PlaybackObservedRelease {
+  string playback_id = 1; // 与原播放实例一致。
+  bool released = 2; // 只允许true；false或缺省不能作为释放证明。
+  uint64 end_event_seq = 3; // 原平台终态水位，不复活会话或扩大保留窗口。
+}
+
+// PlaybackInvitationQueryResponse 仅表示原邀请是否持久记录，不是播放或授权证明。
+message PlaybackInvitationQueryResponse {
+  string status = 1; // unknown/recorded；unknown不能证明未执行或允许换token重做。
+  PlaybackInvitationResponse invitation = 2; // 仅recorded提供原子会话逻辑状态及replay=true。
+}
+
+// PlaybackInvitationRequest 仅由可信工具编排传入；会话与幂等token由服务注入，模型仅选择获准内容。
+message PlaybackInvitationRequest {
+  string parent_session_id = 1; // 原用户当前有效的统一AI会话，不接受旧AI缓存替代。
+  string msg_token = 2; // 本次可信工具操作的固定幂等token，重试不能更换。
+  string content_ref = 3; // 内容服务授权的不透明引用，不接受URL、密钥或文件路径。
+  repeated string output_modalities = 4; // 完整audio/video输出组，不能暗中缩减视频为音频。
+}
+
+// PlaybackInvitationResponse 仅确认持久受理；不含媒体URL，不是load/play完成或实际输出事实。
+message PlaybackInvitationResponse {
+  string session_id = 1; // 原独立文件子会话，重放不得生成新实例。
+  string state = 2; // 当前持久状态，首次为negotiating；重放可返回ended。
+  bool replay = 3; // 原邀请只读重放，不重新授权或延长截止。
+}
+
+// IPCSourceControlRequest 只接受已授权设备主体及原命令，企业/内部服务身份取RPC上下文。
+message IPCSourceControlRequest {
+  string subject = 1; // 已鉴权device:productID:deviceName，不能从模型或应用参数提升身份。
+  bytes payload = 2; // 无平台水位的原trackControl信封，不含音视频媒体。
+}
+
+// IPCSourceControlResponse 仅说明原命令持久受理，不能当成采集/播放/停止已经生效。
+message IPCSourceControlResponse {
+  bool accepted = 1; // 重试可确认原受理，不重投、不延长执行截止。
+}
+
+// DeviceToolBindingRequest 只接受会话键，用户与企业必须来自MCP内部调用上下文。
+message DeviceToolBindingRequest {
+  string session_id = 1; // 统一信令会话ID，不接受客户端自报设备主体。
+}
+
+// DeviceToolBindingResponse 仅供已授权工具确定设备，执行时仍需设备接入层实时权限校验。
+message DeviceToolBindingResponse {
+  string subject = 1; // device:productID:deviceName，结束/过期/非本人会话拒绝返回。
+}
+
+// LiveInvitationTrack 是原邀请的只读轨投影，不包含源、采集、媒体地址或实际播放事实。
+message LiveInvitationTrack {
+  string track_id = 1; // 原完整邀请的固定轨标识，不能用于扩组或换源。
+  string kind = 2; // audio/video，与原已授权邀请一致，不表示active或paused。
+}

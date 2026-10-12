@@ -1,0 +1,3024 @@
+{
+  "components": {
+    "schemas": {
+      "AreaInfo": {
+        "properties": {
+          "areaID": {
+            "description": "项目区域id（只读）",
+            "type": "string"
+          },
+          "areaName": {
+            "description": "项目区域名称（读写）",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "项目id（只读）",
+            "type": "string"
+          }
+        },
+        "title": "AreaInfo",
+        "type": "object"
+      },
+      "CodeReq": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "CodeReq",
+        "type": "object"
+      },
+      "CommonResp": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "CommonResp",
+        "type": "object"
+      },
+      "CompareInt64": {
+        "properties": {
+          "cmpType": {
+            "description": "\"=\":相等 \"!=\":不相等 \">\":大于\">=\":大于等于\"<\":小于\"<=\":小于等于 \"like\":模糊查询",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cmpType",
+          "value"
+        ],
+        "title": "CompareInt64",
+        "type": "object"
+      },
+      "DataInfo": {
+        "properties": {
+          "dataPoint": {
+            "description": "组成的格式为:  productID/deviceName/dataID",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "发生时间戳(毫秒时间戳) 只读",
+            "type": "string"
+          },
+          "value": {
+            "description": "获取到的值",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "dataPoint",
+          "value"
+        ],
+        "title": "DataInfo",
+        "type": "object"
+      },
+      "DateRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 格式：yyyy-mm-dd",
+            "type": "string"
+          },
+          "start": {
+            "description": "开始时间 格式：yyyy-mm-dd",
+            "type": "string"
+          }
+        },
+        "title": "DateRange",
+        "type": "object"
+      },
+      "DeviceCore": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品ID",
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceCore",
+        "type": "object"
+      },
+      "DeviceError": {
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "msg": {
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          }
+        },
+        "title": "DeviceError",
+        "type": "object"
+      },
+      "IDPath": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "idPath": {
+            "type": "string"
+          }
+        },
+        "title": "IDPath",
+        "type": "object"
+      },
+      "OrderBy": {
+        "properties": {
+          "field": {
+            "description": "排序的字段名",
+            "type": "string"
+          },
+          "sort": {
+            "description": "排序方式：1 从小到大, 2 从大到小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "OrderBy",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": "排序",
+            "items": {
+              "$ref": "#/components/schemas/OrderBy"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "latitude": {
+            "description": "纬度",
+            "format": "double",
+            "maximum": 90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "经度",
+            "format": "double",
+            "maximum": 180,
+            "type": "number"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "PublishMsg": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "explain": {
+            "description": "内部使用的拓展字段",
+            "type": "string"
+          },
+          "handle": {
+            "description": "对应 mqtt topic的第一个 thing ota config 等等",
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "protocolCode": {
+            "description": "如果有该字段则回复的时候也会带上该字段",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "毫秒时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为",
+            "type": "string"
+          }
+        },
+        "required": [
+          "handle",
+          "type",
+          "payload",
+          "timestamp",
+          "productID",
+          "deviceName",
+          "explain",
+          "protocolCode"
+        ],
+        "title": "PublishMsg",
+        "type": "object"
+      },
+      "RuleChainComponentBuiltins": {
+        "properties": {
+          "endpoints": {
+            "$ref": "#/components/schemas/RuleChainComponentEndpoints"
+          },
+          "functionNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "nodePool": {
+            "type": "object"
+          }
+        },
+        "required": [
+          "functionNames",
+          "endpoints",
+          "nodePool"
+        ],
+        "title": "RuleChainComponentBuiltins",
+        "type": "object"
+      },
+      "RuleChainComponentEndpoints": {
+        "properties": {
+          "inProcessors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "outProcessors": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "inProcessors",
+          "outProcessors"
+        ],
+        "title": "RuleChainComponentEndpoints",
+        "type": "object"
+      },
+      "RuleChainComponentGetListReq": {
+        "title": "RuleChainComponentGetListReq",
+        "type": "object"
+      },
+      "RuleChainComponentGetListResp": {
+        "properties": {
+          "builtins": {
+            "$ref": "#/components/schemas/RuleChainComponentBuiltins"
+          },
+          "endpoints": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "nodes": {
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "endpoints",
+          "nodes",
+          "builtins"
+        ],
+        "title": "RuleChainComponentGetListResp",
+        "type": "object"
+      },
+      "RuleChainDetail": {
+        "properties": {
+          "connections": {
+            "type": "object"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "endpoints": {
+            "type": "object"
+          },
+          "firstNodeIndex": {
+            "description": "数据流中第一个节点的索引,默认为0",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "规则链的唯一标识符",
+            "type": "string"
+          },
+          "nodes": {
+            "type": "object"
+          },
+          "updatedTime": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "RuleChainDetail",
+        "type": "object"
+      },
+      "RuleChainExecuteReq": {
+        "properties": {
+          "data": {
+            "description": "消息体",
+            "type": "string"
+          },
+          "dataType": {
+            "description": "消息的数据格式 TEXT,JSON",
+            "type": "string"
+          },
+          "header": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "消息头",
+            "type": "object"
+          },
+          "id": {
+            "description": "规则链的唯一标识符",
+            "type": "string"
+          },
+          "isAsync": {
+            "description": "是否异步执行",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "元数据",
+            "type": "object"
+          },
+          "msgType": {
+            "description": "消息类型 Examples include: POST_TELEMETRY, ACTIVITY_EVENT, INACTIVITY_EVENT, CONNECT_EVENT, DISCONNECT_EVENT, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED, DEVICE_ALARM, POST_DEVICE_DATA",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "msgType",
+          "dataType"
+        ],
+        "title": "RuleChainExecuteReq",
+        "type": "object"
+      },
+      "RuleChainExecuteResp": {
+        "properties": {
+          "data": {
+            "description": "消息体",
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "元数据",
+            "type": "object"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "RuleChainExecuteResp",
+        "type": "object"
+      },
+      "RuleChainGroup": {
+        "properties": {
+          "chainCount": {
+            "description": "只读,分组下的规则链数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/RuleChainGroup"
+            },
+            "type": "array"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "id": {
+            "description": "分组的标识符",
+            "type": "string"
+          },
+          "idPath": {
+            "description": "id路径",
+            "type": "string"
+          },
+          "name": {
+            "description": "分组的名称",
+            "type": "string"
+          },
+          "parentID": {
+            "description": "父级的ID",
+            "type": "string"
+          },
+          "updatedTime": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "RuleChainGroup",
+        "type": "object"
+      },
+      "RuleChainGroupGetListReq": {
+        "properties": {
+          "name": {
+            "description": "规则链分组的名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "parentID": {
+            "description": "父级的ID",
+            "type": "string"
+          }
+        },
+        "title": "RuleChainGroupGetListReq",
+        "type": "object"
+      },
+      "RuleChainGroupGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/RuleChainGroup"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "RuleChainGroupGetListResp",
+        "type": "object"
+      },
+      "RuleChainGroupGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "分组的标识符",
+            "type": "string"
+          },
+          "withChildren": {
+            "description": "同时返回子分组",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "RuleChainGroupGetOneReq",
+        "type": "object"
+      },
+      "RuleChainInfo": {
+        "properties": {
+          "additionalInfo": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "是扩展字段",
+            "type": "object"
+          },
+          "configuration": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": "包含规则链的配置信息",
+            "type": "object"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "debugMode": {
+            "description": "表示节点是否处于调试模式。如果为true,则在节点处理消息时会触发调试回调函数,此设置会覆盖节点的 `DebugMode` 配置",
+            "format": "int64",
+            "type": "integer"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "detail": {
+            "$ref": "#/components/schemas/RuleChainDetail"
+          },
+          "disabled": {
+            "description": "表示规则链是否被禁用",
+            "format": "int64",
+            "type": "integer"
+          },
+          "groupID": {
+            "description": "所在分组的ID",
+            "type": "string"
+          },
+          "id": {
+            "description": "规则链的唯一标识符",
+            "type": "string"
+          },
+          "name": {
+            "description": "规则链的名称",
+            "type": "string"
+          },
+          "root": {
+            "description": "表示此规则链是根规则链还是子规则链(仅作为标记使用,不应用于实际逻辑)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "RuleChainInfo",
+        "type": "object"
+      },
+      "RuleChainInfoGetListReq": {
+        "properties": {
+          "debugMode": {
+            "description": "表示节点是否处于调试模式。如果为true,则在节点处理消息时会触发调试回调函数,此设置会覆盖节点的 `DebugMode` 配置",
+            "format": "int64",
+            "type": "integer"
+          },
+          "disabled": {
+            "description": "表示规则链是否被禁用",
+            "format": "int64",
+            "type": "integer"
+          },
+          "groupID": {
+            "description": "规则链分组ID",
+            "type": "string"
+          },
+          "name": {
+            "description": "规则链的名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "root": {
+            "description": "表示此规则链是根规则链还是子规则链(仅作为标记使用,不应用于实际逻辑)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withDetail": {
+            "description": "同时返回规则链的详情",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "RuleChainInfoGetListReq",
+        "type": "object"
+      },
+      "RuleChainInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/RuleChainInfo"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "RuleChainInfoGetListResp",
+        "type": "object"
+      },
+      "RuleChainInfoGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "规则链的唯一标识符",
+            "type": "string"
+          },
+          "withDetail": {
+            "description": "同时返回规则链的详情",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "RuleChainInfoGetOneReq",
+        "type": "object"
+      },
+      "RuleChainLocalGetOneReq": {
+        "title": "RuleChainLocalGetOneReq",
+        "type": "object"
+      },
+      "RuleChainLocalResp": {
+        "title": "RuleChainLocalResp",
+        "type": "object"
+      },
+      "RuleChainLog": {
+        "properties": {
+          "err": {
+            "type": "string"
+          },
+          "flowType": {
+            "type": "string"
+          },
+          "msg": {
+            "$ref": "#/components/schemas/RuleMsg"
+          },
+          "nodeID": {
+            "type": "string"
+          },
+          "relationType": {
+            "type": "string"
+          },
+          "ts": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ts",
+          "nodeID",
+          "flowType",
+          "msg",
+          "relationType",
+          "err"
+        ],
+        "title": "RuleChainLog",
+        "type": "object"
+      },
+      "RuleChainLogGetListReq": {
+        "properties": {
+          "chainID": {
+            "type": "string"
+          },
+          "nodeID": {
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "chainID",
+          "nodeID"
+        ],
+        "title": "RuleChainLogGetListReq",
+        "type": "object"
+      },
+      "RuleChainLogGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/RuleChainLog"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "RuleChainLogGetListResp",
+        "type": "object"
+      },
+      "RuleMsg": {
+        "properties": {
+          "data": {
+            "type": "string"
+          },
+          "dataType": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "metadata": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "ts": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "ts",
+          "id",
+          "dataType",
+          "type",
+          "data",
+          "metadata"
+        ],
+        "title": "RuleMsg",
+        "type": "object"
+      },
+      "SendOption": {
+        "properties": {
+          "requestTimeout": {
+            "description": "请求超时,超时后会进行重试",
+            "format": "int64",
+            "type": "integer"
+          },
+          "retryInterval": {
+            "description": "重试间隔",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeoutToFail": {
+            "description": "超时失败时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "SendOption",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "description": "开始时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "UserCore": {
+        "properties": {
+          "avatar": {
+            "description": " 用户头像",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "email": {
+            "description": " 邮箱",
+            "type": "string"
+          },
+          "lastIP": {
+            "description": " 最后登录ip",
+            "type": "string"
+          },
+          "nickName": {
+            "description": " 用户的昵称",
+            "type": "string"
+          },
+          "phone": {
+            "description": " 手机号",
+            "type": "string"
+          },
+          "regIP": {
+            "description": " 注册ip",
+            "type": "string"
+          },
+          "userID": {
+            "description": " 用户id",
+            "type": "string"
+          },
+          "userName": {
+            "description": " 用户名(唯一)",
+            "type": "string"
+          }
+        },
+        "title": "UserCore",
+        "type": "object"
+      },
+      "VizDataPointBatchSendPropertyReq": {
+        "properties": {
+          "datas": {
+            "description": "需要控制是的数据列表",
+            "items": {
+              "$ref": "#/components/schemas/DataInfo"
+            },
+            "type": "array"
+          },
+          "vizID": {
+            "description": "分组的标识符",
+            "type": "string"
+          }
+        },
+        "required": [
+          "vizID",
+          "datas"
+        ],
+        "title": "VizDataPointBatchSendPropertyReq",
+        "type": "object"
+      },
+      "VizDataPointGetListGetReq": {
+        "properties": {
+          "vizID": {
+            "description": "分组的标识符",
+            "type": "string"
+          }
+        },
+        "title": "VizDataPointGetListGetReq",
+        "type": "object"
+      },
+      "VizDataPointGetListReq": {
+        "properties": {
+          "vizID": {
+            "description": "分组的标识符",
+            "type": "string"
+          }
+        },
+        "title": "VizDataPointGetListReq",
+        "type": "object"
+      },
+      "VizDataPointGetListResp": {
+        "properties": {
+          "list": {
+            "items": {
+              "$ref": "#/components/schemas/DataInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "VizDataPointGetListResp",
+        "type": "object"
+      },
+      "VizGroup": {
+        "properties": {
+          "children": {
+            "items": {
+              "$ref": "#/components/schemas/VizGroup"
+            },
+            "type": "array"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "id": {
+            "description": "分组的标识符",
+            "type": "string"
+          },
+          "idPath": {
+            "description": "id路径",
+            "type": "string"
+          },
+          "name": {
+            "description": "分组的名称",
+            "type": "string"
+          },
+          "parentID": {
+            "description": "父级的ID",
+            "type": "string"
+          },
+          "updatedTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "vizCount": {
+            "description": "只读,分组下的可视化数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "VizGroup",
+        "type": "object"
+      },
+      "VizGroupGetListReq": {
+        "properties": {
+          "name": {
+            "description": "可视化分组的名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "parentID": {
+            "description": "父级的ID",
+            "type": "string"
+          }
+        },
+        "title": "VizGroupGetListReq",
+        "type": "object"
+      },
+      "VizGroupGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/VizGroup"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "VizGroupGetListResp",
+        "type": "object"
+      },
+      "VizGroupGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "分组的标识符",
+            "type": "string"
+          },
+          "withChildren": {
+            "description": "同时返回子分组",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "VizGroupGetOneReq",
+        "type": "object"
+      },
+      "VizInfo": {
+        "properties": {
+          "areaID": {
+            "description": "区域ID(雪花ID),默认为2 未分类",
+            "type": "string"
+          },
+          "areaName": {
+            "description": "只读,区域的名称",
+            "type": "string"
+          },
+          "code": {
+            "description": "编码,相同区域下的code不能重复",
+            "type": "string"
+          },
+          "data": {
+            "description": "可视化数据",
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "groupID": {
+            "description": "分组ID,不填默认为1",
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "image": {
+            "description": "略缩图路径",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称,创建必传",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "所属项目ID(雪花ID),默认为2,未分类",
+            "type": "string"
+          },
+          "projectName": {
+            "description": "只读,项目的名称",
+            "type": "string"
+          }
+        },
+        "title": "VizInfo",
+        "type": "object"
+      },
+      "VizInfoCreateReq": {
+        "properties": {
+          "areaID": {
+            "description": "区域ID(雪花ID),默认为2 未分类",
+            "type": "string"
+          },
+          "code": {
+            "description": "编码,相同区域下的code不能重复",
+            "type": "string"
+          },
+          "copyFromID": {
+            "description": "从别的可视化复制,别的可视化的ID",
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "groupID": {
+            "description": "分组ID,不填默认为1",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称,创建必传",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "所属项目ID(雪花ID),默认为2,未分类",
+            "type": "string"
+          }
+        },
+        "title": "VizInfoCreateReq",
+        "type": "object"
+      },
+      "VizInfoExportReq": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "title": "VizInfoExportReq",
+        "type": "object"
+      },
+      "VizInfoExportResp": {
+        "properties": {
+          "fileUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "fileUrl"
+        ],
+        "title": "VizInfoExportResp",
+        "type": "object"
+      },
+      "VizInfoGetListReq": {
+        "properties": {
+          "areaID": {
+            "description": "区域ID(雪花ID),默认为2 未分类",
+            "type": "string"
+          },
+          "code": {
+            "description": "编码,相同区域下的code不能重复",
+            "type": "string"
+          },
+          "groupID": {
+            "description": "分组ID,不填默认为1",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称,创建必传",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "projectID": {
+            "description": "所属项目ID(雪花ID),默认为2,未分类",
+            "type": "string"
+          }
+        },
+        "title": "VizInfoGetListReq",
+        "type": "object"
+      },
+      "VizInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": "可视化信息",
+            "items": {
+              "$ref": "#/components/schemas/VizInfo"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "VizInfoGetListResp",
+        "type": "object"
+      },
+      "VizInfoGetOneReq": {
+        "properties": {
+          "areaID": {
+            "description": "区域ID(雪花ID),默认为2 未分类",
+            "type": "string"
+          },
+          "code": {
+            "description": "编码,相同区域下的code不能重复",
+            "type": "string"
+          },
+          "id": {
+            "description": "如果填写id,则会以此获取,如果不填id,则下面三个参数必填",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "所属项目ID(雪花ID),默认为2,未分类",
+            "type": "string"
+          }
+        },
+        "title": "VizInfoGetOneReq",
+        "type": "object"
+      },
+      "VizInfoImportReq": {
+        "properties": {
+          "id": {
+            "type": "string"
+          }
+        },
+        "title": "VizInfoImportReq",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      },
+      "WithIDChildren": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          },
+          "withChildren": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "WithIDChildren",
+        "type": "object"
+      },
+      "WithIDOrCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithIDOrCode",
+        "type": "object"
+      },
+      "WithIDStr": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithIDStr",
+        "type": "object"
+      },
+      "WithStrID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithStrID",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "things-lowcode",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/lowcode/rule/chain/component/get-list": {
+      "post": {
+        "description": "业务说明：获取规则链组件列表",
+        "operationId": "postApiV1LowcodeRuleChainComponentGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainComponentGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainComponentGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链组件列表",
+        "tags": [
+          "lowcode/rule/chain/component",
+          "lowcodeRuleChainComponent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/detail/get-one": {
+      "post": {
+        "description": "业务说明：获取规则链详情",
+        "operationId": "postApiV1LowcodeRuleChainDetailGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithStrID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainDetail"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链详情",
+        "tags": [
+          "lowcode/rule/chain/detail",
+          "lowcodeRuleChainDetail"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/detail/update": {
+      "post": {
+        "description": "业务说明：更新规则链详情",
+        "operationId": "postApiV1LowcodeRuleChainDetailUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainDetail"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新规则链详情",
+        "tags": [
+          "lowcode/rule/chain/detail",
+          "lowcodeRuleChainDetail"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/group/create": {
+      "post": {
+        "description": "业务说明：添加规则链分组",
+        "operationId": "postApiV1LowcodeRuleChainGroupCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainGroup"
+              }
+            }
+          },
+          "description": " RuleChainGroup 定义规则链",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithIDStr"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加规则链分组",
+        "tags": [
+          "lowcode/rule/chain/group",
+          "lowcodeRuleChainGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/group/delete": {
+      "post": {
+        "description": "业务说明：删除规则链分组",
+        "operationId": "postApiV1LowcodeRuleChainGroupDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithIDStr"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除规则链分组",
+        "tags": [
+          "lowcode/rule/chain/group",
+          "lowcodeRuleChainGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/group/get-list": {
+      "post": {
+        "description": "业务说明：获取规则链分组列表",
+        "operationId": "postApiV1LowcodeRuleChainGroupGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainGroupGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainGroupGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链分组列表",
+        "tags": [
+          "lowcode/rule/chain/group",
+          "lowcodeRuleChainGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/group/get-one": {
+      "post": {
+        "description": "业务说明：获取规则链分组信息",
+        "operationId": "postApiV1LowcodeRuleChainGroupGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainGroupGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainGroup"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链分组信息",
+        "tags": [
+          "lowcode/rule/chain/group",
+          "lowcodeRuleChainGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/group/update": {
+      "post": {
+        "description": "业务说明：更新规则链分组",
+        "operationId": "postApiV1LowcodeRuleChainGroupUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainGroup"
+              }
+            }
+          },
+          "description": " RuleChainGroup 定义规则链",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新规则链分组",
+        "tags": [
+          "lowcode/rule/chain/group",
+          "lowcodeRuleChainGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/info/create": {
+      "post": {
+        "description": "业务说明：添加规则链",
+        "operationId": "postApiV1LowcodeRuleChainInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainInfo"
+              }
+            }
+          },
+          "description": " RuleChainInfo 定义规则链",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithStrID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加规则链",
+        "tags": [
+          "lowcode/rule/chain/info",
+          "lowcodeRuleChainInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/info/delete": {
+      "post": {
+        "description": "业务说明：删除规则链",
+        "operationId": "postApiV1LowcodeRuleChainInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithStrID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除规则链",
+        "tags": [
+          "lowcode/rule/chain/info",
+          "lowcodeRuleChainInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/info/get-list": {
+      "post": {
+        "description": "业务说明：获取规则链列表",
+        "operationId": "postApiV1LowcodeRuleChainInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链列表",
+        "tags": [
+          "lowcode/rule/chain/info",
+          "lowcodeRuleChainInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/info/get-one": {
+      "post": {
+        "description": "业务说明：获取规则链信息",
+        "operationId": "postApiV1LowcodeRuleChainInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取规则链信息",
+        "tags": [
+          "lowcode/rule/chain/info",
+          "lowcodeRuleChainInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/info/update": {
+      "post": {
+        "description": "业务说明：更新规则链",
+        "operationId": "postApiV1LowcodeRuleChainInfoUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainInfo"
+              }
+            }
+          },
+          "description": " RuleChainInfo 定义规则链",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新规则链",
+        "tags": [
+          "lowcode/rule/chain/info",
+          "lowcodeRuleChainInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/local/get-one": {
+      "post": {
+        "description": "业务说明：本地配置",
+        "operationId": "postApiV1LowcodeRuleChainLocalGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainLocalGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainLocalResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "本地配置",
+        "tags": [
+          "lowcode/rule/chain/local",
+          "lowcodeRuleChainLocal"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/log/get-list": {
+      "post": {
+        "description": "业务说明：调试日志",
+        "operationId": "postApiV1LowcodeRuleChainLogGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainLogGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainLogGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "调试日志",
+        "tags": [
+          "lowcode/rule/chain/log",
+          "lowcodeRuleChainLog"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/rule/chain/operate/execute": {
+      "post": {
+        "description": "业务说明：执行规则链",
+        "operationId": "postApiV1LowcodeRuleChainOperateExecute",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RuleChainExecuteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RuleChainExecuteResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "执行规则链",
+        "tags": [
+          "lowcode/rule/chain/operate",
+          "lowcodeRuleChainOperate"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/data-point/control-batch-send": {
+      "post": {
+        "description": "业务说明：批量调用设备属性",
+        "operationId": "postApiV1LowcodeVizData-pointControl-batch-send",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizDataPointBatchSendPropertyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量调用设备属性",
+        "tags": [
+          "lowcode/viz/dataPoint",
+          "lowcodeVizDataPoint"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/data-point/get-list": {
+      "get": {
+        "description": "业务说明：数据点读取",
+        "operationId": "getApiV1LowcodeVizData-pointGet-list",
+        "parameters": [
+          {
+            "description": "分组的标识符",
+            "in": "query",
+            "name": "vizID",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizDataPointGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "数据点读取",
+        "tags": [
+          "lowcode/viz/dataPoint",
+          "lowcodeVizDataPoint"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      },
+      "post": {
+        "description": "业务说明：数据点读取",
+        "operationId": "postApiV1LowcodeVizData-pointGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizDataPointGetListReq"
+              }
+            }
+          },
+          "description": " VizGroup 定义可视化",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizDataPointGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "数据点读取",
+        "tags": [
+          "lowcode/viz/dataPoint",
+          "lowcodeVizDataPoint"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/group/create": {
+      "post": {
+        "description": "业务说明：添加可视化分组",
+        "operationId": "postApiV1LowcodeVizGroupCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizGroup"
+              }
+            }
+          },
+          "description": " VizGroup 定义可视化",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithIDStr"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加可视化分组",
+        "tags": [
+          "lowcode/viz/group",
+          "lowcodeVizGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/group/delete": {
+      "post": {
+        "description": "业务说明：删除可视化分组",
+        "operationId": "postApiV1LowcodeVizGroupDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithIDStr"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除可视化分组",
+        "tags": [
+          "lowcode/viz/group",
+          "lowcodeVizGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/group/get-list": {
+      "post": {
+        "description": "业务说明：获取可视化分组列表",
+        "operationId": "postApiV1LowcodeVizGroupGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizGroupGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizGroupGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取可视化分组列表",
+        "tags": [
+          "lowcode/viz/group",
+          "lowcodeVizGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/group/get-one": {
+      "post": {
+        "description": "业务说明：获取可视化分组信息",
+        "operationId": "postApiV1LowcodeVizGroupGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizGroupGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizGroup"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取可视化分组信息",
+        "tags": [
+          "lowcode/viz/group",
+          "lowcodeVizGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/group/update": {
+      "post": {
+        "description": "业务说明：更新可视化分组",
+        "operationId": "postApiV1LowcodeVizGroupUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizGroup"
+              }
+            }
+          },
+          "description": " VizGroup 定义可视化",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新可视化分组",
+        "tags": [
+          "lowcode/viz/group",
+          "lowcodeVizGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/create": {
+      "post": {
+        "description": "业务说明：新增可视化",
+        "operationId": "postApiV1LowcodeVizInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizInfoCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithIDStr"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增可视化",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/delete": {
+      "post": {
+        "description": "业务说明：删除可视化",
+        "operationId": "postApiV1LowcodeVizInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithIDStr"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除可视化",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/export": {
+      "post": {
+        "description": "业务说明：导出可视化",
+        "operationId": "postApiV1LowcodeVizInfoExport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizInfoExportReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizInfoExportResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "导出可视化",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/get-list": {
+      "post": {
+        "description": "业务说明：获取可视化信息列表",
+        "operationId": "postApiV1LowcodeVizInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取可视化信息列表",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/get-one": {
+      "post": {
+        "description": "业务说明：获取可视化详情",
+        "operationId": "postApiV1LowcodeVizInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/VizInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取可视化详情",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/import": {
+      "post": {
+        "description": "业务说明：导入可视化",
+        "operationId": "postApiV1LowcodeVizInfoImport",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "id",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                    "x-formData-name": "file"
+                  },
+                  "id": {
+                    "type": "string",
+                    "x-formData-name": "id"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "导入可视化",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    },
+    "/api/v1/lowcode/viz/info/update": {
+      "post": {
+        "description": "业务说明：更新可视化",
+        "operationId": "postApiV1LowcodeVizInfoUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VizInfo"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新可视化",
+        "tags": [
+          "lowcode/viz/info",
+          "lowcodeVizInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/lowcode",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "lowcode"
+      }
+    }
+  }
+}

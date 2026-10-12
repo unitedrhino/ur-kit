@@ -1,0 +1,128 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡用量详情"
+    desc: "物联卡历史流量使用记录查询"
+    version: "v1"
+)
+
+type (
+    CardFlowHis {
+        ID               int64   `json:"id,string"`
+        TotalFlow        float64 `json:"totalFlow,optional"`
+        TotalFlowNow     float64 `json:"totalFlowNow,optional"`
+        Month            int64   `json:"month"`
+        Year             int64   `json:"year"`
+        Day              int64   `json:"day"`
+        Iccid            string  `json:"iccid"`
+        ApnNames         string  `json:"apnNames,optional"` // 当日实际使用 APN，多个名称以顿号分隔
+        CreateTime       string  `json:"createTime,optional"`
+        UpdateTime       string  `json:"updateTime,optional"`
+        TotalShowFlow    float64 `json:"totalShowFlow,optional"`
+        TotalShowFlowNow float64 `json:"totalShowFlowNow,optional"`
+    }
+
+    CardFlowHisGetListReq {
+        PageInfo
+        Iccid     string `json:"iccid,optional"`
+        Year      int64  `json:"year,optional"`
+        Month     int64  `json:"month,optional"`
+        Day       int64  `json:"day,optional"`
+        StartTime string `json:"startTime,optional"`
+        EndTime   string `json:"endTime,optional"`
+    }
+
+    CardFlowHisGetListResp {
+        PageResp
+        List []*CardFlowHis `json:"list"`
+    }
+
+    CardFlowHisStatisticsResp {
+        Iccid              string  `json:"iccid"`              // 物联卡 ICCID
+        TotalFlow          float64 `json:"totalFlow"`          // 总流量(MB)
+        TotalFlowNow       float64 `json:"totalFlowNow"`       // 当天总流量(MB)
+        TotalUsedFlow      float64 `json:"totalUsedFlow"`      // 总已用流量(MB)
+        TotalRemainingFlow float64 `json:"totalRemainingFlow"` // 总剩余流量(MB)
+        AverageFlow        float64 `json:"averageFlow"`        // 平均流量(MB)
+        MaxFlow            float64 `json:"maxFlow"`            // 最大流量(MB)
+        MinFlow            float64 `json:"minFlow"`            // 最小流量(MB)
+    }
+
+    CardFlowHisStatisticsReq {
+        Iccid     string `json:"iccid,optional"`
+        Year      int64  `json:"year,optional"`
+        Month     int64  `json:"month,optional"`
+        Day       int64  `json:"day,optional"`
+        StartTime string `json:"startTime,optional"`
+        EndTime   string `json:"endTime,optional"`
+    }
+
+    CardFlowHisExportReq {
+        Iccid     string `json:"iccid,optional"`
+        Year      int64  `json:"year,optional"`
+        Month     int64  `json:"month,optional"`
+        Day       int64  `json:"day,optional"`
+        StartTime string `json:"startTime,optional"`
+        EndTime   string `json:"endTime,optional"`
+    }
+
+    CardFlowHisExportResp {
+        FileUrl string `json:"fileUrl"`
+    }
+)
+
+@server(
+    group: card/flowHis
+    prefix: /api/v1/things/card/flow-his
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取用量详情列表"
+        description: "业务说明：获取用量详情列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardFlowHisGetListReq) returns (CardFlowHisGetListResp)
+
+    @doc(
+        summary: "获取用量详情"
+        description: "业务说明：按租户和主键查询单条历史用量记录"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardFlowHis)
+
+    @doc(
+        summary: "获取用量统计"
+        description: "业务说明：获取用量统计"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler statistics
+    post /statistics (CardFlowHisStatisticsReq) returns (CardFlowHisStatisticsResp)
+
+    @doc(
+        summary: "导出用量详情"
+        description: "业务说明：按搜索条件导出用量详情并返回 OSS 下载地址"
+        authType: "admin"
+        resource: "card"
+        action: "export"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler export
+    post /export (CardFlowHisExportReq) returns (CardFlowHisExportResp)
+}

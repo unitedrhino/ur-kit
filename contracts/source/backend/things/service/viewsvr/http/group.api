@@ -1,0 +1,90 @@
+import "common.api"
+
+@server(
+	group: view/group
+	prefix: /api/v1/view/group
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "创建分组"
+	    authType: "admin"
+	    description: "业务说明：创建可视化资源分组，支持数据集、组件、资源库等分组场景。用于左侧分组栏管理。"
+	    resource: "viewGroup"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler create
+	post /create (GroupCreateReq) returns ()
+	@doc(
+	    summary: "更新分组"
+	    authType: "admin"
+	    description: "业务说明：更新可视化分组名称和排序。用于分组栏维护。"
+	    resource: "viewGroup"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler update
+	post /update (GroupUpdateReq) returns ()
+	@doc(
+	    summary: "删除分组"
+	    authType: "admin"
+	    description: "业务说明：删除可视化分组。用于清理无效分组。"
+	    resource: "viewGroup"
+	    action: "delete"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (GroupDeleteReq) returns ()
+	@doc(
+	    summary: "获取分组列表"
+	    authType: "admin"
+	    description: "业务说明：查询可视化分组列表，支持数据集、组件、资源库等类型。用于页面左侧分组栏展示。"
+	    resource: "viewGroup"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (GroupGetListReq) returns (GroupGetListResp)
+}
+
+type (
+	GroupCreateReq {
+		Name string `json:"name"`          // 分组名称
+		Type string `json:"type"`          // 分组类型 dataset/component/asset
+		Sort int64  `json:"sort,optional"` // 排序
+	}
+
+	GroupUpdateReq {
+		ID   int64  `json:"id,string"`     // 分组id
+		Name string `json:"name,optional"` // 分组名称
+		Sort int64  `json:"sort,optional"` // 排序
+	}
+
+	GroupDeleteReq {
+		ID int64 `json:"id,string"` // 分组id
+	}
+
+	GroupGetListReq {
+		Type  string `json:"type,optional"`  // 分组类型 dataset/component/asset
+		Scene string `json:"scene,optional"` // 场景: manage/editor
+	}
+
+	GroupView {
+		ID          int64  `json:"id,string,optional"`          // 分组id
+		TenantCode  string `json:"tenantCode,optional"`         // 租户编码
+		Name        string `json:"name,optional"`               // 分组名称
+		Type        string `json:"type,optional"`               // 分组类型
+		Sort        int64  `json:"sort,optional"`               // 排序
+		CreatedTime int64  `json:"createdTime,string,optional"` // 创建时间
+		UpdatedTime int64  `json:"updatedTime,string,optional"` // 更新时间
+	}
+
+	GroupGetListResp {
+		List []*GroupView `json:"list"` // 分组列表
+	}
+)

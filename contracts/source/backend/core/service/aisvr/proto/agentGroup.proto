@@ -1,0 +1,95 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// AgentGroupEmpty AgentGroup 服务通用空响应。
+message AgentGroupEmpty {
+}
+
+// AgentGroupWithID AgentGroup 服务通用 ID 响应。
+message AgentGroupWithID {
+  int64 ID = 1;
+}
+
+// AgentGroupInfo AI 助手分组信息（ai_agent_groups）。
+message AgentGroupInfo {
+  // 主线已发布语音字段的编号保持不变；本次新增字段使用 20 起的空闲编号。
+  // voicePipeline 组级语音链路；省略不修改，空字符串恢复默认。
+  optional string voicePipeline = 15;
+  // realtimeConfigID 组级实时模型业务 ID；省略不修改，空字符串清除引用。
+  optional string realtimeConfigID = 16;
+  // interactionMode 组级交互策略；省略不修改，空字符串恢复默认。
+  optional string interactionMode = 17;
+  int64 ID = 1;
+  // tenantCode 租户编码（"common"=平台级）
+  string tenantCode = 2;
+  // code 助手组编码（租户内唯一）
+  string code = 3;
+  // name 助手组名称
+  string name = 4;
+  // desc 描述
+  string desc = 5;
+  // systemPrompt 组级系统提示词（Agent 继承）
+  string systemPrompt = 6;
+  // llmConfigID 组级默认 LLM 配置
+  string llmConfigID = 7;
+  // mcpServiceIds 组级 MCP 服务 ID 列表（JSON 字符串）
+  string mcpServiceIds = 8;
+  // skillIds 组级 Skill ID 列表（JSON 字符串）
+  string skillIds = 9;
+  // status 状态（1-启用 2-禁用）
+  int64 status = 10;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 11;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 12;
+  // 与共同分组业务对齐的权限、语音及知识库设置。
+  string authType = 20;
+  string authCode = 21;
+  string ttsConfigID = 22;
+  string asrConfigID = 23;
+  string knowledgeBaseIds = 24;
+  reserved 13; // 已废弃 purpose，改用 code 区分组类型
+  reserved 14; // 已废弃 defaultAgentId，改用 agentCode 确定默认 Agent
+}
+
+// AgentGroupGetOneReq 读取单个助手组请求。
+message AgentGroupGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 助手组 ID
+  int64 ID = 2;
+}
+
+// AgentGroupGetListReq 助手组列表查询请求。
+message AgentGroupGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // code 助手组编码（精确匹配）
+  string code = 3;
+  // name 名称模糊筛选
+  string name = 4;
+  // status 状态筛选（0 表示不筛）
+  int64 status = 5;
+  reserved 6; // 已废弃 purpose 筛选
+}
+
+// AgentGroupGetListResp 助手组列表查询响应。
+message AgentGroupGetListResp {
+  repeated AgentGroupInfo list = 1;
+  int64 total = 2;
+}
+
+// AgentGroup AI 助手分组服务（一个 proto 一个 service）。
+service AgentGroup {
+  rpc AgentGroupCreate(AgentGroupInfo) returns(AgentGroupWithID);
+  rpc AgentGroupUpdate(AgentGroupInfo) returns(AgentGroupEmpty);
+  rpc AgentGroupDelete(AgentGroupGetOneReq) returns(AgentGroupEmpty);
+  rpc AgentGroupGetOne(AgentGroupGetOneReq) returns(AgentGroupInfo);
+  rpc AgentGroupGetList(AgentGroupGetListReq) returns(AgentGroupGetListResp);
+}

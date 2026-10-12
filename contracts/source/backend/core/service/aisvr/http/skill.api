@@ -1,0 +1,406 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-技能包管理"
+	desc:    "AI Skill Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 技能包类型定义 ----
+
+type SkillInfo {
+	ID            int64  `json:"id,optional"`            // 技能ID
+	tenantCode    string `json:"tenantCode,optional"`    // 租户编码，"common"=平台级
+	code          string `json:"code"`                   // 技能编码
+	name          string `json:"name"`                   // 技能名称
+	desc          string `json:"desc,optional"`          // 描述
+	version       string `json:"version,optional"`       // 版本号
+	parentID      int64  `json:"parentID,optional"`      // 父技能ID（0=顶级）
+	manifest      string `json:"manifest,optional"`      // skill.yaml内容（JSON字符串）
+	ossPath       string `json:"ossPath,optional"`       // OSS存储路径
+	sort          int64  `json:"sort,optional"`          // 排序
+	status        int64  `json:"status,optional"`        // 状态 1-启用 2-禁用
+	createdTime   int64  `json:"createdTime,optional"`   // 创建时间
+	updatedTime   int64  `json:"updatedTime,optional"`   // 更新时间
+	// 治理字段
+	publishStatus string `json:"publishStatus,optional"` // 发布状态：draft/uploaded/validated/review_done/test_passed/approved/published/deprecated
+	reviewResult  string `json:"reviewResult,optional"`  // AI审阅结果（JSON）
+	testResult    string `json:"testResult,optional"`    // 测试结果（JSON）
+	scope         string `json:"scope,optional"`         // 范围：tenant=租户级 platform=平台级
+}
+
+type SkillGetListReq {
+	page       PageInfo `json:"page"`                 // 分页信息
+	tenantCode string   `json:"tenantCode,optional"`  // 租户编码过滤
+	name       string   `json:"name,optional"`        // 名称模糊搜索
+	parentID   int64    `json:"parentID,optional"`    // 父技能ID过滤
+	status     int64    `json:"status,optional"`      // 状态过滤
+}
+
+type SkillGetListResp {
+	list  []SkillInfo `json:"list"`  // 技能列表
+	total int64       `json:"total"` // 总数
+}
+
+// ---- 技能包上传/下载类型定义 ----
+
+type SkillUploadReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	code       string `json:"code"`                // 技能编码
+	name       string `json:"name"`                // 技能名称
+	zipData    string `json:"zipData"`             // Base64编码的zip包数据
+	parentID   int64  `json:"parentID,optional"`   // 父技能ID
+}
+
+type SkillPublishReq {
+	skillID int64  `json:"skillID"` // 技能ID
+	version string `json:"version"` // 新版本号
+}
+
+type SkillDownloadResp {
+	zipData string `json:"zipData"` // Base64编码的zip包数据
+	ossPath string `json:"ossPath"` // OSS存储路径
+}
+
+// ---- 技能文件管理类型定义 ----
+
+type SkillFileInfo {
+	path        string `json:"path"`                 // 文件路径（相对于技能根目录）
+	content     string `json:"content,optional"`     // 文件内容
+	size        int64  `json:"size,optional"`        // 文件大小（字节）
+	isDir       bool   `json:"isDir"`                // 是否为目录
+	updatedTime int64  `json:"updatedTime,optional"` // 更新时间
+}
+
+type SkillFileListReq {
+	skillID int64  `json:"skillID"`          // 技能ID
+	path    string `json:"path,optional"`    // 目录路径（默认根目录）
+}
+
+type SkillFileListResp {
+	list []SkillFileInfo `json:"list"` // 文件列表
+}
+
+type SkillFileGetReq {
+	skillID int64  `json:"skillID"` // 技能ID
+	path    string `json:"path"`    // 文件路径
+}
+
+type SkillFileGetResp {
+	path    string `json:"path"`    // 文件路径
+	content string `json:"content"` // 文件内容
+	size    int64  `json:"size"`    // 文件大小
+}
+
+type SkillFileUpdateReq {
+	skillID int64  `json:"skillID"` // 技能ID
+	path    string `json:"path"`    // 文件路径
+	content string `json:"content"` // 文件内容
+}
+
+type SkillFileAddReq {
+	skillID int64  `json:"skillID"` // 技能ID
+	path    string `json:"path"`    // 文件路径
+	content string `json:"content"` // 文件内容
+	isDir   bool   `json:"isDir"`   // 是否为目录
+}
+
+type SkillFileDeleteReq {
+	skillID int64  `json:"skillID"` // 技能ID
+	path    string `json:"path"`    // 文件路径
+}
+
+// ---- 技能治理类型定义 ----
+
+type SkillSubmitReq {
+	id int64 `json:"id"` // 技能ID
+}
+
+type SkillValidateReq {
+	id int64 `json:"id"` // 技能ID
+}
+
+type SkillValidateResp {
+	success  bool     `json:"success"`  // 验证是否通过
+	errors   []string `json:"errors"`   // 错误列表
+	warnings []string `json:"warnings"` // 警告列表
+}
+
+type SkillReviewReq {
+	id    int64 `json:"id"`              // 技能ID
+	force bool  `json:"force,optional"`  // 是否强制通过
+}
+
+type SkillTestReq {
+	id        int64  `json:"id"`                  // 技能ID
+	testInput string `json:"testInput,optional"`  // 测试输入
+}
+
+type SkillTestResp {
+	success    bool     `json:"success"`    // 测试是否通过
+	output     string   `json:"output"`     // 测试输出
+	durationMs int64    `json:"durationMs"` // 测试耗时（毫秒）
+	errors     []string `json:"errors"`     // 错误列表
+}
+
+type SkillApproveReq {
+	id       int64  `json:"id"`                // 技能ID
+	approved bool   `json:"approved"`          // 是否通过
+	comment  string `json:"comment,optional"`  // 审批意见
+}
+
+// ---- 技能包服务定义 ----
+
+@server(
+	group:               ai/skill
+	prefix:              /api/v1/ai/skill
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiSkillManage"
+	accessNamePrefix:    "技能包管理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建技能"
+		description: "业务说明：创建新的技能包记录，定义技能编码、名称、描述、版本号等。技能包是AI能力的知识载体，包含提示词模板、工具定义、示例对话等。创建后可通过上传zip包添加技能内容。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "create"
+		group: "ai/skill"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (SkillInfo) returns (WithID)
+
+	@doc(
+		summary: "更新技能"
+		description: "业务说明：修改已存在的技能包元数据，支持更新名称、描述、版本号、排序、状态等。部分更新，空值字段不修改。技能内容更新需通过文件管理接口或重新上传zip包。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "update"
+		group: "ai/skill"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (SkillInfo)
+
+	@doc(
+		summary: "删除技能"
+		description: "业务说明：删除指定的技能包记录及其关联的文件内容。删除前需检查是否有助手组正在使用该技能，如有则需先解除绑定后再删除。删除操作不可恢复，OSS存储的文件也会同步删除。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "delete"
+		group: "ai/skill"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "获取技能详情"
+		description: "业务说明：根据技能ID查询完整的技能包信息，包括编码、名称、版本、OSS路径、发布状态、审阅结果等。用于技能编辑回显、详情查看、版本管理等场景。manifest字段包含skill.yaml内容。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "view"
+		group: "ai/skill"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (SkillInfo)
+
+	@doc(
+		summary: "获取技能列表"
+		description: "业务说明：分页查询技能包列表，支持按租户、名称、父技能ID、状态过滤。用于技能管理页面、助手组选择技能等场景。返回结果按排序权重排列，租户可看到本租户和common租户的技能。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "view"
+		group: "ai/skill"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (SkillGetListReq) returns (SkillGetListResp)
+
+	@doc(
+		summary: "上传技能zip包"
+		description: "业务说明：上传技能包的zip压缩文件，包含skill.yaml配置、提示词文件、示例文件等。服务端解析zip内容，存储到OSS，更新技能记录。用于技能包初次上传、版本更新等场景。返回技能ID。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "upload"
+		group: "ai/skill"
+		recordLogMode: "2"
+	)
+	@handler upload
+	post /upload (SkillUploadReq) returns (WithID)
+
+	@doc(
+		summary: "发布新版本"
+		description: "业务说明：将已审核通过的技能包发布为新版本，更新版本号，标记为published状态。发布后该版本技能可被助手组正式使用。发布前需确保技能已完成全部治理流程（验证、审阅、测试、审批）。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "publish"
+		group: "ai/skill"
+		recordLogMode: "2"
+	)
+	@handler publish
+	post /publish (SkillPublishReq)
+
+	@doc(
+		summary: "下载技能zip包"
+		description: "业务说明：下载指定技能包的完整zip文件，包含所有技能内容和配置。用于技能包分发、离线查看、备份导出等场景。返回Base64编码的zip数据和OSS路径。"
+		authType: "admin"
+		resource: "ai/skill"
+		action: "view"
+		group: "ai/skill"
+		recordLogMode: "1"
+	)
+	@handler download
+	post /download (WithID) returns (SkillDownloadResp)
+}
+
+// ---- 技能文件管理服务定义 ----
+
+@server(
+	group:               ai/skill/file
+	prefix:              /api/v1/ai/skill/file
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiSkillManage"
+	accessNamePrefix:    "技能文件管理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建技能文件"
+		description: "业务说明：在技能包中新增文件或目录，支持创建提示词文件、配置文件、示例文件等。新文件立即存储到OSS，更新技能包内容。用于技能内容编辑、增量更新等场景。"
+		authType: "admin"
+		resource: "ai/skill/file"
+		action: "create"
+		group: "ai/skill/file"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (SkillFileAddReq)
+
+	@doc(
+		summary: "更新文件内容"
+		description: "业务说明：修改技能包中已存在文件的内容，立即同步到OSS存储。用于技能内容编辑、配置调整等场景。更新后技能包版本不变，需手动发布新版本才能生效。"
+		authType: "admin"
+		resource: "ai/skill/file"
+		action: "update"
+		group: "ai/skill/file"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (SkillFileUpdateReq)
+
+	@doc(
+		summary: "删除文件"
+		description: "业务说明：删除技能包中的指定文件或目录，同步删除OSS存储。删除前需确认文件引用关系，避免删除关键配置文件导致技能失效。删除后技能包内容更新。"
+		authType: "admin"
+		resource: "ai/skill/file"
+		action: "delete"
+		group: "ai/skill/file"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (SkillFileDeleteReq)
+
+	@doc(
+		summary: "获取文件内容"
+		description: "业务说明：查询技能包中指定文件的完整内容，返回文件文本内容、大小、路径等。用于文件编辑回显、内容查看、调试等场景。仅支持文本文件，二进制文件返回错误。"
+		authType: "admin"
+		resource: "ai/skill/file"
+		action: "view"
+		group: "ai/skill/file"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (SkillFileGetReq) returns (SkillFileGetResp)
+
+	@doc(
+		summary: "列出技能包内文件"
+		description: "业务说明：查询技能包指定目录下的文件和子目录列表，返回路径、大小、是否目录、更新时间等。用于技能包文件浏览、目录导航等场景。默认列出根目录，可指定子目录路径。"
+		authType: "admin"
+		resource: "aiSkillFile"
+		action: "view"
+		group: "AI中台"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (SkillFileListReq) returns (SkillFileListResp)
+}
+
+// ---- 技能治理服务定义 ----
+
+@server(
+	group:               ai/skill
+	prefix:              /api/v1/ai/skill
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiSkillGovernance"
+	accessNamePrefix:    "技能治理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "提交审核"
+		description: "业务说明：将技能包提交到治理流程，进入审核队列。提交后技能状态变为待审核，触发后续验证、审阅、测试、审批等流程。用于技能包准备完成后的上线申请。返回更新后的技能信息。"
+		authType: "admin"
+		resource: "aiSkillGovernance"
+		action: "create"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler submit
+	post /submit (SkillSubmitReq) returns (SkillInfo)
+
+	@doc(
+		summary: "验证技能"
+		description: "业务说明：对技能包进行自动化验证，检查skill.yaml格式、文件完整性、配置正确性等。返回验证结果、错误列表、警告列表。验证通过后方可进入审阅环节。用于快速检测技能包质量。"
+		authType: "admin"
+		resource: "aiSkillGovernance"
+		action: "execute"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler validate
+	post /validate (SkillValidateReq) returns (SkillValidateResp)
+
+	@doc(
+		summary: "AI审阅"
+		description: "业务说明：使用AI自动审阅技能包内容，评估提示词质量、示例完整性、工具定义合理性等。审阅结果写入reviewResult字段。可设置force强制通过。用于技能质量把关。返回更新后的技能信息。"
+		authType: "admin"
+		resource: "aiSkillGovernance"
+		action: "execute"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler review
+	post /review (SkillReviewReq) returns (SkillInfo)
+
+	@doc(
+		summary: "测试技能"
+		description: "业务说明：执行技能包的功能测试，验证提示词效果、工具调用正确性等。可指定测试输入，返回测试输出、耗时、错误列表。测试通过后方可进入审批环节。用于技能功能验证。"
+		authType: "admin"
+		resource: "aiSkillGovernance"
+		action: "test"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler test
+	post /test (SkillTestReq) returns (SkillTestResp)
+
+	@doc(
+		summary: "审批技能"
+		description: "业务说明：管理员对技能包进行最终审批，approved=true通过，false拒绝。可添加审批意见comment。审批通过后技能状态变为approved，可发布上线。用于技能上线前的最后把关。"
+		authType: "admin"
+		resource: "aiSkillGovernance"
+		action: "approve"
+		group: "AI中台"
+		recordLogMode: "2"
+	)
+	@handler approve
+	post /approve (SkillApproveReq) returns (SkillInfo)
+}

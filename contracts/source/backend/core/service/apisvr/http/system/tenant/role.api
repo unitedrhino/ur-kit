@@ -1,0 +1,61 @@
+info(
+	title:   "租户角色管理模块"
+	desc:    "租户角色管理接口"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/user/role
+	prefix:           /api/v1/system/tenant/user/role
+	accessCodePrefix: "systemTenantRole"
+	accessNamePrefix: "租户角色"
+	accessGroup:      "租户管理"
+	defaultAuthType:  "admin"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取租户用户角色列表"
+	    description: "业务说明：查询指定用户在租户中已分配的角色列表。用于用户管理页面展示用户角色、编辑角色分配时的初始数据加载。"
+	    authType: "admin"
+	    group: "system/tenant/user/role"
+	    resource: "system/tenant/user/role"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantUserRoleGetListReq) returns (TenantUserRoleGetListResp)
+
+	@doc(
+	    summary: "更新租户用户的角色列表"
+	    description: "业务说明：批量更新指定用户在租户中的角色分配，可新增或移除角色。仅租户管理员可操作，用于用户角色管理功能。"
+	    authType: "admin"
+	    group: "system/tenant/user/role"
+	    resource: "system/tenant/user/role"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler batchUpdate
+	post /batch-update (TenantUserRoleBatchUpdateReq)
+}
+
+type (
+	TenantUserRoleGetListReq {
+		UserID     int64  `json:"userID,string"` // 用户ID
+		TenantCode string `json:"tenantCode,optional"` // 租户编码（可选，不填取当前用户租户）
+	}
+
+	TenantUserRoleGetListResp {
+		List []*RoleInfo `json:"list"` // 角色列表
+		PageResp
+	}
+
+	TenantUserRoleBatchUpdateReq {
+		UserID     int64  `json:"userID,string"` // 用户ID
+		TenantCode string `json:"tenantCode,optional"` // 租户编码（可选，不填取当前用户租户）
+		RoleIDs    []int64 `json:"roleIDs,string"` // 角色编号列表
+	}
+)

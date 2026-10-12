@@ -1,0 +1,95 @@
+syntax = "v1"
+
+
+info (
+	title:   "物联卡批量任务执行结果"
+	desc:    "物联卡批量任务执行结果文件记录与下载"
+	version: "v1"
+)
+
+type (
+	ExecutionTask {
+		ID          int64  `json:"id,string"`
+		TaskNo      string `json:"taskNo"`
+		TaskName    string `json:"taskName,optional"`
+		TaskType    int64  `json:"taskType"`
+		TaskTypeName string `json:"taskTypeName,optional"`
+		URL         string `json:"url,optional"`
+		FileName    string `json:"fileName,optional"`
+		FileSize    int64  `json:"fileSize,optional"`
+		Auth        string `json:"auth,optional"`
+		StartTime   string `json:"startTime,optional"`
+		EndTime     string `json:"endTime,optional"`
+		CreatedTime string `json:"createdTime,optional"`
+	}
+
+	ExecutionTaskGetListReq {
+		PageInfo
+		TaskNo   string `json:"taskNo,optional"`
+		TaskName string `json:"taskName,optional"`
+		TaskType int64  `json:"taskType,optional"`
+		StartTime string `json:"startTime,optional"`
+		EndTime   string `json:"endTime,optional"`
+	}
+
+	ExecutionTaskGetListResp {
+		PageResp
+		List []*ExecutionTask `json:"list"`
+	}
+
+	ExecutionTaskDownloadReq {
+		TaskNo string `json:"taskNo"`
+	}
+
+	ExecutionTaskDownloadResp {
+		FileUrl string `json:"fileUrl"`
+	}
+
+	// ExecutionTaskGetOneReq 按租户内主键查询执行结果详情。
+	ExecutionTaskGetOneReq {
+		ID int64 `json:"id,string"`
+	}
+)
+
+@server (
+	group:      card/executionTask
+	prefix:     /api/v1/things/card/execution-task
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+	@doc (
+		summary:       "获取执行结果文件列表"
+		description:   "业务说明：获取批量任务执行结果文件列表"
+		authType:      "admin"
+		resource:      "card"
+		action:        "view"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ExecutionTaskGetListReq) returns (ExecutionTaskGetListResp)
+
+	@doc (
+		summary:       "获取执行结果详情"
+		description:   "业务说明：按租户和主键查询单条执行结果记录"
+		authType:      "admin"
+		resource:      "card"
+		action:        "view"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ExecutionTaskGetOneReq) returns (ExecutionTask)
+
+	@doc (
+		summary:       "下载执行结果文件"
+		description:   "业务说明：按任务编号获取最新结果文件 OSS 下载地址"
+		authType:      "admin"
+		resource:      "card"
+		action:        "export"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler download
+	post /download (ExecutionTaskDownloadReq) returns (ExecutionTaskDownloadResp)
+}

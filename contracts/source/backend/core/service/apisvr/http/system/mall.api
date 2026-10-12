@@ -1,0 +1,421 @@
+info (
+	title:   "商城授权管理模块"
+	desc:    "商品、套餐与授权码管理"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+type WithLicenseCode {
+	LicenseCode string `json:"licenseCode"` // 授权码
+	WithSource  bool   `json:"withSource,optional"` // 是否返回来源对象详情（商品或套餐）
+}
+
+@server (
+	group:            system/mall/product
+	prefix:           /api/v1/system/mall/product
+	accessCodePrefix: "systemMall"
+	accessNamePrefix: "商品管理"
+	accessGroup:      "系统管理"
+	defaultNeedAuth:  "true"
+	defaultAuthType:  "platform"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:  "创建商品"
+		description: "业务说明：创建商品"
+		authType: "platform"
+		group: "system/mall/product"
+		resource: "system/mall/product"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (MallProductCreateReq) returns (WithID)
+
+	@doc (
+		summary:  "更新商品"
+		description: "业务说明：更新商品"
+		authType: "platform"
+		group: "system/mall/product"
+		resource: "system/mall/product"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (MallProductUpdateReq)
+
+	@doc (
+		summary:  "删除商品"
+		description: "业务说明：删除商品"
+		authType: "platform"
+		group: "system/mall/product"
+		resource: "system/mall/product"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:  "获取商品详情"
+		description: "业务说明：获取商品详情"
+		authType: "admin"
+		group: "system/mall/product"
+		resource: "system/mall/product"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (MallProductInfo)
+
+	@doc (
+		summary:  "获取商品列表"
+		description: "业务说明：获取商品列表"
+		authType: "admin"
+		group: "system/mall/product"
+		resource: "system/mall/product"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (MallProductGetListReq) returns (MallProductGetListResp)
+}
+
+@server (
+	group:            system/mall/package
+	prefix:           /api/v1/system/mall/package
+	accessCodePrefix: "systemMall"
+	accessNamePrefix: "套餐管理"
+	accessGroup:      "系统管理"
+	defaultNeedAuth:  "true"
+	defaultAuthType:  "platform"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:  "创建套餐"
+		description: "业务说明：创建套餐"
+		authType: "platform"
+		group: "system/mall/package"
+		resource: "system/mall/package"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (MallPackageCreateReq) returns (WithID)
+
+	@doc (
+		summary:  "更新套餐"
+		description: "业务说明：更新套餐"
+		authType: "platform"
+		group: "system/mall/package"
+		resource: "system/mall/package"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (MallPackageUpdateReq)
+
+	@doc (
+		summary:  "删除套餐"
+		description: "业务说明：删除套餐"
+		authType: "platform"
+		group: "system/mall/package"
+		resource: "system/mall/package"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc (
+		summary:  "获取套餐详情"
+		description: "业务说明：获取套餐详情"
+		authType: "admin"
+		group: "system/mall/package"
+		resource: "system/mall/package"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (MallPackageInfo)
+
+	@doc (
+		summary:  "获取套餐列表"
+		description: "业务说明：获取套餐列表"
+		authType: "admin"
+		group: "system/mall/package"
+		resource: "system/mall/package"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (MallPackageGetListReq) returns (MallPackageGetListResp)
+}
+
+@server (
+	group:            system/mall/license
+	prefix:           /api/v1/system/mall/license
+	accessCodePrefix: "systemMall"
+	accessNamePrefix: "授权码管理"
+	accessGroup:      "系统管理"
+	defaultNeedAuth:  "true"
+	defaultAuthType:  "platform"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:  "创建授权码"
+		description: "业务说明：创建授权码"
+		authType: "platform"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler licenseCreate
+	post /create (MallLicenseCreateReq) returns (WithLicenseCode)
+
+	@doc (
+		summary:  "批量创建授权码"
+		description: "业务说明：批量创建授权码"
+		authType: "platform"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler licenseBatchCreate
+	post /batch-create (MallLicenseBatchCreateReq) returns (MallLicenseBatchCreateResp)
+
+	@doc (
+		summary:  "授权码列表"
+		description: "业务说明：授权码列表"
+		authType: "admin"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler licenseGetList
+	post /get-list (MallLicenseGetListReq) returns (MallLicenseGetListResp)
+
+	@doc (
+		summary:  "授权码详情"
+		description: "业务说明：授权码详情"
+		authType: "admin"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler licenseGetOne
+	post /get-one (WithLicenseCode) returns (MallLicenseInfo)
+
+	@doc (
+		summary:  "撤销授权码"
+		description: "业务说明：撤销已使用的授权码，回收对应资源"
+		authType: "platform"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler licenseRevoke
+	post /revoke (WithLicenseCode)
+
+	@doc (
+		summary:  "批量作废授权码"
+		description: "业务说明：批量作废待使用状态的授权码，非待使用的跳过并返回"
+		authType: "platform"
+		group: "system/mall/license"
+		resource: "system/mall/license"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler licenseInvalidBatch
+	post /invalid-batch (MallLicenseInvalidBatchReq) returns (MallLicenseInvalidBatchResp)
+}
+
+type (
+	// 商品 SKU
+	MallProductSku {
+		SkuCode      string            `json:"skuCode"`
+		SkuName      string            `json:"skuName"`
+		LicenseMode  string            `json:"licenseMode"`
+		DurationDays int64             `json:"durationDays,optional"`
+		BindMode     string            `json:"bindMode"`
+		ConfigValues map[string]string `json:"configValues,optional"`
+		Status       int32             `json:"status,optional"`
+	}
+	// 商品信息
+	MallProductInfo {
+		ID          int64             `json:"id,string"`
+		ProductCode string            `json:"productCode"`
+		ProductName string            `json:"productName"`
+		ProductType string            `json:"productType"`
+		GrantSchema string            `json:"grantSchema,optional"`
+		Desc        string            `json:"desc,optional"`
+		Status      int32             `json:"status,optional"`
+		Skus        []*MallProductSku `json:"skus,optional"`
+		CreatedTime int64             `json:"createdTime,string,optional"`
+	}
+	// 创建商品入参
+	MallProductCreateReq {
+		ProductCode string            `json:"productCode"`
+		ProductName string            `json:"productName"`
+		ProductType string            `json:"productType"`
+		GrantSchema string            `json:"grantSchema,optional"`
+		Desc        string            `json:"desc,optional"`
+		Status      int32             `json:"status,optional"`
+		Skus        []*MallProductSku `json:"skus,optional"`
+	}
+	// 更新商品入参
+	MallProductUpdateReq {
+		ID          int64             `json:"id,string"`
+		ProductName string            `json:"productName,optional"`
+		ProductType string            `json:"productType,optional"`
+		GrantSchema string            `json:"grantSchema,optional"`
+		Desc        string            `json:"desc,optional"`
+		Status      int32             `json:"status,optional"`
+		Skus        []*MallProductSku `json:"skus,optional"`
+	}
+	// 商品列表查询入参
+	MallProductGetListReq {
+		Page        *PageInfo `json:"page,optional"`
+		ProductCode string    `json:"productCode,optional"`
+		ProductName string    `json:"productName,optional"`
+		ProductType string    `json:"productType,optional"`
+		Status      int32     `json:"status,optional"`
+	}
+	// 商品列表返回
+	MallProductGetListResp {
+		List  []*MallProductInfo `json:"list"`
+		Total int64              `json:"total,string"`
+	}
+
+	// 套餐项
+	MallPackageItem {
+		ProductID int64  `json:"productID,string"`
+		SkuCode   string `json:"skuCode"`
+		Sort      int64  `json:"sort,optional"`
+		Status    int32  `json:"status,optional"`
+	}
+	// 套餐信息
+	MallPackageInfo {
+		ID           int64              `json:"id,string"`
+		PackageCode  string             `json:"packageCode"`
+		PackageName  string             `json:"packageName"`
+		Category     string             `json:"category,optional"`
+		Desc         string             `json:"desc,optional"`
+		VerifyMethod string             `json:"verifyMethod,optional"`
+		Status       int32              `json:"status,optional"`
+		Items        []*MallPackageItem `json:"items,optional"`
+		CreatedTime  int64              `json:"createdTime,string,optional"`
+	}
+	// 创建套餐入参
+	MallPackageCreateReq {
+		PackageCode  string             `json:"packageCode"`
+		PackageName  string             `json:"packageName"`
+		Category     string             `json:"category,optional"`
+		Desc         string             `json:"desc,optional"`
+		VerifyMethod string             `json:"verifyMethod,optional"`
+		Status       int32              `json:"status,optional"`
+		Items        []*MallPackageItem `json:"items,optional"`
+	}
+	// 更新套餐入参
+	MallPackageUpdateReq {
+		ID           int64              `json:"id,string"`
+		PackageName  string             `json:"packageName,optional"`
+		Category     string             `json:"category,optional"`
+		Desc         string             `json:"desc,optional"`
+		VerifyMethod string             `json:"verifyMethod,optional"`
+		Status       int32              `json:"status,optional"`
+		Items        []*MallPackageItem `json:"items,optional"`
+	}
+	// 套餐列表查询入参
+	MallPackageGetListReq {
+		Page        *PageInfo `json:"page,optional"`
+		PackageCode string    `json:"packageCode,optional"`
+		PackageName string    `json:"packageName,optional"`
+		Category    string    `json:"category,optional"`
+		Status      int32     `json:"status,optional"`
+	}
+	// 套餐列表返回
+	MallPackageGetListResp {
+		List  []*MallPackageInfo `json:"list"`
+		Total int64              `json:"total,string"`
+	}
+
+	// 授权码信息
+	MallLicenseInfo {
+		ID            int64             `json:"id,string"`
+		LicenseCode   string            `json:"licenseCode"`
+		SourceType    string            `json:"sourceType"`
+		SourceID      int64             `json:"sourceID,string"`
+		SkuCode       string            `json:"skuCode,optional"`
+		Status        string            `json:"status"`
+		ValidFrom     int64             `json:"validFrom,string,optional"`
+		ValidUntil    int64             `json:"validUntil,string,optional"`
+		BoundTargetID string            `json:"boundTargetID,optional"`
+		BoundTime     int64             `json:"boundTime,string,optional"`
+		BoundMeta     map[string]string `json:"boundMeta,optional"`
+		GrantSnapshot string            `json:"grantSnapshot,optional"`
+		GrantResult   string            `json:"grantResult,optional"`
+		Desc          string            `json:"desc,optional"`
+		Issuer        string            `json:"issuer,optional"`
+		CreatedTime   int64             `json:"createdTime,string,optional"`
+		SourceProduct *MallProductInfo  `json:"sourceProduct,optional"` // withSource=true 且 sourceType=product 时返回
+		SourcePackage *MallPackageInfo  `json:"sourcePackage,optional"` // withSource=true 且 sourceType=package 时返回
+	}
+	// 创建授权码入参
+	MallLicenseCreateReq {
+		SourceType string `json:"sourceType"`
+		SourceID   int64  `json:"sourceID,string"`
+		SkuCode    string `json:"skuCode,optional"`
+		Desc       string `json:"desc,optional"`
+		Issuer     string `json:"issuer,optional"`
+	}
+	// 批量创建授权码入参
+	MallLicenseBatchCreateReq {
+		SourceType string `json:"sourceType"`
+		SourceID   int64  `json:"sourceID,string"`
+		SkuCode    string `json:"skuCode,optional"`
+		Desc       string `json:"desc,optional"`
+		Issuer     string `json:"issuer,optional"`
+		Count      int32  `json:"count,optional"`
+	}
+	// 批量创建授权码返回
+	MallLicenseBatchCreateResp {
+		LicenseCodes []string `json:"licenseCodes"`
+		Count        int32    `json:"count,optional"`
+	}
+	// 批量作废授权码入参
+	MallLicenseInvalidBatchReq {
+		LicenseCodes []string `json:"licenseCodes"`
+	}
+	// 批量作废授权码返回
+	MallLicenseInvalidBatchResp {
+		Count        int32    `json:"count"`
+		SkippedCodes []string `json:"skippedCodes,optional"`
+	}
+	// 授权码列表查询入参
+	MallLicenseGetListReq {
+		Page          *PageInfo `json:"page,optional"`
+		SourceType    string    `json:"sourceType,optional"`
+		SourceID      int64     `json:"sourceID,string,optional"`
+		SkuCode       string    `json:"skuCode,optional"`
+		Status        string    `json:"status,optional"`
+		LicenseCode   string    `json:"licenseCode,optional"`
+		BoundTargetID string    `json:"boundTargetID,optional"`
+		WithSource    bool      `json:"withSource,optional"` // 是否返回来源对象详情（商品或套餐）
+		Desc          string    `json:"desc,optional"`       // 描述（备注）模糊搜索
+	}
+	// 授权码列表返回
+	MallLicenseGetListResp {
+		List  []*MallLicenseInfo `json:"list"`
+		Total int64              `json:"total,string"`
+	}
+)

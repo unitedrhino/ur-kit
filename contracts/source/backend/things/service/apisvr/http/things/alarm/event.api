@@ -1,0 +1,122 @@
+info (
+	title:   "告警事件"
+	desc:    "告警事件"
+	author:  "杨磊"
+	email:   "603685348@qq.com"
+	version: "v1"
+)
+
+import "alarmCommon.api"
+
+@server (
+	group:            things/alarm/event
+	prefix:           /api/v1/things/alarm/event
+	accessCodePrefix: "thingsAlarmEvent"
+	accessNamePrefix: "告警事件"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+    summary: "获取告警事件详情"
+    description: "获取告警事件详情"
+    resource: "things/alarm/event"
+    action: "view"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/event"
+)
+	@handler getOne
+	post /get-one (AlarmEventWithID) returns (AlarmEventDetail)
+
+	@doc(
+    summary: "获取告警事件列表"
+    description: "获取告警事件列表"
+    resource: "things/alarm/event"
+    action: "view"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/event"
+)
+	@handler getList
+	post /get-list (AlarmEventGetListReq) returns (AlarmEventGetListResp)
+
+	@doc(
+    summary: "处理告警事件"
+    description: "处理告警事件"
+    resource: "things/alarm/event"
+    action: "deal"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/event"
+)
+	@handler deal
+	post /deal (AlarmEventDealReq) returns (ShareEmpty)
+
+	@doc(
+    summary: "标记误报"
+    description: "标记误报"
+    resource: "things/alarm/event"
+    action: "deal"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/event"
+)
+	@handler falseAlarm
+	post /false-alarm (AlarmEventFalseAlarmReq) returns (ShareEmpty)
+
+	@doc(
+    summary: "告警事件统计"
+    description: "告警事件统计"
+    resource: "things/alarm/event"
+    action: "view"
+        authType: "admin"
+        recordLogMode: "1"
+        group: "things/alarm/event"
+)
+	@handler stat
+	post /stat (AlarmEventStatReq) returns (AlarmEventStatResp)
+}
+
+type AlarmEventGetListReq {
+	Page             *PageInfo `json:"page,optional"`              // 分页
+	Keyword          string    `json:"keyword,optional"`           // 名称模糊搜索
+	Status           []string  `json:"status,optional"`            // 状态列表
+	Level            []string  `json:"level,optional"`             // 级别列表
+	AlarmID          int64     `json:"alarmID,string,optional"`    // 告警规则ID
+	ProductID        string    `json:"productID,optional"`         // 产品ID
+	DeviceName       string    `json:"deviceName,optional"`        // 设备名
+	TriggerTimeRange *TimeRange `json:"triggerTimeRange,optional"` // 触发时间范围
+	IsRecovered      *bool     `json:"isRecovered,optional"`       // 是否已恢复
+	IsFalseAlarm     *bool     `json:"isFalseAlarm,optional"`      // 是否误报
+}
+
+type AlarmEventGetListResp {
+	List []*AlarmEvent `json:"list"` // 事件列表
+	PageResp
+}
+
+type AlarmEventDealReq {
+	EventID int64  `json:"eventID,string"`  // 事件ID
+	Action  string `json:"action"`          // ack / shield / unshield
+	Remark  string `json:"remark,optional"` // 备注
+}
+
+type AlarmEventFalseAlarmReq {
+	EventID    int64  `json:"eventID,string"`   // 事件ID
+	Reason     string `json:"reason,optional"`  // 原因
+	ReasonType string `json:"reasonType"`       // configurationError / dataError / drill / other
+}
+
+type AlarmEventStatReq {
+	GroupBy          string     `json:"groupBy"`                   // level / status / alarm / date / product
+	TriggerTimeRange *TimeRange `json:"triggerTimeRange,optional"` // 触发时间范围
+	Status           []string   `json:"status,optional"`           // 状态列表
+	Level            []string   `json:"level,optional"`            // 级别列表
+}
+
+type AlarmEventStatResp {
+	List []*AlarmEventStatItem `json:"list"` // 统计列表
+}

@@ -1,0 +1,149 @@
+info(
+    desc: "字典信息"
+	author: "yl"
+	email: "603785348@qq.com"
+)
+
+import "./detail.api"
+
+@server(
+    group: system/dict/info
+    prefix: /api/v1/system/dict/info
+    accessCodePrefix: "systemDictManage"
+    accessNamePrefix: "字典管理"
+    accessGroup: "字典管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "添加字典信息"
+        description: "业务说明：创建新的字典分类，包括字典名称、编码、分组、结构类型（列表/树型）等。字典分类是字典项的容器，用于组织和管理业务枚举值，如设备类型、状态码等。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (DictInfo) returns (WithID)
+
+    @doc(
+        summary: "获取字典信息列表"
+        description: "业务说明：查询字典分类列表，支持按名称、分组、状态等条件筛选。可选同时返回每个字典分类下的详情项（withDetail参数）。用于字典管理页面的分类列表展示。"
+        authType: "all"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (DictInfoGetListReq) returns (DictInfoGetListResp)
+
+    @doc(
+        summary: "更新字典信息"
+        description: "业务说明：修改字典分类配置，包括名称、描述、状态等，支持部分更新。结构类型（列表/树型）创建后不可修改。用于调整字典分类的基本信息和启用禁用状态。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (DictInfo) returns ()
+
+    @doc(
+        summary: "获取字典信息详情"
+        description: "业务说明：查询单个字典分类的完整配置信息，支持按ID或编码查询。用于字典分类编辑页面加载初始数据，或查看字典分类的详细配置和关联的详情项。"
+        authType: "platform"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (DictInfoGetOneReq) returns (DictInfo)
+
+    @doc(
+        summary: "删除字典信息"
+        description: "业务说明：删除指定的字典分类，删除后该分类及下属所有字典项均不可用。删除前需确认无业务数据引用该字典分类下的字典值，避免数据完整性问题。此操作不可恢复。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "批量导入字典信息"
+        description: "业务说明：批量导入字典分类和字典项数据，用于系统初始化或数据迁移场景。传入JSON格式的字典数据，返回导入统计（成功数、失败数、忽略数）。支持覆盖或跳过已存在的字典。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "import"
+        recordLogMode: "1"
+    )
+    @handler batchImport
+    post /batch-import (DictInfoMultImportReq) returns (DictInfoMultImportResp)
+
+    @doc(
+        summary: "批量导出字典信息"
+        description: "业务说明：批量导出字典分类和字典项数据为JSON格式，用于数据备份或跨系统迁移。可指定导出的字典编码列表，不指定则导出全部。导出数据可直接用于批量导入接口。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/info"
+        resource: "system/dict/info"
+        action: "export"
+        recordLogMode: "1"
+    )
+    @handler batchExport
+    post /batch-export (DictInfoMultExportReq) returns (DictInfoMultExportResp)
+}
+type (
+    DictInfoMultImportReq{
+        Dicts string  `json:"dicts"`
+    }
+    DictInfoMultImportResp{
+        Total int64 `json:"total"`                                 //导入总接口数
+        ErrCount int64  `json:"errCount"` //失败数
+        IgnoreCount int64  `json:"ignoreCount"` //忽略数
+        SuccCount int64  `json:"succCount"` //成功数
+    }
+    DictInfoMultExportReq{
+        DictCodes []string `json:"dictCodes,optional"`
+    }
+    DictInfoMultExportResp{
+        Dicts string  `json:"dicts"`
+    }
+    DictInfoGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        Status int64 `json:"status,optional"`
+        Name string `json:"name,optional"` // 名称
+        Group string `json:"group,optional"`
+        WithDetail bool `json:"withDetail,optional"` // true 时每条 DictInfo 附带 details（仅当前页字典分类）
+    }
+    DictInfoGetOneReq{
+        ID int64 `json:"id,string"`                                  // 编号
+        Code string `json:"code,optional"` // 编码
+    }
+
+    DictInfoGetListResp  {
+        PageResp
+        List []*DictInfo `json:"list"` //菜单列表
+    }
+    DictInfo{
+        ID int64 `json:"id,string,optional"`                                  // 编号
+        Name string `json:"name,optional"`                             // 名称
+        Group string `json:"group,optional"`                     // 分组
+        Code string `json:"code,optional"`                     // 编码
+        Desc *string `json:"desc,optional"`          // 页面
+        Expand map[string]string  `json:"expand,optional"` //前端自定义字段
+        StructType int64 `json:"structType,optional"` //结构类型(不可修改) 1:列表(默认) 2:树型
+        Details []*DictDetail `json:"details,optional"` // withDetail 时返回
+    }
+)

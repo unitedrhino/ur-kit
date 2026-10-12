@@ -1,0 +1,266 @@
+//--------------------设备交互服务----
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "deviceManage.proto";
+import "deviceGroup.proto";
+
+// DeviceInteractEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message DeviceInteractEmpty {
+}
+
+// DeviceInteractWithID 带ID的消息
+// 定义只包含ID的消息类型
+message DeviceInteractWithID{
+  int64 id = 1; // ID值
+}
+
+// DeviceInteractWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message DeviceInteractWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+//设备交互
+service DeviceInteract {
+  //调用设备行为
+  rpc actionSend(ActionSendReq)         returns(ActionSendResp);
+  //获取异步调用设备行为的结果
+  rpc actionGetOne(RespGetOneReq)         returns(ActionSendResp);
+
+  //回复调用设备行为
+  rpc actionResp(ActionRespReq)         returns(DeviceInteractEmpty);
+
+  rpc schemaMockGen(SchemaMockGenReq)         returns(SchemaMockGenResp);
+
+  //请求设备获取设备最新属性
+  rpc propertyGetReportSend(PropertyGetReportSendReq) returns(PropertyGetReportSendResp);
+  //请求设备获取设备最新属性
+  rpc propertyGetReportBatchSend(PropertyGetReportBatchSendReq) returns(PropertyGetReportBatchSendResp);
+
+  //调用设备属性
+  rpc propertyControlSend(PropertyControlSendReq)     returns(PropertyControlSendResp);
+  //批量调用设备属性
+  rpc propertyControlBatchSend(PropertyControlBatchSendReq)     returns(PropertyControlBatchSendResp);
+  //获取异步调用设备属性的结果
+  rpc propertyControlGetOne(RespGetOneReq)  returns(PropertyControlSendResp);
+  //发送消息给设备 -- 调试使用
+  rpc sendMsg(SendMsgReq)     returns(SendMsgResp);
+  //获取网关拓扑关系
+  rpc gatewayGetFoundSend(GatewayGetFoundReq)returns(DeviceInteractEmpty);
+  //通知网关绑定子设备
+  rpc gatewayNotifyBindSend(GatewayNotifyBindSendReq)returns(DeviceInteractEmpty);
+
+  //提供给边缘端进行http访问
+  rpc edgeSend(EdgeSendReq)returns(EdgeSendResp);
+
+    //下行事件通知设备
+  rpc eventSend(EventSendReq)         returns(EventSendResp);
+}
+
+message SchemaMockGenReq {
+  string productID = 1; // 产品id；deviceName为空时读取产品物模型。
+  string deviceName = 2; // 设备名；不为空时读取设备合并物模型。
+  int64 type = 3; // 物模型类型：1=property属性，2=event事件，3=action行为。
+  repeated string dataIDs = 4; // 功能标识符；属性不填生成全部属性，事件不填生成全部上行事件，行为不填生成全部下行行为。
+}
+
+message SchemaMockGenResp {
+  string params = 1; //模拟数据参数,json字符串
+}
+
+message EventSendReq {
+  string  productID = 1; //产品id 获取产品id下的所有设备信息
+  string  deviceName = 2; //设备名
+  string eventID = 3; //产品数据模板中事件功能的标识符，由开发者自行根据设备的应用场景定义
+  string type = 4; //事件类型:info(默认)：信息,alert：告警,fault：故障
+  string params = 5; //通知内容,json字符串
+}
+message EventSendResp {
+
+}
+
+// ActionSendReq 设备行为调用请求
+message ActionSendReq{
+  string  productID = 1; //产品id 获取产品id下的所有设备信息
+  string  deviceName = 2; //设备名
+  string actionID = 3; //产品数据模板中行为功能的标识符，由开发者自行根据设备的应用场景定义
+  string inputParams = 4; //输入参数
+  string outputParams = 7; //输出参数 如果填写该参数会直接返回,不会下发到设备
+  bool isAsync = 5; //是否异步获取
+  SendOption option = 6; //异步选项
+}
+
+// ActionSendResp 设备行为调用响应
+message ActionSendResp{
+  string msgToken = 1; //调用id
+  string outputParams = 2; //输出参数 注意：此字段可能返回 null，表示取不到有效值。
+  string  msg = 3; //返回状态
+  int64   code = 4; //设备返回状态码
+  optional int64 receivedTime = 5; // 实际设备回复的接收时间
+}
+
+// RespGetOneReq 异步响应读取请求
+message RespGetOneReq{
+  string  productID = 1; //产品id
+  string  deviceName = 2; //设备名
+  string  msgToken = 3; //调用id
+}
+
+// ActionRespReq 设备行为响应请求
+message ActionRespReq{
+  string  productID = 1; //产品id 获取产品id下的所有设备信息
+  string  deviceName = 2; //设备名
+  string msgToken = 3; //调用id
+  string outputParams = 4; //输出参数 注意：此字段可能返回 null，表示取不到有效值。
+  string  msg = 5; //返回状态
+  int64   code = 6; //设备返回状态码
+}
+
+// PropertyGetReportSendReq 获取设备最新属性请求
+message PropertyGetReportSendReq{
+  string productID = 1; //产品id (必填)
+  string deviceName = 2; //设备名(必填)
+  repeated string dataIDs = 3; //获取的具体标识符的数据 如果不指定则获取所有属性数据,一个属性一条
+}
+
+// PropertyGetReportSendResp 获取设备最新属性响应
+message PropertyGetReportSendResp{
+  int64   code = 1; //设备返回状态码
+  string  msg = 2; //返回状态
+  string msgToken = 3; //调用id
+  int64 timestamp = 4; //上报时间戳(毫秒时间戳)
+  string params = 5; //获取到的值
+  map<string,string> quality = 6; // 按属性标识的质量
+  optional int64 receivedTime = 7; // 实际设备回复的接收时间
+}
+
+// PropertyGetReportSendMsg 获取设备最新属性消息
+message PropertyGetReportSendMsg{
+  int64   code = 1; //设备返回状态码
+  string  msg = 2; //返回状态
+  string msgToken = 3; //调用id
+  int64 timestamp = 4; //上报时间戳(毫秒时间戳)
+  string params = 5; //获取到的值
+  string productID = 6; //产品id (必填)
+  string deviceName = 7; //设备名(必填)
+  string sysMsg = 8; //系统错误信息
+  int64  sysCode = 9; //系统错误码
+  map<string,string> quality = 10; // 按属性标识的质量
+  optional int64 receivedTime = 11; // 当前设备回复的接收时间
+}
+
+// PropertyGetReportBatchSendReq 批量获取设备最新属性请求
+message PropertyGetReportBatchSendReq{
+  repeated string dataIDs = 1; //获取的具体标识符的数据 如果不指定则获取所有属性数据,一个属性一条
+  string  productID = 2; //产品id
+  repeated string deviceNames = 3; //设备名
+  repeated DeviceCore devices =4; //如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+  int64 areaID =5; //控制一个区域的设备
+  string areaIDPath = 6; //根据区域路径控制设备
+  int64 groupID =7; //控制一个组的设备
+}
+
+// PropertyGetReportBatchSendResp 批量获取设备最新属性响应
+message PropertyGetReportBatchSendResp{
+  repeated PropertyGetReportSendMsg list = 1; //批量设备返回结果列表
+}
+
+// PropertyControlSendReq 设备属性控制请求
+message PropertyControlSendReq{
+  string  productID = 1; //产品id
+  string  deviceName = 2; //设备名
+  string data = 3; //属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义
+  //设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错
+  // 2:如果有设备影子只修改影子,没有的也不下发 3: 只修改云端的值,不下发设备
+  int64 shadowControl = 4;
+  bool isAsync = 6; //是否异步操作 异步情况通过获取接口来获取
+  WithProfile withProfile =7;
+  int64 syncTimeout =8; //同步超时时间(单位:秒)
+}
+
+// WithProfile 设备配置
+message WithProfile{
+  string code =1;
+  string params=2;
+}
+
+// PropertyControlSendResp 设备属性控制响应
+message PropertyControlSendResp{
+  int64   code = 1; //设备返回状态码
+  string  msg = 2; //返回状态
+  string msgToken = 3; //调用id
+}
+
+// PropertyControlBatchSendReq 批量设备属性控制请求
+message PropertyControlBatchSendReq{
+  string  productID = 1; //产品id
+  repeated string deviceNames = 2; //设备名
+  repeated DeviceCore devices =3; //如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+  int64 shadowControl = 4; //设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错 2:如果有设备影子只修改影子,没有的也不下发
+  string data = 5; //属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义
+  bool isAsync = 6; //是否异步操作 异步情况通过获取接口来获取
+  int64 areaID =7; //控制一个区域的设备
+  string areaIDPath = 10; //根据区域路径控制设备
+  int64 groupID =8; //控制一个组的设备
+  int64 syncTimeout =9; //同步超时时间(单位:秒,不填默认3秒)
+}
+
+// PropertyControlSendMsg 设备属性控制消息
+message PropertyControlSendMsg{
+  string productID =1;
+  string  deviceName = 2; //设备名
+  int64   code = 3; //设备返回状态码
+  string  msg = 4; //返回状态
+  string msgToken = 5; //调用id
+  string sysMsg = 6; //系统错误信息
+  int64  sysCode = 7; //系统错误码
+}
+
+// PropertyControlBatchSendResp 批量设备属性控制响应
+message PropertyControlBatchSendResp{
+  repeated PropertyControlSendMsg list = 1; //批量设备返回结果列表
+}
+
+// SendMsgReq 发送消息请求
+message SendMsgReq{
+  string topic = 1; //发送的topic
+  bytes payload = 2; //发送的数据
+}
+
+// SendMsgResp 发送消息响应
+message SendMsgResp{
+
+}
+
+// GatewayGetFoundReq 获取网关拓扑关系请求
+message GatewayGetFoundReq{
+  string  productID = 1; //产品id
+  string  deviceName = 2; //设备名
+}
+
+// GatewayNotifyBindSendReq 通知网关绑定子设备请求
+message GatewayNotifyBindSendReq{
+  DeviceCore gateway =1;
+  repeated DeviceCore subDevices =2;
+}
+
+// EdgeSendReq 边缘端发送请求
+message EdgeSendReq{
+  string handle = 1; //对应 mqtt topic的第一个 thing ota config 等等
+  string type = 2; //操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+  bytes payload = 3;
+  string productID = 4;
+  string deviceName = 5;
+  int64 receivedTime = 6; // HTTP 平台入口接收时间，仅由内部 RPC 传递
+}
+
+// EdgeSendResp 边缘端发送响应
+message EdgeSendResp{
+  bytes payload = 3;
+}

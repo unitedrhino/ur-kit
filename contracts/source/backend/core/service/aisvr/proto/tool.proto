@@ -1,0 +1,28 @@
+// 工具内部执行契约；与 HTTP 共用执行与权限逻辑。
+syntax = "proto3";
+package ai;
+option go_package = "/ai";
+
+// ToolRunReq 指定工具及 JSON 输入，不接受调用方覆盖身份。
+message ToolRunReq {
+  int64 toolID = 1;
+  string inputs = 2;
+}
+// ToolRunResp 返回异步运行标识。
+message ToolRunResp { string runID = 1; }
+// ToolRunStatusReq 指定运行标识，服务端按调用身份过滤。
+message ToolRunStatusReq { string runID = 1; }
+// ToolRunStatusResp 保持工具运行状态、输出及错误语义。
+message ToolRunStatusResp {
+  string runID = 1;
+  string status = 2;
+  string state = 3;
+  string output = 4;
+  string logs = 5;
+  int64 durationMs = 6;
+  string errorMsg = 7;
+}
+service Tool {
+  rpc ToolRun(ToolRunReq) returns (ToolRunResp);
+  rpc ToolRunStatus(ToolRunStatusReq) returns (ToolRunStatusResp);
+}

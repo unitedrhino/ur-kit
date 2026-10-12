@@ -1,0 +1,108 @@
+syntax = "v1"
+
+info (
+	title:   "ota升级任务接口"
+	desc:    "ota升级任务接口"
+	author:  "Hya"
+	email:   "1943965929@qq.com"
+	version: "v1"
+)
+
+@server (
+	group:             things/ota/module/info
+	prefix:            /api/v1/things/ota/module/info
+	accessCodePrefix:  "thingsOtaModule"
+	accessNamePrefix:  "模块"
+	accessGroup:       "ota远程升级"
+	defaultIsNeedAuth: "true"
+	defaultAuthType:   "admin"
+	middleware:        CheckTokenWare,InitCtxsWare
+)
+service api {
+	//验证升级包
+	//创建静态模块
+	@doc(
+	    summary: "创建模块"
+	    description: "业务说明：创建OTA升级模块定义。模块是产品的子组件，用于区分同一产品中不同可升级的部分（如主控模块、通信模块、传感器模块等）。创建模块后可关联多个升级包，设备升级时指定模块编码确定升级哪个组件。适用于：多模块设备（如网关+子设备）、支持独立升级各组件的复杂设备。"
+	    authType: "admin"
+	    group: "things/ota/module/info"
+	    resource: "things/ota/module/info"
+	    action: "create"
+	    recordLogMode: "1"
+	)
+	@handler create
+	post /create (OtaModuleInfo) returns (WithID)
+
+	//获取升级包下的升级任务批次列表
+	@doc(
+	    summary: "获取模块列表"
+	    description: "业务说明：查询产品的所有OTA升级模块列表。返回模块基本信息（编码、名称、描述、关联产品等），支持按模块名称和产品ID过滤。用于管理界面展示模块清单、创建升级包时选择目标模块、设备升级时选择要升级的模块。"
+	    authType: "admin"
+	    group: "things/ota/module/info"
+	    resource: "things/ota/module/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (OtaModuleInfoGetListReq) returns (OtaModuleInfoGetListResp)
+
+	//查询指定模块的详情
+	@doc(
+	    summary: "查询模块详情"
+	    description: "业务说明：获取单个OTA升级模块的完整信息。包括模块编码（用于设备端识别）、名称、描述、关联的产品ID等。用于模块配置查看、升级包创建时确认目标模块、设备升级日志分析。"
+	    authType: "admin"
+	    group: "things/ota/module/info"
+	    resource: "things/ota/module/info"
+	    action: "view"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithIDOrCode) returns (OtaModuleInfo)
+
+	@doc(
+	    summary: "更新模块"
+	    description: "业务说明：修改OTA升级模块的配置信息。可调整模块名称、描述等属性。注意：模块编码创建后不可修改（设备端依赖编码识别模块），关联的产品ID也不建议修改。用于模块信息维护、描述说明更新。"
+	    authType: "admin"
+	    group: "things/ota/module/info"
+	    resource: "things/ota/module/info"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler update
+	post /update (OtaModuleInfo)
+
+	@doc(
+	    summary: "删除模块"
+	    description: "业务说明：删除OTA升级模块定义。删除前需确认该模块下无关联的升级包和进行中的升级任务。删除后模块编码失效，设备端无法识别该模块。适用于：模块废弃、产品架构调整、清理不再使用的模块定义。注意：删除操作不可恢复，需谨慎操作。"
+	    authType: "admin"
+	    group: "things/ota/module/info"
+	    resource: "things/ota/module/info"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+}
+
+// OtaModuleInfoGetListReq 表示根据固件索引的OTA作业请求。
+type OtaModuleInfoGetListReq {
+	Page      *PageInfo `json:"page,optional"` // 分页信息
+	Name      string    `json:"name,optional"`
+	ProductID string    `json:"productID,optional"`
+}
+
+// OtaModuleInfoGetListResp 表示OTA作业信息索引的响应。
+type OtaModuleInfoGetListResp {
+	List []*OtaModuleInfo `json:"list"` // OTA作业信息列表
+	PageResp
+}
+
+type OtaModuleInfo {
+	ID          int64  `json:"id,string,optional"`
+	Code        string `json:"code,optional"`
+	Name        string `json:"name,optional"`
+	Desc        string `json:"desc,optional"`
+	ProductID   string `json:"productID,optional"`
+	CreatedTime int64  `json:"createdTime,string,optional"`
+}
+

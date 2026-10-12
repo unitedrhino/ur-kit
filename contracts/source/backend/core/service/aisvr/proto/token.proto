@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// UdpTokenCreateReq 创建 UDP 会话 Token 请求。
+// 用途：调用方（如 dmsvr）在 Listen/Hello 后调用 aicenter 获取 UDP 会话凭证。
+message UdpTokenCreateReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // agentId 助手 ID
+  int64 agentID = 2;
+  // cloneId 数字分身 ID（优先级高于 agentID）
+  int64 cloneId = 3;
+  // sessionTtlSec 会话有效期（秒）
+  int64 sessionTtlSec = 4;
+  // audioParamsJson 音频参数（JSON，含采样率/帧长/编码等）
+  string audioParamsJson = 6;
+  // mcpToolsJson 允许调用的 MCP 工具清单（JSON）
+  string mcpToolsJson = 7;
+  // metadataJson 调用方透传的元数据（JSON，如设备标识、用户信息等）
+  string metadataJson = 10;
+  // audioRequested 表示本次会话包含音频；纯文字会话不做设备语音模式协商。
+  bool audioRequested = 11;
+  // supportedInteractionModes 是设备声明的模式；presence 由 interactionModesDeclared 区分旧端与显式空列表。
+  repeated string supportedInteractionModes = 12;
+  // aecMode 为设备本地回声消除声明，只有 device 允许全双工。
+  string aecMode = 13;
+  // interactionModesDeclared 标识新设备显式上报了交互能力。
+  bool interactionModesDeclared = 14;
+}
+
+// UdpTokenCreateResp 创建 UDP 会话 Token 响应。
+message UdpTokenCreateResp {
+  // token UDP 会话 token（用于 UDP 握手/鉴权）
+  string token = 1;
+  // aesKey UDP 数据面加密 key（通常用于 AES-CTR）
+  string aesKey = 2;
+  // nonce UDP 会话 nonce（与 key 搭配使用）
+  string nonce = 3;
+  // udpHost UDP 接入地址
+  string udpHost = 4;
+  // udpPort UDP 端口
+  int64 udpPort = 5;
+  // expireAt 过期时间（Unix 秒）
+  int64 expireAt = 6;
+  // sessionId 会话 ID（用于链路追踪/日志）
+  string sessionID = 7;
+  // replyFormat 回包格式约定（如 json/eventstream 等）
+  string replyFormat = 8;
+  // replyTopic 下行推送 topic（由 aicenter 自动生成，含 sessionID）
+  string replyTopic = 9;
+  // interactionMode 是本次锁定的单一模式，旧端为空。
+  string interactionMode = 10;
+  // supportedInteractionModes 是平台与设备的公共能力，旧端为空。
+  repeated string supportedInteractionModes = 11;
+}
+
+// Token Token 服务（一个 proto 一个 service）。
+service Token {
+  rpc UdpTokenCreate(UdpTokenCreateReq) returns(UdpTokenCreateResp);
+}

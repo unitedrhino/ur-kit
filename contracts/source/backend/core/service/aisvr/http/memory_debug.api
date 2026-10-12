@@ -1,0 +1,191 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-记忆调试"
+	desc:    "AI Memory Debug HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ===== 记忆调试面板类型定义 =====
+
+type MemoryDebugOverviewReq {}
+
+type PipelineStateBrief {
+	ID          int64  `json:"id,string"`             // 状态ID
+	ownerType   string `json:"ownerType"`             // 归属主体类型
+	ownerID     int64  `json:"ownerID,string"`        // 归属主体ID
+	stateKey    string `json:"stateKey"`              // 状态键
+	stateValue  string `json:"stateValue,optional"`   // 状态值
+	updatedTime int64  `json:"updatedTime,optional,string"` // 更新时间
+}
+
+type MemoryDebugOverviewResp {
+	recordCount    int64                  `json:"recordCount,string"`    // 记忆记录总数
+	l1Count        int64                  `json:"l1Count,string"`        // L1 记录数
+	l2Count        int64                  `json:"l2Count,string"`        // L2 记录数
+	profileCount   int64                  `json:"profileCount,string"`   // 画像数
+	dreamRunCount  int64                  `json:"dreamRunCount,string"`  // Dream 运行数
+	archiveCount   int64                  `json:"archiveCount,string"`   // 归档数
+	lastWriteTime  int64                  `json:"lastWriteTime,optional,string"`  // 最近写入时间
+	lastErrorTime  int64                  `json:"lastErrorTime,optional,string"`  // 最近错误时间
+	traceCount     int64                  `json:"traceCount,string"`     // 召回轨迹数
+	pipelineStates []PipelineStateBrief   `json:"pipelineStates"`        // 流水线状态列表
+}
+
+type MemoryDebugTraceGetListReq {
+	cloneID int64    `json:"cloneID,optional,string"` // 分身ID（不传则查全部）
+	page    PageInfo `json:"page"`                    // 分页信息
+	query   string   `json:"query,optional"`          // 查询内容模糊搜索
+}
+
+type MemoryDebugTraceInfo {
+	traceID       string `json:"traceID"`                     // 轨迹标识
+	query         string `json:"query"`                       // 用户查询
+	enoughAt      string `json:"enoughAt,optional"`           // 命中层级
+	path          string `json:"path,optional"`               // 召回路径
+	resultSummary string `json:"resultSummary,optional"`      // 召回摘要
+	tenantCode    string `json:"tenantCode,optional"`         // 租户编码
+	ownerID       int64  `json:"ownerID,optional,string"`     // 分身ID
+	createdTime   int64  `json:"createdTime,optional,string"` // 创建时间
+}
+
+type MemoryDebugTraceGetListResp {
+	list  []MemoryDebugTraceInfo `json:"list"`  // 召回轨迹列表
+	total int64                  `json:"total,string"` // 总数
+}
+
+type MemoryDebugPipelineStateGetListReq {
+	cloneID int64    `json:"cloneID,optional,string"` // 分身ID（不传则查全部）
+	page    PageInfo `json:"page"`                    // 分页信息
+}
+
+type PipelineStateInfo {
+	ID          int64  `json:"id,string"`                 // 状态ID
+	ownerType   string `json:"ownerType"`                 // 归属主体类型
+	ownerID     int64  `json:"ownerID,string"`            // 归属主体ID
+	tenantCode  string `json:"tenantCode"`                // 租户编码
+	stateKey    string `json:"stateKey"`                  // 状态键
+	stateValue  string `json:"stateValue,optional"`       // 状态值
+	updatedTime int64  `json:"updatedTime,optional,string"` // 更新时间
+}
+
+type MemoryDebugPipelineStateGetListResp {
+	list  []PipelineStateInfo `json:"list"`  // 流水线状态列表
+	total int64               `json:"total,string"` // 总数
+}
+
+type MemoryDebugDreamRunGetListReq {
+	cloneID int64    `json:"cloneID,optional,string"` // 分身ID（不传则查全部）
+	page    PageInfo `json:"page"`                    // 分页信息
+	status  string   `json:"status,optional"`         // 状态过滤 running/success/skipped/failed
+}
+
+type MemoryDebugDreamRunInfo {
+	ID               int64  `json:"id,string"`                   // Dream运行ID
+	ownerType        string `json:"ownerType"`                   // 归属主体类型
+	ownerID          int64  `json:"ownerID,string"`              // 归属主体ID
+	tenantCode       string `json:"tenantCode"`                  // 租户编码
+	triggerType      string `json:"triggerType"`                 // 触发类型
+	status           string `json:"status"`                      // 运行状态
+	inputWindowStart string `json:"inputWindowStart,optional"`   // 审查窗口开始
+	inputWindowEnd   string `json:"inputWindowEnd,optional"`     // 审查窗口结束
+	summary          string `json:"summary,optional"`            // Dream摘要
+	createdTime      int64  `json:"createdTime,optional,string"` // 创建时间
+	updatedTime      int64  `json:"updatedTime,optional,string"` // 更新时间
+}
+
+type MemoryDebugDreamRunGetListResp {
+	list  []MemoryDebugDreamRunInfo `json:"list"`  // Dream运行记录列表
+	total int64                     `json:"total,string"` // 总数
+}
+
+type MemoryDebugArchiveGetListReq {
+	cloneID       int64    `json:"cloneID,optional,string"` // 分身ID（不传则查全部）
+	page          PageInfo `json:"page"`                    // 分页信息
+	archiveReason string   `json:"archiveReason,optional"`  // 归档原因过滤
+}
+
+type MemoryDebugArchiveInfo {
+	ID            int64  `json:"id,string"`                 // 归档ID
+	ownerType     string `json:"ownerType"`                 // 归属主体类型
+	ownerID       int64  `json:"ownerID,string"`            // 归属主体ID
+	tenantCode    string `json:"tenantCode"`                // 租户编码
+	recordID      int64  `json:"recordID,string"`           // 来源记忆记录ID
+	archiveReason string `json:"archiveReason"`             // 归档原因
+	createdTime   int64  `json:"createdTime,optional,string"` // 创建时间
+}
+
+type MemoryDebugArchiveGetListResp {
+	list  []MemoryDebugArchiveInfo `json:"list"`  // 归档记录列表
+	total int64                    `json:"total,string"` // 总数
+}
+
+// ---- 记忆调试服务定义 ----
+@server (
+	prefix:           /api/v1/ai/memory/debug
+	group:            ai/memory/debug
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType:  "platform"
+)
+service ai {
+	@doc(
+		summary: "记忆调试总览"
+		description: "业务说明：平台管理员查看全局记忆统计数据，包括各层级记录数、Dream运行数、归档数、流水线状态等。用于记忆系统健康监控和调试。"
+		authType: "platform"
+		resource: "ai/memory"
+		action: "view"
+		group: "ai/memory/debug"
+		recordLogMode: "1"
+	)
+	@handler memoryDebugOverview
+	post /overview (MemoryDebugOverviewReq) returns (MemoryDebugOverviewResp)
+
+	@doc(
+		summary: "调试-召回轨迹列表"
+		description: "业务说明：平台管理员查看全局记忆召回轨迹，支持按分身、查询内容过滤。用于调试记忆召回效果和排查问题。"
+		authType: "platform"
+		resource: "ai/memory"
+		action: "view"
+		group: "ai/memory/debug"
+		recordLogMode: "1"
+	)
+	@handler memoryDebugTraceGetList
+	post /traces/get-list (MemoryDebugTraceGetListReq) returns (MemoryDebugTraceGetListResp)
+
+	@doc(
+		summary: "调试-流水线状态列表"
+		description: "业务说明：平台管理员查看记忆流水线状态，支持按分身过滤。用于监控记忆处理流水线的运行状况。"
+		authType: "platform"
+		resource: "ai/memory"
+		action: "view"
+		group: "ai/memory/debug"
+		recordLogMode: "1"
+	)
+	@handler memoryDebugPipelineStateGetList
+	post /pipeline-state/get-list (MemoryDebugPipelineStateGetListReq) returns (MemoryDebugPipelineStateGetListResp)
+
+	@doc(
+		summary: "调试-Dream运行记录列表"
+		description: "业务说明：平台管理员查看全局 Dream 运行记录，支持按分身、状态过滤。用于监控记忆整理任务的执行情况。"
+		authType: "platform"
+		resource: "ai/memory"
+		action: "view"
+		group: "ai/memory/debug"
+		recordLogMode: "1"
+	)
+	@handler memoryDebugDreamRunGetList
+	post /dream-runs/get-list (MemoryDebugDreamRunGetListReq) returns (MemoryDebugDreamRunGetListResp)
+
+	@doc(
+		summary: "调试-归档记录列表"
+		description: "业务说明：平台管理员查看全局记忆归档记录，支持按分身、归档原因过滤。用于查看已归档的记忆数据。"
+		authType: "platform"
+		resource: "ai/memory"
+		action: "view"
+		group: "ai/memory/debug"
+		recordLogMode: "1"
+	)
+	@handler memoryDebugArchiveGetList
+	post /archives/get-list (MemoryDebugArchiveGetListReq) returns (MemoryDebugArchiveGetListResp)
+}

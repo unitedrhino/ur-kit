@@ -1,0 +1,65 @@
+syntax = "v1"
+
+// GB28181 SIP 平台配置接口
+
+info(
+    title: "音视频 SIP 配置"
+    desc: "读取和保存 GB28181 SIP 平台配置"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvSipConfig {
+    Domain       string `json:"domain"`              // 国标域，如 3402000000
+    SipID        string `json:"sipID"`               // SIP ID，如 34020000002000000001
+    Password     string `json:"password,optional"`   // 接入密码
+    Port         int64  `json:"port"`                // SIP 端口
+    StreamMode   int64  `json:"streamMode,string"`   // 收流模式：0 udp, 1 tcpPassive, 2 tcpActive
+    ServerIP     string `json:"serverIP,optional"`   // 服务器外网 IP
+    RegisterAuth int64  `json:"registerAuth,string"` // 注册鉴权模式：0 开放注册, 1 预登记（仅已建档设备可注册）
+    AlarmSubscribeEnable bool  `json:"alarmSubscribeEnable"`       // 报警订阅总开关
+    AlarmSubscribeCycle  int64 `json:"alarmSubscribeCycle,string"` // 报警订阅周期（秒）
+}
+
+type AvSipConfigSaveReq {
+    Domain       string `json:"domain"`              // 国标域
+    SipID        string `json:"sipID"`               // SIP ID
+    Password     string `json:"password,optional"`   // 接入密码
+    Port         int64  `json:"port"`                // SIP 端口
+    StreamMode   int64  `json:"streamMode,string"`   // 收流模式：0 udp, 1 tcpPassive, 2 tcpActive
+    ServerIP     string `json:"serverIP,optional"`   // 服务器外网 IP
+    RegisterAuth int64  `json:"registerAuth,string"` // 注册鉴权模式：0 开放注册, 1 预登记（仅已建档设备可注册）
+    AlarmSubscribeEnable bool  `json:"alarmSubscribeEnable"`       // 报警订阅总开关
+    AlarmSubscribeCycle  int64 `json:"alarmSubscribeCycle,string"` // 报警订阅周期（秒）
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "获取 SIP 平台配置"
+        description: "业务说明：读取当前 GB28181 SIP 平台配置。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvSipConfigGetOne
+    post /api/v1/av/config/sip/get-one (EmptyReq) returns (AvSipConfig)
+
+    @doc(
+        summary: "保存 SIP 平台配置"
+        description: "业务说明：保存 GB28181 SIP 平台配置，覆盖原有配置。"
+        authType: "admin"
+        resource: "av"
+        action: "update"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvSipConfigSave
+    post /api/v1/av/config/sip/save (AvSipConfigSaveReq) returns (EmptyResp)
+}

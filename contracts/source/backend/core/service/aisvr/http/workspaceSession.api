@@ -1,0 +1,108 @@
+syntax = "v1"
+
+// WorkspaceSessionItem 是当前范围会话元数据。
+type WorkspaceSessionItem {
+ ID int64 `json:"id"` // 数据库标识
+ sessionID string `json:"sessionID"` // 会话标识
+ title string `json:"title"` // 标题
+ status int64 `json:"status,string"` // 原始生命周期
+ lastActiveAt int64 `json:"lastActiveAt"` // 最后交互秒时间
+ createdTime int64 `json:"createdTime"` // 创建秒时间
+ turnCount int64 `json:"turnCount"` // 自有轮数
+ completionState string `json:"completionState"` // 用户整理状态
+ parentSessionID string `json:"parentSessionID"` // 来源会话
+ parentTurnIndex int32 `json:"parentTurnIndex"` // 来源截止轮次
+ parentSummaryID int64 `json:"parentSummaryID"` // 来源最大摘要主键
+}
+type WorkspaceSessionListReq {
+ page PageInfo `json:"page,optional"` // 默认20最大100
+ completionState string `json:"completionState,optional"` // inProgress/completed或空
+ keyword string `json:"keyword,optional"` // 标题及正文关键词
+}
+type WorkspaceSessionListResp {
+ list []WorkspaceSessionItem `json:"list"` // 当前范围结果
+ total int64 `json:"total"` // 匹配总数
+}
+type WorkspaceSessionReadReq {
+ sessionID string `json:"sessionID"` // 目标会话
+ page PageInfo `json:"page,optional"` // 原始轮次分页
+ untilTurnIndex int32 `json:"untilTurnIndex,optional"` // 来源轮次上限
+ maxSummaryID int64 `json:"maxSummaryID,optional"` // 来源摘要主键上限
+}
+type WorkspaceSessionTurn {
+ sourceSessionID string `json:"sourceSessionID"` // 来源会话
+ createdTime int64 `json:"createdTime"` // 原始消息创建秒时间
+ turnIndex int32 `json:"turnIndex"` // 原始轮次
+ userInput string `json:"userInput"` // 用户文字
+ aiResponse string `json:"aiResponse"` // 助手文字
+ userContents []ContentPart `json:"userContents"` // 原始附件引用
+ truncated bool `json:"truncated"` // 正文截断提示
+}
+type WorkspaceSessionReadResp {
+ session WorkspaceSessionItem `json:"session"` // 目标元数据
+ turns []WorkspaceSessionTurn `json:"turns"` // 自有消息轮次
+ total int64 `json:"total"` // 消息总数
+ results []InteractionReference `json:"results"` // 同页图表引用
+}
+type WorkspaceSessionUpdateReq {
+ sessionID string `json:"sessionID"` // 目标会话
+ title *string `json:"title,optional"` // 未传不修改
+ completionState *string `json:"completionState,optional"` // 用户整理状态
+}
+type WorkspaceSessionForkReq {
+ sessionID string `json:"sessionID"` // 来源会话
+ turnIndex int32 `json:"turnIndex,optional"` // 零取最新保存轮次
+ requestID string `json:"requestID"` // 幂等键
+}
+@server (
+ group: ai/workspace
+ prefix: /api/v1/ai/session/workspace
+ middleware: CheckTokenWare,InitCtxsWare
+ defaultAuthType: "all"
+)
+service ai {
+ @doc(
+  summary: "查询工作区会话"
+  description: "业务说明：查询工作区会话，强制绑定当前用户、企业、应用、项目及权限范围，用户完成状态独立于设备生命周期。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler workspaceGetList
+ post /get-list (WorkspaceSessionListReq) returns (WorkspaceSessionListResp)
+ @doc(
+  summary: "读取工作区会话"
+  description: "业务说明：读取工作区会话，强制绑定当前用户、企业、应用、项目及权限范围，用户完成状态独立于设备生命周期。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler workspaceGetOne
+ post /get-one (WorkspaceSessionReadReq) returns (WorkspaceSessionReadResp)
+ @doc(
+  summary: "整理工作区会话"
+  description: "业务说明：整理工作区会话，强制绑定当前用户、企业、应用、项目及权限范围，用户完成状态独立于设备生命周期。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "update"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler workspaceUpdate
+ post /update (WorkspaceSessionUpdateReq) returns (WorkspaceSessionItem)
+ @doc(
+  summary: "基于来源新建会话"
+  description: "业务说明：基于来源新建会话，强制绑定当前用户、企业、应用、项目及权限范围，用户完成状态独立于设备生命周期。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "create"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler workspaceFork
+ post /fork (WorkspaceSessionForkReq) returns (WorkspaceSessionItem)
+}

@@ -1,0 +1,223 @@
+syntax = "v1"
+
+// 录像管理接口
+
+info(
+    title: "录像管理"
+    desc: "查询、下载、删除录像，控制 ZLM 录像计划"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvRecording {
+    RecordID    string `json:"recordID"`            // 录像 ID
+    ChannelID   string `json:"channelID"`           // 通道 ID
+    DeviceID    string `json:"deviceID"`            // 设备 ID
+    StartTime   int64  `json:"startTime"`           // 开始时间
+    EndTime     int64  `json:"endTime"`             // 结束时间
+    Duration    int64  `json:"duration"`            // 时长（秒）
+    FileSize    int64  `json:"fileSize"`            // 文件大小（字节）
+    FilePath    string `json:"filePath"`             // 存储路径
+    FileURL     string `json:"fileURL,optional"`    // 播放/下载地址
+    RecordType  string `json:"recordType"`           // 录像类型：cloud/local
+    Status      string `json:"status"`               // 状态：recording/complete/uploading
+    CreatedTime int64  `json:"createdTime"`          // 创建时间
+}
+
+type AvRecordGetListReq {
+    PageInfo
+    ChannelID  string `json:"channelID,optional"`  // 按通道过滤
+    DeviceID   string `json:"deviceID,optional"`   // 按设备过滤
+    StartTime  int64  `json:"startTime,optional"`  // 开始时间
+    EndTime    int64  `json:"endTime,optional"`    // 结束时间
+    RecordType string `json:"recordType,optional"` // 录像类型
+}
+
+type AvRecordGetListResp {
+    PageResp
+}
+
+type AvRecordDeleteReq {
+    RecordID string `json:"recordID"` // 录像 ID
+}
+
+type AvRecordDownloadReq {
+    RecordID string `json:"recordID"` // 录像 ID
+}
+
+type AvRecordDownloadResp {
+    URL string `json:"url"` // 下载地址
+}
+
+type AvRecordPlanReq {
+    ChannelID    string `json:"channelID"`             // 通道 ID
+    Enable       bool   `json:"enable"`                // 是否启用录像
+    RecordDays   int64  `json:"recordDays,optional"`   // 保留天数
+}
+
+type AvRecordStartReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+type AvRecordStopReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+}
+
+type AvRecordCalendarReq {
+    ChannelID string `json:"channelID"`          // 通道 ID
+    YearMonth string `json:"yearMonth"`          // 年月，格式 YYYY-MM
+}
+
+type AvRecordCalendarResp {
+    Dates []string `json:"dates"`                // 有录像的日期列表，格式 YYYY-MM-DD
+}
+
+type AvRecordMonthlyReq {
+    ChannelID string `json:"channelID"`          // 通道 ID
+    YearMonth string `json:"yearMonth"`          // 年月，格式 YYYY-MM
+}
+
+type AvRecordMonthlyResp {
+    YearMonth string `json:"yearMonth"`          // 年月，格式 YYYY-MM
+    Days      string `json:"days"`               // 按天 bitmap，01 日至当月最后一日，有录像为 1，无为 0
+}
+
+type AvRecordTimelineReq {
+    ChannelID string `json:"channelID"`          // 通道 ID
+    Date      string `json:"date"`               // 日期，格式 YYYY-MM-DD
+}
+
+type AvRecordTimelineResp {
+    List []*AvRecording `json:"list"`            // 当日录像片段列表
+}
+
+type AvRecordPlayStartReq {
+    RecordID string `json:"recordID"`            // 录像 ID
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "获取录像列表"
+        description: "业务说明：按通道、设备、时间范围等条件分页查询录像列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordGetList
+    post /api/v1/av/record/get-list (AvRecordGetListReq) returns (AvRecordGetListResp)
+
+    @doc(
+        summary: "删除录像"
+        description: "业务说明：按录像 ID 删除指定录像文件及记录。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordDelete
+    post /api/v1/av/record/delete (AvRecordDeleteReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取录像下载地址"
+        description: "业务说明：按录像 ID 获取录像下载地址。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordDownload
+    post /api/v1/av/record/download (AvRecordDownloadReq) returns (AvRecordDownloadResp)
+
+    @doc(
+        summary: "保存录像计划"
+        description: "业务说明：设置指定通道是否启用录像及录像保留天数。"
+        authType: "admin"
+        resource: "av"
+        action: "update"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordPlan
+    post /api/v1/av/record/plan (AvRecordPlanReq) returns (EmptyResp)
+
+    @doc(
+        summary: "启动通道录像"
+        description: "业务说明：立即启动指定通道的录像。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordStart
+    post /api/v1/av/record/start (AvRecordStartReq) returns (EmptyResp)
+
+    @doc(
+        summary: "停止通道录像"
+        description: "业务说明：立即停止指定通道的录像。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordStop
+    post /api/v1/av/record/stop (AvRecordStopReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取录像日历"
+        description: "业务说明：查询指定通道指定年月有录像的日期列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordCalendar
+    post /api/v1/av/record/calendar (AvRecordCalendarReq) returns (AvRecordCalendarResp)
+
+    @doc(
+        summary: "获取录像时间轴"
+        description: "业务说明：查询指定通道指定日期的录像片段列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordTimeline
+    post /api/v1/av/record/timeline (AvRecordTimelineReq) returns (AvRecordTimelineResp)
+
+    @doc(
+        summary: "获取录像月历 bitmap"
+        description: "业务说明：查询指定通道指定年月的录像日期 bitmap。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordMonthly
+    post /api/v1/av/record/monthly (AvRecordMonthlyReq) returns (AvRecordMonthlyResp)
+
+    @doc(
+        summary: "启动录像回放"
+        description: "业务说明：按录像 ID 启动录像回放并返回播放地址。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvRecordPlayStart
+    post /api/v1/av/record/play/start (AvRecordPlayStartReq) returns (AvPlayStreamInfo)
+}

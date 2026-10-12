@@ -1,0 +1,162 @@
+syntax = "v1"
+
+
+
+
+
+@server (
+	group:      lowcode/rule/chain/component
+	prefix:     /api/v1/lowcode/rule/chain/component
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "获取规则链组件列表"
+	    description: "业务说明：获取规则链组件列表"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (RuleChainComponentGetListReq) returns (RuleChainComponentGetListResp)
+}
+
+
+@server (
+//操作规则链
+	group:      lowcode/rule/chain/operate
+	prefix:     /api/v1/lowcode/rule/chain/operate
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "执行规则链"
+	    description: "业务说明：执行规则链"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler execute
+	post /execute (RuleChainExecuteReq) returns (RuleChainExecuteResp)
+}
+
+@server (
+	//操作规则链
+	group:      lowcode/rule/chain/log
+	prefix:     /api/v1/lowcode/rule/chain/log
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "调试日志"
+	    description: "业务说明：调试日志"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (RuleChainLogGetListReq) returns (RuleChainLogGetListResp)
+}
+
+@server (
+	//操作规则链
+	group:      lowcode/rule/chain/local
+	prefix:     /api/v1/lowcode/rule/chain/local
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "本地配置"
+	    description: "业务说明：本地配置"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (RuleChainLocalGetOneReq) returns (RuleChainLocalResp)
+}
+
+type (
+	RuleChainComponentGetListReq{
+
+	}
+	RuleChainComponentGetListResp {
+		Endpoints []interface{} `json:"endpoints"`
+		Nodes []interface{} `json:"nodes"`
+		Builtins  RuleChainComponentBuiltins `json:"builtins"`
+	}
+	RuleChainComponentBuiltins{
+		FunctionNames []string `json:"functionNames"`
+		Endpoints RuleChainComponentEndpoints `json:"endpoints"`
+		NodePool interface{} 	`json:"nodePool"`
+	}
+	RuleChainComponentEndpoints{
+		InProcessors []string  `json:"inProcessors"`
+		OutProcessors []string  `json:"outProcessors"`
+	}
+)
+
+type (
+	RuleChainLocalGetOneReq{}
+	RuleChainLocalResp{}
+	RuleChainLogGetListReq{
+		Page *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		ChainID string  `json:"chainID"`
+		NodeID string `json:"nodeID"`
+	}
+	 RuleMsg  {
+		// Ts is the message timestamp.
+		Ts int64 `json:"ts"`
+		// Id is the unique identifier for the message as it flows through the rule engine.
+		Id string `json:"id"`
+		// DataType is the type of data contained in the message.
+		DataType string `json:"dataType"`
+		// Type is a crucial field for the rule engine to distribute data. Messages are categorized and assigned a Type when processed by the rule engine (`ruleEngine.OnMsg(msg)`).
+		// Examples include: POST_TELEMETRY, ACTIVITY_EVENT, INACTIVITY_EVENT, CONNECT_EVENT, DISCONNECT_EVENT, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED, DEVICE_ALARM, POST_DEVICE_DATA.
+		Type string `json:"type"`
+		// Data is the content of the message.
+		Data string `json:"data"`
+		// Metadata contains metadata associated with the message.
+		Metadata map[string]string `json:"metadata"`
+	}
+	RuleChainLog{
+		//debug数据发生时间
+		Ts int64 `json:"ts,string"`
+		//节点ID
+		nodeID string `json:"nodeID"`
+		//流向OUT/IN
+		FlowType string `json:"flowType"`
+		//消息
+		Msg RuleMsg `json:"msg"`
+		//关系
+		RelationType string `json:"relationType"`
+		//Err 错误
+		Err string `json:"err"`
+	}
+	RuleChainLogGetListResp{
+		List  []*RuleChainLog `json:"list"` // 列表数据
+		PageResp
+	}
+	RuleChainExecuteReq{
+		ID string `json:"id"`//规则链的唯一标识符
+		MsgType string `json:"msgType"` //消息类型 Examples include: POST_TELEMETRY, ACTIVITY_EVENT, INACTIVITY_EVENT, CONNECT_EVENT, DISCONNECT_EVENT, ENTITY_CREATED, ENTITY_UPDATED, ENTITY_DELETED, DEVICE_ALARM, POST_DEVICE_DATA
+		DataType string  `json:"dataType"` //消息的数据格式 TEXT,JSON
+		Header map[string]string `json:"header,optional"` //消息头
+		Metadata map[string]string `json:"metadata,optional"` //元数据
+		Data string `json:"data,optional"` //消息体
+		IsAsync bool `json:"isAsync,optional"` //是否异步执行
+	}
+	RuleChainExecuteResp{
+		Data string `json:"data"` //消息体
+		Metadata map[string]string `json:"metadata,optional"` //元数据
+	}
+)
+

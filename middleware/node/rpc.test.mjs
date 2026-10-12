@@ -1,0 +1,17 @@
+// 本文件验证 Node gRPC 中间件对令牌和身份元数据的处理。
+import assert from 'node:assert/strict';
+import { test } from 'node:test';
+import grpc from '@grpc/grpc-js';
+import { protectUnaryRPC } from './rpc.mjs';
+
+test('RPC 一元方法只接受验证后的身份', async () => {
+  const handler = protectUnaryRPC((call, callback) => {
+    assert.equal(call.identity.userId, '42');
+    assert.deepEqual(call.metadata.get('ithings-user'), []);
+    callback(null, { ok: true });
+  }, { authenticate: async (_call, token) => token === 'good' ? { userId: '42', tenantCode: 'demo' } : null });
+  const metadata = new grpc.Metadata();
+  metadata.set('ithings-token', 'good');
+  metadata.set('ithings-user', 'forged');
+  await new Promise((resolve, reject) => handler({ metadata }, (error, response) => error ? reject(error) : (assert.deepEqual(response, { ok: true }), resolve())));
+});

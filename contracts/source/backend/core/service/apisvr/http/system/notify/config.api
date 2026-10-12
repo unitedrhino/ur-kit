@@ -1,0 +1,236 @@
+info(
+    title: "通知管理模块"
+    desc: "通知管理"
+    author: "L"
+    email: "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+@server (
+    group: system/notify/config
+    prefix: /api/v1/system/notify/config
+    accessCodePrefix: "systemNotifyConfig"
+    accessNamePrefix: "通知配置"
+    accessGroup: "通知配置"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加通知配置"
+        description: "业务说明：创建新的通知配置项，定义通知类型编码、名称、支持的通知渠道类型（短信、邮件、钉钉等）、是否启用、是否记录到消息中心、防抖间隔等属性。平台管理员权限，用于配置系统通知的基础设置。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (NotifyConfig) returns (WithID)
+
+    @doc(
+        summary: "获取通知列表"
+        description: "业务说明：分页查询通知配置列表，支持按名称、编码、分组、启用状态筛选。可选择是否返回绑定的模板信息。用于通知配置管理页面的列表展示。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (NotifyConfigGetListReq) returns (NotifyConfigGetListResp)
+
+    @doc(
+        summary: "获取通知列表树"
+        description: "业务说明：按分组维度组织通知配置，返回树形结构便于前端分类展示。每个分组包含该分组下的所有通知配置项，用于通知配置管理页面的左侧导航树或分组展示。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler tree
+    post /tree (NotifyConfigGetListReq) returns (NotifyConfigTreeResp)
+
+
+    @doc(
+        summary: "获取通知详情"
+        description: "业务说明：根据ID或编码获取单个通知配置的详细信息，包括配置属性和可选的绑定模板列表。用于通知配置编辑页面的数据加载，支持通过ID或唯一编码查询。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (WithIDOrCode) returns (NotifyConfig)
+
+    @doc(
+        summary: "更新通知配置"
+        description: "业务说明：修改通知配置的属性，包括名称、支持渠道、启用状态、防抖间隔、变量参数等。平台管理员权限，用于维护通知配置的设置变更，支持部分更新。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (NotifyConfig) returns ()
+
+    @doc(
+        summary: "删除通知配置"
+        description: "业务说明：删除指定的通知配置项，会同时清理该配置绑定的模板关联关系。平台管理员权限，删除前需确保无业务依赖该通知配置。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "测试发送通知"
+        description: "业务说明：验证通知配置是否正常工作，向指定账号发送测试消息。支持选择通知渠道类型、模板ID、模板变量参数。用于配置调试和上线前验证，确保通知渠道可达。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config"
+        resource: "system/notify/config"
+        action: "execute"
+        recordLogMode: "1"
+    )
+    @handler sendTest
+    post /send-test (NotifyConfigSendTestReq)
+
+}
+
+
+@server (
+    group: system/notify/config/template
+    prefix: /api/v1/system/notify/config/template
+    accessCodePrefix: "systemNotifyTemplate"
+    accessNamePrefix: "通知模版"
+    accessGroup: "通知管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "获取通知绑定模版列表"
+        description: "业务说明：查询某个通知配置绑定的模版列表，支持按渠道类型筛选。用于通知配置详情页展示已绑定的模版信息，便于管理和更新模版绑定关系。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config/template"
+        resource: "system/notify/config/template"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (NotifyConfigTemplateGetListReq) returns (NotifyConfigTemplateGetListResp)
+    @doc(
+        summary: "更新通知绑定模版"
+        description: "业务说明：修改通知配置与模版的绑定关系，包括通知编码、渠道类型、模版ID。用于为通知配置指定各渠道类型的具体模版，实现通知内容的模版化管理。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config/template"
+        resource: "system/notify/config/template"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (NotifyConfigTemplate) returns ()
+    @doc(
+        summary: "删除通知绑定模版"
+        description: "业务说明：解除通知配置与指定渠道模版的绑定关系。用于清理不再使用的模版绑定，删除后该通知配置在该渠道类型将无模版可用。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/config/template"
+        resource: "system/notify/config/template"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (NotifyConfigTemplateDeleteReq) returns ()
+}
+
+
+
+type (
+    NotifyConfigTemplate {
+        ID int64 `json:"id,string,optional"`
+        NotifyCode string `json:"notifyCode,optional"`
+        Type string `json:"type,optional"`
+        TemplateID int64 `json:"templateID,string,optional"`
+    }
+    NotifyConfigTemplateDeleteReq{
+        NotifyCode string `json:"notifyCode"`
+        Type string `json:"type"`
+    }
+    NotifyConfigTemplateGetListReq{
+        NotifyCode string `json:"notifyCode"`
+        Type string `json:"type,optional"`
+    }
+    NotifyConfigTemplateGetListResp{
+        List []*NotifyConfigTemplate `json:"list"`
+    }
+)
+
+
+
+type (
+
+    NotifyConfigGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        Name string `json:"name,optional"`                     // 应用名称
+        Code string `json:"code,optional"`                     // 应用编号
+        Group string  `json:"group,optional"` //分组
+        IsEnabled int64 `json:"isEnabled,optional"` //是否启用 1:启用 2:禁用
+        WithTemplates bool `json:"withTemplates,optional"`
+    }
+
+
+    NotifyConfigGetListResp  {
+        List []*NotifyConfig `json:"list"`            // 通知列表数据
+        PageResp
+    }
+    NotifyConfigTreeResp  {
+        List []*NotifyGroupInfo `json:"list"`            // 通知列表数据
+    }
+    NotifyGroupInfo  {
+        ID string `json:"id,string,optional"`                               // id
+        Code string `json:"code,optional"`                               // 应用编号
+        name  string `json:"name,optional"`                               // 接口分组
+        Children []*NotifyConfig `json:"children,omitempty"`            // 列表数据
+    }
+
+    NotifyConfigSendTestReq {
+        Accounts   []string          `json:"accounts,optional"` //指定账号列表
+        NotifyCode string            `json:"notifyCode"` //通知编码
+        TemplateID int64             `json:"templateID,string,optional"` //指定模版ID
+        Type       string            `json:"type"` //渠道类型 sms|email|dingTalk|message等
+        Params     map[string]string `json:"params,optional"` //模版变量
+        Str1       string            `json:"str1,optional"`
+        Str2       string            `json:"str2,optional"`
+        Str3       string            `json:"str3,optional"`
+    }
+
+    NotifyConfig{
+         ID int64 `json:"id,string,optional"` // id编号
+         Group string `json:"group,optional"` //分组
+         Code string `json:"code,optional"` // 通知类型编码
+         Name string `json:"name,optional"` //通知的命名
+         SupportTypes []string `json:"supportTypes,optional"` //支持的通知类型 sms(短信),email(邮箱),dingTalk(钉钉机器人),dingWebhook(钉钉webhook),wxEWebHook(企业微信webhook)
+         Desc string `json:"desc,optional"` // 备注
+         IsRecord int64 `json:"isRecord,optional"` //是否记录该消息,是的情况下会将消息存一份到消息中心
+         IsEnabled int64 `json:"isEnabled,optional"` //是否启用 1:启用 2:禁用
+         Throttle int64 `json:"throttle,optional"` //防抖间隔秒数,0表示不防抖
+         Params map[string]string `json:"params,optional"` //变量属性 key是变量参数,value是变量描述
+         Templates []*NotifyConfigTemplate `json:"templates,omitempty,optional"` //传withTemplates的时候返回,只读
+    }
+)

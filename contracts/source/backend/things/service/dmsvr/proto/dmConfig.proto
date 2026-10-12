@@ -1,0 +1,18 @@
+//--------------------物联网全局配置服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+// DmConfigEmpty 空消息
+message DmConfigEmpty {
+}
+
+// DmConfigInfo 全局配置信息
+message DmConfigInfo {
+  string mqttHost = 1; // MQTT访问地址
+}
+
+service DmConfig {
+  rpc configInfoGetOne(DmConfigEmpty) returns (DmConfigInfo);
+  rpc configInfoUpdate(DmConfigInfo) returns (DmConfigEmpty);
+}

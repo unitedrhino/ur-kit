@@ -1,0 +1,758 @@
+{
+  "components": {
+    "schemas": {
+      "CloudStorageEvent": {
+        "properties": {
+          "data": {
+            "type": "string"
+          },
+          "endTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "startTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "thumbnail": {
+            "type": "string"
+          },
+          "uploadStatus": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "startTime",
+          "endTime",
+          "thumbnail",
+          "eventId",
+          "uploadStatus",
+          "data"
+        ],
+        "title": "CloudStorageEvent",
+        "type": "object"
+      },
+      "CodeReq": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "CodeReq",
+        "type": "object"
+      },
+      "CommonResp": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "CommonResp",
+        "type": "object"
+      },
+      "DateRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 格式：yyyy-mm-dd",
+            "type": "string"
+          },
+          "start": {
+            "description": "开始时间 格式：yyyy-mm-dd",
+            "type": "string"
+          }
+        },
+        "title": "DateRange",
+        "type": "object"
+      },
+      "DescribeCloudStorageEventsReq": {
+        "properties": {
+          "channelId": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "context": {
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "endTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "size": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "userId": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DescribeCloudStorageEventsReq",
+        "type": "object"
+      },
+      "DescribeCloudStorageEventsResp": {
+        "properties": {
+          "context": {
+            "type": "string"
+          },
+          "events": {
+            "items": {
+              "$ref": "#/components/schemas/CloudStorageEvent"
+            },
+            "type": "array"
+          },
+          "listover": {
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "videoURL": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "events",
+          "context",
+          "listover",
+          "total",
+          "videoURL"
+        ],
+        "title": "DescribeCloudStorageEventsResp",
+        "type": "object"
+      },
+      "DescribeCloudStorageThumbnailListReq": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "thumbnailList": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName",
+          "thumbnailList"
+        ],
+        "title": "DescribeCloudStorageThumbnailListReq",
+        "type": "object"
+      },
+      "DescribeCloudStorageThumbnailListResp": {
+        "properties": {
+          "thumbnailURLInfoList": {
+            "items": {
+              "$ref": "#/components/schemas/ThumbnailURLInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "thumbnailURLInfoList"
+        ],
+        "title": "DescribeCloudStorageThumbnailListResp",
+        "type": "object"
+      },
+      "DeviceCore": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品ID",
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceCore",
+        "type": "object"
+      },
+      "DeviceInfoBindReq": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "expand": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 拓展字段",
+            "type": "object"
+          },
+          "token": {
+            "description": " 中绑定的token",
+            "type": "string"
+          }
+        },
+        "title": "DeviceInfoBindReq",
+        "type": "object"
+      },
+      "NotifyReq": {
+        "properties": {
+          "devicename": {
+            "type": "string"
+          },
+          "payload": {
+            "$ref": "#/components/schemas/Payload"
+          },
+          "productid": {
+            "type": "string"
+          },
+          "seq": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timemills": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "title": "NotifyReq",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "Payload": {
+        "properties": {
+          "appID": {
+            "type": "string"
+          },
+          "appName": {
+            "type": "string"
+          },
+          "clientToken": {
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "event": {
+            "type": "string"
+          },
+          "eventId": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "type": "object"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          },
+          "role": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "timestamp": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "topic": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "userId": {
+            "type": "string"
+          },
+          "wx_openid": {
+            "type": "string"
+          }
+        },
+        "title": "Payload",
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "latitude": {
+            "description": "纬度",
+            "format": "double",
+            "maximum": 90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "经度",
+            "format": "double",
+            "maximum": 180,
+            "type": "number"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "ThumbnailURLInfo": {
+        "properties": {
+          "expireTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "thumbnailURL": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "thumbnailURL",
+          "expireTime"
+        ],
+        "title": "ThumbnailURLInfo",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "description": "开始时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Tree": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "idPath": {
+            "description": " 1-2-3-的格式记录顶级区域到当前区域的路径",
+            "type": "string"
+          },
+          "parentID": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "Tree",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      },
+      "WithIDChildren": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withChildren": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "WithIDChildren",
+        "type": "object"
+      },
+      "WithIDOrCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithIDOrCode",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "protocol-tencent",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/protocol/cloud/tencent/cloud-storage-events": {
+      "post": {
+        "description": "业务说明：按设备、时间范围和上下文分页查询腾讯云存事件列表，供前端查看设备云录像事件。",
+        "operationId": "postApiV1ProtocolCloudTencentCloud-storage-events",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeCloudStorageEventsReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DescribeCloudStorageEventsResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "拉取云存事件列表",
+        "tags": [
+          "tencent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/protocol/tencent",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "protocol-tencent"
+      }
+    },
+    "/api/v1/protocol/cloud/tencent/cloud-storage-thumbnail-list": {
+      "post": {
+        "description": "业务说明：根据腾讯云返回的缩略图标识批量换取可访问的缩略图 URL。",
+        "operationId": "postApiV1ProtocolCloudTencentCloud-storage-thumbnail-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DescribeCloudStorageThumbnailListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DescribeCloudStorageThumbnailListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量拉取云存事件缩略图",
+        "tags": [
+          "tencent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/protocol/tencent",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "protocol-tencent"
+      }
+    },
+    "/api/v1/protocol/cloud/tencent/rule/notify/{tenantCode}/{projectID}": {
+      "get": {
+        "description": "业务说明：处理腾讯云侧的通知握手或通知查询请求，用于协议接入初始化与联调。",
+        "operationId": "getApiV1ProtocolCloudTencentRuleNotify:tenantCode:projectID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenantCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取腾讯云通知",
+        "tags": [
+          "rule"
+        ],
+        "x-action": "view",
+        "x-auth-type": "public",
+        "x-group": "things/protocol/tencent/rule",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "protocol-tencent"
+      },
+      "post": {
+        "description": "业务说明：接收腾讯云 IoT/视频能力推送的设备通知消息，并转交平台内部处理。",
+        "operationId": "postApiV1ProtocolCloudTencentRuleNotify:tenantCode:projectID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenantCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "projectID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NotifyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "接收腾讯云通知",
+        "tags": [
+          "rule"
+        ],
+        "x-action": "hook",
+        "x-auth-type": "public",
+        "x-group": "things/protocol/tencent/rule",
+        "x-log-mode": "1",
+        "x-oper-type": "hook",
+        "x-resource": "protocol-tencent"
+      }
+    },
+    "/api/v1/protocol/cloud/tencent/slot/device-bind": {
+      "post": {
+        "description": "业务说明：处理腾讯云设备与平台设备的绑定请求，写入设备扩展绑定信息。",
+        "operationId": "postApiV1ProtocolCloudTencentSlotDevice-bind",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoBindReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "腾讯云设备绑定",
+        "tags": [
+          "slot"
+        ],
+        "x-action": "bind",
+        "x-auth-type": "public",
+        "x-group": "things/protocol/tencent/slot",
+        "x-log-mode": "1",
+        "x-oper-type": "bind",
+        "x-resource": "protocol-tencent"
+      }
+    }
+  }
+}

@@ -1,0 +1,120 @@
+info(
+    title: "通知模版管理模块"
+    desc: "通知模版管理"
+    author: "L"
+    email: "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+@server (
+    group: system/notify/template
+    prefix: /api/v1/system/notify/template
+    accessCodePrefix: "systemNotifyTemplate"
+    accessNamePrefix: "通知模版"
+    accessGroup: "通知管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加通知模版"
+        description: "业务说明：创建新的通知模版，定义模版名称、通知编码、渠道类型（短信/邮件/钉钉/微信等）、模版编码、主题、内容、备注等属性。不同渠道类型有不同的专属字段配置，用于统一管理各渠道的通知内容模版。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/template"
+        resource: "system/notify/template"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (NotifyTemplate) returns (WithID)
+
+    @doc(
+        summary: "获取通知模版列表"
+        description: "业务说明：分页查询通知模版列表，支持按模版名称、通知编码、渠道类型筛选。用于模版管理页面的列表展示，便于查找和管理各类通知模版。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/template"
+        resource: "system/notify/template"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (NotifyTemplateGetListReq) returns (NotifyTemplateGetListResp)
+
+    @doc(
+        summary: "获取通知模版详情"
+        description: "业务说明：根据ID获取单个通知模版的详细信息，包括模版名称、通知编码、渠道类型、模版编码、主题、内容、以及渠道专属配置等所有字段。用于模版编辑页面的数据加载。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/template"
+        resource: "system/notify/template"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (NotifyTemplate)
+
+    @doc(
+        summary: "更新通知模版"
+        description: "业务说明：修改通知模版的属性，包括名称、模版编码、主题、内容、备注以及渠道专属配置。用于维护模版内容变更，支持部分更新。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/template"
+        resource: "system/notify/template"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (NotifyTemplate) returns ()
+
+    @doc(
+        summary: "删除通知模版"
+        description: "业务说明：删除指定的通知模版，删除前需确保该模版未被通知配置绑定使用。用于清理不再使用的模版，管理员权限。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/notify/template"
+        resource: "system/notify/template"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+}
+
+type (
+
+    NotifyTemplateGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        Name string `json:"name,optional"`                     //
+        NotifyCode string `json:"notifyCode,optional"`                     // 应用编号
+        Type string  `json:"type,optional"` //对应的配置类型 sms email
+    }
+
+
+    NotifyTemplateGetListResp  {
+        List []*NotifyTemplate `json:"list"`            // 通知模版列表数据
+        PageResp
+    }
+
+    NotifyTemplate{
+        ID int64 `json:"id,string,optional"`  // id编号
+        Name string `json:"name,optional"`  //通知的命名
+        NotifyCode string `json:"notifyCode,optional"`  //对应的配置Code
+        Type string `json:"type,optional,options=sms|email|dingTalk|dingWebhook|wxMini|wxEWebHook|message|phoneCall|banner|news|wxOfficialAccount"`  //对应的配置类型 sms:短信, email:邮箱, dingTalk:钉钉机器人, dingWebhook:钉钉webhook, wxMini:微信小程序推送, wxEWebHook:企业微信webhook, message:站内信通知, phoneCall:电话通知, banner:横幅通知, news:资讯通知, wxOfficialAccount:微信公众号
+        TemplateCode string `json:"templateCode,optional"`  // 短信通知模版编码(短信必填)
+        Subject string `json:"subject,optional"`  //默认消息主题(邮箱需要填写)
+        Body string `json:"body,optional"`  //默认模版内容
+        Desc string `json:"desc,optional"`  // 备注
+        WebHook string `json:"webhook,optional"`  //钉钉webhook及企微webhook
+        EmailFormat string `json:"emailFormat,optional,omitempty"`  // email专属：邮件格式 richtext/html
+        ShowAsModal int64 `json:"showAsModal,string,optional,omitempty"`  // message/news专属：是否弹窗 1=是 2=否
+        ModalShowStartTime int64 `json:"modalShowStartTime,string,optional,omitempty"`  // 弹窗开始时间(毫秒)
+        ModalShowEndTime int64 `json:"modalShowEndTime,string,optional,omitempty"`  // 弹窗结束时间(毫秒)
+        Severity string `json:"severity,optional,omitempty"`  // banner专属：严重等级 info/warning/error
+        AllowDismiss int64 `json:"allowDismiss,string,optional,omitempty"`  // banner专属：允许关闭 1=是 2=否
+        CoverImage string `json:"coverImage,optional,omitempty"`  // news专属：封面图URL
+        VideoUrl string `json:"videoUrl,optional,omitempty"`  // news专属：视频URL
+    }
+)

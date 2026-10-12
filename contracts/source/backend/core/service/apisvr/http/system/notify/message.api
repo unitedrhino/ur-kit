@@ -1,0 +1,119 @@
+info (
+	title:   "消息管理模块"
+	desc:    "消息管理"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/notify/message/info
+	prefix:           /api/v1/system/notify/message/info
+	accessNamePrefix: "通知消息"
+	accessGroup:      "消息管理"
+	defaultAuthType:  "platform"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取消息列表"
+	    description: "业务说明：分页查询消息记录列表，支持按通知编码、分组、是否全局消息、关联手动通知ID筛选。用于消息中心展示历史通知消息，管理员可查看所有消息记录。"
+	    authType: "platform"
+	    group: "system/notify/message/info"
+	    resource: "system/notify/message/info"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (MessageInfoGetListReq) returns (MessageInfoGetListResp)
+
+	@doc(
+	    summary: "更新消息"
+	    description: "业务说明：修改消息的属性，如分组、主题、内容、通知时间等。用于修正消息内容或调整消息状态，支持部分更新。管理员权限。"
+	    authType: "platform"
+	    group: "system/notify/message/info"
+	    resource: "system/notify/message/info"
+	    action: "update"
+	    recordLogMode: "1"
+	)
+	@handler update
+	post /update (MessageInfo)
+
+	@doc(
+	    summary: "删除消息"
+	    description: "业务说明：删除指定的消息记录，清理消息中心的历史消息。删除后用户端将无法查看该消息。管理员权限。"
+	    authType: "platform"
+	    group: "system/notify/message/info"
+	    resource: "system/notify/message/info"
+	    action: "delete"
+	    recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+	    summary: "发送消息"
+	    description: "业务说明：手动发送通知消息，可指定目标用户ID列表或发送全局消息。支持选择通知编码、主题、内容、通知时间等参数，不填通知时间则立即发送。用于管理员手动推送通知。"
+	    authType: "platform"
+	    group: "system/notify/message/info"
+	    resource: "system/notify/message/info"
+	    action: "send"
+	    recordLogMode: "1"
+	)
+	@handler send
+	post /send (MessageInfoSendReq)
+}
+
+type (
+	MessageInfoSendReq {
+		UserIDs    []int64 `json:"userIDs,string,optional"` //指定用户ID
+		IsGlobal   int64   `json:"isGlobal"` //全局消息
+		NotifyCode string  `json:"notifyCode"` //通知的code
+		Subject    string  `json:"subject"` //通知主题
+		Body       string  `json:"body"`
+		NotifyTime int64   `json:"notifyTime,optional"` //通知时间,不填立刻发送
+		Str1       string  `json:"str1,optional"`
+		Str2       string  `json:"str2,optional"`
+		Str3       string  `json:"str3,optional"`
+	}
+	MessageInfoGetListReq {
+		Page           *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		NotifyCode     string    `json:"notifyCode,optional"` //通知编码
+		Group          string    `json:"group,optional"` //分组
+		IsGlobal       int64     `json:"isGlobal,optional"` //全局消息
+		NotificationID int64     `json:"notificationID,string,optional"` //关联手动通知ID
+	}
+	MessageInfoGetListResp {
+		List []*MessageInfo `json:"list"` // 消息列表数据
+		PageResp
+	}
+	MessageInfo {
+		ID             int64  `json:"id,string"`
+		Group          string `json:"group"` //分组
+		NotifyCode     string `json:"notifyCode"`
+		NotifyName     string `json:"notifyName,optional"` //通知的名称,只读
+		Subject        string `json:"subject"` //主题
+		Body           string `json:"body"` //内容
+		Str1           string `json:"str1"`
+		Str2           string `json:"str2"`
+		Str3           string `json:"str3"`
+		IsGlobal       int64  `json:"isGlobal"`
+		NotifyTime     int64  `json:"notifyTime"` //通知时间
+		Type           string `json:"type,optional"` //渠道类型 sms|email|dingTalk|message等
+		Priority       int64  `json:"priority,optional"` //优先级 1:紧急 2:重要 3:普通
+		NotificationID int64  `json:"notificationID,string,optional"` //关联手动通知ID
+		ActionText     string `json:"actionText,optional"` //操作按钮文案
+		ActionURL      string `json:"actionURL,optional"` //操作跳转URL
+		ExpireTime     int64  `json:"expireTime,optional"` //有效期(毫秒时间戳)
+		CreatedTime    int64  `json:"createdTime,string"`
+		EmailFormat        string `json:"emailFormat,optional,omitempty"` // email专属：邮件格式 richtext/html
+		ShowAsModal        int64  `json:"showAsModal,string,optional,omitempty"` // message/news专属：是否弹窗 1=是 2=否
+		ModalShowStartTime int64  `json:"modalShowStartTime,string,optional,omitempty"` // 弹窗开始时间(毫秒)
+		ModalShowEndTime   int64  `json:"modalShowEndTime,string,optional,omitempty"` // 弹窗结束时间(毫秒)
+		Severity           string `json:"severity,optional,omitempty"` // banner专属：严重等级 info/warning/error
+		AllowDismiss       int64  `json:"allowDismiss,string,optional,omitempty"` // banner专属：允许关闭 1=是 2=否
+		CoverImage         string `json:"coverImage,optional,omitempty"` // news专属：封面图URL
+		VideoUrl           string `json:"videoUrl,optional,omitempty"` // news专属：视频URL
+	}
+)

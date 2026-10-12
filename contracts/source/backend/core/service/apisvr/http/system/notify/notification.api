@@ -1,0 +1,185 @@
+info (
+	title:   "手动通知管理模块"
+	desc:    "手动通知的创建、发送、撤回等管理"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/notify/notification
+	prefix:           /api/v1/system/notify/notification
+	accessCodePrefix: "systemNotifyNotification"
+	accessNamePrefix: "手动通知"
+	accessGroup:      "通知管理"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "创建手动通知"
+		description: "业务说明：创建新的手动通知任务，定义标题、内容、发送渠道列表、优先级、目标受众类型（指定用户/全局）、目标用户ID列表、计划发送时间等属性。支持草稿状态保存，后续再发送。用于管理员手动推送通知的场景。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (Notification) returns (WithID)
+
+	@doc(
+		summary: "获取手动通知详情"
+		description: "业务说明：根据ID获取手动通知任务的完整信息，包括标题、内容、渠道、优先级、状态、受众配置、发送统计（预计送达数/实际送达数）、创建者、时间等所有字段。用于通知编辑页面的数据加载或通知详情查看。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler read
+	post /read (WithID) returns (Notification)
+
+	@doc(
+		summary: "更新手动通知"
+		description: "业务说明：修改手动通知任务的属性，包括标题、内容、渠道、优先级、受众配置等。支持部分更新，用于修正通知内容或调整发送配置。仅草稿状态可修改。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (Notification) returns ()
+
+	@doc(
+		summary: "删除手动通知"
+		description: "业务说明：删除指定的手动通知任务，删除后用户端将无法收到该通知。用于清理不再需要的通知任务，仅草稿状态可删除。管理员权限。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithID) returns ()
+
+	@doc(
+		summary: "获取手动通知列表"
+		description: "业务说明：分页查询手动通知任务列表，支持按状态、分组、优先级、租户、标题筛选。用于通知任务管理页面的列表展示，管理员可查看所有状态的通知任务（草稿/已计划/发送中/已发送/已撤回）。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler index
+	post /index (NotificationIndexReq) returns (NotificationIndexResp)
+
+	@doc(
+		summary: "发送手动通知"
+		description: "业务说明：执行手动通知任务的发送操作，可指定计划发送时间（不填则立即发送）。发送后通知状态流转为发送中，完成发送后变为已发送。用于触发通知推送，支持定时发送。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler send
+	post /send (NotificationSendReq) returns ()
+
+	@doc(
+		summary: "撤回手动通知"
+		description: "业务说明：撤回已发送的手动通知，撤回后用户端将无法继续查看该通知。用于紧急修正错误通知或停止通知展示，仅已发送状态可撤回。管理员权限。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "execute"
+		recordLogMode: "1"
+	)
+	@handler revoke
+	post /revoke (WithID) returns ()
+
+	@doc(
+		summary: "复制手动通知"
+		description: "业务说明：复制现有的手动通知任务创建新副本，新通知继承原通知的所有属性但状态初始化为草稿。用于基于历史通知快速创建新通知，减少重复配置工作。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler copy
+	post /copy (WithID) returns (WithID)
+
+	@doc(
+		summary: "预估送达用户数"
+		description: "业务说明：根据手动通知的受众配置（指定用户/全局）预估送达用户数量。用于发送前评估通知覆盖范围，帮助管理员决策是否调整受众配置。"
+		authType: "platform"
+		isNeedAuth: "true"
+		group: "system/notify/notification"
+		resource: "system/notify/notification"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler estimateUsers
+	post /estimate-users (WithID) returns (NotificationEstimateResp)
+}
+
+type (
+	Notification {
+		ID            int64   `json:"id,string,optional"` //通知ID
+		TenantCode    string  `json:"tenantCode,optional"` //租户编码,空=平台级
+		Title         string  `json:"title"` //标题
+		Content       string  `json:"content"` //内容
+		Group         string  `json:"group,optional"` //分组
+		Channels      []string `json:"channels,optional"` //发送渠道列表
+		Priority      int64   `json:"priority,optional"` //优先级 1:紧急 2:重要 3:普通
+		Status        int64   `json:"status,optional"` //状态 1:草稿 2:已计划 3:发送中 4:已发送 5:已撤回
+		ActionText    string  `json:"actionText,optional"` //操作按钮文案
+		ActionURL     string  `json:"actionURL,optional"` //操作跳转URL
+		ExpireTime    int64   `json:"expireTime,optional"` //有效期(毫秒时间戳)
+		ScheduleTime  int64   `json:"scheduleTime,optional"` //计划发送时间(毫秒时间戳)
+		SentTime      int64   `json:"sentTime,optional"` //实际发送时间(毫秒时间戳),只读
+		AudienceType  int64   `json:"audienceType,optional"` //受众类型 1:指定用户 2:全局
+		TargetUserIDs []int64 `json:"targetUserIDs,string,optional"` //目标用户ID列表
+		EstimatedUsers int64  `json:"estimatedUsers,optional"` //预计送达数,只读
+		ActualUsers   int64   `json:"actualUsers,optional"` //实际送达数,只读
+		CreatorID     int64   `json:"creatorID,string,optional"` //创建者ID,只读
+		CreatedTime   int64   `json:"createdTime,optional"` //创建时间,只读
+		EmailFormat        string  `json:"emailFormat,optional,omitempty"` // email专属：邮件格式 richtext/html
+		ShowAsModal        int64  `json:"showAsModal,string,optional,omitempty"` // message/news专属：是否弹窗 1=是 2=否
+		ModalShowStartTime int64  `json:"modalShowStartTime,string,optional,omitempty"` // 弹窗开始时间(毫秒)
+		ModalShowEndTime   int64  `json:"modalShowEndTime,string,optional,omitempty"` // 弹窗结束时间(毫秒)
+		Severity           string `json:"severity,optional,omitempty"` // banner专属：严重等级 info/warning/error
+		AllowDismiss       int64  `json:"allowDismiss,string,optional,omitempty"` // banner专属：允许关闭 1=是 2=否
+		CoverImage         string `json:"coverImage,optional,omitempty"` // news专属：封面图URL
+		VideoUrl           string `json:"videoUrl,optional,omitempty"` // news专属：视频URL
+	}
+	NotificationIndexReq {
+		Page       *PageInfo `json:"page,optional"` //分页信息
+		Status     int64     `json:"status,optional"` //状态筛选
+		Group      string    `json:"group,optional"` //分组筛选
+		Priority   int64     `json:"priority,optional"` //优先级筛选
+		TenantCode string    `json:"tenantCode,optional"` //租户编码筛选
+		Title      string    `json:"title,optional"` //标题模糊搜索
+	}
+	NotificationIndexResp {
+		List []*Notification `json:"list"` //通知列表
+		PageResp
+	}
+	NotificationSendReq {
+		ID           int64 `json:"id,string"` //通知ID
+		ScheduleTime int64 `json:"scheduleTime,optional"` //计划发送时间,不填立即发送
+	}
+	NotificationEstimateResp {
+		EstimatedCount int64 `json:"estimatedCount"` //预估送达用户数
+	}
+)

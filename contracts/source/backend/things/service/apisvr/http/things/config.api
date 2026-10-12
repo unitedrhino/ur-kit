@@ -1,0 +1,44 @@
+info(
+    title: "物联网全局配置"
+    desc: "物联网全局配置"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/config/info
+    prefix: /api/v1/things/config/info
+    middleware:  CheckTokenWare,InitCtxsWare
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "获取全局配置"
+        description: "获取物联网全局配置信息，目前包含设备MQTT访问地址。所有登录用户均可访问。"
+        authType: "all"
+        group: "things/config/info"
+        resource: "things/config"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one () returns (ConfigInfo)
+
+    @doc(
+        summary: "更新全局配置"
+        description: "更新物联网全局配置信息，目前支持修改设备MQTT访问地址。仅平台管理员可访问。"
+        authType: "platform"
+        group: "things/config/info"
+        resource: "things/config"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (ConfigInfo) returns ()
+}
+
+type ConfigInfo {
+    mqttHost string `json:"mqttHost"` // MQTT访问地址
+}

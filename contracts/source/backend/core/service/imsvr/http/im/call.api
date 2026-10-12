@@ -1,0 +1,41 @@
+info(
+	title: "IM 音视频通话"
+	desc: "人与人音视频通话信令（1:1 与群通话），媒体经 ZLMediaKit SFU 转发，信令走本模块 REST 上行 + WebSocket 下行推送"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/call
+	prefix: /api/v1/im
+	accessCodePrefix: "imCall"
+	accessNamePrefix: "IM通话"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "通话信令统一入口"
+		description: "业务说明：音视频通话上行信令统一入口，按 type 分发：call_invite 发起 1:1 通话、call_accept 接听、call_reject 拒接、call_cancel 取消、call_end 挂断、call_heartbeat 通话中心跳（15s 一次）、group_invite 发起群通话（上限 9 人）、group_join 加入、group_leave 离开、media_state 静音/关摄像头同步。媒体由前端直连 ZLMediaKit 推拉流，本接口只负责状态机与通知扇出。"
+		authType: "all"
+		group: "im/call"
+		resource: "im/call"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler signal
+	post /call/signal (ImCallSignalReq) returns (ImCallSignalResp)
+
+	@doc(
+		summary: "查询群通话进行状态"
+		description: "业务说明：查询指定群聊当前是否有进行中的群通话，用于前端进入群聊时补拉通话横幅（离线期间错过的 group.state 事件）。"
+		authType: "all"
+		group: "im/call"
+		resource: "im/call"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler active
+	get /call/active (ImCallActiveReq) returns (ImCallActiveResp)
+}

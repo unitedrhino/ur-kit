@@ -1,0 +1,33 @@
+syntax = "v1"
+
+import "common.api"
+import "card/info.api"
+import "card/deviceBinding.api"
+import "card/route.api"
+import "card/package.api"
+import "card/packet.api"
+import "card/flow.api"
+import "card/flowHis.api"
+import "card/dailyUsage.api"
+import "card/auditTrail.api"
+import "card/monthFlow.api"
+import "card/zoneRoaming.api"
+import "card/pollingError.api"
+import "card/pollingProgress.api"
+import "card/batchTask.api"
+import "card/operating.api"
+import "card/offeringInfoList.api"
+import "card/usageReminder.api"
+import "card/offeringInfo.api"
+import "card/orderHistory.api"
+import "card/executionTask.api"
+import "card/setting.api"
+import "card/provisioningResult.api"
+
+info (
+	title:   "物联卡通信管理"
+	desc:    "物联卡通信管理聚合 API 入口"
+	author:  "unitedrhino"
+	version: "v1"
+)
+

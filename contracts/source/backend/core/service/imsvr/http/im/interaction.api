@@ -1,0 +1,156 @@
+// 应用信令传输：注册独立端点、持久事件拉取及接收确认；不改变设备MQTT方法。
+type (
+	ImInteractionTalkAudioAccessReq {
+		Operation string `json:"operation"` // read或set；严格入口保留重复/null检查。
+		CallId string `json:"callId"` // 原IM活群通话，不是设备sessionId。
+		TargetUserID string `json:"targetUserID"` // 规范安全正整数字符串。
+		Allowed *bool `json:"allowed,optional"` // 仅set显式必填，read禁止携带。
+		ExpectedRevision *uint64 `json:"expectedRevision,optional"` // 仅set原许可正代次。
+	}
+	ImInteractionTalkAudioAccessResp {
+		CallId string `json:"callId"` // 原IM通话。
+		TargetUserID string `json:"targetUserID"` // 原目标用户。
+		PublishAllowed bool `json:"publishAllowed"` // 服务器许可，不是实际静音事实。
+		AudioRevision uint64 `json:"audioRevision"` // 原成员许可代次。
+		MemberEpoch uint64 `json:"memberEpoch"` // 当前加入实例。
+		ExpiresAt int64 `json:"expiresAt"` // Unix毫秒，最多两秒。
+	}
+	ImInteractionRecordingTarget {
+		ProductID string `json:"productID"` // 原具体设备产品，不接自由subject。
+		DeviceName string `json:"deviceName"` // 原具体设备名称。
+	}
+	ImInteractionRecordingsQueryReq {
+		EndpointId string `json:"endpointId"` // 原已登录用户注册端点。
+		Target ImInteractionRecordingTarget `json:"target"` // 原授权设备目标。
+		CameraId string `json:"cameraId"` // 显式档案相机，不授权实时画面。
+		StartTimeMs uint64 `json:"startTimeMs"` // 包含的UTC Unix毫秒起点。
+		EndTimeMs uint64 `json:"endTimeMs"` // 不包含的UTC Unix毫秒终点，最多24小时窗口。
+		Limit int `json:"limit"` // 1至32，不默认扩大查询。
+	}
+	ImInteractionRecordingMetadata {
+		RecordingId string `json:"recordingId"` // 固定档案标识。
+		RecordingVersion string `json:"recordingVersion"` // 原不可变版本。
+		CameraId string `json:"cameraId"` // 原档案相机。
+		StartTimeMs uint64 `json:"startTimeMs"` // 原UTC开始。
+		EndTimeMs uint64 `json:"endTimeMs"` // 原UTC结束。
+		DurationMs uint64 `json:"durationMs"` // 整份相对毫秒时长。
+		Available bool `json:"available"` // 目录状态不保证文件实际可打开。
+		VideoCodec string `json:"videoCodec"` // 当前H264。
+		AudioCodec string `json:"audioCodec,optional"` // 可选opus，不授权实时采集。
+	}
+	ImInteractionRecordingsQueryResp {
+		List []ImInteractionRecordingMetadata `json:"list"` // 有限元数据，无路径或引用。
+		HasMore bool `json:"hasMore"` // 截断时应缩小查询窗口。
+	}
+	ImInteractionCommandsReq {
+		EndpointId string `json:"endpointId"` // 已注册的本用户端点，不得自报用户或企业。
+		Command interface{} `json:"command"` // 完整原应用命令JSON对象，不能是字符串或媒体帧。
+	}
+	ImInteractionCommandsResp {
+		Accepted bool `json:"accepted"` // 原操作及通知已持久受理，不代表设备接听或媒体连通。
+		MsgToken string `json:"msgToken"` // 原业务请求token。
+		Replay bool `json:"replay"` // 已受理原请求的幂等重放，不产生新媒体或新副作用。
+	}
+	ImInteractionEndpointResp {
+		EndpointId string `json:"endpointId"` // 当前登录用户的随机端点标识。
+		ExpiresAt int64 `json:"expiresAt"` // Unix毫秒，端点固定有效一小时。
+	}
+	ImInteractionEventsReq {
+		EndpointId string `json:"endpointId"` // 已注册的本用户端点，不接受自报用户身份。
+		Limit int `json:"limit"` // 1至32，客户端应处理后再确认。
+	}
+	ImInteractionEvent {
+		DeliveryId string `json:"deliveryId"` // 稳定传输ID，重复拉取不更换。
+		Event interface{} `json:"event"` // 原interaction.result/state信封对象，不包含媒体帧。
+	}
+	ImInteractionEventsResp {
+		List []ImInteractionEvent `json:"list"` // 当前端点未确认且未过期的有界通知。
+	}
+	ImInteractionEventsAckReq {
+		EndpointId string `json:"endpointId"` // 已注册的当前用户端点。
+		DeliveryIds []string `json:"deliveryIds"` // 1至32个已处理的稳定传输ID，不能重复。
+	}
+	ImInteractionEventsAckResp {
+		Acknowledged int `json:"acknowledged"` // 已确认数量，重复确认幂等成功。
+	}
+)
+
+@server (
+	group: im/interaction
+	prefix: /api/v1/im/interaction
+	accessCodePrefix: "imInteraction"
+	accessNamePrefix: "IM统一信令"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary: "读取或设置会议发言许可"
+		description: "原活IM与持久群成员可读取同会议目标音权；设置仅原通话发起人按原代次CAS执行，不以管理员或设备主人替代。服务端许可不代表实际音频已停止，不创建媒体端点。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "operate"
+		recordLogMode: "3"
+	)
+	@handler talkAudioAccess
+	post /talk/audio-access (ImInteractionTalkAudioAccessReq) returns (ImInteractionTalkAudioAccessResp)
+	@doc (
+		summary: "查询历史录像目录"
+		description: "按当前登录端点和真实设备主人查询显式配置的有限档案窗口；不分配媒体、不授予实时摄像头权限，不返回路径或下载地址。历史播放通过独立recordPlayback会话。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler recordingsQuery
+	post /recordings/query (ImInteractionRecordingsQueryReq) returns (ImInteractionRecordingsQueryResp)
+	@doc (
+		summary: "提交应用信令命令"
+		description: "按当前登录用户绑定端点提交原应用信令；当前接通IPC预览打开、媒体协商、状态报告、观看端按轨订阅控制及结束。打开可显式请求单向监听音频，省略时不开麦克风；观看端仅能订阅、取消订阅、暂停或恢复自身已授权轨，不能控制摄像头发布。受理不代表设备接听或媒体连通，原结果通过持久事件接口获取。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "operate"
+		recordLogMode: "3"
+	)
+	@handler commands
+	post /commands (ImInteractionCommandsReq) returns (ImInteractionCommandsResp)
+
+	@doc (
+		summary: "注册应用信令端点"
+		description: "为已登录用户创建独立一小时端点；端点不替代登录鉴权，不代表设备会话或媒体已建立。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "create"
+		recordLogMode: "3"
+	)
+	@handler endpoint
+	post /endpoints/register returns (ImInteractionEndpointResp)
+
+	@doc (
+		summary: "拉取应用信令事件"
+		description: "按当前用户已注册端点拉取持久interaction.result/state；未确认事件可重放，不把读取当媒体连通或业务执行完成。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler events
+	post /events (ImInteractionEventsReq) returns (ImInteractionEventsResp)
+
+	@doc (
+		summary: "确认应用信令事件接收"
+		description: "同事务确认当前登录端点已处理的事件，任一ID无权限则整体拒绝；不确认设备投递或音视频播放。"
+		authType: "all"
+		group: "im/interaction"
+		resource: "im/interaction"
+		action: "update"
+		recordLogMode: "3"
+	)
+	@handler eventsAck
+	post /events/ack (ImInteractionEventsAckReq) returns (ImInteractionEventsAckResp)
+}

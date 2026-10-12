@@ -1,0 +1,11 @@
+{
+  "name": "@unitedrhino/ur-kit-node",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": "./index.mjs",
+  "scripts": { "test": "node --test" },
+  "dependencies": {
+    "@grpc/grpc-js": "^1.14.0",
+    "@grpc/proto-loader": "^0.8.0"
+  }
+}

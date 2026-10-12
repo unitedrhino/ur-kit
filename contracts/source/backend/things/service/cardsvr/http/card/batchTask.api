@@ -1,0 +1,193 @@
+syntax = "v1"
+
+
+info (
+	title:   "物联卡批量任务"
+	desc:    "物联卡批量操作异步任务"
+	version: "v1"
+)
+
+type (
+	BatchTaskFailedItem {
+		Iccid  string `json:"iccid"`
+		Reason string `json:"reason"`
+	}
+	BatchTask {
+		ID           int64                  `json:"id,string"`
+		TaskNo       string                 `json:"taskNo"`
+		TaskType     int64                  `json:"taskType"`
+		TaskTypeName string                 `json:"taskTypeName,optional"`
+		TaskName     string                 `json:"taskName,optional"`
+		TotalCount   int64                  `json:"totalCount"`
+		SuccessCount int64                  `json:"successCount"`
+		FailCount    int64                  `json:"failCount"`
+		Status       int64                  `json:"status"`
+		StatusName   string                 `json:"statusName,optional"`
+		Params       string                 `json:"params,optional"`
+		Result       string                 `json:"result,optional"`
+		FailedItems  []*BatchTaskFailedItem `json:"failedItems,optional"`
+		StartTime    string                 `json:"startTime,optional"`
+		EndTime      string                 `json:"endTime,optional"`
+		CreatedTime  string                 `json:"createdTime,optional"`
+	}
+	BatchTaskGetListReq {
+		PageInfo
+		TaskNo   string `json:"taskNo,optional"`
+		TaskType int64  `json:"taskType,optional"`
+		Status   int64  `json:"status,optional"`
+	}
+	BatchTaskGetListResp {
+		PageResp
+		List []*BatchTask `json:"list"`
+	}
+	BatchTaskGetOneReq {
+		TaskNo string `json:"taskNo"`
+	}
+	BatchTaskRetryReq {
+		TaskNo string `json:"taskNo"`
+	}
+	BatchTaskCancelReq {
+		TaskNo string `json:"taskNo"`
+	}
+	BatchTaskCreateReq {
+		TaskType int64  `json:"taskType"`
+		TaskName string `json:"taskName,optional"`
+		Params   string `json:"params,optional"`
+	}
+	BatchTaskExportFailedReq {
+		TaskNo string `json:"taskNo"`
+	}
+	BatchTaskExportFailedResp {
+		FileUrl string `json:"fileUrl"`
+	}
+	BatchTaskDetail {
+		ID          int64  `json:"id,string"`
+		TaskNo      string `json:"taskNo"`
+		Iccid       string `json:"iccid"`
+		State       int64  `json:"state"`
+		StateName   string `json:"stateName,optional"`
+		Mydescribe  string `json:"mydescribe,optional"`
+		EndTime     string `json:"endTime,optional"`
+		CreatedTime string `json:"createdTime,optional"`
+	}
+	BatchTaskDetailGetListReq {
+		PageInfo
+		TaskNo string `json:"taskNo"`
+		State  int64  `json:"state,optional"`
+		Iccid  string `json:"iccid,optional"`
+	}
+	BatchTaskDetailGetListResp {
+		PageResp
+		List []*BatchTaskDetail `json:"list"`
+	}
+	BatchTaskDetailExportReq {
+		TaskNo string `json:"taskNo"`
+		State  int64  `json:"state,optional"`
+	}
+	BatchTaskDetailExportResp {
+		FileUrl string `json:"fileUrl"`
+	}
+)
+
+@server (
+	group:      card/batchTask
+	prefix:     /api/v1/things/card/batch-task
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+	@doc (
+		summary:       "获取批量任务列表"
+		description:   "业务说明：获取批量任务列表"
+		authType:      "admin"
+		resource:      "card"
+		action:        "view"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (BatchTaskGetListReq) returns (BatchTaskGetListResp)
+
+	@doc (
+		summary:       "获取批量任务详情"
+		description:   "业务说明：获取批量任务详情"
+		authType:      "admin"
+		resource:      "card"
+		action:        "view"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (BatchTaskGetOneReq) returns (BatchTask)
+
+	@doc (
+		summary:       "导出批量任务失败明细"
+		description:   "业务说明：导出批量任务失败明细为 Excel 并返回下载地址"
+		authType:      "admin"
+		resource:      "card"
+		action:        "export"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler exportFailed
+	post /export-failed (BatchTaskExportFailedReq) returns (BatchTaskExportFailedResp)
+
+	@doc (
+		summary:       "获取批量任务执行明细列表"
+		description:   "业务说明：按状态分页查询批量任务 ICCID 执行明细"
+		authType:      "admin"
+		resource:      "card"
+		action:        "view"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler detailGetList
+	post /detail/get-list (BatchTaskDetailGetListReq) returns (BatchTaskDetailGetListResp)
+
+	@doc (
+		summary:       "导出批量任务执行明细"
+		description:   "业务说明：按状态导出批量任务 ICCID 执行明细为 Excel"
+		authType:      "admin"
+		resource:      "card"
+		action:        "export"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler detailExport
+	post /detail/export (BatchTaskDetailExportReq) returns (BatchTaskDetailExportResp)
+
+	@doc (
+		summary:       "重试批量任务"
+		description:   "业务说明：重试批量任务"
+		authType:      "admin"
+		resource:      "card"
+		action:        "operate"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler retry
+	post /retry (BatchTaskRetryReq)
+
+	@doc (
+		summary:       "取消批量任务"
+		description:   "业务说明：取消批量任务"
+		authType:      "admin"
+		resource:      "card"
+		action:        "operate"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler cancel
+	post /cancel (BatchTaskCancelReq)
+
+	@doc (
+		summary:       "手动创建批量任务"
+		description:   "业务说明：手动创建批量任务，由执行器异步执行"
+		authType:      "admin"
+		resource:      "card"
+		action:        "operate"
+		group:         "things/card"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (BatchTaskCreateReq) returns (WithCode)
+}

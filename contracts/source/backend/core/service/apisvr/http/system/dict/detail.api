@@ -1,0 +1,118 @@
+info(
+    desc: "字典信息"
+	author: "yl"
+	email: "603785348@qq.com"
+)
+
+@server(
+    group: system/dict/detail
+    prefix: /api/v1/system/dict/detail
+    accessCodePrefix: "systemDictManage"
+    accessNamePrefix: "字典管理"
+    accessGroup: "字典管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "添加字典详情"
+        description: "业务说明：为指定字典类型添加具体的字典项，包括展示值、字典值、排序、父子关系等。字典详情是字典分类下的具体选项，用于下拉选择、枚举映射等场景。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/detail"
+        resource: "system/dict/detail"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (DictDetail) returns (WithID)
+
+    @doc(
+        summary: "获取字典详情列表"
+        description: "业务说明：查询指定字典类型下的字典项列表，支持按父节点、状态、标签、值等条件筛选。用于字典管理页面展示字典项，或前端下拉组件获取选项数据。"
+        authType: "platform"
+        group: "system/dict/detail"
+        resource: "system/dict/detail"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (DictDetailGetListReq) returns (DictDetailGetListResp)
+
+    @doc(
+        summary: "更新字典详情"
+        description: "业务说明：修改字典项配置，包括标签、值、排序、状态等，支持部分更新。用于调整字典项的显示顺序、启用禁用状态，变更后立即影响相关业务字段的选择范围。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/detail"
+        resource: "system/dict/detail"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (DictDetail) returns ()
+
+    @doc(
+        summary: "获取字典详情单个"
+        description: "业务说明：查询单个字典项的详细信息，支持按ID或字典编码+值查询。可选返回父级或子级字典项，用于字典项编辑页面加载初始数据，或级联选择器获取子级选项。"
+        authType: "platform"
+        group: "system/dict/detail"
+        resource: "system/dict/detail"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (DictDetailGetOneReq) returns (DictDetail)
+
+    @doc(
+        summary: "删除字典详情"
+        description: "业务说明：删除指定的字典项，删除后该选项不再出现在相关下拉选择中。删除前需确认无业务数据引用该字典值，避免数据完整性问题。树型字典删除父节点会级联影响子节点。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/dict/detail"
+        resource: "system/dict/detail"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+}
+type (
+    DictDetailGetOneReq{
+        ID int64 `json:"id,string,optional"`                                  // 编号
+        DictCode string `json:"dictCode"`
+        Value  string                   `json:"value,optional"`   // 字典值
+        WithFather bool `json:"withFather,optional"`//是否返回父级
+        WithChildren bool `json:"withChildren,optional"`//是否返回子级
+    }
+    DictDetailGetListReq  {
+        Page *PageInfo `json:"page,optional"`                   // 分页信息,只获取一个则不填
+        DictCode string `json:"dictCode"`
+        ParentID int64 `json:"parentID,string,optional"`//父节点
+        Status int64 `json:"status,optional"` // 状态  1:启用,2:禁用
+        Label string `json:"label,optional"`           // 展示值
+        Value string `json:"value,optional"`           // 字典值
+        Values []string `json:"values,optional"` //字典值过滤
+    }
+
+    DictDetailGetListResp  {
+        PageResp
+        List []*DictDetail `json:"list"` //菜单列表
+    }
+    DictDetail{
+        ID int64 `json:"id,string,optional"`                                  // 编号
+        DictCode string `json:"dictCode"`
+        ParentID int64 `json:"parentID,string,optional"`//父节点
+        IDPath string `json:"idPath,optional"`//1-2-3-的格式记录顶级区域到当前id的路径
+        Label string `json:"label,optional"`           // 展示值（编辑场景使用）
+        I18nLabel string `json:"i18nLabel,optional"` // 按当前请求语言翻译后的展示值
+        Value  string                   `json:"value,optional"`   // 字典值
+        Sort   int64                   `json:"sort,optional"`     // 排序标记,默认为1
+        Desc   *string `json:"desc,optional"`      // 模块描述
+        Status int64                   `json:"status,optional"` // 状态  1:启用,2:禁用
+        IsLeaf int64                   `json:"isLeaf,optional"` // 是否是叶子节点(不可修改) 1:是 2:否
+        Expand   map[string]string `json:"expand,optional,omitempty"`      // 自定义数据
+        Parent *DictDetail  `json:"parent,optional,omitempty"`
+        Children []*DictDetail `json:"children,optional,omitempty"`
+    }
+)

@@ -1,0 +1,139 @@
+syntax = "v1"
+
+info(
+    title: "物联卡区域与漫游报表"
+    desc: "同步并查询联通 CMP 区域用量和漫游省份事实"
+    version: "v1"
+)
+
+type (
+    // CardZoneUsage 区域用量报表明细。
+    CardZoneUsage {
+        Iccid string `json:"iccid"` // SIM 卡号
+        RouteCode string `json:"routeCode"` // 通道编码
+        PeriodType string `json:"periodType"` // recent 或 terminal
+        BillingCycle string `json:"billingCycle,optional"` // YYYYMM 账期
+        RatePlan string `json:"ratePlan,optional"` // 资费计划
+        ZoneName string `json:"zoneName"` // 区域名称
+        TermUsageMB float64 `json:"termUsageMB"` // 计费周期用量 MB
+        IncludedUsageMB float64 `json:"includedUsageMB"` // 计划内用量 MB
+        MonthToDateUsageMB float64 `json:"monthToDateUsageMB"` // 当前周期用量 MB
+        IncludedTimeSeconds float64 `json:"includedTimeSeconds"` // 计划内时长（秒）
+        TimeSeconds float64 `json:"timeSeconds"` // 实际连接时长（秒）
+        CollectedTime string `json:"collectedTime"` // 本地采集时间
+    }
+
+    // CardRoamingProvince 漫游省份报表明细。
+    CardRoamingProvince {
+        Iccid string `json:"iccid"` // SIM 卡号
+        RouteCode string `json:"routeCode"` // 通道编码
+        PeriodType string `json:"periodType"` // billing 或 latest
+        BillingCycle string `json:"billingCycle,optional"` // YYYYMM 账期
+        Province string `json:"province"` // 漫游省份
+        UpstreamUpdateTime string `json:"upstreamUpdateTime,optional"` // 上游最近更新时间
+        CollectedTime string `json:"collectedTime"` // 本地采集时间
+    }
+
+    // CardZoneUsageGetListReq 区域用量事实查询请求。
+    CardZoneUsageGetListReq {
+        PageInfo
+        RouteID int64 `json:"routeId,string,optional"` // 通道主键
+        Iccid string `json:"iccid,optional"` // SIM 卡号
+        PeriodType string `json:"periodType,optional"` // recent 或 terminal
+        BillingCycle string `json:"billingCycle,optional"` // YYYYMM 账期
+        ZoneName string `json:"zoneName,optional"` // 区域名称
+    }
+
+    // CardZoneUsageGetListResp 区域用量事实分页响应。
+    CardZoneUsageGetListResp {
+        PageResp
+        List []*CardZoneUsage `json:"list"`
+    }
+
+    // CardRoamingProvinceGetListReq 漫游省份事实查询请求。
+    CardRoamingProvinceGetListReq {
+        PageInfo
+        RouteID int64 `json:"routeId,string,optional"` // 通道主键
+        Iccid string `json:"iccid,optional"` // SIM 卡号
+        PeriodType string `json:"periodType,optional"` // billing 或 latest
+        BillingCycle string `json:"billingCycle,optional"` // YYYYMM 账期
+        Province string `json:"province,optional"` // 漫游省份
+    }
+
+    // CardRoamingProvinceGetListResp 漫游省份事实分页响应。
+    CardRoamingProvinceGetListResp {
+        PageResp
+        List []*CardRoamingProvince `json:"list"`
+    }
+
+    // CardZoneUsageSyncReq 区域用量同步请求。
+    CardZoneUsageSyncReq {
+        RouteID int64 `json:"routeId,string"` // 通道主键
+        Iccids []string `json:"iccids"` // SIM 卡号，最多 50 个
+        PeriodType string `json:"periodType"` // recent 或 terminal
+        BillingCycle string `json:"billingCycle,optional"` // recent 口径必填 YYYYMM
+    }
+
+    // CardRoamingProvinceSyncReq 漫游省份同步请求。
+    CardRoamingProvinceSyncReq {
+        RouteID int64 `json:"routeId,string"` // 通道主键
+        Iccids []string `json:"iccids"` // billing 仅 1 个，latest 最多 20 个
+        PeriodType string `json:"periodType"` // billing 或 latest
+        BillingCycle string `json:"billingCycle,optional"` // billing 口径必填 YYYYMM
+    }
+)
+
+@server(
+    group: card/zoneRoaming
+    prefix: /api/v1/things/card/zone-roaming
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "查询区域用量事实"
+        description: "业务说明：分页查询已同步的联通 CMP 区域用量事实"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getZoneUsageList
+    post /zone-usage/get-list (CardZoneUsageGetListReq) returns (CardZoneUsageGetListResp)
+
+    @doc(
+        summary: "同步区域用量事实"
+        description: "业务说明：按官方 recent 或 terminal 口径拉取区域用量并幂等替换本地事实"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncZoneUsage
+    post /zone-usage/sync (CardZoneUsageSyncReq) returns (WithCode)
+
+    @doc(
+        summary: "查询漫游省份事实"
+        description: "业务说明：分页查询已同步的联通 CMP 漫游省份事实"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getRoamingProvinceList
+    post /roaming-province/get-list (CardRoamingProvinceGetListReq) returns (CardRoamingProvinceGetListResp)
+
+    @doc(
+        summary: "同步漫游省份事实"
+        description: "业务说明：按官方 billing 或 latest 口径拉取漫游省份并幂等替换本地事实"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncRoamingProvince
+    post /roaming-province/sync (CardRoamingProvinceSyncReq) returns (WithCode)
+}

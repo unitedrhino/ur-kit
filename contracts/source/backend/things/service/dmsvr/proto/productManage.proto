@@ -1,0 +1,464 @@
+//--------------------产品管理服务----
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+
+// ProductManageEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message ProductManageEmpty {
+}
+
+// ProductManageWithID 带ID的消息
+// 定义只包含ID的消息类型
+message ProductManageWithID{
+  int64 id = 1; // ID值
+}
+
+// ProductManageWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message ProductManageWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+// ProductManageWithIDChildren 带ID和是否包含子节点标识的消息
+// 定义包含ID和是否包含子节点标识的消息类型
+message ProductManageWithIDChildren{
+  int64 id =1; // ID值
+  bool withChildren =2; // 是否包含子节点
+}
+
+//产品管理
+service ProductManage{
+  rpc productInit(ProductInitReq)  returns (ProductManageEmpty);
+  /*产品管理*/
+  //新增产品
+  rpc productInfoCreate(ProductInfo)     returns (ProductID);
+  //更新产品
+  rpc productInfoUpdate(ProductInfo)     returns (ProductManageEmpty);
+  //删除产品
+  rpc productInfoDelete(ProductID)     returns (ProductManageEmpty);
+  //获取产品信息列表
+  rpc productInfoGetList(ProductInfoGetListReq)     returns (ProductInfoGetListResp);
+  //获取产品信息详情
+  rpc productInfoGetOne(ProductInfoGetOneReq)     returns (ProductInfo);
+  //更新产品配置
+  rpc productConfigUpdate(ProductConfig)     returns (ProductManageEmpty);
+  /*物模型管理*/
+  //更新产品物模型
+  rpc productSchemaUpdate(ProductSchemaUpdateReq)returns (ProductManageEmpty);
+  //新增产品
+  rpc productSchemaCreate(ProductSchemaCreateReq)     returns (ProductManageEmpty);
+  //批量新增物模型,只新增没有的,已有的不处理
+  rpc productSchemaBatchCreate(ProductSchemaBatchCreateReq)     returns (ProductManageEmpty);
+  //删除产品
+  rpc productSchemaDelete(ProductSchemaDeleteReq)     returns (ProductManageEmpty);
+  //获取产品信息列表
+  rpc productSchemaGetList(ProductSchemaGetListReq)     returns (ProductSchemaGetListResp);
+  //删除产品
+  rpc productSchemaTslImport(ProductSchemaTslImportReq)     returns (ProductManageEmpty);
+  //获取产品信息列表
+  rpc productSchemaTslGetOne(ProductSchemaTslGetOneReq)     returns (ProductSchemaTslGetOneResp);
+
+  /*脚本管理*/
+  rpc productCustomGetOne(ProductCustomGetOneReq) returns (ProductCustom);
+  rpc productCustomUpdate(ProductCustom) returns (ProductManageEmpty);
+
+
+  /*产品类型*/
+  //新增产品
+  rpc productCategoryCreate(ProductCategory)     returns (ProductManageWithID);
+  //更新产品
+  rpc productCategoryUpdate(ProductCategory)     returns (ProductManageEmpty);
+  //删除产品
+  rpc productCategoryDelete(ProductManageWithID)     returns (ProductManageEmpty);
+  //获取产品信息列表
+  rpc productCategoryGetList(ProductCategoryGetListReq)     returns (ProductCategoryGetListResp);
+  //获取产品信息详情
+  rpc productCategoryGetOne(ProductManageWithIDChildren)     returns (ProductCategory);
+  //获取产品品类下的物模型列表,绑定的物模型会自动添加到该产品品类及子分类的产品中,并不支持删除
+  rpc productCategorySchemaGetList(ProductCategorySchemaGetListReq) returns(ProductCategorySchemaGetListResp);
+  rpc productCategorySchemaBatchUpdate(ProductCategorySchemaBatchSaveReq) returns(ProductManageEmpty);
+  rpc productCategorySchemaBatchCreate(ProductCategorySchemaBatchSaveReq) returns(ProductManageEmpty);
+  rpc productCategorySchemaBatchDelete(ProductCategorySchemaBatchSaveReq) returns(ProductManageEmpty);
+
+
+  rpc productInfoBatchImport(ProductInfoImportReq) returns(ProductImportResp); //产品导入
+  rpc productInfoBatchExport(ProductInfoExportReq) returns(ProductInfoExportResp); //产品导出
+
+  rpc productCategoryBatchImport(ProductCategoryImportReq) returns(ProductImportResp); //产品导入
+  rpc productCategoryBatchExport(ProductCategoryExportReq) returns(ProductCategoryExportResp); //产品导出
+}
+
+// ProductInitReq 产品初始化请求
+message ProductInitReq{
+//  repeated string initType =1;//thing:物模型
+  repeated string   productIDs = 2; //产品id,不填初始化所有产品
+}
+
+// ProductID 产品ID
+message ProductID{
+  string   productID = 1; //产品id
+}
+
+// ProductInfo 产品信息
+message ProductInfo{
+  string tenantCode =26; //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+  int64   createdTime = 1; //创建时间 只读
+  string   productID = 2; //产品id 只读
+  string  productName = 3; //产品名称
+  int64   authMode = 4; //认证方式:1:账密认证,2:秘钥认证
+  int64   deviceType = 5; //设备类型:1:设备,2:网关,3:子设备
+  int64   categoryID = 6; //产品品类
+  int64   netType = 7; //通讯方式:1:其他,2:wi-fi,3:2G/3G/4G,4:5G,5:BLE,6:LoRaWAN
+  string protocolCode =8; //协议code,默认urMqtt,设备下发只会发送给主协议  urMqtt,urHttp,wumei,aliyun,huaweiyun,tuya
+  google.protobuf.StringValue subProtocolCode =24; //子协议,主协议和子协议传输类型必须不相同, 设备控制下发只会发送给主协议, 当设备是音视频设备但是控制协议需要单独走的时候就可以把主协议定义为普通协议,子协议定义为音视频协议,这样就能实现音视频走音视频协议,控制走子协议
+  int64   autoRegister = 9; //动态注册:1:关闭,2:打开,3:打开并自动创建设备,4:在前面的基础上绑定没有也自动创建
+  string   secret = 10; //动态注册产品秘钥 只读
+  google.protobuf.StringValue   desc = 11; //描述
+  map<string, string> tags = 13; //产品标签
+  string productImg = 14; //产品图片
+  ProductProtocolInfo protocol = 16; //主协议信息
+  ProductProtocolInfo subProtocol = 39; //子协议信息
+  ProductCategory category = 17;
+  map<string,string>protocolConf =18;
+  map<string,string>subProtocolConf =25;
+  google.protobuf.Int64Value  trialTime =38; //试用时间(单位为天,为0不限制)
+  string  sceneMode =19; //场景模式 读写类型: r(只读) rw(可读可写) none(不参与场景)
+  int64 status =20; //产品状态 1:启用 2:禁用 3:开发中
+  map<string,ProductCustomUi> customUi=21; //自定义ui
+  int64 deviceSchemaMode =22; // 设备物模型模式:1:关闭,2:设备自动创建3: 设备自动创建及上报无定义自动创建
+  int64 bindLevel = 23; //绑定级别: 1:强绑定(默认,只有用户解绑之后才能绑定) 2:中绑定(可以通过token强制绑定设备) 3:弱绑定(app可以内部解绑被绑定的设备)
+  ProductConfig config =30; //产品配置
+  int64 onlineHandle   =40; //1: 自动 2: 永远在线
+  int64 default_agent_id =41; //默认绑定的 Agent ID，0 表示未绑定
+  int64 compat_mode =42; //协议兼容模式 1:旧productID(大写D) 2:新productId(小写d,默认)
+}
+
+// ProductProtocolInfo 协议信息
+message ProductProtocolInfo{
+  int64  id = 1;
+  string  name = 2;
+  string code =3; //  iThings,iThings-thingsboard,wumei,aliyun,huaweiyun,tuya
+  string type =4; //协议类型: 普通设备(默认):normal  音视频:media
+  string  transProtocol = 5; // 传输协议: mqtt,tcp,udp
+  string  desc = 6;
+  repeated string  endpoints = 7;
+  string  etcdKey = 8;
+  int64 isEnableSyncProduct =12; //是否支持主动同步产品信息
+  int64 isEnableSyncDevice =13; //是否支持主动同步设备信息
+  repeated ProductProtocolConfigField configFields =9; //配置字段列表,没有可以不传
+  repeated ProductProtocolConfigField productFields =10; //产品需要的配置字段列表
+  repeated ProductProtocolConfigField deviceFields =11; //设备需要的配置字段列表
+}
+
+// ProductProtocolConfigField 协议配置字段（与 domain/protocol.ConfigField 一一对应）
+message ProductProtocolConfigField{
+  int64 id =1;                       //字段ID
+  string group =2;                   //分组名（不传为默认组）
+  string key =3;                     //配置键名
+  string label =4;                   //展示标签
+  bool isRequired =5;                //是否必填
+  int64 sort =6;                     //排序权重
+  string type =7;                    //字段类型: string/int/bool/enum/float/text/password
+  string defaultValue =8;            //默认值
+  string placeholder =9;             //输入提示
+  map<string,string> mapping =10;    //枚举映射（type=enum时有效）
+  string min =11;                    //最小值（type=int/float时有效）
+  string max =12;                    //最大值（type=int/float时有效）
+}
+
+// ProductProtocolConfigInfo 协议配置信息
+message ProductProtocolConfigInfo{
+  int64 id =1;
+  map<string,string> config =2;
+  string desc =3;
+}
+
+// ProductCustomUi 产品自定义UI
+message ProductCustomUi{
+  string path =2;
+  int64 version =3; //版本号,递增
+  bool isUpdateUi=4;
+}
+
+// ProductCategory 产品品类
+message ProductCategory{
+  int64 id = 1;
+  int64 parentID =2;
+  string name = 3;
+  string avatar =4; //品类图片
+  google.protobuf.StringValue desc = 6;
+  string code = 13; //品类编码,全局唯一,创建后不可修改
+  repeated int64 idPath =9;
+  int64 isLeaf =10;
+  int64 deviceCount = 11;
+  int64 order =12; //排序,必须大于等于1,为0代表不修改
+  repeated ProductCategory children =7; //子节点
+}
+
+// ProductConfig 产品配置
+message ProductConfig{
+  string   productID = 1; //产品id 只读
+  DevInit DevInit =2; //设备初始化配置
+}
+
+// DevInit 设备初始化配置
+message DevInit{
+  string tenantCode =1; //设备创建默认分配给的租户
+  int64 projectID =2; //设备创建默认分配给的项目
+  int64 areaID=3; //设备创建默认分配给的区域ID
+  int64 deptID=4; //设备创建默认分配给的部门
+}
+
+// ProductInfoGetOneReq 产品信息读取请求
+message ProductInfoGetOneReq{
+  string   productID = 1; //产品id
+  bool withProtocol =2;
+  bool withCategory=3;
+}
+
+// ProductInfoGetListReq 产品信息列表查询请求
+message ProductInfoGetListReq{
+  PageInfo page = 1; //分页信息 只获取一个则不填
+  string tenantCode =27; //租户号,common 为公共产品归属,所有企业可读,仅 platform 租户下的平台管理员可维护
+  int64  deviceType = 2; //过滤设备类型:0:全部,1:设备,2:网关,3:子设备
+  repeated int64 deviceTypes =10;
+  string keyword = 28; //同时模糊匹配产品名称和产品ID
+  string  productName = 3; //过滤条件: 产品名称
+  repeated string   productIDs = 4; //过滤产品id列表
+  map<string, string> tags = 5; //key tag过滤查询,非模糊查询 为tag的名,value为tag对应的值
+  map<string,string> protocolConf = 6; //协议配置查询
+  string protocolCode =7;
+  string protocolType = 25; //协议类型
+  string protocolTrans = 26; //传输层协议类型
+  bool withProtocol =8;
+  bool withCategory=9;
+  string  sceneMode =16; //场景模式 读写类型: r(只读) rw(可读可写) none(不参与场景)
+  repeated string  sceneModes =17; //场景模式 读写类型: r(只读) rw(可读可写) none(不参与场景)
+  int64 status =20; //产品状态 1:启用 2:禁用 3:开发中
+  repeated int64 statuses =21; //产品状态 1:启用 2:禁用 3:开发中
+  int64   netType = 11; //通讯方式:1:其他,2:wi-fi,3:2G/3G/4G,4:5G,5:BLE,6:LoRaWAN
+  int64 projectID =12; //项目id,只获取项目下有设备的
+  int64 areaID = 22; //区域下有设备的产品列表
+  string areaIDPath=24; //区域路径过滤
+  repeated int64   categoryIDs = 23; //产品品类
+}
+
+// ProductInfoGetListResp 产品信息列表查询响应
+message ProductInfoGetListResp{
+  repeated ProductInfo list = 1; //产品信息
+  int64  total = 2; //总数(只有分页的时候会返回)
+}
+
+// ProductSchemaUpdateReq 产品物模型更新请求
+message ProductSchemaUpdateReq{
+  ProductSchemaInfo info = 1; //物模型信息
+
+}
+
+// ProductSchemaInfo 产品物模型信息
+message ProductSchemaInfo{
+  string tenantCode = 18;
+  string productID = 1; //产品id  必填
+  int64 type = 2; //物模型类型 1:property属性 2:event事件 3:action行为
+  int64 tag = 3; //物模型标签 1:自定义 2:可选 3:必选  必选不可删除
+  string identifier = 4; //标识符
+  google.protobuf.StringValue name = 5; //功能名称
+  google.protobuf.StringValue desc = 6; //描述
+  int64 required = 7; //是否必须 1:是 2:否
+  int64 isCanSceneLinkage =8; //是否支持场景联动控制
+  int64 funcGroup =14; // 功能分类: 1:普通功能 2:系统功能
+  // int64 userPerm =15; //用户权限操作: 1:r(只读) 3:rw(可读可写)
+  // int64 controlMode = 16; //控制模式: 1: 可以群控,可以单控  2:只能单控
+  // int64 recordMode = 10; // 1(默认) 记录历史记录 2 只记录差异值 3 不记录历史记录
+  // int64 isPassword = 17; // 是否是密码类型,密码类型需要加掩码
+  /*
+    affordance 各功能类型的详细参数定义(JSON)。由字段 type 决定其结构:
+
+    1) type=1 PropertyAffordance (属性能力)
+       - isUseShadow: bool  是否使用设备影子。true: 设备离线时写入影子，在线直发
+       - isNoRecord:  bool  是否不存储历史记录。true: 不落库，仅保留最新
+       - define:      object 数据定义(Define)。描述该属性的数据类型、取值范围/枚举、单位、步进等
+       - mode:        int    读写类型(PropertyMode)。1: r(只读) 2: rw(可读可写)
+       - JSON 示例:
+         {"isUseShadow":true,"isNoRecord":false,"define":{"type":"int","min":0,"max":100,"unit":"%"},"mode":2}
+
+    2) type=2 EventAffordance (事件能力)
+       - type:   string  事件类型(EventType)。取值: info(信息) / alert(告警) / fault(故障)
+       - params: object  事件参数(Params)。键为参数名，值为参数定义(同 Define)
+       - JSON 示例:
+         {"type":"alert","params":{"code":{"type":"string"},"level":{"type":"enum","enum":["L1","L2","L3"]}}}
+
+    3) type=3 ActionAffordance (行为能力)
+       - dir:    string  调用方向(ActionDir)。如 up/down，表示触发/响应方向
+       - input:  object  调用入参(Params)。键为参数名，值为参数定义(同 Define)
+       - output: object  返回出参(Params)。键为参数名，值为参数定义(同 Define)
+       - JSON 示例:
+         {"dir":"down","input":{"switch":{"type":"bool"}},"output":{"result":{"type":"int","enum":[0,1]}}}
+
+    参考: things/share/domain/schema/affordance.go
+  */
+  google.protobuf.StringValue affordance = 11; //各功能类型参数(JSON)
+  string extendConfig = 12; //拓展参数
+  int64 order =13; //排序
+}
+
+// ProductSchemaCreateReq 产品物模型创建请求
+message ProductSchemaCreateReq{
+  ProductSchemaInfo info = 1; //物模型信息
+}
+
+// ProductSchemaBatchCreateReq 产品物模型批量创建请求
+message ProductSchemaBatchCreateReq{
+  string productID = 1;
+  repeated  string identifiers = 3; //要导入的标识符列表
+  repeated ProductSchemaInfo list = 2; //物模型信息
+}
+
+// ProductSchemaDeleteReq 产品物模型删除请求
+message ProductSchemaDeleteReq{
+  string productID = 1; //产品id  如果为空返回所有产品的信息
+  string identifier = 2; //标识符
+
+}
+
+// ProductSchemaGetListReq 产品物模型列表查询请求
+message ProductSchemaGetListReq{
+  PageInfo page = 1; //分页信息 只获取一个则不填
+  string productID = 2; //产品id  必填
+  int64  type = 3; //物模型类型 1:property属性 2:event事件 3:action行为
+  repeated int64 types =17;
+  int64  tag = 4; //过滤条件: 物模型标签 1:自定义 2:可选 3:必选
+  repeated string   identifiers = 5; //过滤标识符列表
+  string name =6; //标识符名字过滤
+  int64 isCanSceneLinkage =8; //是否支持场景联动控制
+  int64 funcGroup =14; // 功能分类: 1:普通功能 2:系统功能
+  int64 userPerm =15; //用户权限操作: 1:r(只读) 3:rw(可读可写)
+  string  propertyMode =16; //属性类型可用 读写类型: 1:r(只读) 2:rw(可读可写)
+  int64 controlMode = 18; //控制模式: 1: 可以群控,可以单控  2:只能单控
+
+}
+
+// ProductSchemaGetListResp 产品物模型列表查询响应
+message ProductSchemaGetListResp{
+  repeated ProductSchemaInfo list = 1;
+  int64  total = 2; //总数(只有分页的时候会返回)
+}
+
+// ProductSchemaTslImportReq 产品物模型TSL导入请求
+message ProductSchemaTslImportReq{
+  string   productID = 1; //产品id
+  string   tsl = 2; //物模型tsl
+}
+
+// ProductSchemaTslGetOneReq 产品物模型TSL读取请求
+message ProductSchemaTslGetOneReq{
+  string   productID = 1; //产品id
+}
+
+// ProductSchemaTslGetOneResp 产品物模型TSL读取响应
+message ProductSchemaTslGetOneResp{
+  string   tsl = 1; //物模型tsl
+}
+
+// ProductCustomGetOneReq 产品脚本读取请求
+message ProductCustomGetOneReq{
+  string productID = 1;
+}
+
+// ProductCustom 产品脚本
+message ProductCustom{
+  string productID = 1;
+  int64 scriptLang = 3; //脚本语言类型（默认JavaScript） 1:JavaScript 2:lua 3:python
+  google.protobuf.StringValue transformScript = 2; //协议转换脚本
+  google.protobuf.StringValue loginAuthScript = 5; //登录认证脚本
+  repeated CustomTopic customTopics = 4; //自定义topic信息 只有mqtt协议有用
+}
+
+// CustomTopic 自定义Topic
+message CustomTopic{
+  string topic = 1;//自定义主题需要以$custom 并包含设备名称{deviceName}及产品名称{productID}
+  int64 direction = 2; //1:上行 2:下行 3:双向
+}
+
+// ProductCategoryGetListReq 产品品类列表查询请求
+message ProductCategoryGetListReq{
+  PageInfo page = 1; //分页信息 只获取一个则不填
+  string  name = 2; //过滤名字
+  int64 parentID = 3;
+  repeated int64 ids = 4;
+  int64 projectID =5; //项目id,只获取项目下有设备的
+  string code = 6; //按品类编码过滤
+}
+
+// ProductCategoryGetListResp 产品品类列表查询响应
+message ProductCategoryGetListResp{
+  repeated ProductCategory list = 1; //产品信息
+  int64  total = 2; //总数(只有分页的时候会返回)
+}
+
+// ProductCategorySchemaGetListReq 产品品类物模型列表查询请求
+message ProductCategorySchemaGetListReq{
+  int64 productCategoryID = 1;
+  bool withFather =8; //同时返回父节点的物模型
+}
+
+// ProductCategorySchemaItem 产品品类物模型项（含名称）
+message ProductCategorySchemaItem{
+  string identifier = 1; // 标识符
+  string name = 2;      // 功能名称（来自公共物模型）
+}
+
+// ProductCategorySchemaGetListResp 产品品类物模型列表查询响应
+message ProductCategorySchemaGetListResp{
+  repeated string   identifiers = 5; // 过滤标识符列表（兼容保留）
+  repeated ProductCategorySchemaItem list = 6; // 标识符与名称列表
+}
+
+// ProductCategorySchemaBatchSaveReq 产品品类物模型批量保存请求
+message ProductCategorySchemaBatchSaveReq{
+  int64 productCategoryID = 1;
+  repeated string   identifiers = 5; //过滤标识符列表
+}
+
+// ProductInfoImportReq 产品导入请求
+message ProductInfoImportReq{
+  string productsFile =2; //产品数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProductInfoExportReq 产品导出请求
+message  ProductInfoExportReq{
+    repeated string productIDs =1;
+}
+
+// ProductInfoExportResp 产品导出响应
+message  ProductInfoExportResp{
+  string productsFile =2; //产品数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProductCategoryImportReq 产品品类导入请求
+message ProductCategoryImportReq{
+  string categoriesFile =1; //品类数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProductCategoryExportReq 产品品类导出请求
+message  ProductCategoryExportReq{
+    repeated int64 ids =1; //产品导出的详情信息
+}
+
+// ProductCategoryExportResp 产品品类导出响应
+message  ProductCategoryExportResp{
+  string categoriesFile =1; //品类数据文件的 OSS 地址（ZIP 压缩包）
+}
+
+// ProductImportResp 导入响应
+message ProductImportResp{
+  int64 total =1; //导入总接口数
+  int64  errCount =2; //失败数
+  int64  ignoreCount =3; //忽略数
+  int64  succCount =4; //成功数
+}

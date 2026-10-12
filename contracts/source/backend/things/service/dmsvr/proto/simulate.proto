@@ -1,0 +1,30 @@
+// 本文件定义规则引擎任务开发会话及设备模拟上报 RPC。
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+// Simulate 复用已有 RPC 通道承载任务开发会话和可选的设备上报能力，不负责调度。
+service Simulate {
+  rpc aiTaskToolSession(AiTaskToolSessionReq) returns (AiTaskToolSessionResp);
+  rpc deviceSimulateReport(DeviceSimulateReportReq) returns (DeviceSimulateReportResp);
+}
+// AiTaskToolSessionReq 通用项目任务开发上下文。
+message AiTaskToolSessionReq {
+  int64 projectID = 1; // 项目 ID，未指定时使用请求上下文
+  int64 cloneGroupID = 2; // 必须与项目精确匹配的分身组
+  string prompt = 3; // 可选任务需求
+}
+// AiTaskToolSessionResp 返回项目开发分身和开发约定。
+message AiTaskToolSessionResp {
+  int64 cloneID = 1; // 开发分身 ID
+  string persona = 2; // 开发约定
+}
+// DeviceSimulateReportReq 向设备注入符合物模型的属性值。
+message DeviceSimulateReportReq {
+  int64 projectID = 1; // 项目 ID
+  string productID = 2; // 产品 ID
+  string deviceName = 3; // 设备名称
+  map<string, string> data = 4; // 属性标识与字符串形式的属性值
+}
+// DeviceSimulateReportResp 保持空响应合同，使用本模块消息避免生成器遗漏跨文件返回类型别名。
+message DeviceSimulateReportResp {}

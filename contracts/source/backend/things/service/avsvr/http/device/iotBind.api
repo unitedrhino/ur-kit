@@ -1,0 +1,93 @@
+syntax = "v1"
+
+// 音视频设备与 IoT 设备绑定接口（iot-bind）
+// 用于设备详情页"设备接入"配置页：将 dm_device_info 的 IoT 设备与 av_device_info 音视频设备建立绑定关系。
+
+info(
+    title: "音视频设备 IoT 绑定"
+    desc: "音视频设备与 IoT 设备（dm_device_info）的绑定查询、绑定保存与解绑"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+// AvDeviceIotBindGetOneReq 查询音视频设备与 IoT 设备的绑定关系请求
+type AvDeviceIotBindGetOneReq {
+    ProductID  string `json:"productID"`  // IoT 产品 ID
+    DeviceName string `json:"deviceName"` // IoT 设备标识（dm_device_info.device_name）
+}
+
+// AvDeviceIotBindGetOneResp 查询音视频设备与 IoT 设备的绑定关系响应
+// avDeviceID 为空表示该 IoT 设备尚未绑定音视频设备。
+type AvDeviceIotBindGetOneResp {
+    AvDeviceID  string              `json:"avDeviceID,optional"`  // 绑定的音视频设备 ID，空=未绑定
+    ChannelID   string              `json:"channelID,optional"`   // 绑定的音视频通道 ID，空=未绑定
+    Device      AvDeviceInfo        `json:"device,optional"`      // 音视频设备信息（未绑定时为空对象）
+    Channels    []AvDeviceChannel   `json:"channels,optional"`    // 该音视频设备的通道列表
+}
+
+// AvDeviceIotBindSaveReq 保存音视频设备与 IoT 设备的绑定关系请求
+// mode=bind 时绑定已存在的音视频设备；mode=quick 时按 streamURL 自动建档音视频设备与通道。
+type AvDeviceIotBindSaveReq {
+    ProductID  string `json:"productID"`              // IoT 产品 ID
+    DeviceName string `json:"deviceName"`             // IoT 设备标识（dm_device_info.device_name）
+    Mode       string `json:"mode"`                   // 绑定模式：bind（绑定已有设备）/ quick（按流地址快速建档）
+    AvDeviceID string `json:"avDeviceID,optional"`    // 音视频设备 ID（mode=bind 必填）
+    ChannelID  string `json:"channelID,optional"`     // 音视频通道 ID（mode=bind 选填）
+    StreamURL  string `json:"streamURL,optional"`     // 拉流地址（mode=quick 必填，支持 rtsp:// rtmp:// webrtc://）
+    Name       string `json:"name,optional"`          // 音视频设备/通道名称（mode=quick 选填，默认取流地址 app/stream）
+}
+
+// AvDeviceIotBindSaveResp 保存音视频设备与 IoT 设备的绑定关系响应
+type AvDeviceIotBindSaveResp {
+    AvDeviceID string `json:"avDeviceID"` // 绑定的音视频设备 ID
+    ChannelID  string `json:"channelID"`  // 绑定的音视频通道 ID
+}
+
+// AvDeviceIotBindUnbindReq 解绑音视频设备与 IoT 设备的绑定关系请求
+type AvDeviceIotBindUnbindReq {
+    ProductID  string `json:"productID"`  // IoT 产品 ID
+    DeviceName string `json:"deviceName"` // IoT 设备标识（dm_device_info.device_name）
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "查询音视频设备与 IoT 设备的绑定关系"
+        description: "业务说明：按 IoT 产品 ID 与设备标识查询其绑定的音视频设备与通道，未绑定时 avDeviceID 返回空。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceIotBindGetOne
+    post /api/v1/av/device/iot-bind/get-one (AvDeviceIotBindGetOneReq) returns (AvDeviceIotBindGetOneResp)
+
+    @doc(
+        summary: "保存音视频设备与 IoT 设备的绑定关系"
+        description: "业务说明：mode=bind 绑定已有音视频设备与通道；mode=quick 按拉流地址自动建档音视频设备与通道后绑定。同一 IoT 设备重复绑定时先解绑旧绑定再建新绑定。"
+        authType: "admin"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceIotBindSave
+    post /api/v1/av/device/iot-bind/save (AvDeviceIotBindSaveReq) returns (AvDeviceIotBindSaveResp)
+
+    @doc(
+        summary: "解绑音视频设备与 IoT 设备的绑定关系"
+        description: "业务说明：清除绑定列与 IoT 设备协议配置中的音视频绑定键；若音视频设备为快速建档且无其他引用则删除其通道与设备记录。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceIotBindUnbind
+    post /api/v1/av/device/iot-bind/unbind (AvDeviceIotBindUnbindReq) returns (EmptyResp)
+}

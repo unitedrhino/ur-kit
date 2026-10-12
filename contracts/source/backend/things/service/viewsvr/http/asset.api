@@ -1,0 +1,122 @@
+import "common.api"
+
+@server(
+	group: view/asset
+	prefix: /api/v1/view/asset
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "上传资源"
+	    authType: "admin"
+	    description: "业务说明：上传或登记可视化项目使用的资源文件，包含图片、视频、音频等素材。用于项目素材管理。"
+	    resource: "viewAsset"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler upload
+	post /upload (AssetUploadReq) returns ()
+	@doc(
+	    summary: "上传内嵌页面包"
+	    authType: "admin"
+	    description: "业务说明：通过multipart/formdata上传内嵌页面zip页面包（file字段），平台解压托管到对象存储私有桶并登记场景包资产，返回入口页面URL供内嵌页面组件引用。formdata参数：screenId（必传，归属大屏/模板id，按其归属鉴权）、assetId（可选，传则覆盖既有场景包）、name（可选，资产名称）。zip需含index.html（根目录或唯一一级子目录），仅允许静态资源扩展名，大小与文件数受平台限制。"
+	    resource: "viewAsset"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	    injectFormdataParam: "file"
+	)
+	@handler uploadZip
+	post /upload-zip (Empty) returns (AssetUploadZipResp)
+	@doc(
+	    summary: "更新资源"
+	    authType: "admin"
+	    description: "业务说明：更新可视化资源的名称、类型或标签信息，用于素材维护。"
+	    resource: "viewAsset"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler update
+	post /update (AssetUpdateReq) returns ()
+	@doc(
+	    summary: "删除资源"
+	    authType: "admin"
+	    description: "业务说明：删除可视化资源库中的素材记录。用于清理不再使用的资源。"
+	    resource: "viewAsset"
+	    action: "delete"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (AssetDeleteReq) returns ()
+	@doc(
+	    summary: "获取资源列表"
+	    authType: "admin"
+	    description: "业务说明：分页查询可视化资源列表，支持按名称、类型、分组和格式筛选。用于素材库浏览。"
+	    resource: "viewAsset"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (AssetGetListReq) returns (AssetGetListResp)
+}
+
+type (
+	AssetUploadReq {
+		Name    string `json:"name,optional"`           //资源名称
+		Type    string `json:"type,optional"`           //类型: image/video/audio/other
+		Url     string `json:"url,optional"`            //资源URL
+		Tags    string `json:"tags,optional"`           //标签,逗号分隔
+		Size    int64  `json:"size,optional"`           //文件大小(字节)
+		GroupId int64  `json:"groupId,string,optional"` //分组id
+	}
+
+	AssetUploadZipResp {
+		ID        int64  `json:"id,string"`   //场景包资产id
+		EntryUrl  string `json:"entryUrl"`    //入口页面URL（内嵌页面组件直接引用）
+		FileCount int64  `json:"fileCount"`   //包内文件数
+		Size      int64  `json:"size"`        //解压后总大小（字节）
+	}
+
+	AssetUpdateReq {
+		ID      int64  `json:"id,string"`           //资源id
+		Name    string `json:"name,optional"`       //资源名称
+		Type    string `json:"type,optional"`       //类型
+		Tags    string `json:"tags,optional"`       //标签
+		GroupId int64  `json:"groupId,string,optional"` //分组id
+	}
+
+	AssetDeleteReq {
+		ID int64 `json:"id,string"`              //资源id
+	}
+
+	AssetGetListReq {
+		Page    *PageInfo `json:"page,optional"`           //分页信息
+		Name    string    `json:"name,optional"`           //名称模糊查询
+		Type    string    `json:"type,optional"`           //类型筛选
+		GroupId int64     `json:"groupId,string,optional"` //分组筛选
+		Format  string    `json:"format,optional"`         //文件后缀筛选
+	}
+
+	AssetView {
+		ID          int64  `json:"id,string,optional"`          //资源id
+		TenantCode  string `json:"tenantCode,optional"`         //租户编码
+		Name        string `json:"name,optional"`               //资源名称
+		Type        string `json:"type,optional"`               //类型
+		Url         string `json:"url,optional"`                //资源URL
+		Tags        string `json:"tags,optional"`               //标签
+		Size        int64  `json:"size,optional"`               //文件大小
+		GroupId     int64  `json:"groupId,string,optional"`     //分组id
+		CreatedTime int64  `json:"createdTime,string,optional"` //创建时间
+		UpdatedTime int64  `json:"updatedTime,string,optional"` //更新时间
+	}
+
+	AssetGetListResp {
+		List  []*AssetView `json:"list"`           //资源列表
+		Total int64        `json:"total,optional"` //总数
+		Num   int64        `json:"num,optional"`   //返回数量
+	}
+)

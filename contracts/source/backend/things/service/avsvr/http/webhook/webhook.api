@@ -1,0 +1,241 @@
+syntax = "v1"
+
+// ZLM webhook 接收接口
+// 这些接口由 ZLM 主动调用，用于上报流状态、录像、心跳等信息。
+
+info(
+    title: "ZLM Webhook"
+    desc: "接收 ZLM 媒体服务器事件回调"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvWebhookStreamNoneReaderReq {
+    MediaServerId string `json:"mediaServerId"`  // 媒体服务器 ID
+    App           string `json:"app"`             // 应用名
+    Stream        string `json:"stream"`          // 流 ID
+    Schema        string `json:"schema"`          // 协议 schema
+    Vhost         string `json:"vhost"`           // 虚拟主机
+}
+
+// AvWebhookStreamNoneReaderResp ZLM 无观众事件响应
+// close=true 表示允许 ZLM 关闭流；close=false 表示保持流（用于持续录像）。
+type AvWebhookStreamNoneReaderResp {
+    Code int    `json:"code"`         // 0 表示成功
+    Msg  string `json:"msg,optional"` // 错误信息
+    Close bool  `json:"close"`        // 是否关闭流
+}
+
+type AvWebhookStreamChangedReq {
+    MediaServerId string `json:"mediaServerId"`  // 媒体服务器 ID
+    App           string `json:"app"`             // 应用名
+    Stream        string `json:"stream"`          // 流 ID
+    Schema        string `json:"schema"`          // 协议 schema
+    Vhost         string `json:"vhost"`           // 虚拟主机
+    Regist        bool   `json:"regist"`          // 注册/注销
+}
+
+// AvWebhookRecordMp4Req ZLM 录像完成事件请求
+// 以下字段名为 ZLM 原始字段，保持 snake_case 以兼容 ZLM 回调协议。
+type AvWebhookRecordMp4Req {
+    MediaServerId string  `json:"mediaServerId"`   // 媒体服务器 ID
+    App           string  `json:"app"`             // 应用名
+    Stream        string  `json:"stream"`          // 流 ID
+    Vhost         string  `json:"vhost"`           // 虚拟主机
+    FileName      string  `json:"file_name"`       // 文件名
+    FilePath      string  `json:"file_path"`       // 文件路径
+    FileSize      int64   `json:"file_size"`       // 文件大小
+    StartTime     float64 `json:"start_time"`      // 开始时间戳（ZLM 可能以浮点数字符串上报）
+    TimeLen       float64 `json:"time_len"`        // 录像时长（秒，ZLM 可能以浮点数字符串上报）
+    URL           string  `json:"url,optional"`    // 相对播放 URL
+    Folder        string  `json:"folder,optional"` // 文件目录
+}
+
+type AvWebhookServerKeepaliveReq {
+    MediaServerId string `json:"mediaServerId"`  // 媒体服务器 ID
+}
+
+type AvWebhookServerStartedReq {
+    MediaServerId string `json:"mediaServerId"`  // 媒体服务器 ID
+}
+
+type AvWebhookServerShutdownReq {
+    MediaServerId string `json:"mediaServerId"`  // 媒体服务器 ID
+}
+
+type AvWebhookResp {
+    Code int    `json:"code"` // 0 表示成功
+    Msg  string `json:"msg,optional"` // 错误信息
+}
+
+// AvWebhookPublishReq ZLM 推流鉴权事件请求
+// 触发时机：rtsp/rtmp/rtp 推流时；返回 code=0 表示允许推流。
+type AvWebhookPublishReq {
+    MediaServerId string `json:"mediaServerId"`   // 媒体服务器 ID
+    App           string `json:"app"`              // 应用名
+    Stream        string `json:"stream"`           // 流 ID
+    Schema        string `json:"schema"`           // 协议 schema
+    Vhost         string `json:"vhost"`            // 虚拟主机
+    Params        string `json:"params,optional"` // 推流 URL 参数，如 sign=xxx
+}
+
+// AvWebhookPlayReq ZLM 播放鉴权事件请求
+// 触发时机：rtsp/rtmp/http-flv/ws-flv/hls 播放时。
+type AvWebhookPlayReq {
+    MediaServerId string `json:"mediaServerId"`   // 媒体服务器 ID
+    App           string `json:"app"`              // 应用名
+    Stream        string `json:"stream"`           // 流 ID
+    Schema        string `json:"schema"`           // 协议 schema
+    Vhost         string `json:"vhost"`            // 虚拟主机
+    Params        string `json:"params,optional"` // 播放 URL 参数
+}
+
+// AvWebhookStreamNotFoundReq ZLM 流不存在事件请求
+// 触发时机：播放不存在的流时；后端可触发拉流/推流上线。
+type AvWebhookStreamNotFoundReq {
+    MediaServerId string `json:"mediaServerId"`      // 媒体服务器 ID
+    App           string `json:"app"`                // 应用名
+    Stream        string `json:"stream"`             // 流 ID
+    AppName       string `json:"appName,optional"`   // lalmax 兼容应用名
+    StreamName    string `json:"streamName,optional"`// lalmax 兼容流名
+    Schema        string `json:"schema"`             // 协议 schema
+    Vhost         string `json:"vhost"`              // 虚拟主机
+}
+
+// AvWebhookRtpServerTimeoutReq ZLM RTP 服务器超时事件请求
+// 以下字段名为 ZLM 原始字段，保持 snake_case 以兼容 ZLM 回调协议。
+// 注意：ZLM 该 hook 上报的 ssrc 固定为 JSON number（uint32），必须声明 int64；
+// 若声明 string，go-zero 反序列化会以 "type mismatch" 400 拒绝，导致超时清理失效。
+type AvWebhookRtpServerTimeoutReq {
+    MediaServerId string `json:"mediaServerId"`    // 媒体服务器 ID
+    LocalPort     int64  `json:"local_port"`        // 本地端口
+    SSRC          int64  `json:"ssrc"`              // SSRC（ZLM 固定上报 JSON number）
+    StreamID      string `json:"stream_id"`         // 流 ID
+}
+
+@server(
+    middleware: WebhookAuthWare // ZLM 回调来源校验（安全修复：媒体服务器 IP 白名单或 secret 参数）
+)
+service av-api {
+    @doc(
+        summary: "ZLM 无观众事件回调"
+        description: "业务说明：接收 ZLM 无观众事件，返回是否允许关闭流。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookStreamNoneReader
+    post /api/v1/av/webhook/stream/none/reader (AvWebhookStreamNoneReaderReq) returns (AvWebhookStreamNoneReaderResp)
+
+    @doc(
+        summary: "ZLM 流变更事件回调"
+        description: "业务说明：接收 ZLM 流注册/注销事件。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookStreamChanged
+    post /api/v1/av/webhook/stream/changed (AvWebhookStreamChangedReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 录像完成事件回调"
+        description: "业务说明：接收 ZLM MP4 录像完成事件，入库录像记录。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookRecordMp4
+    post /api/v1/av/webhook/record/mp4 (AvWebhookRecordMp4Req) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 心跳事件回调"
+        description: "业务说明：接收 ZLM 心跳事件，更新媒体服务器在线状态。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookServerKeepalive
+    post /api/v1/av/webhook/server/keepalive (AvWebhookServerKeepaliveReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 启动事件回调"
+        description: "业务说明：接收 ZLM 启动完成事件。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookServerStarted
+    post /api/v1/av/webhook/server/started (AvWebhookServerStartedReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 关闭事件回调"
+        description: "业务说明：接收 ZLM 关闭事件。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookServerShutdown
+    post /api/v1/av/webhook/server/shutdown (AvWebhookServerShutdownReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 推流鉴权事件回调"
+        description: "业务说明：接收 ZLM 推流鉴权请求，返回 code=0 表示允许推流。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookPublish
+    post /api/v1/av/webhook/publish (AvWebhookPublishReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 播放鉴权事件回调"
+        description: "业务说明：接收 ZLM 播放鉴权请求，返回 code=0 表示允许播放。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookPlay
+    post /api/v1/av/webhook/play (AvWebhookPlayReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM 流不存在事件回调"
+        description: "业务说明：接收 ZLM 流不存在事件，触发按需拉流。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookStreamNotFound
+    post /api/v1/av/webhook/stream/not/found (AvWebhookStreamNotFoundReq) returns (AvWebhookResp)
+
+    @doc(
+        summary: "ZLM RTP 服务器超时事件回调"
+        description: "业务说明：接收 ZLM RTP 服务器超时事件。"
+        authType: "public"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvWebhookRtpServerTimeout
+    post /api/v1/av/webhook/rtp/server/timeout (AvWebhookRtpServerTimeoutReq) returns (AvWebhookResp)
+}

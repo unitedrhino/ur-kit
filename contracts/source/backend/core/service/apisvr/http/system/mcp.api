@@ -1,0 +1,29 @@
+info(
+    title: "系统级MCP服务"
+    desc: "系统级MCP服务，提供天气等系统能力工具"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: system/mcp
+    prefix: /api/v1/system/mcp
+    accessCodePrefix: "systemMcp"
+    accessNamePrefix: "system-mcp服务"
+    accessGroup: "ai"
+    middleware:  InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "Stateless MCP HTTP"
+        description: "业务说明：提供给 aisvr 直连调用的无状态 MCP HTTP 入口，用于 tools/list 与 tools/call 等 JSON-RPC 请求。"
+        authType: "all"
+        group: "system/mcp"
+        resource: "system/mcp"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler run
+    post /run () returns ()
+}

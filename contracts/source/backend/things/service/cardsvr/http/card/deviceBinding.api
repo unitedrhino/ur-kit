@@ -1,0 +1,209 @@
+syntax = "v1"
+
+info(
+    title: "设备物联卡绑定"
+    desc: "当前企业蜂窝设备与物联卡的匹配、绑定、换绑、解绑和历史查询"
+    version: "v1"
+)
+
+type (
+    // CardDeviceBindingGetOneReq 按当前企业设备查询活动绑定。
+    CardDeviceBindingGetOneReq {
+        DeviceID int64 `json:"deviceId,string"`
+    }
+
+    // CardDeviceBindingMatchReq 按设备和 ICCID 匹配当前企业卡。
+    CardDeviceBindingMatchReq {
+        DeviceID int64  `json:"deviceId,string"`
+        Iccid    string `json:"iccid"`
+    }
+
+    // CardDeviceBindingGetListReq 分页查询当前企业绑定历史。
+    CardDeviceBindingGetListReq {
+        PageInfo
+        DeviceID int64 `json:"deviceId,string,optional"`
+        CardID   int64 `json:"cardId,string,optional"`
+    }
+
+    // CardDeviceBindingBindReq 将已有卡绑定到设备。
+    CardDeviceBindingBindReq {
+        DeviceID       int64 `json:"deviceId,string"`
+        CardID         int64 `json:"cardId,string"`
+        ConfirmReplace bool  `json:"confirmReplace,optional"`
+    }
+
+    // CardDeviceBindingCreateAndBindReq 快捷创建卡并绑定设备。
+    CardDeviceBindingCreateAndBindReq {
+        DeviceID       int64  `json:"deviceId,string"`
+        Iccid          string `json:"iccid"`
+        ChannelID      int64  `json:"channelId,string,optional"`
+        PackageID      string `json:"packageId,optional"`
+        Remarks        string `json:"remarks,optional"`
+        ConfirmReplace bool   `json:"confirmReplace,optional"`
+    }
+
+    // CardDeviceBindingUnbindReq 按当前企业绑定关系解绑。
+    CardDeviceBindingUnbindReq {
+        BindingID int64 `json:"bindingId,string"`
+    }
+
+    // CardDeviceBindingSummary 返回当前企业设备与卡的绑定摘要。
+    CardDeviceBindingSummary {
+        BindingID   int64  `json:"bindingId,string"`
+        CardID      int64  `json:"cardId,string"`
+        Iccid       string `json:"iccid"`
+        DeviceID    int64  `json:"deviceId,string"`
+        ProductID   string `json:"productId"`
+        DeviceName  string `json:"deviceName"`
+        DeviceAlias string `json:"deviceAlias,optional"`
+        BindSource  string `json:"bindSource"`
+        BoundTime   int64  `json:"boundTime"`
+        UnboundTime int64  `json:"unboundTime,optional"`
+        ChannelID   int64  `json:"channelId,string,optional"`
+        ChannelName string `json:"channelName,optional"`
+        PackageID   string `json:"packageId,optional"`
+        PackageName string `json:"packageName,optional"`
+    }
+
+    // CardSummary 返回当前企业匹配到的卡和其活动绑定摘要。
+    CardSummary {
+        CardID        int64                     `json:"cardId,string"`
+        Iccid         string                    `json:"iccid"`
+        ChannelID     int64                     `json:"channelId,string,optional"`
+        ChannelName   string                    `json:"channelName,optional"`
+        PackageID     string                    `json:"packageId,optional"`
+        PackageName   string                    `json:"packageName,optional"`
+        ActiveBinding *CardDeviceBindingSummary `json:"activeBinding,optional"`
+    }
+
+    // CardDeviceBindingConflict 返回换绑前必须确认的冲突对象。
+    CardDeviceBindingConflict {
+        DeviceBinding *CardDeviceBindingSummary `json:"deviceBinding,optional"`
+        CardBinding   *CardDeviceBindingSummary `json:"cardBinding,optional"`
+    }
+
+    // MatchResult 返回 ICCID 匹配结果，不要求设备或卡已经存在绑定。
+    MatchResult {
+        DeviceID       int64                      `json:"deviceId,string"`
+        Iccid          string                     `json:"iccid"`
+        Matched        bool                       `json:"matched"`
+        Card           *CardSummary               `json:"card,optional"`
+        CurrentBinding *CardDeviceBindingSummary  `json:"currentBinding,optional"`
+        Conflict       *CardDeviceBindingConflict `json:"conflict,optional"`
+    }
+
+    // CardDeviceBindingGetOneResp 返回设备当前活动绑定。
+    CardDeviceBindingGetOneResp {
+        Binding *CardDeviceBindingSummary `json:"binding,optional"`
+    }
+
+    // CardDeviceBindingMatchResp 返回只读 ICCID 匹配结果。
+    CardDeviceBindingMatchResp {
+        Result MatchResult `json:"result"`
+    }
+
+    // CardDeviceBindingGetListResp 返回当前企业绑定历史。
+    CardDeviceBindingGetListResp {
+        PageResp
+        List []*CardDeviceBindingSummary `json:"list"`
+    }
+
+    // CardDeviceBindingBindResp 返回已有卡绑定或冲突结果。
+    CardDeviceBindingBindResp {
+        Binding  *CardDeviceBindingSummary  `json:"binding,optional"`
+        Conflict *CardDeviceBindingConflict `json:"conflict,optional"`
+        Replaced bool                       `json:"replaced"`
+    }
+
+    // CardDeviceBindingCreateAndBindResp 返回快捷创建卡及绑定结果。
+    CardDeviceBindingCreateAndBindResp {
+        Card     *CardSummary               `json:"card,optional"`
+        Binding  *CardDeviceBindingSummary  `json:"binding,optional"`
+        Conflict *CardDeviceBindingConflict `json:"conflict,optional"`
+        Replaced bool                       `json:"replaced"`
+    }
+
+    // CardDeviceBindingUnbindResp 返回已解除的绑定历史摘要。
+    CardDeviceBindingUnbindResp {
+        Binding CardDeviceBindingSummary `json:"binding"`
+    }
+)
+
+@server(
+    group: card/deviceBinding
+    prefix: /api/v1/things/card/device-binding
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "查询设备当前物联卡绑定"
+        description: "业务说明：按当前认证企业的设备主键查询活动绑定，未绑定时返回空 binding"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (CardDeviceBindingGetOneReq) returns (CardDeviceBindingGetOneResp)
+
+    @doc(
+        summary: "匹配设备上报 ICCID"
+        description: "业务说明：只读匹配当前企业卡和双方冲突，不创建卡或绑定"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler match
+    post /match (CardDeviceBindingMatchReq) returns (CardDeviceBindingMatchResp)
+
+    @doc(
+        summary: "查询设备物联卡绑定历史"
+        description: "业务说明：按当前企业设备或卡分页查询绑定、换绑和解绑历史"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardDeviceBindingGetListReq) returns (CardDeviceBindingGetListResp)
+
+    @doc(
+        summary: "绑定已有物联卡"
+        description: "业务说明：将当前企业已有卡绑定到蜂窝设备，冲突确认后执行原子换绑"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler bind
+    post /bind (CardDeviceBindingBindReq) returns (CardDeviceBindingBindResp)
+
+    @doc(
+        summary: "快捷创建物联卡并绑定"
+        description: "业务说明：在同一事务创建当前企业物联卡并绑定设备，逻辑层额外校验 operate 权限"
+        authType: "admin"
+        resource: "card"
+        action: "create"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler createAndBind
+    post /create-and-bind (CardDeviceBindingCreateAndBindReq) returns (CardDeviceBindingCreateAndBindResp)
+
+    @doc(
+        summary: "解绑设备物联卡"
+        description: "业务说明：按当前企业绑定主键幂等解除活动关系，不修改设备上报 ICCID"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler unbind
+    post /unbind (CardDeviceBindingUnbindReq) returns (CardDeviceBindingUnbindResp)
+}

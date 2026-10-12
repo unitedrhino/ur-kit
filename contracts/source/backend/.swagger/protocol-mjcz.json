@@ -1,0 +1,515 @@
+{
+  "components": {
+    "schemas": {
+      "ButtonModifyRequest": {
+        "properties": {
+          "buttonEnable": {
+            "description": " 按键启用状态 0-禁用 1-启用",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "buttonEnable"
+        ],
+        "title": "ButtonModifyRequest",
+        "type": "object"
+      },
+      "CommonResponse": {
+        "properties": {
+          "code": {
+            "description": " 响应状态码，200表示成功",
+            "format": "int32",
+            "type": "integer"
+          },
+          "data": {
+            "description": " 响应数据",
+            "type": "string"
+          },
+          "msg": {
+            "description": " 请求失败原因",
+            "type": "string"
+          },
+          "success": {
+            "description": " 请求是否成功",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "code",
+          "msg",
+          "data",
+          "success"
+        ],
+        "title": "CommonResponse",
+        "type": "object"
+      },
+      "DeviceListItem": {
+        "properties": {
+          "channelNumber": {
+            "description": " 设备可控制的通道数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "dbm": {
+            "description": " 最近一次上报的信号强度",
+            "format": "int32",
+            "type": "integer"
+          },
+          "deviceStatus": {
+            "description": " 设备状态 2-设备在线 3-设备离线",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "channelNumber",
+          "dbm",
+          "deviceStatus"
+        ],
+        "title": "DeviceListItem",
+        "type": "object"
+      },
+      "DeviceListRequest": {
+        "properties": {
+          "sn": {
+            "description": " 设备编号（可选）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn"
+        ],
+        "title": "DeviceListRequest",
+        "type": "object"
+      },
+      "DeviceListResponse": {
+        "properties": {
+          "data": {
+            "description": " 设备列表",
+            "items": {
+              "$ref": "#/components/schemas/DeviceListItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "DeviceListResponse",
+        "type": "object"
+      },
+      "DeviceStatusRequest": {
+        "properties": {
+          "channelNo": {
+            "description": " 通道号，默认1号通道",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "channelNo"
+        ],
+        "title": "DeviceStatusRequest",
+        "type": "object"
+      },
+      "DeviceStatusResponse": {
+        "properties": {
+          "channelNo": {
+            "description": " 通道号",
+            "format": "int32",
+            "type": "integer"
+          },
+          "dbm": {
+            "description": " 最近一次上报的信号强度",
+            "format": "int32",
+            "type": "integer"
+          },
+          "deviceStatus": {
+            "description": " 设备状态 2-设备在线 3-设备离线",
+            "format": "int32",
+            "type": "integer"
+          },
+          "doorStatus": {
+            "description": " 门态传感器状态 0-关闭 1-打开。无门态传感器或设备离线时为null",
+            "format": "int32",
+            "type": "integer"
+          },
+          "lockStatus": {
+            "description": " 设备状态 0-通电（关门）1-断电（开门），设备离线时为null",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "channelNo",
+          "dbm",
+          "deviceStatus",
+          "lockStatus",
+          "doorStatus"
+        ],
+        "title": "DeviceStatusResponse",
+        "type": "object"
+      },
+      "LockRequest": {
+        "properties": {
+          "channelNo": {
+            "description": " 通道号，默认1号通道",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "channelNo"
+        ],
+        "title": "LockRequest",
+        "type": "object"
+      },
+      "PushReq": {
+        "properties": {
+          "data": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": " 设备端口状态变更数据",
+            "type": "object"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          },
+          "type": {
+            "description": " 推送类型 固定为3",
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sn",
+          "type",
+          "data"
+        ],
+        "title": "PushReq",
+        "type": "object"
+      },
+      "RequestHeader": {
+        "properties": {
+          "appKey": {
+            "description": " 平台分配的appKey",
+            "type": "string"
+          },
+          "signature": {
+            "description": " 签名信息",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": " 生成签名所用的13位时间戳",
+            "type": "string"
+          }
+        },
+        "required": [
+          "appKey",
+          "timestamp",
+          "signature"
+        ],
+        "title": "RequestHeader",
+        "type": "object"
+      },
+      "SocketDeviceListItem": {
+        "properties": {
+          "buttonEnable": {
+            "description": " 按键启用状态 0-禁用 1-启用",
+            "format": "int32",
+            "type": "integer"
+          },
+          "csq": {
+            "description": " 设备最近一次上报的信号值",
+            "format": "int32",
+            "type": "integer"
+          },
+          "deviceStatus": {
+            "description": " 设备状态 2-离线 3-在线",
+            "format": "int32",
+            "type": "integer"
+          },
+          "portStatus": {
+            "description": " 端口状态 0-断电 1-通电",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "portStatus",
+          "deviceStatus",
+          "buttonEnable",
+          "csq"
+        ],
+        "title": "SocketDeviceListItem",
+        "type": "object"
+      },
+      "SocketDeviceListRequest": {
+        "properties": {
+          "sn": {
+            "description": " 设备编号（可选）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn"
+        ],
+        "title": "SocketDeviceListRequest",
+        "type": "object"
+      },
+      "SocketDeviceListResponse": {
+        "properties": {
+          "data": {
+            "description": " 设备列表",
+            "items": {
+              "$ref": "#/components/schemas/SocketDeviceListItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "SocketDeviceListResponse",
+        "type": "object"
+      },
+      "SocketOperateRequest": {
+        "properties": {
+          "operateType": {
+            "description": " 操作类型 0-关闭插座 1-打开插座",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "operateType"
+        ],
+        "title": "SocketOperateRequest",
+        "type": "object"
+      },
+      "SocketStatusRequest": {
+        "properties": {
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn"
+        ],
+        "title": "SocketStatusRequest",
+        "type": "object"
+      },
+      "SocketStatusResponse": {
+        "properties": {
+          "buttonEnable": {
+            "description": " 按键启用状态 0-禁用 1-启用",
+            "format": "int32",
+            "type": "integer"
+          },
+          "csq": {
+            "description": " 设备最近一次上报的信号值",
+            "format": "int32",
+            "type": "integer"
+          },
+          "deviceStatus": {
+            "description": " 设备状态 2-离线 3-在线",
+            "format": "int32",
+            "type": "integer"
+          },
+          "portStatus": {
+            "description": " 端口状态 0-断电 1-通电",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "portStatus",
+          "deviceStatus",
+          "buttonEnable",
+          "csq"
+        ],
+        "title": "SocketStatusResponse",
+        "type": "object"
+      },
+      "UnlockRequest": {
+        "properties": {
+          "channelNo": {
+            "description": " 通道号，默认1号通道",
+            "format": "int32",
+            "type": "integer"
+          },
+          "sn": {
+            "description": " 设备编号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sn",
+          "channelNo"
+        ],
+        "title": "UnlockRequest",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "protocol-mjcz",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/cz": {
+      "post": {
+        "description": "业务说明：接收智能插座厂商推送的状态变更消息，并转交平台内部处理。",
+        "operationId": "postApiV1Cz",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "接收插座状态推送",
+        "tags": [
+          "mjcz"
+        ],
+        "x-action": "hook",
+        "x-auth-type": "public",
+        "x-group": "things/protocol/mjcz",
+        "x-log-mode": "1",
+        "x-oper-type": "hook",
+        "x-resource": "protocol-mjcz"
+      }
+    },
+    "/api/v1/mj": {
+      "post": {
+        "description": "业务说明：接收门禁设备厂商推送的状态变更消息，并转交平台内部处理。",
+        "operationId": "postApiV1Mj",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PushReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "接收门禁状态推送",
+        "tags": [
+          "mjcz"
+        ],
+        "x-action": "hook",
+        "x-auth-type": "public",
+        "x-group": "things/protocol/mjcz",
+        "x-log-mode": "1",
+        "x-oper-type": "hook",
+        "x-resource": "protocol-mjcz"
+      }
+    }
+  }
+}

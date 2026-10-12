@@ -1,0 +1,89 @@
+syntax = "v1"
+
+info(
+    title: "物联卡上游异步变更结果"
+    desc: "只读查询联通等上游 wsGetProvisioningStatus 落库快照"
+    version: "v1"
+)
+
+type (
+    CardApiProvisioningResult {
+        ID                 int64  `json:"id,string"`
+        RouteCode          string `json:"routeCode"`
+        Iccid              string `json:"iccid"`
+        UpstreamMessageID  string `json:"upstreamMessageId"`
+        UpstreamTransID    string `json:"upstreamTransId,optional"`
+        OperationType      string `json:"operationType,optional"`
+        Status             string `json:"status"`
+        UpstreamResultCode string `json:"upstreamResultCode,optional"`
+        UpstreamResultDesc string `json:"upstreamResultDesc,optional"`
+        UpstreamStatus     string `json:"upstreamStatus,optional"`
+        ResponseTime       string `json:"responseTime,optional"`
+        CompletedTime      string `json:"completedTime,optional"`
+        SyncBatchNo        string `json:"syncBatchNo,optional"`
+        BatchTaskNo        string `json:"batchTaskNo,optional"`
+        ReconcileID        int64  `json:"reconcileId,string,optional"`
+        CreatedTime        string `json:"createdTime,optional"`
+        UpdatedTime        string `json:"updatedTime,optional"`
+    }
+
+    CardApiProvisioningResultReconcileSummary {
+        ReconcileID       int64  `json:"reconcileId,string,optional"`
+        Status            string `json:"status,optional"`
+        OperationType     string `json:"operationType,optional"`
+        ObjectKey         string `json:"objectKey,optional"`
+        UpstreamRequestID string `json:"upstreamRequestId,optional"`
+    }
+
+    CardApiProvisioningResultGetListReq {
+        PageInfo
+        Iccid             string `json:"iccid,optional"`
+        RouteID           int64  `json:"routeId,string,optional"`
+        RouteCode         string `json:"routeCode,optional"`
+        UpstreamMessageID string `json:"upstreamMessageId,optional"`
+        Status            string `json:"status,optional"`
+        StartTime         string `json:"startTime,optional"`
+        EndTime           string `json:"endTime,optional"`
+    }
+
+    CardApiProvisioningResultGetListResp {
+        PageResp
+        List []*CardApiProvisioningResult `json:"list"`
+    }
+
+    CardApiProvisioningResultGetOneResp {
+        Detail            *CardApiProvisioningResult                 `json:"detail"`
+        ReconcileSummary  *CardApiProvisioningResultReconcileSummary `json:"reconcileSummary,optional"`
+    }
+)
+
+@server(
+    group: card/provisioningResult
+    prefix: /api/v1/things/card/provisioning-result
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取上游异步变更结果列表"
+        description: "业务说明：分页查询 cd_card_api_provisioning_result，支持 iccid、通道、messageId、状态与时间范围筛选"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardApiProvisioningResultGetListReq) returns (CardApiProvisioningResultGetListResp)
+
+    @doc(
+        summary: "获取上游异步变更结果详情"
+        description: "业务说明：按主键查询单条异步变更结果，并附带关联对账摘要"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardApiProvisioningResultGetOneResp)
+}

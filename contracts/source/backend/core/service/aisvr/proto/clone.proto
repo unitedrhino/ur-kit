@@ -1,0 +1,180 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// CloneEmpty Clone 服务通用空响应。
+message CloneEmpty {
+}
+
+// CloneWithID Clone 服务通用 ID 响应。
+message CloneWithID {
+  int64 ID = 1;
+}
+
+// CloneInfo AI 克隆体信息（ai_clones）。
+message CloneInfo {
+  int64 ID = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userID 归属用户 ID
+  int64 userID = 3;
+  // agentID 关联的 Agent ID
+  int64 agentID = 4;
+  // code 克隆体编码（全局唯一，可为空）
+  string code = 5;
+  // name 克隆体名称
+  string name = 6;
+  // customPrompt 个性化提示词（覆盖 Agent）
+  string customPrompt = 7;
+  // llmConfigID LLM 配置 ID（覆盖 Agent）
+  string llmConfigID = 8;
+  // ttsConfigID TTS 配置 ID（覆盖 Agent）
+  string ttsConfigID = 9;
+  // asrConfigID ASR 配置 ID（覆盖 Agent）
+  string asrConfigID = 10;
+  // visionConfigID 视觉配置 ID（覆盖 Agent）
+  string visionConfigID = 11;
+  // mcpServiceIds MCP 服务 ID 列表（JSON 字符串，覆盖 Agent）
+  string mcpServiceIds = 12;
+  // skillIds Skill ID 列表（JSON 字符串，覆盖 Agent）
+  string skillIds = 13;
+  // status 状态（1-启用 2-禁用）
+  int64 status = 14;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 15;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 16;
+  // voiceParams 语音参数（JSON字符串，含 speech_rate/emotion）
+  string voiceParams = 17;
+  // cloneGroupID 所属 CloneGroup ID
+  int64 cloneGroupID = 18;
+  // thirdID 第三方业务 ID（如项目 ID）
+  string thirdID = 19;
+  // cloneGroupName 所属 CloneGroup 名称
+  string cloneGroupName = 20;
+}
+
+// CloneGetOneReq 读取单个克隆体请求。
+message CloneGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 克隆体 ID
+  int64 ID = 2;
+}
+
+// CloneGetListReq 克隆体列表查询请求。
+message CloneGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userID 归属用户（0 表示不筛）
+  int64 userID = 3;
+  // agentID 关联的 Agent ID（0 表示不筛）
+  int64 agentID = 4;
+  // name 名称模糊筛选
+  string name = 5;
+  // status 状态筛选（0 表示不筛）
+  int64 status = 6;
+  // cloneGroupID 所属 CloneGroup ID（0 表示不筛）
+  int64 cloneGroupID = 7;
+  // thirdID 第三方业务 ID（空表示不筛）
+  string thirdID = 8;
+  // isGetAll 是否返回所有（管理员看全租户，默认 false=个人视图）
+  bool isGetAll = 9;
+}
+
+// CloneGetListResp 克隆体列表查询响应。
+message CloneGetListResp {
+  repeated CloneInfo list = 1;
+  int64 total = 2;
+}
+
+// Clone AI 克隆体服务（一个 proto 一个 service）。
+service Clone {
+  rpc CloneCreate(CloneInfo) returns(CloneWithID);
+  rpc CloneUpdate(CloneInfo) returns(CloneEmpty);
+  rpc CloneDelete(CloneGetOneReq) returns(CloneEmpty);
+  rpc CloneGetOne(CloneGetOneReq) returns(CloneInfo);
+  rpc CloneGetList(CloneGetListReq) returns(CloneGetListResp);
+  // Snapshot 相关 RPC
+  rpc CloneSnapshotCreate(CloneSnapshotCreateReq) returns(CloneSnapshotInfo);
+  rpc CloneSnapshotRestore(CloneSnapshotRestoreReq) returns(CloneEmpty);
+  rpc CloneSnapshotDelete(CloneSnapshotGetOneReq) returns(CloneEmpty);
+  rpc CloneSnapshotGetOne(CloneSnapshotGetOneReq) returns(CloneSnapshotInfo);
+  rpc CloneSnapshotGetList(CloneSnapshotGetListReq) returns(CloneSnapshotGetListResp);
+}
+
+// CloneSnapshotInfo Clone 快照信息（ai_clone_snapshots）。
+message CloneSnapshotInfo {
+  int64 ID = 1;
+  // cloneID 关联 Clone ID
+  int64 cloneID = 2;
+  // tenantCode 租户编码
+  string tenantCode = 3;
+  // checksum 校验和（SHA256 前 8 位）
+  string checksum = 4;
+  // ossPath OSS 存储路径
+  string ossPath = 5;
+  // sizeBytes 快照大小（字节）
+  int64 sizeBytes = 6;
+  // fileCount 文件数量
+  int32 fileCount = 7;
+  // description 快照描述
+  string description = 8;
+  // isAuto 是否自动创建 1-是 2-否
+  int64 isAuto = 9;
+  // status 状态 1-正常 2-已过期
+  int64 status = 10;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 11;
+}
+
+// CloneSnapshotCreateReq 创建快照请求。
+message CloneSnapshotCreateReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // cloneID Clone ID
+  int64 cloneID = 2;
+  // description 快照描述
+  string description = 3;
+  // isAuto 是否自动创建 1-是 2-否
+  int64 isAuto = 4;
+}
+
+// CloneSnapshotRestoreReq 恢复快照请求。
+message CloneSnapshotRestoreReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // snapshotID 快照 ID
+  int64 snapshotID = 2;
+}
+
+// CloneSnapshotGetOneReq 读取单个快照请求。
+message CloneSnapshotGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // snapshotID 快照 ID
+  int64 snapshotID = 2;
+}
+
+// CloneSnapshotGetListReq 快照列表查询请求。
+message CloneSnapshotGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // cloneID Clone ID（0 表示不筛）
+  int64 cloneID = 3;
+  // status 状态筛选（0 表示不筛）
+  int64 status = 4;
+}
+
+// CloneSnapshotGetListResp 快照列表查询响应。
+message CloneSnapshotGetListResp {
+  repeated CloneSnapshotInfo list = 1;
+  int64 total = 2;
+}

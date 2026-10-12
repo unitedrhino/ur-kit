@@ -1,0 +1,52 @@
+syntax = "v1"
+
+// 本文件定义阶段版日总量接口，APN 数值不对外暴露。
+type (
+    CardDailyUsageReq {
+        RouteID int64 `json:"routeId,string"` // 当前企业内通道主键
+        Iccid string `json:"iccid"` // 显式单卡卡号
+        Date string `json:"date"` // YYYYMMDD，东八区暂定口径
+    }
+    CardDailyUsage {
+        Iccid string `json:"iccid"` // SIM 卡号
+        Date string `json:"date"` // 统计日期
+        TotalMB float64 `json:"totalMB"` // 日总量 MB，仅 totalKnown 为真时有效
+        TotalKnown bool `json:"totalKnown"` // 区分未知和真实零
+        ApnNames []string `json:"apnNames"` // APN 名称，数值口径待确认
+        CollectedTime string `json:"collectedTime"` // 毫秒时间戳
+    }
+    CardDailyUsageResp {
+        List []CardDailyUsage `json:"list"` // 指定单卡单日快照，最多一条
+    }
+)
+
+@server(
+    group: card/dailyUsage
+    prefix: /api/v1/things/card/daily-usage
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "查询单卡日总量"
+        description: "业务说明：读取当前企业指定通道卡号日期的本地日总量快照，日期时区暂定东八区待官方核验"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardDailyUsageReq) returns (CardDailyUsageResp)
+
+    @doc(
+        summary: "同步单卡日总量"
+        description: "业务说明：仅同步显式绑定卡的近七日某一天日总量，APN 仅保存名称，不从空结果推断零用量"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "2"
+    )
+    @handler sync
+    post /sync (CardDailyUsageReq) returns (WithCode)
+}

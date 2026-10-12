@@ -1,0 +1,194 @@
+syntax = "v1"
+
+// ONVIF 设备发现与控制接口
+
+info(
+    title: "ONVIF 控制"
+    desc: "ONVIF 设备发现、预置位、云台控制"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvOnvifDeviceInfo {
+    IP           string `json:"ip"`        // 设备 IP
+    Port         int64  `json:"port"`      // 设备端口
+    Manufacturer string `json:"manufacturer,optional"` // 厂商
+    Model        string `json:"model,optional"`    // 型号
+    Firmware     string `json:"firmware,optional"` // 固件版本
+    SerialNumber string `json:"serialNumber,optional"` // 序列号
+}
+
+type AvOnvifDiscoverReq {
+    Timeout int64  `json:"timeout,optional"` // 发现超时（秒），默认 5
+    Subnet  string `json:"subnet,optional"`  // 网段过滤，例如 192.168.1 或 192.168.1.0/24
+}
+
+type AvOnvifDiscoverResp {
+    List []AvOnvifDeviceInfo `json:"list"` // 发现的设备列表
+}
+
+type AvOnvifProbeReq {
+    IP       string `json:"ip"`   // 设备 IP
+    Port     int64  `json:"port"` // 设备端口
+    Username string `json:"username,optional"` // 用户名
+    Password string `json:"password,optional"` // 密码
+}
+
+type AvOnvifProbeResp {
+    Device   AvOnvifDeviceInfo `json:"device"`   // 认证探测得到的设备信息
+    Profiles []AvOnvifProfile `json:"profiles"` // 媒体配置列表
+}
+
+type AvOnvifProfile {
+    Token       string `json:"token"`       // Profile Token
+    Name        string `json:"name"`        // Profile 名称
+    VideoSource string `json:"videoSource"` // 视频源 Token
+    StreamURI   string `json:"streamURI"`   // 拉流地址
+    Encoding    string `json:"encoding,optional"` // 视频编码
+    Width       int64  `json:"width,optional"`    // 视频宽度
+    Height      int64  `json:"height,optional"`   // 视频高度
+    FrameRate   int64  `json:"frameRate,optional"` // 帧率上限
+    Bitrate     int64  `json:"bitrate,optional"`  // 码率上限（kbps）
+    Available   bool   `json:"available"`         // 是否可导入
+    Error       string `json:"error,optional"`    // 当前 Profile 不可用原因
+}
+
+type AvOnvifImportReq {
+    IP            string   `json:"ip"`                  // 设备 IP
+    Port          int64    `json:"port"`                // 设备端口
+    Username      string   `json:"username,optional"`   // 用户名
+    Password      string   `json:"password,optional"`   // 密码
+    DeviceName    string   `json:"deviceName,optional"` // 设备名称，为空时按探测信息生成
+    ProfileTokens []string `json:"profileTokens"`       // 用户选中的 Profile Token
+}
+
+type AvOnvifImportResp {
+    Device       AvDeviceInfo      `json:"device"`       // 创建或复用的设备
+    Channels     []AvDeviceChannel `json:"channels"`     // 创建或复用的通道
+    CreatedCount int64             `json:"createdCount"` // 新增通道数量
+    ReusedCount  int64             `json:"reusedCount"`  // 复用通道数量
+}
+
+type AvOnvifPtzControlReq {
+    ChannelID string `json:"channelID"`     // 通道 ID
+    Command   string `json:"command"`       // 指令：left/right/up/down/zoomIn/zoomOut/stop
+    Speed     int64  `json:"speed,optional"` // 速度 0-100，默认 50
+}
+
+type AvOnvifPresetReq {
+    ChannelID  string `json:"channelID"`      // 通道 ID
+    PresetID   string `json:"presetID,optional"` // 预置位 ID
+    PresetName string `json:"presetName,optional"` // 预置位名称
+}
+
+type AvOnvifPreset {
+    PresetID   string `json:"presetID"`   // 预置位 ID
+    PresetName string `json:"presetName"` // 预置位名称
+}
+
+type AvOnvifPresetListResp {
+    List []AvOnvifPreset `json:"list"` // 预置位列表
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "ONVIF 设备发现"
+        description: "业务说明：在指定网段内广播发现 ONVIF 设备。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifDiscover
+    post /api/v1/av/onvif/discover (AvOnvifDiscoverReq) returns (AvOnvifDiscoverResp)
+
+    @doc(
+        summary: "ONVIF 设备探测"
+        description: "业务说明：按 IP 和端口探测 ONVIF 设备，返回媒体 Profile 列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifProbe
+    post /api/v1/av/onvif/probe (AvOnvifProbeReq) returns (AvOnvifProbeResp)
+
+    @doc(
+        summary: "导入 ONVIF 设备"
+        description: "业务说明：重新探测指定设备，并按用户选择的 Profile 原子创建设备与通道。"
+        authType: "admin"
+        resource: "av"
+        action: "import"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifImport
+    post /api/v1/av/onvif/import (AvOnvifImportReq) returns (AvOnvifImportResp)
+
+    @doc(
+        summary: "ONVIF 云台控制"
+        description: "业务说明：通过 ONVIF 协议控制指定通道云台方向与缩放。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifPtzControl
+    post /api/v1/av/onvif/ptz/control (AvOnvifPtzControlReq) returns (EmptyResp)
+
+    @doc(
+        summary: "ONVIF 添加预置位"
+        description: "业务说明：为指定通道添加 ONVIF 预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifPresetAdd
+    post /api/v1/av/onvif/preset/add (AvOnvifPresetReq) returns (AvOnvifPreset)
+
+    @doc(
+        summary: "ONVIF 删除预置位"
+        description: "业务说明：按预置位 ID 删除指定通道的 ONVIF 预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifPresetDelete
+    post /api/v1/av/onvif/preset/delete (AvOnvifPresetReq) returns (EmptyResp)
+
+    @doc(
+        summary: "ONVIF 调用预置位"
+        description: "业务说明：按摄像机返回的预置位 Token 调用指定 ONVIF 预置位。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifPresetGoto
+    post /api/v1/av/onvif/preset/goto (AvOnvifPresetReq) returns (EmptyResp)
+
+    @doc(
+        summary: "ONVIF 获取预置位列表"
+        description: "业务说明：查询指定通道的 ONVIF 预置位列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvOnvifPresetList
+    post /api/v1/av/onvif/preset/list (AvOnvifPresetReq) returns (AvOnvifPresetListResp)
+}

@@ -1,0 +1,37 @@
+
+info (
+	title:   "用户区域权限申请模块"
+	desc:    "用户申请区域权限相关接口"
+	author:  "大绵羊"
+	email:   "robotyang123@163.com"
+	version: "v1"
+)
+
+@server (
+	group:            things/user/area/apply
+	prefix:           /api/v1/things/user/area/apply
+	accessCodePrefix: "thingsUserArea"
+	accessNamePrefix: "区域申请"
+	accessGroup:      "用户区域"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "all"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+	    summary: "申请用户区域权限"
+	    description: "业务说明：用户向系统申请特定区域的访问权限，支持读权限（查看区域下设备和数据）和管理权限（编辑、控制设备）。申请提交后进入审批流程，审批通过后用户获得对应区域权限。"
+	    authType: "all"
+	    group: "things/user/area/apply"
+	    resource: "things/user/area/apply"
+	    action: "apply"
+	    recordLogMode: "3"
+	)
+	@handler areaApplyCreate
+	post /create (UserAreaApplyCreateReq)
+}
+
+type UserAreaApplyCreateReq {
+	areaID   int64 `json:"areaID"`   // 区域ID
+	authType int64 `json:"authType"` // 权限类型 1:读权限 4:管理权限
+}

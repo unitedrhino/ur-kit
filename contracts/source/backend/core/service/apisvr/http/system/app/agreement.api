@@ -1,0 +1,77 @@
+info(
+    title: "应用协议关联管理"
+    desc: "应用与协议绑定管理"
+    author: "L"
+    email: "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+@server(
+    group: system/app/agreement
+    prefix: /api/v1/system/app/agreement
+    accessCodePrefix: "systemAppAgreement"
+    accessNamePrefix: "应用协议关联"
+    accessGroup: "应用管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "获取应用协议绑定列表"
+        description: "业务说明：查询应用与协议的绑定关系，支持按应用或协议双向查看，并按需携带应用详情或协议详情。用于协议管理页和应用详情页的双向绑定管理。"
+        authType: "platform"
+        group: "system/app/agreement"
+        resource: "system/app/agreement"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getBindList
+    post /get-bind-list (AppAgreementBindGetListReq) returns (AppAgreementBindGetListResp)
+
+    @doc(
+        summary: "批量更新应用协议绑定"
+        description: "业务说明：按应用维度或协议维度批量覆盖绑定关系，同时保存协议类型、排序和启用状态。同一应用下协议 code 必须唯一。"
+        authType: "platform"
+        group: "system/app/agreement"
+        resource: "system/app/agreement"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler bindBatchUpdate
+    post /bind-batch-update (AppAgreementBindBatchUpdateReq) returns ()
+}
+
+type (
+    AppAgreementBind {
+        ID int64 `json:"id,string,optional"`
+        AgreementID int64 `json:"agreementID,string,optional"`
+        AppID int64 `json:"appID,string,optional"`
+        Type string `json:"type,optional"`
+        Sort int64 `json:"sort,optional"`
+        Status int64 `json:"status,optional"`
+        Agreement *Agreement `json:"agreement,optional"`
+        App *AppInfo `json:"app,optional"`
+    }
+
+    AppAgreementBindGetListReq {
+        Page *PageInfo `json:"page,optional"`
+        AgreementID int64 `json:"agreementID,string,optional"`
+        AppID int64 `json:"appID,string,optional"`
+        Type string `json:"type,optional"`
+        Status int64 `json:"status,optional"`
+        WithAgreement bool `json:"withAgreement,optional"`
+        WithApp bool `json:"withApp,optional"`
+    }
+
+    AppAgreementBindGetListResp {
+        List []*AppAgreementBind `json:"list"`
+        PageResp
+    }
+
+    AppAgreementBindBatchUpdateReq {
+        AgreementID int64 `json:"agreementID,string,optional"`
+        AppID int64 `json:"appID,string,optional"`
+        List []*AppAgreementBind `json:"list"`
+    }
+)

@@ -1,0 +1,124 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// PingReq 连通性测试请求。
+message PingReq {
+  string ping = 1;
+}
+
+// PingResp 连通性测试响应。
+message PingResp {
+  string pong = 1;
+}
+
+// AgentEmpty AgentService 通用空响应。
+message AgentEmpty {
+}
+
+// AgentWithID AgentService 通用 ID 响应。
+message AgentWithID {
+  int64 ID = 1;
+}
+
+// AgentInfo AI 助手信息（ai_agents）。
+message AgentInfo {
+	// voicePipeline 语音链路；未传不修改，空字符串恢复分组继承。
+	optional string voicePipeline = 28;
+	// realtimeConfigID 实时模型业务ID；未传不修改，空字符串恢复分组继承。
+	optional string realtimeConfigID = 29;
+	// interactionMode 交互策略；未传不修改，空字符串恢复分组继承。
+	optional string interactionMode = 30;
+  int64 ID = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userId 归属用户
+  int64 userID = 3;
+  // groupID 所属助手组 ID
+  int64 groupID = 24;
+  // code 智能体编码（租户内唯一）
+  string code = 25;
+  // name 助手名称
+  string name = 4;
+  // customPrompt 自定义提示词
+  string customPrompt = 5;
+  // llmConfigId 关联的 LLM 配置 ID（ai_configs）
+  string llmConfigID = 6;
+  // llmModelType LLM模型级别（small/medium/large/xlarge）
+  string llmModelType = 27;
+  // ttsConfigId 关联的 TTS 配置 ID（ai_configs）
+  string ttsConfigID = 7;
+  // asrSpeed ASR 语速（normal/patient/fast）
+  string asrSpeed = 8;
+  // status 助手状态（active/inactive）
+  string status = 9;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 10;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 11;
+  // avatar 助手头像URL
+  string avatar = 12;
+  // description 助手描述
+  string description = 13;
+  // systemPrompt 系统提示词
+  string systemPrompt = 14;
+  // welcomeMessage 欢迎语
+  string welcomeMessage = 15;
+  // asrConfigID ASR配置ID
+  string asrConfigID = 16;
+  // visionConfigID 视觉配置ID
+  string visionConfigID = 17;
+  // capabilities 能力列表（JSON字符串，如["text","voice"]）
+  string capabilities = 18;
+  // llmParams LLM参数（JSON字符串）
+  string llmParams = 19;
+  // voiceParams 语音参数（JSON字符串）
+  string voiceParams = 20;
+  // mcpServiceIds MCP服务ID列表（JSON字符串）
+  string mcpServiceIds = 21;
+  // sort 排序权重
+  int64 sort = 23;
+}
+
+// AgentGetOneReq 读取单个助手请求。
+message AgentGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 助手 ID
+  int64 ID = 2;
+}
+
+// AgentGetListReq 助手列表查询请求。
+message AgentGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userId 归属用户（0 表示不筛）
+  int64 userID = 3;
+  // name 名称模糊筛选
+  string name = 4;
+  // capabilities 按能力过滤（如 "voice"）
+  string capabilities = 5;
+  // isGetAll 是否返回所有（管理员看全租户，默认 false=个人视图）
+  bool isGetAll = 6;
+}
+
+// AgentGetListResp 助手列表查询响应。
+message AgentGetListResp {
+  repeated AgentInfo list = 1;
+  int64 total = 2;
+}
+
+// Agent AI 助手服务（一个 proto 一个 service）。
+service Agent {
+  rpc Ping(PingReq) returns(PingResp);
+  rpc AgentCreate(AgentInfo) returns(AgentWithID);
+  rpc AgentGetOne(AgentGetOneReq) returns(AgentInfo);
+  rpc AgentUpdate(AgentInfo) returns(AgentEmpty);
+  rpc AgentDelete(AgentGetOneReq) returns(AgentEmpty);
+  rpc AgentGetList(AgentGetListReq) returns(AgentGetListResp);
+}

@@ -1,0 +1,42 @@
+info (
+	title:   "租户核心信息"
+	desc:    "租户核心信息的查询和搜索"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/core
+	prefix:           /api/v1/system/tenant/core
+	defaultAuthType:  "public"
+	accessCodePrefix: "systemTenantCore"
+	accessNamePrefix: "租户配置"
+	accessGroup:      "租户管理"
+	middleware:       InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取租户信息"
+	    description: "根据ID或租户代码获取租户基本信息，用于登录页展示租户配置（Logo、名称等），无需登录即可调用"
+	    authType: "public"
+	    group: "system/tenant/core"
+	    resource: "system/tenant/core"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithIDOrCode) returns (TenantCore)
+
+	@doc(
+	    summary: "搜索租户信息"
+	    description: "搜索租户列表，用于租户选择、租户发现等场景，支持按名称、代码模糊搜索，无需登录即可调用"
+	    authType: "public"
+	    group: "system/tenant/core"
+	    resource: "system/tenant/core"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantCoreGetListReq) returns (TenantCoreGetListResp)
+}

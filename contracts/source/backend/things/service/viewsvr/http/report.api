@@ -1,0 +1,224 @@
+@server(
+	group: view/report
+	prefix: /api/v1/view/report
+	middleware: CheckTokenWare, InitCtxsWare
+)
+service view {
+	@doc(
+		summary: "渲染报表"
+		authType: "admin"
+		description: "业务说明：执行绑定数据集并按模板替换/展开，返回计算后的 workbook JSON，供设计器预览与导出共用。"
+		resource: "viewReport"
+		action: "execute"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler render
+	post /render (ReportRenderReq) returns (ReportRenderResp)
+
+	@doc(
+		summary: "导出报表"
+		authType: "admin"
+		description: "业务说明：按模板渲染后生成 xlsx 文件并上传 OSS，返回受控下载地址。"
+		resource: "viewReport"
+		action: "export"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler export
+	post /export (ReportExportReq) returns (ReportExportResp)
+
+	@doc(
+		summary: "按ID导出报表"
+		authType: "admin"
+		description: "业务说明：按报表 ID 加载设计内容、渲染并导出 xlsx，返回受控下载地址（列表页一键导出）。"
+		resource: "viewReport"
+		action: "export"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler exportById
+	post /export-by-id (ReportExportByIdReq) returns (ReportExportResp)
+
+	@doc(
+		summary: "新增报表"
+		authType: "admin"
+		description: "业务说明：创建报表（按项目组织），初始详情内容为空。"
+		resource: "viewReport"
+		action: "create"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (ReportCreateReq) returns (ReportCreateResp)
+
+	@doc(
+		summary: "更新报表"
+		authType: "admin"
+		description: "业务说明：更新报表基础信息。"
+		resource: "viewReport"
+		action: "update"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (ReportUpdateReq) returns ()
+
+	@doc(
+		summary: "删除报表"
+		authType: "admin"
+		description: "业务说明：删除报表及其详情内容。"
+		resource: "viewReport"
+		action: "delete"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (ReportDeleteReq) returns ()
+
+	@doc(
+		summary: "获取报表列表"
+		authType: "admin"
+		description: "业务说明：分页查询报表列表，支持按项目、名称筛选。"
+		resource: "viewReport"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ReportGetListReq) returns (ReportGetListResp)
+
+	@doc(
+		summary: "获取报表详情"
+		authType: "admin"
+		description: "业务说明：查询单个报表基础信息。"
+		resource: "viewReport"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ReportGetOneReq) returns (ReportView)
+}
+
+@server(
+	group: view/report/detail
+	prefix: /api/v1/view/report/detail
+	middleware: CheckTokenWare, InitCtxsWare
+)
+service view {
+	@doc(
+		summary: "更新报表详情内容"
+		authType: "admin"
+		description: "业务说明：保存报表设计内容（Univer workbook JSON）。"
+		resource: "viewReportDetail"
+		action: "update"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (ReportDetail) returns ()
+
+	@doc(
+		summary: "获取报表详情内容"
+		authType: "admin"
+		description: "业务说明：加载报表设计内容供设计器回显。"
+		resource: "viewReportDetail"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ReportGetOneReq) returns (ReportDetail)
+}
+
+type (
+	ReportRenderReq {
+		Content string            `json:"content"`         // 设计态 Univer workbook JSON（IWorkbookData）
+		Params  map[string]string `json:"params,optional"` // 报表参数（数据集动态参数值）
+	}
+
+	ReportRenderResp {
+		Content  string          `json:"content"`           // 计算后 workbook JSON
+		Warnings []RenderWarning `json:"warnings,optional"` // 替换告警（字段缺失等），不阻断渲染
+	}
+
+	ReportExportReq {
+		Content string            `json:"content"`         // 设计态 Univer workbook JSON（IWorkbookData）
+		Params  map[string]string `json:"params,optional"` // 报表参数（数据集动态参数值）
+	}
+
+	ReportExportByIdReq {
+		ID     int64             `json:"id,string"`        // 报表ID
+		Params map[string]string `json:"params,optional"`  // 报表参数（上下文名称等）
+	}
+
+	ReportExportResp {
+		URL string `json:"url"` // xlsx 受控下载地址
+	}
+
+	ReportCreateReq {
+		ProjectID int64  `json:"projectID,string,optional"` // 归属物联网项目ID
+		Name      string `json:"name"`                      // 报表名称
+		Desc      string `json:"desc,optional"`             // 报表描述
+		Status    int64  `json:"status,optional"`           // 状态 1: 启用 2: 停用
+	}
+
+	ReportCreateResp {
+		ID int64 `json:"id,string"` // 报表ID
+	}
+
+	ReportUpdateReq {
+		ID        int64  `json:"id,string"`           // 报表ID
+		ProjectID int64  `json:"projectID,string,optional"` // 归属物联网项目ID
+		Name      string `json:"name,optional"`        // 报表名称
+		Desc      string `json:"desc,optional"`        // 报表描述
+		Status    int64  `json:"status,optional"`      // 状态 1: 启用 2: 停用
+	}
+
+	ReportDeleteReq {
+		ID int64 `json:"id,string"` // 报表ID
+	}
+
+	ReportGetListReq {
+		Page      *PageInfo `json:"page,optional"`    // 分页信息
+		ProjectID int64     `json:"projectID,string,optional"` // 归属物联网项目ID
+		Name      string    `json:"name,optional"`    // 名称模糊查询
+		Status    int64     `json:"status,optional"`  // 状态
+	}
+
+	ReportGetListResp {
+		List  []*ReportView `json:"list"`  // 报表列表
+		Total int64         `json:"total,optional"` // 总数
+		Num   int64         `json:"num,optional"`   // 返回数量
+	}
+
+	ReportGetOneReq {
+		ID int64 `json:"id,string"` // 报表ID
+	}
+
+	ReportView {
+		ID            int64  `json:"id,string,optional"`       // 报表ID，只读
+		ProjectID     int64  `json:"projectID,string,optional"` // 归属物联网项目ID
+		TenantCode    string `json:"tenantCode,optional"`      // 租户编码
+		Name          string `json:"name,optional"`            // 报表名称
+		Desc          string `json:"desc,optional"`            // 报表描述
+		CreatedUserID int64  `json:"createdUserID,string,optional"` // 创建者ID
+		Status        int64  `json:"status,optional"`          // 状态 1: 启用 2: 停用
+		CreatedTime   int64  `json:"createdTime,string,optional"` // 创建时间
+		UpdatedTime   int64  `json:"updatedTime,string,optional"` // 更新时间
+	}
+
+	ReportDetail {
+		ID      int64  `json:"id,string,optional"` // 报表ID，只读
+		Content string `json:"content"`            // 报表设计内容（Univer workbook JSON）
+	}
+
+	RenderWarning {
+		SheetName string `json:"sheetName"` // 工作表名
+		Row       int64  `json:"row"`       // 行号（0 起）
+		Col       int64  `json:"col"`       // 列号（0 起）
+		Token     string `json:"token"`     // 原始绑定 token
+		Reason    string `json:"reason"`    // 告警原因
+	}
+)

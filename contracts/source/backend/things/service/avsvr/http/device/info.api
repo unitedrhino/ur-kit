@@ -1,0 +1,149 @@
+syntax = "v1"
+
+// 音视频设备管理接口
+
+info(
+    title: "音视频设备管理"
+    desc: "音视频设备的增删改查、在线状态、能力集管理"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+
+
+type AvDeviceInfo {
+    DeviceID        string `json:"deviceID"`        // 设备唯一标识
+    DeviceName      string `json:"deviceName"`      // 设备名称
+    Transport       string `json:"transport"`       // 传输协议
+    Manufacturer    string `json:"manufacturer,optional"` // 厂商
+    Model           string `json:"model,optional"`        // 型号
+    Firmware        string `json:"firmware,optional"`     // 固件版本
+    SerialNumber    string `json:"serialNumber,optional"` // ONVIF 设备序列号
+    StreamNum       int64  `json:"streamNum,optional"`    // 通道数量
+    StreamMode      int64  `json:"streamMode,optional,string"` // 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效）
+    IP              string `json:"ip,optional"`           // 设备 IP
+    Port            int64  `json:"port,optional"`         // 设备端口
+    PushSecret      string `json:"pushSecret,optional"`   // RTMP 推流鉴权密钥
+    Status          string `json:"status"`                // 在线状态
+    LastConnectTime int64  `json:"lastConnectTime,optional"` // 最后上线时间
+    ExpireTime      int64  `json:"expireTime,optional"`      // 注册过期时间
+    CreatedTime     int64  `json:"createdTime"`              // 创建时间
+}
+
+type AvDeviceInfoCreateReq {
+    DeviceName   string `json:"deviceName"`                  // 设备名称
+    Transport    string `json:"transport"`                   // 传输协议
+    Manufacturer string `json:"manufacturer,optional"`       // 厂商
+    Model        string `json:"model,optional"`              // 型号
+    Firmware     string `json:"firmware,optional"`           // 固件版本
+    SerialNumber string `json:"serialNumber,optional"`       // ONVIF 设备序列号
+    IP           string `json:"ip,optional"`                 // 设备 IP
+    Port         int64  `json:"port,optional"`               // 设备端口
+    StreamMode   int64  `json:"streamMode,optional,string"`  // 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效），默认 1
+    PushSecret   string `json:"pushSecret,optional"`         // RTMP 推流鉴权密钥
+    Username     string `json:"username,optional"`           // 用户名
+    Password     string `json:"password,optional"`           // 密码
+    GB28181SipID string `json:"gb28181SipID,optional"`       // 国标 SIP ID
+    GB28181Realm string `json:"gb28181Realm,optional"`       // 国标域
+}
+
+type AvDeviceInfoUpdateReq {
+    DeviceID     string `json:"deviceID"`                    // 设备 ID
+    DeviceName   string `json:"deviceName,optional"`         // 设备名称
+    Manufacturer string `json:"manufacturer,optional"`       // 厂商
+    Model        string `json:"model,optional"`              // 型号
+    Firmware     string `json:"firmware,optional"`           // 固件版本
+    SerialNumber string `json:"serialNumber,optional"`       // ONVIF 设备序列号
+    IP           string `json:"ip,optional"`                 // 设备 IP
+    Port         int64  `json:"port,optional"`               // 设备端口
+    StreamMode   int64  `json:"streamMode,optional,string"`  // 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效）
+    PushSecret   string `json:"pushSecret,optional"`         // RTMP 推流鉴权密钥
+    Username     string `json:"username,optional"`           // 用户名
+    Password     string `json:"password,optional"`           // 密码
+}
+
+type AvDeviceInfoDeleteReq {
+    DeviceID string `json:"deviceID"` // 设备 ID
+}
+
+type AvDeviceInfoGetOneReq {
+    DeviceID string `json:"deviceID"` // 设备 ID
+}
+
+type AvDeviceInfoGetListReq {
+    PageInfo
+    DeviceName string `json:"deviceName,optional"` // 按名称模糊查询
+    Transport  string `json:"transport,optional"`  // 按协议过滤
+    Status     string `json:"status,optional"`     // 按状态过滤
+}
+
+type AvDeviceInfoGetListResp {
+    PageResp
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "创建音视频设备"
+        description: "业务说明：创建一条音视频设备记录，用于管理摄像头、NVR、流媒体设备等。"
+        authType: "admin"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceInfoCreate
+    post /api/v1/av/device/info/create (AvDeviceInfoCreateReq) returns (AvDeviceInfo)
+
+    @doc(
+        summary: "更新音视频设备"
+        description: "业务说明：按设备 ID 更新音视频设备信息，支持部分字段更新。"
+        authType: "admin"
+        resource: "av"
+        action: "update"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceInfoUpdate
+    post /api/v1/av/device/info/update (AvDeviceInfoUpdateReq) returns (AvDeviceInfo)
+
+    @doc(
+        summary: "删除音视频设备"
+        description: "业务说明：按设备 ID 删除音视频设备及其关联通道。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceInfoDelete
+    post /api/v1/av/device/info/delete (AvDeviceInfoDeleteReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取音视频设备详情"
+        description: "业务说明：按设备 ID 查询单条音视频设备详情。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceInfoGetOne
+    post /api/v1/av/device/info/get-one (AvDeviceInfoGetOneReq) returns (AvDeviceInfo)
+
+    @doc(
+        summary: "获取音视频设备列表"
+        description: "业务说明：按名称、协议、状态等条件分页查询音视频设备列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvDeviceInfoGetList
+    post /api/v1/av/device/info/get-list (AvDeviceInfoGetListReq) returns (AvDeviceInfoGetListResp)
+}

@@ -1,0 +1,91 @@
+syntax = "v1"
+
+info (
+ title: "AI 对话私有附件"
+ desc: "上传输入附件与鉴权下载"
+ author: "unitedrhino"
+ version: "v1"
+)
+
+// ChatAttachmentUploadReq 由 multipart 表单提交，file 字段为原始文件流。
+type ChatAttachmentUploadReq {
+ requestID string `json:"requestID"` // 上传幂等键，同一键不能替换内容
+}
+
+// ChatAttachmentReq 只接受长期附件 ID，不接受 OSS 路径。
+type ChatAttachmentReq {
+ artifactID string `json:"artifactID"` // 已登记的附件标识
+}
+
+// ChatAttachmentInfo 不包含私有对象键或临时签名地址。
+type ChatAttachmentInfo {
+ artifactID string `json:"artifactID"` // 长期标识
+ name string `json:"name"` // 文件名
+ mime string `json:"mime"` // 已校验的真实格式
+ kind string `json:"kind"` // image、video 或 file
+ size int64 `json:"size"` // 字节数
+ status string `json:"status"` // uploading、ready、failed、expired
+ sessionID string `json:"sessionID"` // 为空表示尚未发送的草稿
+ expiresAt string `json:"expiresAt"` // 文件有效期，毫秒时间戳
+}
+
+// ChatAttachmentDownloadResp 短期链接仅供当前调用方使用。
+type ChatAttachmentDownloadResp {
+ url string `json:"url"` // 鉴权后的临时签名地址
+ expiresAt string `json:"expiresAt"` // 链接有效期，毫秒时间戳
+}
+
+@server (
+ group: ai/attachment
+ prefix: /api/v1/ai/chat/attachment
+ middleware: CheckTokenWare,InitCtxsWare
+ defaultAuthType: "all"
+ maxBytes: 105906176
+ timeout: 120s
+)
+service ai {
+ @doc(
+  summary: "上传对话附件"
+  injectFormdataParam: "file"
+  description: "业务说明：multipart 表单携带 file 和 requestID，限额检查真实格式后上传私有 OSS，仅在对象和附件登记完成后返回可用状态。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "create"
+  group: "ai/chat"
+  recordLogMode: "3"
+ )
+ @handler upload
+ post /upload (ChatAttachmentUploadReq) returns (ChatAttachmentInfo)
+}
+
+@server (
+ group: ai/attachment
+ prefix: /api/v1/ai/chat/attachment
+ middleware: CheckTokenWare,InitCtxsWare
+ defaultAuthType: "all"
+)
+service ai {
+ @doc(
+  summary: "获取对话附件"
+  description: "业务说明：按当前用户、应用和实际数据权限查询附件状态，不返回 OSS 凭据或对象键。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler getOne
+ post /get-one (ChatAttachmentReq) returns (ChatAttachmentInfo)
+
+ @doc(
+  summary: "获取对话附件下载链接"
+  description: "业务说明：鉴权并确认私有对象存在后签发最长一小时链接，文件有效期为七天，原件过期后须重新上传或生成。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "3"
+ )
+ @handler download
+ post /download (ChatAttachmentReq) returns (ChatAttachmentDownloadResp)
+}

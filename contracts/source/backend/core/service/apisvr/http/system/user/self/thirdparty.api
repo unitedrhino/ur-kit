@@ -1,0 +1,86 @@
+info (
+    title:   "第三方客户端绑定"
+    desc:    "第三方客户端认证绑定相关接口，原 OpenClaw 专用实现（历史备注：2026-09 正名为通用第三方客户端认证，CLI 为当前接入形式，OpenClaw 为接入方之一）"
+    author:  "Codex"
+    version: "v0.1.0"
+)
+
+@server (
+    group:            system/user/self/thirdparty
+    prefix:           /api/v1/system/user/self/thirdparty
+    defaultAuthType:  "all"
+    defaultNeedAuth:  "true"
+    middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "完成第三方客户端绑定"
+        description: "前端在访问令牌创建成功后调用，将 AK/SK 与 setup_code 关联写入 Redis"
+        authType: "all"
+        group: "system/user/self/thirdparty"
+        resource: "system/user/self/thirdparty"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler setupComplete
+    post /setup-complete (ThirdpartySetupCompleteReq) returns (ThirdpartySetupCompleteResp)
+}
+
+@server (
+    group:            system/user/self/thirdparty
+    prefix:           /api/v1/system/user/self/thirdparty
+    defaultAuthType:  "public"
+    middleware:       InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "查询第三方客户端绑定状态"
+        description: "第三方客户端轮询接口，public 无需登录，通过 setup_code 查询绑定结果"
+        authType: "public"
+        group: "system/user/self/thirdparty"
+        resource: "system/user/self/thirdparty"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler setupCheck
+    post /setup-check (ThirdpartySetupCheckReq) returns (ThirdpartySetupCheckResp)
+
+    @doc(
+        summary: "登记第三方客户端绑定码"
+        description: "第三方客户端生成绑定码后先调用本接口在后端登记（TTL 600 秒），使绑定码有效期从生成时刻起算；【完成第三方客户端绑定】时会校验本登记是否存在"
+        authType: "public"
+        group: "system/user/self/thirdparty"
+        resource: "system/user/self/thirdparty"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler setupInit
+    post /setup-init (ThirdpartySetupInitReq) returns (ThirdpartySetupInitResp)
+}
+
+type (
+    ThirdpartySetupCompleteReq {
+        SetupCode     string `json:"setupCode"`              // CLI 生成的第三方客户端绑定码
+        AccessTokenID int64  `json:"accessTokenID,string"`   // 访问令牌 ID
+        AccessKey     string `json:"accessKey"`              // 访问密钥标识（前端传入，用于写入 Redis）
+        AccessSecret  string `json:"accessSecret"`           // 访问密钥（前端传入，用于写入 Redis）
+    }
+    ThirdpartySetupCompleteResp {
+        Success bool `json:"success"`
+    }
+    ThirdpartySetupCheckReq {
+        SetupCode string `json:"setupCode"` // CLI 生成的第三方客户端绑定码
+    }
+    ThirdpartySetupCheckResp {
+        Status       string `json:"status"`                      // pending | completed | expired
+        AccessKey    string `json:"accessKey,optional"`          // 授权成功后的 AK
+        AccessSecret string `json:"accessSecret,optional"`      // 授权成功后的 SK
+        TenantCode   string `json:"tenantCode,optional"`        // 授权成功后的租户编码
+    }
+    ThirdpartySetupInitReq {
+        SetupCode string `json:"setupCode"` // CLI 生成的第三方客户端绑定码
+    }
+    ThirdpartySetupInitResp {
+        Success bool `json:"success"` // 登记是否成功
+    }
+)

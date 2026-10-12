@@ -1,0 +1,31 @@
+info (
+	title:   "用户资源权限"
+	desc:    "用户资源动作权限相关接口"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:           system/user/self
+	prefix:          /api/v1/system/user/self
+	defaultAuthType: "all"
+	middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+	    summary: "获取用户资源动作权限列表"
+	    description: "业务说明：获取当前登录用户通过角色绑定的所有 resource+action 权限对，用于前端路由守卫和按钮权限控制。返回格式为 {resource, action} 列表，前端转换为 resource:action 字符串做权限匹配。"
+	    authType: "all"
+	    group: "system/user/self"
+	    resource: "system/user/self"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler resourceActionGetList
+	post /resource/action/get-list returns (UserResourceActionGetListResp)
+}
+
+type UserResourceActionGetListResp {
+	List []*RoleResourceActionItem `json:"list"` // 资源动作权限列表
+}

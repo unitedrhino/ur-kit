@@ -1,0 +1,132 @@
+info(
+    desc: "签到 & 积分管理"
+    author: "yl"
+    email: "603785348@qq.com"
+)
+
+@server(
+    group: system/checkIn
+    prefix: /api/v1/system/check-in
+    accessCodePrefix: "systemCheckIn"
+    accessNamePrefix: "签到积分"
+    accessGroup: "签到积分管理"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "用户签到"
+        description: "业务说明：用户每日签到获得积分奖励，支持连续签到额外奖励。返回本次签到获得积分、当前总积分、是否已签到状态。重复签到不获得积分但返回当前状态。"
+        authType: "admin"
+        group: "system/checkIn"
+        resource: "system/checkIn"
+        action: "execute"
+        recordLogMode: "1"
+    )
+    @handler do
+    post /do (CheckInDoReq) returns (CheckInDoResp)
+
+    @doc(
+        summary: "签到记录列表"
+        description: "业务说明：分页查询签到记录，支持按用户ID、时间范围筛选。管理员可查看所有用户签到记录，普通用户只能查看自己的记录。返回签到日期、是否连续、获得积分等信息。"
+        authType: "admin"
+        group: "system/checkIn"
+        resource: "system/checkIn"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (CheckInGetListReq) returns (CheckInGetListResp)
+
+    @doc(
+        summary: "积分流水列表"
+        description: "业务说明：分页查询积分变动流水，支持按用户ID、来源类型、时间范围筛选。来源类型包括签到(checkIn)、管理员调整(admin)等。返回变动量、变动后余额、来源、备注等信息。"
+        authType: "admin"
+        group: "system/checkIn"
+        resource: "system/checkIn"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler pointLogGetList
+    post /point-log/get-list (PointLogGetListReq) returns (PointLogGetListResp)
+
+    @doc(
+        summary: "获取当前用户积分余额"
+        description: "业务说明：查询当前登录用户的积分余额，用于个人中心、积分商城等场景展示用户积分状态。"
+        authType: "admin"
+        group: "system/checkIn"
+        resource: "system/checkIn"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler pointBalanceGet
+    post /point-balance/get () returns (PointBalanceGetResp)
+
+    @doc(
+        summary: "管理员调整积分"
+        description: "业务说明：管理员手动调整用户积分，支持增加或扣减。调整记录会记入流水，来源标记为admin。用于积分补发、违规扣分、活动奖励等场景。调整备注必填。"
+        authType: "admin"
+        isNeedAuth: "true"
+        group: "system/checkIn"
+        resource: "system/checkIn"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler pointLogAdjust
+    post /point-log/adjust (PointLogAdjustReq) returns ()
+}
+
+type (
+    CheckInDoReq {
+    }
+    CheckInDoResp {
+        AlreadyDone   bool  `json:"alreadyDone"` // 今日是否已签到
+        PointDelta    int64 `json:"pointDelta,string"` // 本次签到获得积分（重复签到为0）
+        TotalBalance  int64 `json:"totalBalance,string"` // 当前总积分
+    }
+    CheckInGetListReq {
+        Page      *PageInfo `json:"page,optional"` // 分页信息
+        UserID    int64     `json:"userID,string,optional"` // 管理员可指定用户ID
+        StartTime int64     `json:"startTime,string,optional"` // 开始时间(Unix毫秒)
+        EndTime   int64     `json:"endTime,string,optional"` // 结束时间(Unix毫秒)
+    }
+    CheckInItem {
+        Id           int64  `json:"id,string"` // 记录ID
+        UserID       int64  `json:"userID,string"` // 用户ID
+        CheckDate    string `json:"checkDate"` // 签到日期 yyyy-MM-dd
+        IsContinuous bool   `json:"isContinuous"` // 是否连续签到
+        PointDelta   int64  `json:"pointDelta,string"` // 获得积分
+        CreatedTime  int64  `json:"createdTime,string"` // 创建时间(Unix毫秒)
+    }
+    CheckInGetListResp {
+        PageResp
+        List []*CheckInItem `json:"list"` // 签到记录列表
+    }
+    PointLogGetListReq {
+        Page      *PageInfo `json:"page,optional"` // 分页信息
+        UserID    int64     `json:"userID,string,optional"` // 管理员可指定用户ID
+        Source    string    `json:"source,optional"` // 来源过滤: checkIn/admin
+        StartTime int64     `json:"startTime,string,optional"` // 开始时间(Unix毫秒)
+        EndTime   int64     `json:"endTime,string,optional"` // 结束时间(Unix毫秒)
+    }
+    PointLogItem {
+        Id          int64  `json:"id,string"` // 记录ID
+        UserID      int64  `json:"userID,string"` // 用户ID
+        Delta       int64  `json:"delta,string"` // 积分变动量(正增负减)
+        Balance     int64  `json:"balance,string"` // 变动后余额
+        Source      string `json:"source"` // 来源: checkIn/admin
+        Remark      string `json:"remark,optional"` // 备注
+        CreatedTime int64  `json:"createdTime,string"` // 创建时间(Unix毫秒)
+    }
+    PointLogGetListResp {
+        PageResp
+        List []*PointLogItem `json:"list"` // 积分流水列表
+    }
+    PointBalanceGetResp {
+        Balance int64 `json:"balance,string"` // 当前积分余额
+    }
+    PointLogAdjustReq {
+        TargetUserID int64  `json:"targetUserID,string"` // 目标用户ID
+        Delta        int64  `json:"delta,string"` // 积分变动量(正增负减,不为0)
+        Remark       string `json:"remark"` // 调整备注(必填)
+    }
+)

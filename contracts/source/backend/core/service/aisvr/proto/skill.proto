@@ -1,0 +1,292 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// SkillEmpty Skill 服务通用空响应。
+message SkillEmpty {
+}
+
+// SkillWithID Skill 服务通用 ID 响应。
+message SkillWithID {
+  int64 ID = 1;
+}
+
+// SkillInfo AI Skill 信息（ai_skills）。
+message SkillInfo {
+  int64 ID = 1;
+  // tenantCode 租户编码（"common"=平台级）
+  string tenantCode = 2;
+  // code Skill 编码（租户内唯一）
+  string code = 3;
+  // name Skill 名称
+  string name = 4;
+  // desc 描述
+  string desc = 5;
+  // version 版本号
+  string version = 6;
+  // storageType 存储类型（oss/local）
+  string storageType = 7;
+  // storagePath 存储路径（OSS Key 或本地路径）
+  string storagePath = 8;
+  // manifest Skill 清单（JSON 字符串）
+  string manifest = 9;
+  // isPublished 是否已发布（1-是 2-否）
+  int64 isPublished = 10;
+  // status 状态（1-启用 2-禁用）
+  int64 status = 11;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 12;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 13;
+  // publishStatus 发布状态 draft/uploaded/validated/review_done/tested/approved/published/deprecated
+  string publishStatus = 14;
+  // reviewResult AI 审阅结果（JSON 字符串）
+  string reviewResult = 15;
+  // reviewBy 审阅者 ID（AI 或人工）
+  int64 reviewBy = 16;
+  // reviewTime 审阅时间（Unix 秒）
+  int64 reviewTime = 17;
+  // testResult 测试结果（JSON 字符串）
+  string testResult = 18;
+  // testBy 测试执行者 ID
+  int64 testBy = 19;
+  // testTime 测试时间（Unix 秒）
+  int64 testTime = 20;
+  // approvedBy 审批人 ID
+  int64 approvedBy = 21;
+  // approvedTime 审批时间（Unix 秒）
+  int64 approvedTime = 22;
+  // scope 作用域 platform/tenant
+  string scope = 23;
+  // publishedTime 发布时间（Unix 秒）
+  int64 publishedTime = 24;
+  // 与现有业务输入对齐的新增字段。
+  int64 parentID = 25;
+  int64 sort = 26;
+}
+
+// SkillGetOneReq 读取单个 Skill 请求。
+message SkillGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+}
+
+// SkillGetListReq Skill 列表查询请求。
+message SkillGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // code Skill 编码（精确匹配）
+  string code = 3;
+  // name 名称模糊筛选
+  string name = 4;
+  // isPublished 是否已发布（0 表示不筛）
+  int64 isPublished = 5;
+  // status 状态筛选（0 表示不筛）
+  int64 status = 6;
+  // 与现有业务输入对齐的新增字段。
+  int64 parentID = 7;
+}
+
+// SkillGetListResp Skill 列表查询响应。
+message SkillGetListResp {
+  repeated SkillInfo list = 1;
+  int64 total = 2;
+}
+
+// SkillUploadReq Skill 上传请求。
+message SkillUploadReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // code Skill 编码
+  string code = 2;
+  // version 版本号
+  string version = 3;
+  // fileContent 文件内容（Base64 编码的 ZIP）
+  string fileContent = 4;
+  // HTTP 上传已有的名称与父级。
+  string name = 5;
+  int64 parentID = 6;
+}
+
+// SkillUploadResp Skill 上传响应。
+message SkillUploadResp {
+  // id Skill ID
+  int64 ID = 1;
+  // storagePath 存储路径
+  string storagePath = 2;
+}
+
+// SkillDownloadReq Skill 下载请求。
+message SkillDownloadReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+}
+
+// SkillDownloadResp Skill 下载响应。
+message SkillDownloadResp {
+  // fileContent 文件内容（Base64 编码的 ZIP）
+  string fileContent = 1;
+  // fileName 文件名
+  string fileName = 2;
+}
+
+// SkillPublishReq Skill 发布请求。
+message SkillPublishReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+}
+
+// SkillFileListReq Skill 文件列表请求。
+message SkillFileListReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // 与现有业务输入对齐的新增字段。
+  string path = 3;
+}
+
+// SkillFileInfo Skill 文件信息。
+message SkillFileInfo {
+  // path 文件路径（相对于 Skill 根目录）
+  string path = 1;
+  // size 文件大小（字节）
+  int64 size = 2;
+  // modTime 修改时间（Unix 秒）
+  int64 modTime = 3;
+}
+
+// SkillFileListResp Skill 文件列表响应。
+message SkillFileListResp {
+  repeated SkillFileInfo files = 1;
+}
+
+// SkillFileGetReq Skill 文件读取请求。
+message SkillFileGetReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // path 文件路径
+  string path = 3;
+}
+
+// SkillFileGetResp Skill 文件读取响应。
+message SkillFileGetResp {
+  // content 文件内容（Base64 编码）
+  string content = 1;
+}
+
+// SkillFileUpdateReq Skill 文件更新请求。
+message SkillFileUpdateReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // path 文件路径
+  string path = 3;
+  // content 文件内容（Base64 编码）
+  string content = 4;
+}
+
+// Skill AI Skill 服务（一个 proto 一个 service）。
+service Skill {
+  rpc SkillCreate(SkillInfo) returns(SkillWithID);
+  rpc SkillUpdate(SkillInfo) returns(SkillEmpty);
+  rpc SkillDelete(SkillGetOneReq) returns(SkillEmpty);
+  rpc SkillGetOne(SkillGetOneReq) returns(SkillInfo);
+  rpc SkillGetList(SkillGetListReq) returns(SkillGetListResp);
+  rpc SkillUpload(SkillUploadReq) returns(SkillUploadResp);
+  rpc SkillDownload(SkillDownloadReq) returns(SkillDownloadResp);
+  rpc SkillPublish(SkillPublishReq) returns(SkillEmpty);
+  rpc SkillFileList(SkillFileListReq) returns(SkillFileListResp);
+  rpc SkillFileGet(SkillFileGetReq) returns(SkillFileGetResp);
+  rpc SkillFileUpdate(SkillFileUpdateReq) returns(SkillEmpty);
+  // Skills 治理 RPC
+  rpc SkillSubmit(SkillSubmitReq) returns(SkillInfo);
+  rpc SkillValidate(SkillValidateReq) returns(SkillValidateResp);
+  rpc SkillReview(SkillReviewReq) returns(SkillInfo);
+  rpc SkillTest(SkillTestReq) returns(SkillTestResp);
+  rpc SkillApprove(SkillApproveReq) returns(SkillInfo);
+}
+
+// SkillSubmitReq 提交审核请求。
+message SkillSubmitReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+}
+
+// SkillValidateReq 验证请求。
+message SkillValidateReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+}
+
+// SkillValidateResp 验证响应。
+message SkillValidateResp {
+  // success 是否成功
+  bool success = 1;
+  // errors 错误列表
+  repeated string errors = 2;
+  // warnings 警告列表
+  repeated string warnings = 3;
+}
+
+// SkillReviewReq AI 审阅请求。
+message SkillReviewReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // force 是否强制重新审阅
+  bool force = 3;
+}
+
+// SkillTestReq 测试请求。
+message SkillTestReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // testInput 测试输入（JSON 字符串）
+  string testInput = 3;
+}
+
+// SkillTestResp 测试响应。
+message SkillTestResp {
+  // success 是否成功
+  bool success = 1;
+  // output 测试输出
+  string output = 2;
+  // durationMs 耗时（毫秒）
+  int64 durationMs = 3;
+  // errors 错误列表
+  repeated string errors = 4;
+}
+
+// SkillApproveReq 审批请求。
+message SkillApproveReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id Skill ID
+  int64 ID = 2;
+  // approved 是否通过
+  bool approved = 3;
+  // comment 审批意见
+  string comment = 4;
+}

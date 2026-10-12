@@ -1,0 +1,1232 @@
+{
+  "components": {
+    "schemas": {
+      "Aggregation": {
+        "properties": {
+          "argFunc": {
+            "description": " 聚合函数 count|sum|avg|max|min|first|last 等",
+            "type": "string"
+          },
+          "column": {
+            "description": " 聚合列名",
+            "type": "string"
+          }
+        },
+        "title": "Aggregation",
+        "type": "object"
+      },
+      "DataSourceGetListReq": {
+        "properties": {
+          "code": {
+            "description": " 数据源标识",
+            "type": "string"
+          },
+          "dbType": {
+            "description": " 数据库类型过滤",
+            "type": "string"
+          },
+          "name": {
+            "description": " 名称模糊搜索",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": " 状态过滤",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DataSourceGetListReq",
+        "type": "object"
+      },
+      "DataSourceGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/DataSourceManage"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DataSourceGetListResp",
+        "type": "object"
+      },
+      "DataSourceManage": {
+        "properties": {
+          "code": {
+            "description": " 数据源标识",
+            "type": "string"
+          },
+          "dbType": {
+            "description": " 数据库类型 mysql|pgsql|sqlite|tdengine",
+            "type": "string"
+          },
+          "desc": {
+            "description": " 描述",
+            "type": "string"
+          },
+          "driver": {
+            "description": " 驱动类型（TDengine用）taosWS|taosRestful|taosSql",
+            "type": "string"
+          },
+          "dsn": {
+            "description": " 连接字符串",
+            "type": "string"
+          },
+          "funcMap": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 自定义函数模板，覆盖内置模板",
+            "type": "object"
+          },
+          "id": {
+            "description": " 编号",
+            "type": "string"
+          },
+          "maxIdleConns": {
+            "description": " 最大空闲连接数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "maxOpenConns": {
+            "description": " 最大打开连接数",
+            "format": "int32",
+            "type": "integer"
+          },
+          "name": {
+            "description": " 名称",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1:启用 2:禁用",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "dbType",
+          "dsn"
+        ],
+        "title": "DataSourceManage",
+        "type": "object"
+      },
+      "DataSourcePingReq": {
+        "properties": {
+          "code": {
+            "description": " 数据源标识",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "DataSourcePingReq",
+        "type": "object"
+      },
+      "FilterKeywords": {
+        "properties": {
+          "sql": {
+            "description": " SQL模板",
+            "type": "string"
+          },
+          "type": {
+            "description": " 值类型 date:日期字符串 array:逗号分隔数组",
+            "type": "string"
+          },
+          "valNum": {
+            "description": " 占位符数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "sql",
+          "valNum",
+          "type"
+        ],
+        "title": "FilterKeywords",
+        "type": "object"
+      },
+      "OrderBy": {
+        "properties": {
+          "field": {
+            "description": " 排序的字段名",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序方式：0 从小到大, 1 从大到小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "OrderBy",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": " 排序",
+            "items": {
+              "$ref": "#/components/schemas/OrderBy"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      },
+      "PermConfig": {
+        "properties": {
+          "filterRoles": {
+            "description": " 角色过滤（逗号分隔）",
+            "type": "string"
+          },
+          "hooks": {
+            "description": " Hook 列表（code 固定 \"dataFilter\"，SubCode 区分场景）",
+            "items": {
+              "$ref": "#/components/schemas/PermHook"
+            },
+            "type": "array"
+          },
+          "isFilterTenant": {
+            "description": " 租户过滤 1:按tenant_code过滤，超管无租户header时查所有",
+            "format": "int64",
+            "type": "integer"
+          },
+          "preFilters": {
+            "description": " 固定 WHERE 条件（无条件注入）",
+            "items": {
+              "$ref": "#/components/schemas/PreFilter"
+            },
+            "type": "array"
+          },
+          "softDeleteColumn": {
+            "description": " 软删除列名，空=不过滤",
+            "type": "string"
+          }
+        },
+        "title": "PermConfig",
+        "type": "object"
+      },
+      "PermHook": {
+        "properties": {
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " key=传给hook的参数名, value=HTTP header key名称（运行时动态读取）",
+            "type": "object"
+          },
+          "subCode": {
+            "description": " 过滤场景，如 \"projectScope\"、\"deviceScope\"",
+            "type": "string"
+          }
+        },
+        "required": [
+          "subCode"
+        ],
+        "title": "PermHook",
+        "type": "object"
+      },
+      "PreFilter": {
+        "properties": {
+          "column": {
+            "description": " 列名，如 \"tenant_code\"",
+            "type": "string"
+          },
+          "value": {
+            "description": " 固定值，如 \"common\"",
+            "type": "string"
+          }
+        },
+        "required": [
+          "column",
+          "value"
+        ],
+        "title": "PreFilter",
+        "type": "object"
+      },
+      "QueryConfigGetListReq": {
+        "properties": {
+          "code": {
+            "description": " 查询标识",
+            "type": "string"
+          },
+          "dataSourceCode": {
+            "description": " 数据源过滤",
+            "type": "string"
+          },
+          "name": {
+            "description": " 名称模糊搜索",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "type": {
+            "description": " 类型过滤",
+            "type": "string"
+          }
+        },
+        "title": "QueryConfigGetListReq",
+        "type": "object"
+      },
+      "QueryConfigGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "items": {
+              "$ref": "#/components/schemas/QueryConfigManage"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "QueryConfigGetListResp",
+        "type": "object"
+      },
+      "QueryConfigManage": {
+        "properties": {
+          "code": {
+            "description": " 查询标识",
+            "type": "string"
+          },
+          "columns": {
+            "description": " 默认查询列",
+            "type": "string"
+          },
+          "dataSourceCode": {
+            "description": " 关联数据源code，空则使用默认数据源",
+            "type": "string"
+          },
+          "filter": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/FilterKeywords"
+            },
+            "description": " 预定义过滤器",
+            "type": "object"
+          },
+          "id": {
+            "description": " 编号",
+            "type": "string"
+          },
+          "isToHump": {
+            "description": " 是否驼峰转换 1:是 2:否",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": " 名称",
+            "type": "string"
+          },
+          "omits": {
+            "description": " 排除字段列表",
+            "type": "string"
+          },
+          "orderBy": {
+            "description": " 默认排序",
+            "type": "string"
+          },
+          "permConfig": {
+            "$ref": "#/components/schemas/PermConfig"
+          },
+          "sql": {
+            "description": " SQL模板（type=sql时使用）",
+            "type": "string"
+          },
+          "table": {
+            "description": " 表名（type=table时使用）",
+            "type": "string"
+          },
+          "type": {
+            "description": " 查询类别 sql:SQL模板查询 table:直接查表",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "dataSourceCode",
+          "type"
+        ],
+        "title": "QueryConfigManage",
+        "type": "object"
+      },
+      "QueryInfoGetListReq": {
+        "properties": {
+          "finds": {
+            "description": " 批量查询列表",
+            "items": {
+              "$ref": "#/components/schemas/QueryInfoGetOneReq"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "finds"
+        ],
+        "title": "QueryInfoGetListReq",
+        "type": "object"
+      },
+      "QueryInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 批量查询结果",
+            "items": {
+              "items": {
+                "type": "object"
+              },
+              "type": "array"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "QueryInfoGetListResp",
+        "type": "object"
+      },
+      "QueryInfoGetOneReq": {
+        "properties": {
+          "aggregations": {
+            "description": " 聚合",
+            "items": {
+              "$ref": "#/components/schemas/Aggregation"
+            },
+            "type": "array"
+          },
+          "code": {
+            "description": " 查询配置code",
+            "type": "string"
+          },
+          "columns": {
+            "description": " 查询列（覆盖默认）",
+            "type": "string"
+          },
+          "filter": {
+            "additionalProperties": {
+              "type": "object"
+            },
+            "description": " 过滤条件",
+            "type": "object"
+          },
+          "groupBy": {
+            "description": " 分组",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "QueryInfoGetOneReq",
+        "type": "object"
+      },
+      "QueryInfoGetOneResp": {
+        "properties": {
+          "list": {
+            "description": " 查询结果列表",
+            "items": {
+              "type": "object"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "QueryInfoGetOneResp",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "core-data",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/data/datasource/manage/create": {
+      "post": {
+        "description": "业务说明：创建新的数据库连接配置，支持MySQL、PostgreSQL、SQLite、TDengine等多种数据库类型。配置连接字符串、连接池参数后可用于查询配置的数据来源。数据源是平台级基础设施，跨租户共享，仅平台管理员可操作。",
+        "operationId": "postApiV1DataDatasourceManageCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataSourceManage"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加数据源",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "create",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/datasource/manage/delete": {
+      "post": {
+        "description": "业务说明：删除数据源配置记录。删除前需确保无查询配置引用该数据源，否则删除失败。删除后相关查询配置将无法执行。仅平台管理员可操作。",
+        "operationId": "postApiV1DataDatasourceManageDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除数据源",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/datasource/manage/get-list": {
+      "post": {
+        "description": "业务说明：分页查询数据源配置列表，支持按标识、名称、数据库类型、状态过滤。用于数据源管理页面展示，返回基本信息不含敏感字段。仅平台管理员可访问。",
+        "operationId": "postApiV1DataDatasourceManageGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataSourceGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DataSourceGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据源列表",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "view",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/datasource/manage/get-one": {
+      "post": {
+        "description": "业务说明：根据ID查询单个数据源的完整配置信息，包括连接字符串、连接池参数、自定义函数模板等。用于编辑回显、配置查看等场景。仅平台管理员可访问。",
+        "operationId": "postApiV1DataDatasourceManageGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DataSourceManage"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据源详情",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "view",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/datasource/manage/ping": {
+      "post": {
+        "description": "业务说明：验证数据源连接配置是否有效，尝试建立数据库连接并立即关闭。用于新增/编辑数据源时的配置验证，确保连接字符串正确。仅平台管理员可操作。",
+        "operationId": "postApiV1DataDatasourceManagePing",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataSourcePingReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "测试数据源连接",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "test",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "test",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/datasource/manage/update": {
+      "post": {
+        "description": "业务说明：修改数据源配置参数，支持更新名称、连接字符串、连接池参数、状态等。部分更新，空值字段不修改。修改后需重新测试连接有效性。仅平台管理员可操作。",
+        "operationId": "postApiV1DataDatasourceManageUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DataSourceManage"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新数据源",
+        "tags": [
+          "data/datasource/manage",
+          "dataDatasourceManage"
+        ],
+        "x-action": "update",
+        "x-auth-type": "platform",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "dataSource"
+      }
+    },
+    "/api/v1/data/query/info/get-list": {
+      "post": {
+        "description": "业务说明：批量执行多个查询配置，一次请求返回多个查询结果。用于数据看板场景，减少HTTP请求数量。每个查询独立执行，支持各自的过滤条件和分页参数。权限配置自动注入确保数据隔离。所有登录用户可调用。",
+        "operationId": "postApiV1DataQueryInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QueryInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量执行查询",
+        "tags": [
+          "data/query/info",
+          "dataQueryInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "queryExecution"
+      }
+    },
+    "/api/v1/data/query/info/get-one": {
+      "post": {
+        "description": "业务说明：根据查询配置code执行SQL查询，支持动态过滤条件、分页、聚合、分组等。权限配置（PermConfig）自动注入租户过滤、项目过滤等条件，确保用户只能查询其权限范围内的数据。用于报表数据加载、数据看板、通用查询等场景。所有登录用户可调用。",
+        "operationId": "postApiV1DataQueryInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QueryInfoGetOneResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "执行单个查询",
+        "tags": [
+          "data/query/info",
+          "dataQueryInfo"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "queryExecution"
+      }
+    },
+    "/api/v1/data/query/manage/create": {
+      "post": {
+        "description": "业务说明：创建查询配置模板，定义SQL模板或表名、查询列、过滤条件、权限配置等。支持两种类型：sql（SQL模板查询）和table（直接查表）。用于动态报表、数据看板、通用查询等场景。租户管理员可操作。",
+        "operationId": "postApiV1DataQueryManageCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryConfigManage"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "添加查询配置",
+        "tags": [
+          "data/query/manage",
+          "dataQueryManage"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "queryConfig"
+      }
+    },
+    "/api/v1/data/query/manage/delete": {
+      "post": {
+        "description": "业务说明：删除查询配置记录。删除后相关查询将无法执行，需确保无业务依赖后再删除。租户管理员可操作。",
+        "operationId": "postApiV1DataQueryManageDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除查询配置",
+        "tags": [
+          "data/query/manage",
+          "dataQueryManage"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "queryConfig"
+      }
+    },
+    "/api/v1/data/query/manage/get-list": {
+      "post": {
+        "description": "业务说明：分页查询查询配置列表，支持按标识、名称、数据源、类型过滤。用于查询配置管理页面展示。租户管理员可访问。",
+        "operationId": "postApiV1DataQueryManageGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryConfigGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QueryConfigGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取查询配置列表",
+        "tags": [
+          "data/query/manage",
+          "dataQueryManage"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "queryConfig"
+      }
+    },
+    "/api/v1/data/query/manage/get-one": {
+      "post": {
+        "description": "业务说明：根据ID查询单个查询配置的完整信息，包括SQL模板、列定义、过滤器、权限配置等。用于编辑回显、配置查看等场景。租户管理员可访问。",
+        "operationId": "postApiV1DataQueryManageGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/QueryConfigManage"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取查询配置详情",
+        "tags": [
+          "data/query/manage",
+          "dataQueryManage"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "数据服务",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "queryConfig"
+      }
+    },
+    "/api/v1/data/query/manage/update": {
+      "post": {
+        "description": "业务说明：修改查询配置参数，支持更新SQL模板、列定义、过滤器、权限配置等。部分更新，空值字段不修改。修改后立即生效。租户管理员可操作。",
+        "operationId": "postApiV1DataQueryManageUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QueryConfigManage"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新查询配置",
+        "tags": [
+          "data/query/manage",
+          "dataQueryManage"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "数据服务",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "queryConfig"
+      }
+    }
+  }
+}

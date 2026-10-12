@@ -1,0 +1,148 @@
+syntax = "v1"
+
+@server (
+	group:      lowcode/rule/chain/info
+	prefix:     /api/v1/lowcode/rule/chain/info
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "添加规则链"
+	    description: "业务说明：添加规则链"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler create
+	post /create (RuleChainInfo) returns (WithStrID)
+
+	@doc(
+	    summary: "获取规则链列表"
+	    description: "业务说明：获取规则链列表"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (RuleChainInfoGetListReq) returns (RuleChainInfoGetListResp)
+
+	@doc(
+	    summary: "获取规则链信息"
+	    description: "业务说明：获取规则链信息"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (RuleChainInfoGetOneReq) returns (RuleChainInfo)
+
+	@doc(
+	    summary: "更新规则链"
+	    description: "业务说明：更新规则链"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler update
+	post /update (RuleChainInfo)
+
+	@doc(
+	    summary: "删除规则链"
+	    description: "业务说明：删除规则链"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithStrID)
+}
+
+@server (
+	group:      lowcode/rule/chain/detail
+	prefix:     /api/v1/lowcode/rule/chain/detail
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+	@doc(
+	    summary: "获取规则链详情"
+	    description: "业务说明：获取规则链详情"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithStrID) returns (RuleChainDetail)
+
+	@doc(
+	    summary: "更新规则链详情"
+	    description: "业务说明：更新规则链详情"
+	    authType: "admin"
+	resource: "lowcode"
+	action: "view"
+	group: "things/lowcode"
+	recordLogMode: "1"
+	)
+	@handler update
+	post /update (RuleChainDetail)
+}
+
+type (
+	// RuleChainInfo 定义规则链
+	RuleChainInfo {
+		ID             string                 `json:"id,optional"` //规则链的唯一标识符
+		GroupID        int64                  `json:"groupID,string,optional"` //所在分组的ID
+		Name           string                 `json:"name,optional"` //规则链的名称
+		DebugMode      int64                  `json:"debugMode,optional"` //表示节点是否处于调试模式。如果为true,则在节点处理消息时会触发调试回调函数,此设置会覆盖节点的 `DebugMode` 配置
+		Root           int64                  `json:"root,optional"` //表示此规则链是根规则链还是子规则链(仅作为标记使用,不应用于实际逻辑)
+		Disabled       int64                  `json:"disabled,optional"` //表示规则链是否被禁用
+		Configuration  map[string]interface{} `json:"configuration,omitempty,optional"` //包含规则链的配置信息
+		AdditionalInfo map[string]interface{} `json:"additionalInfo,omitempty,optional"` //是扩展字段
+		Detail         *RuleChainDetail       `json:"detail,optional"` //只读,要更新需要调用详情更新接口 只有传WithDetail的时候会赋值
+		Desc           string                 `json:"desc,optional"`
+		CreatedTime    int64                  `json:"createdTime,string,optional"`
+		UpdatedTime    int64                  `json:"updatedTime,optional"`
+	}
+	RuleChainDetail {
+		ID             string `json:"id,optional"` //规则链的唯一标识符
+		FirstNodeIndex *int64 `json:"firstNodeIndex,omitempty,optional"` //数据流中第一个节点的索引,默认为0
+		// Endpoints 是端点定义
+		Endpoints interface{} `json:"endpoints,optional,omitempty"`
+		// Nodes 是节点的组件定义
+		// 每个对象代表规则链中的一个规则节点
+		Nodes interface{} `json:"nodes,optional"`
+		// Connections 定义规则链中两个节点之间的连接
+		Connections interface{} `json:"connections,optional"`
+		CreatedTime int64       `json:"createdTime,string,optional"`
+		UpdatedTime int64       `json:"updatedTime,optional"`
+	}
+	RuleChainInfoGetOneReq {
+		ID         string `json:"id"` //规则链的唯一标识符
+		WithDetail bool   `json:"withDetail,optional"` //同时返回规则链的详情
+	}
+	RuleChainInfoGetListReq {
+		Page       *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		GroupID    int64     `json:"groupID,string,optional"` //规则链分组ID
+		Name       string    `json:"name,optional"` //规则链的名称
+		DebugMode  int64     `json:"debugMode,optional"` //表示节点是否处于调试模式。如果为true,则在节点处理消息时会触发调试回调函数,此设置会覆盖节点的 `DebugMode` 配置
+		Root       int64     `json:"root,optional"` //表示此规则链是根规则链还是子规则链(仅作为标记使用,不应用于实际逻辑)
+		Disabled   int64     `json:"disabled,optional"` //表示规则链是否被禁用
+		WithDetail bool      `json:"withDetail,optional"` //同时返回规则链的详情
+	}
+	RuleChainInfoGetListResp {
+		List []*RuleChainInfo `json:"list"` // 列表数据
+		PageResp
+	}
+)
+

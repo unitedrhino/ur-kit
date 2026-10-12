@@ -1,0 +1,3 @@
+# 合同清单仅含文件 SHA-256，排除高熵哈希误报；其他源码仍需扫描。
+[allowlist]
+paths = ['^contracts/manifest\.json$']

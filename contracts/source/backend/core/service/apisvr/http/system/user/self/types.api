@@ -1,0 +1,228 @@
+type (
+	// 用户信息相关
+	UserSelfUpdateReq {
+		NickName string `json:"nickName,optional"` // 用户昵称
+		Sex      int64  `json:"sex,optional"` // 性别（1:男，2:女，0:未知）
+		Avatar   string `json:"avatar,optional"` // 头像（传图片的filePath）
+		Language *string `json:"language,optional"` // 个人语言；空字符串表示清除设置并跟随浏览器
+	}
+	UserSearchReq {
+		Account string `json:"account"`
+	}
+	UserSearchResp {
+		UserID   int64  `json:"userID,string,optional"` // 用户id
+		UserName string `json:"userName,optional"` // 用户名(唯一)
+		NickName string `json:"nickName,optional"` // 用户的昵称
+		Avatar   string `json:"avatar,optional"` // 用户头像
+		Status   int64  `json:"status,optional"`
+	}
+	UserSelfAppGetOneReq {
+		AppID   int64 `json:"appID,string"` //
+		Type    string `json:"type"` //  app:应用  mini:小程序
+		SubType string `json:"subType"` //wx:微信小程序  dingTalk:钉钉小程序
+	}
+	UserSelfAppGetOneResp {
+		AppID       int64    `json:"appID,string"` // 应用ID
+		Name        string   `json:"name,optional"` // 名称
+		TenantCodes []string `json:"tenantCodes,optional"` //拥有这个app的租户列表
+	}
+	UserAreaApplyCreateReq {
+		AreaID   int64 `json:"areaID,string"`
+		AuthType int64 `json:"authType"` //1:读权限,只能读,不能写 4:管理权限,可以修改别人的权限
+	}
+	UserSelfGetOneReq {
+		WithTenant bool `json:"withTenant,optional"`
+	}
+	UserModuleGetListReq {
+		WithMenus bool `json:"withMenus,optional"` //同时返回模块下的菜单列表
+	}
+	UserMenuGetListReq {
+		AppID    int64 `json:"appID,string,optional"` // 应用编号
+		IsCommon int64 `json:"isCommon,optional"` // 是否常用菜单 1-是 2-否
+	}
+	UserResourceGetOneResp {
+		Roles []*RoleInfo `json:"roles"` //角色列表
+		Info  *UserInfo   `json:"info"` //用户信息
+	}
+	UserChangePwdReq {
+		Type        string `json:"type,options=phone|email|pwd"` //验证方式: phone手机号 email邮箱  pwd:原密码
+		Code        string `json:"code,optional"` //验证码    微信登录填code 账号密码登录时填写密码
+		CodeID      string `json:"codeID,optional"` //验证码编号 微信登录填state
+		Password    string `json:"password,optional"` //密码
+		OldPassword string `json:"oldPassword,optional"` //pwd方式需要填写 如果原来没有设置过密码可以不填 输入原密码修改密码(sha256格式并需要输入图像验证码)
+	}
+	UserBindAccountReq {
+		Type    string `json:"type,options=phone|email|wxOpen|wxIn|wxMiniP|dingApp"` //验证方式:phone手机号注册 wxOpen 微信开放平台登录 wxIn 微信内 wxMiniP 微信小程序
+		Account string `json:"account,optional"` //手机号注册时填写手机号 email填写邮箱
+		Code    string `json:"code,optional"` //验证码    微信登录填code 账号密码登录时填写密码
+		CodeID  string `json:"codeID,optional"` //验证码编号 微信登录填state
+	}
+)
+
+type (
+	// 认证相关
+	UserCaptchaReq {
+		Account string `json:"account,optional"` //短信验证时填写手机号,邮箱验证时填写邮箱
+		Type    string `json:"type,options=phone|image|email"` //验证方式:短信验证,图片验证码
+		Use     string `json:"use,options=login|register|changePwd|forgetPwd|bindAccount"` //用途
+		Code    string `json:"code,optional"` //验证码    微信邮箱验证登录填code
+		CodeID  string `json:"codeID,optional"` //验证码编号 微信邮箱验证登录填state
+	}
+	UserCaptchaResp {
+		CodeID string `json:"codeID"` //验证码编号
+		Url    string `json:"url,optional"` //图片验证码url
+		Expire int64  `json:"expire"` //过期时间
+	}
+	UserThirdAuthStartReq {
+		Provider string `json:"provider,options=huawei|google|github|apple"`
+		Platform string `json:"platform,optional"`
+	}
+	UserThirdAuthStartResp {
+		AuthURL string `json:"authUrl"`
+		State string `json:"state"`
+	}
+	UserThirdLoginReq {
+		Provider string `json:"provider,options=huawei|google|github|apple"`
+		Code string `json:"code"`
+		State string `json:"state"`
+		Platform string `json:"platform,optional"`
+	}
+	UserThirdLoginResp {
+		Status string `json:"status"`
+		Login *UserLoginResp `json:"login,optional"`
+		PendingToken string `json:"pendingToken,optional"`
+		Provider string `json:"provider,optional"`
+		Message string `json:"message,optional"`
+	}
+	UserThirdRegisterReq {
+		PendingToken string `json:"pendingToken"`
+		RegType string `json:"regType,options=phone|email"`
+		Account string `json:"account"`
+		Code string `json:"code"`
+		CodeID string `json:"codeID,optional"`
+		Password string `json:"password,optional"`
+		NickName string `json:"nickName,optional"`
+	}
+	UserLoginReq {
+		Account   string `json:"account,optional"` //登录账号(支持用户名,手机号,邮箱) 账号密码登录时需要填写
+		PwdType   int32  `json:"pwdType,optional"` //账号密码登录的凭据类型：0 无密码；1 SHA-256 摘要（当前标准）；2 MD5 摘要（仅历史兼容）
+		Password  string `json:"password,optional"` //账号密码登录凭据；pwdType=1 时传原始密码的 SHA-256 十六进制摘要，CLI 接收原始密码并负责生成该摘要
+		LoginType string `json:"loginType,options=phone|wxOpen|wxIn|wxMiniP|dingApp|pwd|email|huawei|google|apple|github|jwt"` //验证类型 phone 手机号 wxOpen 微信开放平台 wxIn 微信内 wxMiniP 微信小程序 pwd 账号密码 email 邮箱 huawei 华为 google Google apple Apple github GitHub jwt 一键登录
+		Code      string `json:"code,optional"` //验证码    微信邮箱验证登录填code
+		CodeID    string `json:"codeID,optional"` //验证码编号 微信邮箱验证登录填state
+	}
+	UserLoginResp {
+		Info UserInfo `json:"info"` //用户信息
+		Token JwtToken `json:"token"` //用户token
+	}
+	JwtToken {
+		AccessToken  string `json:"accessToken,omitempty"` //用户token
+		AccessExpire int64  `json:"accessExpire,string,omitempty"` //token过期时间
+		RefreshAfter int64  `json:"refreshAfter,string,omitempty"` //token刷新时间
+	}
+	UserRegisterReq {
+		//注册方式:     phone手机号注册 wxOpen 微信开放平台登录 wxIn 微信内登录 wxMiniP 微信小程序 pwd 账号密码注册
+		RegType     string            `json:"regType,options=phone|email|wxOpen|wxIn|wxMiniP|pwd|dingApp|huawei|google|apple|github|jwt"`
+		Account     string            `json:"account,optional"` //手机号注册时填写手机号 账号密码注册时填写userName
+		Code        string            `json:"code"` //验证码    微信登录填code 账号密码登录时填写密码
+		CodeID      string            `json:"codeID,optional"` //验证码编号 微信登录填state
+		Password    string            `json:"password,optional"` //密码
+		Expand      map[string]string `json:"expand,optional"` //拓展, 微信登录方式 phoneCode:获取手机号code  手机号和邮箱注册: wxOpenCode:如果需要同时绑定微信则在这里填写开放平台的用户code
+		IsWithLogin bool              `json:"isWithLogin,optional"` //注册成功同时返回token,自动登录
+		NickName    string            `json:"nickName,optional"` // 用户的昵称
+	}
+	UserForgetPwdReq {
+		Type     string `json:"type,options=phone|email"` //验证方式: phone手机号 email邮箱
+		Account  string `json:"account,optional"` //手机号注册时填写手机号 账号密码注册时填写userName
+		Code     string `json:"code,optional"` //验证码    微信登录填code 账号密码登录时填写密码
+		CodeID   string `json:"codeID,optional"` //验证码编号 微信登录填state
+		Password string `json:"password"` //密码
+	}
+)
+
+type (
+	// 用户配置相关
+	UserProfileGetOneReq {
+		Code         string `json:"code"`
+		WithProjects bool   `json:"withProjects,optional"`
+	}
+	UserProfileGetOneResp {
+		UserProfile
+		Projects []*ProjectInfo `json:"projects,optional,omitempty"` //项目列表
+	}
+	UserProfile {
+		Code   string `json:"code"`
+		Params string `json:"params"`
+	}
+	UserProfileDeleteReq {
+		Code string `json:"code"`
+	}
+	UserProfileGetListReq {
+		Codes []string `json:"codes"`
+	}
+	UserProfileGetListResp {
+		Profiles []*UserProfile `json:"profiles"`
+	}
+	UserPushClientReportReq {
+		PushClientID string `json:"pushClientId"`
+		Platform     string `json:"platform,options=android|ios|harmony|harmonyos|unbind"`
+		AppID        string `json:"appId,optional"`
+		AppVersion   string `json:"appVersion,optional"`
+	}
+)
+
+type (
+	// 用户消息相关
+	UserMessageGetListReq {
+		Page        *PageInfo  `json:"page,optional"`
+		Group       string     `json:"group,optional"` //分组
+		Type        string     `json:"type,optional"` //渠道类型
+		NotifyCode  string     `json:"notifyCode,optional"` //通知编码
+		IsRead      int64      `json:"isRead,optional"` //是否已读 1:已读 2:未读
+		IsHandled   int64      `json:"isHandled,optional"` //是否已处理 1:已处理 2:未处理
+		Str1        string     `json:"str1,optional"`
+		Str2        string     `json:"str2,optional"`
+		Str3        string     `json:"str3,optional"`
+		CreatedTime *TimeRange `json:"createdTime,string,optional"` //创建时间范围
+	}
+	UserMessageGetPendingReq {
+		Page *PageInfo `json:"page,optional"` //分页信息
+	}
+	UserMessageStatisticsResp {
+		UnreadCounts map[string]int64 `json:"unreadCounts"` //各分组未读数
+		TotalUnread  int64            `json:"totalUnread"` //总未读数
+		TotalPending int64            `json:"totalPending"` //总待处理数
+	}
+	UserMessage {
+		ID          int64        `json:"id,string"` //消息ID
+		UserID      int64        `json:"userID,string"` //用户ID
+		Group       string       `json:"group"` //分组
+		MessageID   int64        `json:"messageID,string"` //消息详情ID
+		IsRead      int64        `json:"isRead"` //是否已读 1:已读 2:未读
+		Type        string       `json:"type,optional"` //渠道类型
+		IsHandled   int64        `json:"isHandled"` //是否已处理 1:已处理 2:未处理
+		Message     *MessageInfo `json:"message,optional"` //消息详情
+		CreatedTime int64        `json:"createdTime,string"` //创建时间
+	}
+	UserMessageGetListResp {
+		PageResp
+		List []*UserMessage `json:"list"` //消息列表
+	}
+)
+
+type (
+	// 用户通知偏好
+	UserNotifyPreference {
+		TenantCode     string                    `json:"tenantCode,optional"` //租户编码,只读
+		UserID         int64                     `json:"userID,string,optional"` //用户ID,只读
+		QuietStartTime string                    `json:"quietStartTime,optional"` //免打扰开始时间 HH:MM
+		QuietEndTime   string                    `json:"quietEndTime,optional"` //免打扰结束时间 HH:MM
+		QuietChannels  []string                  `json:"quietChannels,optional"` //免打扰渠道列表
+		Subscriptions  []*UserNotifySubscription `json:"subscriptions,optional"` //订阅控制列表
+	}
+	UserNotifySubscription {
+		Group     string `json:"group"` //通知分组
+		Type      string `json:"type"` //渠道类型
+		IsEnabled int64  `json:"isEnabled"` //是否启用 1:启用 2:禁用
+	}
+)

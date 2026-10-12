@@ -1,0 +1,121 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-助手组管理"
+	desc:    "AI Agent Group Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 助手组类型定义 ----（PageInfo 和 WithID 定义在 common.api）
+
+	type AgentGroupInfo {
+	voicePipeline *string `json:"voicePipeline,optional"` // 组级语音链路；未传不修改，空值恢复 cascade 默认
+	realtimeConfigID *string `json:"realtimeConfigID,optional"` // 组级实时模型业务ID；未传不修改，空值清除
+	interactionMode *string `json:"interactionMode,optional"` // 组级交互策略；未传不修改，空值恢复 auto 默认
+		authType string `json:"authType,optional"` // 权限类型：user 用户权限 / hook 第三方权限
+		authCode string `json:"authCode,optional"` // 第三方权限认证码
+
+	ID            int64  `json:"id,optional"`            // 助手组ID
+	tenantCode    string `json:"tenantCode,optional"`    // 租户编码，"common"=平台级
+	code          string `json:"code"`                   // 助手组编码（租户内唯一）
+	name          string `json:"name"`                   // 助手组名称
+	desc          string `json:"desc,optional"`          // 描述
+	purpose       string `json:"purpose,optional"`       // 用途分类 default/customer_service/...
+	systemPrompt  string `json:"systemPrompt,optional"`  // 共享系统提示词模板（供组内Agent决策时继承）
+	llmConfigID   string `json:"llmConfigID,optional"`   // 共享默认LLM配置ID
+	ttsConfigID   string `json:"ttsConfigID,optional"`   // 共享默认TTS配置ID
+	asrConfigID   string `json:"asrConfigID,optional"`   // 共享默认ASR配置ID
+	mcpServiceIds string `json:"mcpServiceIds,optional"` // 共享MCP服务ID列表（JSON字符串，供组内Agent复用）
+	skillIds      string `json:"skillIds,optional"`      // 平台分发Skill ID列表（JSON字符串，供组内Agent复用，不表示Group或Clone拥有learned skills）
+	knowledgeBaseIds string `json:"knowledgeBaseIds,optional"` // 共享知识库ID列表（JSON字符串，供组内Agent复用）
+	status         int64  `json:"status,string,optional"`   // 状态 1-启用 2-禁用
+	defaultAgentId int64  `json:"defaultAgentId,optional"`  // 默认决策AgentID（0=未设置）
+	createdTime    int64  `json:"createdTime,optional"`     // 创建时间
+	updatedTime    int64  `json:"updatedTime,optional"`     // 更新时间
+}
+
+type AgentGroupGetListReq {
+	page       PageInfo `json:"page"`                 // 分页信息
+	tenantCode string   `json:"tenantCode,optional"`  // 租户编码过滤
+	name       string   `json:"name,optional"`        // 名称模糊搜索
+	purpose    string   `json:"purpose,optional"`     // 用途分类过滤
+}
+
+type AgentGroupGetListResp {
+	list  []AgentGroupInfo `json:"list"`  // 助手组列表
+	total int64            `json:"total"` // 总数
+}
+
+// ---- 助手组服务定义 ----
+
+@server(
+	group:               ai/agentgroup
+	prefix:              /api/v1/ai/agent/group
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiAgentGroupManage"
+	accessNamePrefix:    "助手组管理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建助手组"
+		description: "业务说明：创建新的助手组，用于维护组内 Agent 共享的提示词模板、默认模型配置、共享知识库以及平台分发 skills。AgentGroup 只承载共享配置，不是 learned skills 的归属主体；真正执行决策的是 Agent；Clone 只承载长期状态与记忆。tenantCode 为 'common' 时表示平台级共享配置组。"
+		authType: "admin"
+		resource: "ai/agent-group"
+		action: "create"
+		group: "ai/agent-group"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (AgentGroupInfo) returns (WithID)
+
+	@doc(
+		summary: "更新助手组"
+		description: "业务说明：修改已存在的助手组共享配置，支持更新名称、描述、共享提示词、共享 LLM/TTS/ASR、平台分发 skills、共享知识库和默认决策 Agent 等。该接口不改变 learned skills 的归属语义，Group 与 Clone 都不是 learned skills 的长期拥有者。"
+		authType: "admin"
+		resource: "ai/agent-group"
+		action: "update"
+		group: "ai/agent-group"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (AgentGroupInfo)
+
+	@doc(
+		summary: "删除助手组"
+		description: "业务说明：删除指定的助手组记录。删除前需检查组下是否还有助手，如有则需先删除或迁移助手后再删除助手组。平台级助手组删除需平台管理员权限。删除操作不可恢复。"
+		authType: "admin"
+		resource: "ai/agent-group"
+		action: "delete"
+		group: "ai/agent-group"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "获取助手组详情"
+		description: "业务说明：根据助手组ID查询共享配置信息，包括共享提示词、共享 LLM/TTS/ASR、平台分发 skills、共享知识库和默认决策 Agent 等。返回内容用于共享配置查看与编辑，不表示 Group 或 Clone 拥有 learned skills。"
+		authType: "admin"
+		resource: "ai/agent-group"
+		action: "view"
+		group: "ai/agent-group"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (WithID) returns (AgentGroupInfo)
+
+	@doc(
+		summary: "获取助手组列表"
+		description: "业务说明：分页查询助手组列表，支持按租户、名称、用途分类过滤。列表展示的是共享配置组，不是决策主体；真正执行决策的是组内 Agent。平台管理员可查看所有租户的助手组，普通用户只能查看本租户和 common 的助手组。"
+		authType: "admin"
+		resource: "ai/agent-group"
+		action: "view"
+		group: "ai/agent-group"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (AgentGroupGetListReq) returns (AgentGroupGetListResp)
+}

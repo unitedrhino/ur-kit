@@ -1,0 +1,272 @@
+// 统一信令下行端口：契约属于Core，由设备接入服务实现，Core不依赖Things代码。
+syntax = "proto3";
+package im;
+option go_package = "/im";
+
+// DeviceDeliveryRequest 承载已入库且已领取的下行，不接受原始任意MQTT Topic。
+message DeviceDeliveryRequest {
+  string delivery_id = 1; // 稳定投递ID，重试不更换。
+  string subject = 2; // 已鉴权设备主体，格式device:productID:deviceName。
+  string route = 3; // 仅signaling或message，不能用于旧AI、物模型或cleanup。
+  bytes payload = 4; // 已校验的完整JSON信封，不含媒体帧。
+  int64 expires_at = 5; // 最晚可开始发布时间，Unix毫秒；不会延长原始有效期。
+  int64 owner_user_id = 6; // 人际/IPC/文件邀请及源/文件/焦点控制必填；dmsvr复核设备当前主人，不只信IM绑定。
+  string purpose = 7; // 新门铃源邀请humanCall、源/文件/焦点控制取原持久用途；旧邀请保持缺省，焦点不得虚构focus用途。
+  int64 connection_epoch = 8; // 新humanCall源邀请、文件邀请/控制及焦点控制固定原连接；旧缺省邀请/源控制保持零值，不进入设备JSON。
+  repeated string output_modalities = 9; // 文件控制及历史源投递的完整输出需求，来自原持久邀请；其他分支为空，不进入设备JSON。
+  string camera_id = 10; // recordPlayback/aiVision轨控制必填，绑定原选摄像头；不能以首个相机代替，不进入设备JSON。
+  bytes live_invite = 11; // 仅liveBroadcast投递必填：原claimed会话的严格邀请参数，绑定完整接收组；不进入设备JSON。
+  string expected_connection_instance = 12; // 私有快照/AI接续专属出口固定的32位小写hex物理连接实例；旧分支省略，不从设备正文推断。
+  AIVisionControlBinding ai_vision_control = 13; // 仅aiVision轨控制必填：原claimed来源的严格绑定，不进入设备MQTT正文或授予本人同意。
+  AIEndpointDeliveryBinding ai_endpoint_binding = 14; // AI跨端接续专属来源；不能与其他私有来源混用。
+  AIControlSnapshotDeliveryBinding ai_control_snapshot_binding = 15; // AI控制恢复快照专属原选择，不进入设备JSON。
+  AIReplyInstallationDeliveryBinding ai_reply_installation_binding = 16; // 原初始UDP Start已claimed安装出处，不借恢复/候选能力；不能与其他私有绑定混用。
+}
+
+// AIMediaTrack 承载原平台选择轨，不能靠目标当前能力重新选轨或切换摄像头。
+message AIMediaTrack {
+  string track_id = 1; // 原逻辑轨标识。
+  string kind = 2; // 本阶段仅audio。
+  string source_id = 3; // 原明确物理来源。
+  string direction = 4; // 原sendonly/recvonly。
+  string codec = 5; // 原opus。
+  string state = 6; // 原选择或当前实际状态。
+}
+
+// AIEndpointDeliveryBinding 绑定原claimed接续账本，不能凭合法邀请或held媒体代替本人确认。
+message AIEndpointDeliveryBinding {
+  string model_session_id = 1; // 永久原模型锚点。
+  string handoff_id = 2; // 原接续事务。
+  string endpoint_session_id = 3; // 原候选/当前公开端腿。
+  uint64 capability_revision = 4; // 原目标已核能力修订。
+  string transport = 5; // 原模型UDP/WebRTC，不以接续切传输。
+  string interaction_mode = 6; // 原半/全双工选择。
+  AIMediaAudioParams audio = 7; // 原完整音频参数。
+  repeated AIMediaTrack tracks = 8; // 原完整两向轨。
+  string stage = 9; // candidate/current/sourceTerminal封闭阶段。
+  string source_session_id = 10; // 原公开源腿，后继接续可与永久model锚点不同；仅对齐原scope事实。
+  bool udp_reply_start_receipt = 11; // 原明确选择，目标能力缺失必须拒，不能接续后静默降级。
+}
+
+// AIControlSnapshotDeliveryBinding 仅供正式已释放原快照投递；终态仍核当前主人和原读取socket。
+message AIControlSnapshotDeliveryBinding {
+  string transport = 1; // 原none/udp/webrtc，不另建媒体。
+  string interaction_mode = 2; // None为空，音频为原模式。
+  AIMediaAudioParams audio = 3; // None为空，音频为原完整格式。
+  uint64 capability_revision = 4; // 当前读取请求已验证的完整能力修订。
+  bool udp_reply_start_receipt = 5; // 原选择保留，不能从恢复快照晚开启安装能力。
+}
+
+// AIReplyInstallationDeliveryBinding 仅原初始Start的私有持久出处，设备JSON与公共RPC均不携带。
+message AIReplyInstallationDeliveryBinding {
+  string model_session_id = 1; // 原模型锚点，初始即公开会话。
+  string install_operation_id = 2; // 原唯一Start同CAS的持久安装操作。
+  uint64 capability_revision = 3; // 原已核能力，不从当前设备临时升级。
+  string transport = 4; // 固定udp。
+  string interaction_mode = 5; // 原半/全双工。
+  AIMediaAudioParams audio = 6; // 原完整格式。
+  string track_id = 7; // 原公开recvonly音频轨。
+  uint64 media_revision = 8; // 原实际媒体代次。
+}
+
+// AIVisionControlBinding 绑定原平台选定视频轨与能力/媒体代次；本人同意和原claimed账本由IM独立核验。
+message AIVisionControlBinding {
+  string track_id = 1; // 原会话逻辑视频轨，不与camera_id混用。
+  uint64 capability_revision = 2; // 原已核能力修订；发布前DMS仍独立读当前原连接声明。
+  uint64 media_revision = 3; // 原媒体代次；停止不能借重投改指另一个会话或新媒体。
+}
+
+// DeviceDeliveryResponse 只确认Broker接受，不代表设备收到、执行或播放。
+message DeviceDeliveryResponse {
+  string delivery_id = 1; // 与请求完全一致，防止错误关联。
+  bool broker_accepted = 2; // 仅实际确认后为true；不可用/超时必须返回RPC错误。
+}
+
+// IPCPreflightRequest 查询指定源及用途的准入；操作者取可信上下文，不能从正文指定用户。
+message IPCPreflightRequest {
+  string subject = 1; // 已验证格式的device:productID:deviceName，不接受任意Topic。
+  string camera_id = 2; // 设备声明的物理源，不能用trackId代替。
+  bool listen_audio = 3; // 是否请求显式mic监听能力，不授权反向对讲。
+  string purpose = 4; // ipcLiveView/ipcTalk/humanCall/recordPlayback分别预检；历史不授权实时采集，未传保留预览语义。
+  string call_type = 5; // 仅humanCall允许voice/video；空保持旧视频语义，voice必须无camera/listenAudio。
+}
+
+// IPCPreflightResponse 是短期准入快照，不等于授权永久有效或媒体已经连接。
+message IPCPreflightResponse {
+  string subject = 1; // 必须与请求相同。
+  int64 owner_user_id = 2; // 当前设备主人，与调用上下文用户一致。
+  int64 connection_epoch = 3; // 本次连接时间，设备重连后旧快照不得复用。
+  bytes capability_report = 4; // 已验证的完整capabilityReport信封，不含供应商凭据。
+  int64 expires_at = 5; // 快照截止Unix毫秒；正式投递仍独立复核设备能力和归属。
+  string purpose = 6; // 已实际校验的用途；对讲与人际呼叫必须精确回执，避免旧节点忽略新请求字段。
+  string call_type = 7; // 精确回读原humanCall请求类型；空保持旧客户端响应，不以未知类型推断voice。
+}
+
+// PlaybackPreflightRequest 只申请文件输出能力，不授权摄像头、采集或任意内容URL。
+message PlaybackPreflightRequest {
+  string subject = 1; // 已验证的设备主体，不能另报主人或企业。
+  repeated string output_modalities = 2; // 本次全部必需的audio/video输出，不能只匹配其中一项。
+}
+
+// PlaybackPreflightResponse 绑定当前主人、连接和输出需求；后续投递仍需重新核验。
+message PlaybackPreflightResponse {
+  string subject = 1; // 必须与请求的设备相同。
+  int64 owner_user_id = 2; // 当前设备主人；仅内部RPC使用，不作为外部JSON的数字ID。
+  int64 connection_epoch = 3; // 当前连接代次，重连后旧快照无效。
+  bytes capability_report = 4; // 当前连接完整能力声明，不含URL或凭据。
+  int64 expires_at = 5; // 两秒以内的Unix毫秒截止，重试不能延长旧结果。
+  repeated string output_modalities = 6; // 精确回执本次输出需求，不能自动扩大为所有能力。
+}
+
+// LivePreflightRequest 独立核验原AI连接的实时接收能力，不使用摄像头或文件准入。
+message LivePreflightRequest {
+  string subject = 1; // 原AI父绑定的设备主体，主人与企业来自可信内部上下文。
+  int64 connection_epoch = 2; // 原AI父的正安全连接代次，不得升级到设备重连后的新代次。
+  bytes live_invite = 3; // 原严格五字段LiveInvite JSON参数，包含完整接收轨，不接受任意源URL。
+}
+
+// LivePreflightResponse 仅返回短期能力旁证，不能替代节目、父子会话或焦点授权。
+message LivePreflightResponse {
+  string subject = 1; // 精确回执原目标设备。
+  int64 owner_user_id = 2; // 已核实的当前主人，与真实调用用户相同。
+  int64 connection_epoch = 3; // 必须精确等于原请求的已验证连接代次。
+  bytes capability_report = 4; // 当前原连接的完整能力信封，不含媒体地址或凭据。
+  int64 expires_at = 5; // 最多两秒的Unix毫秒快照截止，不延长原邀请。
+  bytes live_invite = 6; // 已求完整交集的原请求参数字节，防止缩组或用其他用途代替。
+}
+
+// FocusPreflightRequest 核验原连接完整管理组，不授权某业务、抢占资源或证明设备实际空闲。
+message FocusPreflightRequest {
+  string subject = 1; // 已鉴权device主体，用户/企业来自内部上下文。
+  int64 connection_epoch = 2; // 原连接代次，设备重连后不能改用新连接维持旧Owner。
+  repeated string resources = 3; // 首次实际证明的完整资源组，不允许部分满足或隐式扩大。
+}
+
+// FocusPreflightResponse 仅提供短期在线/主人/能力快照，不能代替实际focusState或原业务许可。
+message FocusPreflightResponse {
+  string subject = 1; // 精确回执请求主体。
+  int64 owner_user_id = 2; // 当前鉴权设备主人，不接受请求自报。
+  int64 connection_epoch = 3; // 精确回执已核实的原连接代次。
+  bytes capability_report = 4; // 当前完整能力，不能从播放器模态补造资源。
+  int64 expires_at = 5; // 最多两秒Unix毫秒截止，仅Owner预检，不是资源许可续期。
+  repeated string resources = 6; // 全组已核验，保留原请求集合，不返回其他未请求资源。
+}
+
+// DeviceContentPreflightRequest 只查询原连接的离散附件输入能力，不指定企业、主人或模型。
+message DeviceContentPreflightRequest {
+  string subject = 1; // 原会话已鉴权设备主体，必须精确匹配当前设备。
+  int64 connection_epoch = 2; // 原会话可信正安全连接代次，不允许提升到重连后的新代次。
+  string input_modality = 3; // 仅image/file，上传许可不代表模型能处理附件。
+}
+
+// DeviceContentPreflightResponse 是最多两秒的只读旁证，不是上传、模型或焦点授权。
+message DeviceContentPreflightResponse {
+  string subject = 1; // 精确回执原设备主体。
+  int64 owner_user_id = 2; // 当前真实主人，与内部可信调用用户相同。
+  int64 connection_epoch = 3; // 精确回执已核对的当前原连接代次。
+  int64 expires_at = 4; // 自预检开始最多两秒的Unix毫秒截止，不因查询或重试续期。
+  string input_modality = 5; // 精确回执已声明的单一image/file输入，不扩大模态。
+}
+
+// AIMediaAudioParams 复核已选AI媒体格式，不能以恢复重新选择格式或重建模型。
+message AIMediaAudioParams {
+  string format = 1; // 原opus编解码；恢复不降级为其他格式。
+  int32 sample_rate = 2; // 原协商PCM采样率，WebRTC当前只允许48000Hz。
+  int32 channels = 3; // 原声道数，当前只允许单声道。
+  int32 frame_duration = 4; // 原帧长毫秒，WebRTC当前只允许20ms。
+}
+
+// AIMediaPreflightRequest 只查询原连接原AI模式，不能借相机、文件或焦点授权。
+message AIMediaPreflightRequest {
+  string subject = 1; // 原AI会话的已鉴权设备主体，主人和企业来自内部可信上下文。
+  int64 connection_epoch = 2; // 原连接正安全代次；不允许升级到新MQTT连接。
+  string transport = 3; // 原媒体传输，当前恢复只支持webrtc。
+  string interaction_mode = 4; // 原已选halfDuplex/fullDuplex，不重新选模型或模式。
+  AIMediaAudioParams audio = 5; // 原已选音频参数，完整复核而非只满足一项。
+}
+
+// AIMediaPreflightResponse 是最多两秒的原连接旁证，不续会话、恢复窗口或模型授权。
+message AIMediaPreflightResponse {
+  string subject = 1; // 精确回执原设备主体。
+  int64 owner_user_id = 2; // 已复核的当前主人，与可信原调用用户一致。
+  int64 connection_epoch = 3; // 精确回执原连接代次，禁止新连接替旧会话。
+  int64 expires_at = 4; // 从预检开始最多两秒的Unix毫秒截止。
+  bytes capability_report = 5; // 当前原连接完整有效能力，调用方仍核原模式及全部音频需求。
+}
+
+// AIControlPreflightRequest 只读核本次真实控制连接，不能指定用户或以旧代替新物理来源。
+message AIControlPreflightRequest {
+  string subject = 1; // 已鉴权device主体，企业及原主人来自内部可信上下文。
+  int64 connection_epoch = 2; // 当前实际native建立时间，须与DMS LastLogin和原socket共同精确匹配。
+  string connection_instance = 3; // 可信接入冻结的32位小写hex物理实例，不接受设备JSON自报。
+}
+
+// AIControlPreflightResponse 是最多两秒的当前控制旁证，不迁移业务Owner、延长恢复窗口或授媒体许可。
+message AIControlPreflightResponse {
+  string subject = 1; // 精确回执原主体，不返回其他设备或跨企业身份。
+  int64 owner_user_id = 2; // 当前原真实主人，仅内部RPC字段，不作为外部JSON数字ID。
+  int64 connection_epoch = 3; // 已独立核当前DMS和socket的精确建立时间。
+  string connection_instance = 4; // 已核实际当前物理实例，同毫秒不同socket仍隔离。
+  int64 expires_at = 5; // 自预检开始最多两秒的Unix毫秒截止，不因查询或重投延长。
+  bytes capability_report = 6; // 当前连接完整能力，必须独立声明AI sessionSync；调用方继续核原选择交集。
+}
+
+// AIEndpointPreflightRequest 仅正式AI跨端接续使用；prepare可成对省略来源发现，后继必须精确原目标socket。
+message AIEndpointPreflightRequest {
+  string subject = 1; // 目标设备；主人和企业仍取原已鉴权内部上下文。
+  int64 connection_epoch = 2; // prepare发现时为0；后继必须为原旁证实际代次。
+  string connection_instance = 3; // prepare发现时为空；后继必须为原实际32位socket实例。
+  string transport = 4; // 原模型已选udp/webrtc，不借接续切换模型或传输。
+  string interaction_mode = 5; // 原已选半/全双工，目标必须如实支持。
+  AIMediaAudioParams audio = 6; // 原已选完整音频参数，不只核音频握手。
+}
+
+// AIEndpointPreflightResponse 是双SQL/缓存/socket复验的两秒只读旁证，不授权开采集或替代接听。
+message AIEndpointPreflightResponse {
+  string subject = 1; // 原目标设备，不返回另一设备。
+  int64 owner_user_id = 2; // SQL与缓存核过的共同主人。
+  int64 connection_epoch = 3; // 实际目标native建立时间，不使用设备JSON自报。
+  string connection_instance = 4; // 实际目标当前随机socket实例。
+  int64 expires_at = 5; // 自本次核验开始最多两秒，不续原接续窗口。
+  bytes capability_report = 6; // 完整当前能力，必须显式aiEndpointHandoff、audio和localAccept。
+}
+
+// AIVisionPreflightRequest 独立核原摄像头AI用途，不能借音频、IPC或附件许可。
+message AIVisionPreflightRequest {
+  string subject = 1; // 原已鉴权设备主体；主人和企业只取可信调用上下文。
+  int64 connection_epoch = 2; // 原连接正安全代次，不能提升为重连后的连接。
+  string camera_id = 3; // 原平台选择的物理摄像头，不猜首个源或使用trackId代替。
+  uint64 capability_revision = 4; // 原已冻结能力修订；撤回或更新后旧选择不能复用。
+  string transport = 5; // 固定webrtc，不将离散图片或UDP音频扩展成持续视觉。
+  string interaction_mode = 6; // 原halfDuplex/fullDuplex，完整核AEC交集。
+  AIMediaAudioParams audio = 7; // 原Opus48000Hz单声道20ms，不选择新音频格式。
+}
+
+// AIVisionPreflightResponse 是两秒以内只读旁证，不签发cameraAI同意或开始摄像头。
+message AIVisionPreflightResponse {
+  string subject = 1; // 精确回执原主体。
+  int64 owner_user_id = 2; // 当前SQL主人，与可信原调用用户及缓存交叉核验。
+  int64 connection_epoch = 3; // 精确回执已核原连接代次。
+  string camera_id = 4; // 精确回执指定摄像头，而非全部源。
+  uint64 capability_revision = 5; // 精确回执原能力修订，不以新修订续原授权。
+  string transport = 6; // 精确回执原webrtc传输。
+  string interaction_mode = 7; // 精确回执已核半/全双工模式。
+  AIMediaAudioParams audio = 8; // 已核原全部音频参数；不含模型或供应商配置。
+  int64 expires_at = 9; // 首读开始最多两秒Unix毫秒截止，不延长本人Consent期限。
+  bytes capability_report = 10; // 当前原连接的完整能力信封；调用方仍独立核活Owner/Consent。
+}
+
+// DeviceDelivery 由dmsvr注册；调用必须使用具体企业的内部管理上下文。
+service DeviceDelivery {
+  rpc Publish(DeviceDeliveryRequest) returns (DeviceDeliveryResponse); // 验证设备归属并等待Broker确认。
+  rpc PreflightIPC(IPCPreflightRequest) returns (IPCPreflightResponse); // 创建会话前核对当前主人、在线及声明能力。
+  rpc PreflightPlayback(PlaybackPreflightRequest) returns (PlaybackPreflightResponse); // 独立核验文件输出，不借用IPC或AI采集能力。
+  rpc PreflightFocus(FocusPreflightRequest) returns (FocusPreflightResponse); // 当前原连接的完整焦点管理能力，不授权输出或续focus许可。
+  rpc PreflightLive(LivePreflightRequest) returns (LivePreflightResponse); // 实时节目独立接收能力与原AI连接，不借文件、相机或当前新代次。
+  rpc PreflightDeviceContent(DeviceContentPreflightRequest) returns (DeviceContentPreflightResponse); // 原主人、原连接和明确附件输入声明，不授予模型消费或资源焦点。
+  rpc PreflightAIMedia(AIMediaPreflightRequest) returns (AIMediaPreflightResponse); // 原AI媒体专属能力预检，不重建模型、借用IPC或改变原连接代次。
+  rpc PreflightAIReplyInstallation(AIControlPreflightRequest) returns (AIControlPreflightResponse); // 仅原UDP安装feature独立双来源旁证，不借sessionSync或接听能力。
+  rpc PreflightAIControl(AIControlPreflightRequest) returns (AIControlPreflightResponse); // 独立当前控制连接双来源旁证，不借附件授权、不变更原会话或发送设备消息。
+  rpc PreflightAIEndpoint(AIEndpointPreflightRequest) returns (AIEndpointPreflightResponse); // 独立跨设备接续目标只读发现/精确复验，不放宽S19缺来源拒绝。
+  rpc PreflightAIVision(AIVisionPreflightRequest) returns (AIVisionPreflightResponse); // SQL归属/撤权屏障/实际隐私/原视觉能力独立只读准入，不签发本人同意。
+}

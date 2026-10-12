@@ -1,0 +1,25 @@
+syntax = "v1"
+
+// 公共结构体定义
+
+info(
+    title: "音视频公共结构体"
+    desc: "音视频服务公共请求/响应结构体定义"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+type PageInfo {
+    Page     int64  `json:"page,optional"`      // 页码，从 1 开始
+    Size     int64  `json:"size,optional"`      // 每页数量
+    Orders   []string `json:"orders,optional"`  // 排序字段，如 "created_time desc"
+}
+
+type PageResp {
+    Total int64 `json:"total"` // 总记录数
+    List  interface{} `json:"list"` // 列表数据
+}
+
+type EmptyResp {}
+
+type EmptyReq {}

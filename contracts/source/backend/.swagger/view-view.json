@@ -1,0 +1,4794 @@
+{
+  "components": {
+    "schemas": {
+      "AssetDeleteReq": {
+        "properties": {
+          "id": {
+            "description": "资源id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AssetDeleteReq",
+        "type": "object"
+      },
+      "AssetGetListReq": {
+        "properties": {
+          "format": {
+            "description": "文件后缀筛选",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组筛选",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "type": {
+            "description": "类型筛选",
+            "type": "string"
+          }
+        },
+        "title": "AssetGetListReq",
+        "type": "object"
+      },
+      "AssetGetListResp": {
+        "properties": {
+          "list": {
+            "description": "资源列表",
+            "items": {
+              "$ref": "#/components/schemas/AssetView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": "返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "AssetGetListResp",
+        "type": "object"
+      },
+      "AssetUpdateReq": {
+        "properties": {
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "资源id",
+            "type": "string"
+          },
+          "name": {
+            "description": "资源名称",
+            "type": "string"
+          },
+          "tags": {
+            "description": "标签",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "AssetUpdateReq",
+        "type": "object"
+      },
+      "AssetUploadReq": {
+        "properties": {
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "name": {
+            "description": "资源名称",
+            "type": "string"
+          },
+          "size": {
+            "description": "文件大小(字节)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tags": {
+            "description": "标签,逗号分隔",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型: image/video/audio/other",
+            "type": "string"
+          },
+          "url": {
+            "description": "资源URL",
+            "type": "string"
+          }
+        },
+        "title": "AssetUploadReq",
+        "type": "object"
+      },
+      "AssetUploadZipResp": {
+        "properties": {
+          "entryUrl": {
+            "description": "入口页面URL（内嵌页面组件直接引用）",
+            "type": "string"
+          },
+          "fileCount": {
+            "description": "包内文件数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "场景包资产id",
+            "type": "string"
+          },
+          "size": {
+            "description": "解压后总大小（字节）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "entryUrl",
+          "fileCount",
+          "size"
+        ],
+        "title": "AssetUploadZipResp",
+        "type": "object"
+      },
+      "AssetView": {
+        "properties": {
+          "createdTime": {
+            "description": "创建时间",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "资源id",
+            "type": "string"
+          },
+          "name": {
+            "description": "资源名称",
+            "type": "string"
+          },
+          "size": {
+            "description": "文件大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tags": {
+            "description": "标签",
+            "type": "string"
+          },
+          "tenantCode": {
+            "description": "租户编码",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": "更新时间",
+            "type": "string"
+          },
+          "url": {
+            "description": "资源URL",
+            "type": "string"
+          }
+        },
+        "title": "AssetView",
+        "type": "object"
+      },
+      "CommonResp": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "CommonResp",
+        "type": "object"
+      },
+      "CompareInt64": {
+        "properties": {
+          "cmpTYpe": {
+            "description": "\"=\":相等 \"!=\":不相等 \">\":大于\">=\":大于等于\"<\":小于\"<=\":小于等于 \"like\":模糊查询",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cmpTYpe",
+          "value"
+        ],
+        "title": "CompareInt64",
+        "type": "object"
+      },
+      "ComponentCopyReq": {
+        "properties": {
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ComponentCopyReq",
+        "type": "object"
+      },
+      "ComponentCreateReq": {
+        "properties": {
+          "categoryId": {
+            "description": "分类: chart/table/decorate/info/map/other",
+            "type": "string"
+          },
+          "content": {
+            "description": "组合模板JSON",
+            "type": "string"
+          },
+          "cover": {
+            "description": "预览图",
+            "type": "string"
+          },
+          "description": {
+            "description": "说明",
+            "type": "string"
+          },
+          "entry": {
+            "description": "组件入口",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "name": {
+            "description": "组件名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "归属物联网项目ID",
+            "type": "string"
+          },
+          "version": {
+            "description": "版本",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ComponentCreateReq",
+        "type": "object"
+      },
+      "ComponentDeleteReq": {
+        "properties": {
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ComponentDeleteReq",
+        "type": "object"
+      },
+      "ComponentDesignReq": {
+        "properties": {
+          "content": {
+            "description": "组合模板JSON",
+            "type": "string"
+          },
+          "cover": {
+            "description": "预览图",
+            "type": "string"
+          },
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "content"
+        ],
+        "title": "ComponentDesignReq",
+        "type": "object"
+      },
+      "ComponentGetListReq": {
+        "properties": {
+          "categoryId": {
+            "description": "分类筛选",
+            "type": "string"
+          },
+          "createdTime": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "createdUserID": {
+            "description": "创建者ID筛选",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组筛选",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "projectID": {
+            "description": "归属物联网项目ID",
+            "type": "string"
+          },
+          "source": {
+            "description": "来源筛选 common/private",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态筛选",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "ComponentGetListReq",
+        "type": "object"
+      },
+      "ComponentGetListResp": {
+        "properties": {
+          "list": {
+            "description": "组件列表",
+            "items": {
+              "$ref": "#/components/schemas/ComponentView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": "返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ComponentGetListResp",
+        "type": "object"
+      },
+      "ComponentGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ComponentGetOneReq",
+        "type": "object"
+      },
+      "ComponentUpdateReq": {
+        "properties": {
+          "categoryId": {
+            "description": "分类",
+            "type": "string"
+          },
+          "content": {
+            "description": "组合模板JSON",
+            "type": "string"
+          },
+          "cover": {
+            "description": "预览图",
+            "type": "string"
+          },
+          "description": {
+            "description": "说明",
+            "type": "string"
+          },
+          "entry": {
+            "description": "组件入口",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          },
+          "name": {
+            "description": "组件名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态 1:上线 2:下线",
+            "format": "int64",
+            "type": "integer"
+          },
+          "version": {
+            "description": "版本",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ComponentUpdateReq",
+        "type": "object"
+      },
+      "ComponentView": {
+        "properties": {
+          "categoryId": {
+            "description": "分类",
+            "type": "string"
+          },
+          "content": {
+            "description": "组合模板JSON",
+            "type": "string"
+          },
+          "cover": {
+            "description": "预览图",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": "创建时间",
+            "type": "string"
+          },
+          "createdUserID": {
+            "description": "创建者ID",
+            "type": "string"
+          },
+          "description": {
+            "description": "说明",
+            "type": "string"
+          },
+          "entry": {
+            "description": "组件入口",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "组件id",
+            "type": "string"
+          },
+          "name": {
+            "description": "组件名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "归属物联网项目ID",
+            "type": "string"
+          },
+          "source": {
+            "description": "来源 common/private",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态 1:上线 2:下线",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCode": {
+            "description": "租户编码",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": "更新时间",
+            "type": "string"
+          },
+          "version": {
+            "description": "版本",
+            "type": "string"
+          }
+        },
+        "title": "ComponentView",
+        "type": "object"
+      },
+      "DatasetCreateReq": {
+        "properties": {
+          "cacheEnabled": {
+            "description": "是否启用缓存",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "cacheTTL": {
+            "description": "缓存TTL(秒)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "config": {
+            "description": "类型专属配置JSON",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "dynamicParams": {
+            "description": "动态参数JSON",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据集名称",
+            "type": "string"
+          },
+          "outputFields": {
+            "description": "输出字段JSON",
+            "type": "string"
+          },
+          "requestScript": {
+            "description": "请求前JS脚本",
+            "type": "string"
+          },
+          "responseScript": {
+            "description": "响应后JS脚本",
+            "type": "string"
+          },
+          "schema": {
+            "description": "字段定义JSON(兼容)",
+            "type": "string"
+          },
+          "sourceId": {
+            "description": "数据源id",
+            "type": "string"
+          },
+          "tags": {
+            "description": "标签,逗号分隔",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型: raw/sql/procedure/json/js/http/script/iot",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "DatasetCreateReq",
+        "type": "object"
+      },
+      "DatasetDeleteReq": {
+        "properties": {
+          "id": {
+            "description": "数据集id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasetDeleteReq",
+        "type": "object"
+      },
+      "DatasetGetListReq": {
+        "properties": {
+          "groupId": {
+            "description": "分组筛选",
+            "type": "string"
+          },
+          "name": {
+            "description": "名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "scene": {
+            "description": "场景: manage/editor",
+            "type": "string"
+          },
+          "sourceId": {
+            "description": "数据源筛选",
+            "type": "string"
+          },
+          "tags": {
+            "description": "标签筛选",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型筛选",
+            "type": "string"
+          }
+        },
+        "title": "DatasetGetListReq",
+        "type": "object"
+      },
+      "DatasetGetListResp": {
+        "properties": {
+          "list": {
+            "description": "数据集列表",
+            "items": {
+              "$ref": "#/components/schemas/DatasetView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": "返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DatasetGetListResp",
+        "type": "object"
+      },
+      "DatasetGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "数据集id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasetGetOneReq",
+        "type": "object"
+      },
+      "DatasetPreviewReq": {
+        "properties": {
+          "id": {
+            "description": "数据集id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasetPreviewReq",
+        "type": "object"
+      },
+      "DatasetPreviewResp": {
+        "properties": {
+          "dataset": {
+            "description": "ECharts dataset格式JSON: {\"dimensions\":[...],\"source\":[...]}",
+            "type": "string"
+          },
+          "fields": {
+            "description": "字段列表JSON（字符串化数组）",
+            "type": "string"
+          },
+          "rows": {
+            "description": "预览数据JSON（字符串化数组）",
+            "type": "string"
+          }
+        },
+        "title": "DatasetPreviewResp",
+        "type": "object"
+      },
+      "DatasetUpdateReq": {
+        "properties": {
+          "cacheEnabled": {
+            "description": "是否启用缓存",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "cacheTTL": {
+            "description": "缓存TTL(秒)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "config": {
+            "description": "类型专属配置JSON",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "dynamicParams": {
+            "description": "动态参数JSON",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "数据集id",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据集名称",
+            "type": "string"
+          },
+          "outputFields": {
+            "description": "输出字段JSON",
+            "type": "string"
+          },
+          "requestScript": {
+            "description": "请求前JS脚本",
+            "type": "string"
+          },
+          "responseScript": {
+            "description": "响应后JS脚本",
+            "type": "string"
+          },
+          "schema": {
+            "description": "字段定义JSON(兼容)",
+            "type": "string"
+          },
+          "sourceId": {
+            "description": "数据源id",
+            "type": "string"
+          },
+          "tags": {
+            "description": "标签",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasetUpdateReq",
+        "type": "object"
+      },
+      "DatasetView": {
+        "properties": {
+          "cacheEnabled": {
+            "description": "是否启用缓存",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "cacheTTL": {
+            "description": "缓存TTL(秒)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "config": {
+            "description": "类型专属配置JSON",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": "创建时间",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "displayName": {
+            "description": "编辑器展示名称",
+            "type": "string"
+          },
+          "dynamicParams": {
+            "description": "动态参数JSON",
+            "type": "string"
+          },
+          "groupId": {
+            "description": "分组id",
+            "type": "string"
+          },
+          "id": {
+            "description": "数据集id",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据集名称",
+            "type": "string"
+          },
+          "outputFields": {
+            "description": "输出字段JSON",
+            "type": "string"
+          },
+          "requestScript": {
+            "description": "请求前JS脚本",
+            "type": "string"
+          },
+          "responseScript": {
+            "description": "响应后JS脚本",
+            "type": "string"
+          },
+          "schema": {
+            "description": "字段定义JSON(兼容)",
+            "type": "string"
+          },
+          "sourceId": {
+            "description": "数据源id",
+            "type": "string"
+          },
+          "sourceName": {
+            "description": "数据源名称",
+            "type": "string"
+          },
+          "tags": {
+            "description": "标签",
+            "type": "string"
+          },
+          "tenantCode": {
+            "description": "租户编码",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": "更新时间",
+            "type": "string"
+          }
+        },
+        "title": "DatasetView",
+        "type": "object"
+      },
+      "DatasourceCreateReq": {
+        "properties": {
+          "config": {
+            "description": "配置JSON",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据源名称",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型: http/ws/mock/mysql/postgres",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "DatasourceCreateReq",
+        "type": "object"
+      },
+      "DatasourceDeleteReq": {
+        "properties": {
+          "id": {
+            "description": "数据源id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasourceDeleteReq",
+        "type": "object"
+      },
+      "DatasourceGetListReq": {
+        "properties": {
+          "name": {
+            "description": "名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": "状态筛选",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "类型筛选",
+            "type": "string"
+          }
+        },
+        "title": "DatasourceGetListReq",
+        "type": "object"
+      },
+      "DatasourceGetListResp": {
+        "properties": {
+          "list": {
+            "description": "数据源列表",
+            "items": {
+              "$ref": "#/components/schemas/DatasourceView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": "返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DatasourceGetListResp",
+        "type": "object"
+      },
+      "DatasourceGetOneReq": {
+        "properties": {
+          "id": {
+            "description": "数据源id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasourceGetOneReq",
+        "type": "object"
+      },
+      "DatasourceTestResp": {
+        "properties": {
+          "duration": {
+            "description": "耗时ms",
+            "format": "int64",
+            "type": "integer"
+          },
+          "message": {
+            "description": "消息",
+            "type": "string"
+          },
+          "success": {
+            "description": "是否成功",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "success"
+        ],
+        "title": "DatasourceTestResp",
+        "type": "object"
+      },
+      "DatasourceUpdateReq": {
+        "properties": {
+          "config": {
+            "description": "配置JSON",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "id": {
+            "description": "数据源id",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据源名称",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "DatasourceUpdateReq",
+        "type": "object"
+      },
+      "DatasourceView": {
+        "properties": {
+          "config": {
+            "description": "配置JSON",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": "创建时间",
+            "type": "string"
+          },
+          "desc": {
+            "description": "描述",
+            "type": "string"
+          },
+          "id": {
+            "description": "数据源id",
+            "type": "string"
+          },
+          "name": {
+            "description": "数据源名称",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态 1:正常 2:异常",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCode": {
+            "description": "租户编码",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": "更新时间",
+            "type": "string"
+          }
+        },
+        "title": "DatasourceView",
+        "type": "object"
+      },
+      "DateRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 格式：yyyy-mm-dd",
+            "type": "string"
+          },
+          "start": {
+            "description": "开始时间 格式：yyyy-mm-dd",
+            "type": "string"
+          }
+        },
+        "title": "DateRange",
+        "type": "object"
+      },
+      "DeviceCore": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceCore",
+        "type": "object"
+      },
+      "Empty": {
+        "title": "Empty",
+        "type": "object"
+      },
+      "EnergyChartDataset": {
+        "properties": {
+          "dimensions": {
+            "description": " 字段定义",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "source": {
+            "description": " dataset.source JSON 字符串",
+            "type": "string"
+          }
+        },
+        "title": "EnergyChartDataset",
+        "type": "object"
+      },
+      "EnergyDashboardQueryReq": {
+        "properties": {
+          "areaIDs": {
+            "description": " 区域ID列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "limit": {
+            "description": " 返回条数限制",
+            "format": "int64",
+            "type": "integer"
+          },
+          "projectID": {
+            "description": " 项目ID",
+            "type": "string"
+          },
+          "timeEnd": {
+            "description": " 自定义结束时间毫秒时间戳",
+            "type": "string"
+          },
+          "timeRange": {
+            "description": " 预设时间范围",
+            "type": "string"
+          },
+          "timeStart": {
+            "description": " 自定义开始时间毫秒时间戳",
+            "type": "string"
+          }
+        },
+        "title": "EnergyDashboardQueryReq",
+        "type": "object"
+      },
+      "EnergyDeviceStatusResp": {
+        "properties": {
+          "dataset": {
+            "$ref": "#/components/schemas/EnergyChartDataset"
+          },
+          "summary": {
+            "$ref": "#/components/schemas/EnergyDeviceStatusSummary"
+          }
+        },
+        "title": "EnergyDeviceStatusResp",
+        "type": "object"
+      },
+      "EnergyDeviceStatusSummary": {
+        "properties": {
+          "fault": {
+            "description": " 异常数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "inactive": {
+            "description": " 未激活数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "offline": {
+            "description": " 离线数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "online": {
+            "description": " 在线数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "EnergyDeviceStatusSummary",
+        "type": "object"
+      },
+      "EnergyOverviewResp": {
+        "properties": {
+          "avgPower": {
+            "description": " 平均功率",
+            "format": "double",
+            "type": "number"
+          },
+          "maxPower": {
+            "description": " 最大功率",
+            "format": "double",
+            "type": "number"
+          },
+          "minPower": {
+            "description": " 最小功率",
+            "format": "double",
+            "type": "number"
+          },
+          "todayEnergy": {
+            "description": " 今日用电",
+            "format": "double",
+            "type": "number"
+          },
+          "totalPower": {
+            "description": " 实时功率",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "title": "EnergyOverviewResp",
+        "type": "object"
+      },
+      "GroupCreateReq": {
+        "properties": {
+          "name": {
+            "description": " 分组名称",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 分组类型 dataset/component/asset",
+            "type": "string"
+          }
+        },
+        "required": [
+          "name",
+          "type"
+        ],
+        "title": "GroupCreateReq",
+        "type": "object"
+      },
+      "GroupDeleteReq": {
+        "properties": {
+          "id": {
+            "description": " 分组id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GroupDeleteReq",
+        "type": "object"
+      },
+      "GroupGetListReq": {
+        "properties": {
+          "scene": {
+            "description": " 场景: manage/editor",
+            "type": "string"
+          },
+          "type": {
+            "description": " 分组类型 dataset/component/asset",
+            "type": "string"
+          }
+        },
+        "title": "GroupGetListReq",
+        "type": "object"
+      },
+      "GroupGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 分组列表",
+            "items": {
+              "$ref": "#/components/schemas/GroupView"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "GroupGetListResp",
+        "type": "object"
+      },
+      "GroupUpdateReq": {
+        "properties": {
+          "id": {
+            "description": " 分组id",
+            "type": "string"
+          },
+          "name": {
+            "description": " 分组名称",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "GroupUpdateReq",
+        "type": "object"
+      },
+      "GroupView": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "id": {
+            "description": " 分组id",
+            "type": "string"
+          },
+          "name": {
+            "description": " 分组名称",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCode": {
+            "description": " 租户编码",
+            "type": "string"
+          },
+          "type": {
+            "description": " 分组类型",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "type": "string"
+          }
+        },
+        "title": "GroupView",
+        "type": "object"
+      },
+      "IDList": {
+        "properties": {
+          "ids": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "ids"
+        ],
+        "title": "IDList",
+        "type": "object"
+      },
+      "OrderBy": {
+        "properties": {
+          "field": {
+            "description": "排序的字段名",
+            "type": "string"
+          },
+          "sort": {
+            "description": "排序方式：0 从小到大, 1 从大到小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "OrderBy",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": "排序",
+            "items": {
+              "$ref": "#/components/schemas/OrderBy"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "latitude": {
+            "description": "纬度",
+            "format": "double",
+            "maximum": 90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "经度",
+            "format": "double",
+            "maximum": 180,
+            "type": "number"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "ProjectDetail": {
+        "properties": {
+          "content": {
+            "description": " 项目详情内容（草稿）",
+            "type": "string"
+          },
+          "id": {
+            "description": " 项目id，只读",
+            "type": "string"
+          },
+          "publishedContent": {
+            "description": " 已发布快照内容",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ProjectDetail",
+        "type": "object"
+      },
+      "ProjectInfoCreateReq": {
+        "properties": {
+          "desc": {
+            "description": " 项目描述",
+            "type": "string"
+          },
+          "indexImage": {
+            "description": " 图片地址",
+            "type": "string"
+          },
+          "isSystem": {
+            "description": " 是否系统模板",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "name": {
+            "description": " 项目名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 项目状态 1: 已发布 2: 未发布",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " screen/template",
+            "type": "string"
+          }
+        },
+        "title": "ProjectInfoCreateReq",
+        "type": "object"
+      },
+      "ProjectInfoDeleteReq": {
+        "properties": {
+          "id": {
+            "description": " 项目id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ProjectInfoDeleteReq",
+        "type": "object"
+      },
+      "ProjectInfoGetListReqEx": {
+        "properties": {
+          "allProjects": {
+            "description": " 跨项目查询（不过滤项目ID，用于未归属大屏查询）",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "createdTime": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "createdUserID": {
+            "description": " 创建者ID",
+            "type": "string"
+          },
+          "name": {
+            "description": " 名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "scope": {
+            "description": " all/private/system",
+            "type": "string"
+          },
+          "source": {
+            "description": " 来源别名 all/custom/system",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " screen/template",
+            "type": "string"
+          },
+          "updatedTime": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "ProjectInfoGetListReqEx",
+        "type": "object"
+      },
+      "ProjectInfoGetListRespView": {
+        "properties": {
+          "list": {
+            "description": " 项目信息",
+            "items": {
+              "$ref": "#/components/schemas/ProjectInfoView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": " 返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ProjectInfoGetListRespView",
+        "type": "object"
+      },
+      "ProjectInfoGetOneReq": {
+        "properties": {
+          "forView": {
+            "description": " /view/ 路由请求时传 true，返回已发布内容",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "id": {
+            "description": " 项目id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ProjectInfoGetOneReq",
+        "type": "object"
+      },
+      "ProjectInfoUpdateReq": {
+        "properties": {
+          "desc": {
+            "description": " 项目描述",
+            "type": "string"
+          },
+          "id": {
+            "description": " 项目id",
+            "type": "string"
+          },
+          "indexImage": {
+            "description": " 图片地址",
+            "type": "string"
+          },
+          "name": {
+            "description": " 项目名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 项目状态 1: 已发布 2: 未发布",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ProjectInfoUpdateReq",
+        "type": "object"
+      },
+      "ProjectInfoView": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "createdUserID": {
+            "description": " 创建者ID",
+            "type": "string"
+          },
+          "desc": {
+            "description": " 项目描述",
+            "type": "string"
+          },
+          "id": {
+            "description": " 项目id，只读",
+            "type": "string"
+          },
+          "indexImage": {
+            "description": " 图片地址",
+            "type": "string"
+          },
+          "isSystem": {
+            "description": " 是否系统模板",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "name": {
+            "description": " 项目名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "resolution": {
+            "description": " 分辨率",
+            "type": "string"
+          },
+          "source": {
+            "description": " 来源 system/custom",
+            "type": "string"
+          },
+          "status": {
+            "description": " 项目状态 1: 已发布 2: 未发布",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCode": {
+            "description": " 租户编码",
+            "type": "string"
+          },
+          "type": {
+            "description": " screen/template",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "type": "string"
+          }
+        },
+        "title": "ProjectInfoView",
+        "type": "object"
+      },
+      "RenderWarning": {
+        "properties": {
+          "col": {
+            "description": " 列号（0 起）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reason": {
+            "description": " 告警原因",
+            "type": "string"
+          },
+          "row": {
+            "description": " 行号（0 起）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sheetName": {
+            "description": " 工作表名",
+            "type": "string"
+          },
+          "token": {
+            "description": " 原始绑定 token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sheetName",
+          "row",
+          "col",
+          "token",
+          "reason"
+        ],
+        "title": "RenderWarning",
+        "type": "object"
+      },
+      "ReportCreateReq": {
+        "properties": {
+          "desc": {
+            "description": " 报表描述",
+            "type": "string"
+          },
+          "name": {
+            "description": " 报表名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1: 启用 2: 停用",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "ReportCreateReq",
+        "type": "object"
+      },
+      "ReportCreateResp": {
+        "properties": {
+          "id": {
+            "description": " 报表ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ReportCreateResp",
+        "type": "object"
+      },
+      "ReportDeleteReq": {
+        "properties": {
+          "id": {
+            "description": " 报表ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ReportDeleteReq",
+        "type": "object"
+      },
+      "ReportDetail": {
+        "properties": {
+          "content": {
+            "description": " 报表设计内容（Univer workbook JSON）",
+            "type": "string"
+          },
+          "id": {
+            "description": " 报表ID，只读",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ReportDetail",
+        "type": "object"
+      },
+      "ReportExportByIdReq": {
+        "properties": {
+          "id": {
+            "description": " 报表ID",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 报表参数（上下文名称等）",
+            "type": "object"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ReportExportByIdReq",
+        "type": "object"
+      },
+      "ReportExportReq": {
+        "properties": {
+          "content": {
+            "description": " 设计态 Univer workbook JSON（IWorkbookData）",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 报表参数（数据集动态参数值）",
+            "type": "object"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ReportExportReq",
+        "type": "object"
+      },
+      "ReportExportResp": {
+        "properties": {
+          "url": {
+            "description": " xlsx 受控下载地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "ReportExportResp",
+        "type": "object"
+      },
+      "ReportGetListReq": {
+        "properties": {
+          "name": {
+            "description": " 名称模糊查询",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "ReportGetListReq",
+        "type": "object"
+      },
+      "ReportGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 报表列表",
+            "items": {
+              "$ref": "#/components/schemas/ReportView"
+            },
+            "type": "array"
+          },
+          "num": {
+            "description": " 返回数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ReportGetListResp",
+        "type": "object"
+      },
+      "ReportGetOneReq": {
+        "properties": {
+          "id": {
+            "description": " 报表ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ReportGetOneReq",
+        "type": "object"
+      },
+      "ReportRenderReq": {
+        "properties": {
+          "content": {
+            "description": " 设计态 Univer workbook JSON（IWorkbookData）",
+            "type": "string"
+          },
+          "params": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 报表参数（数据集动态参数值）",
+            "type": "object"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ReportRenderReq",
+        "type": "object"
+      },
+      "ReportRenderResp": {
+        "properties": {
+          "content": {
+            "description": " 计算后 workbook JSON",
+            "type": "string"
+          },
+          "warnings": {
+            "description": " 替换告警（字段缺失等），不阻断渲染",
+            "items": {
+              "$ref": "#/components/schemas/RenderWarning"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "title": "ReportRenderResp",
+        "type": "object"
+      },
+      "ReportUpdateReq": {
+        "properties": {
+          "desc": {
+            "description": " 报表描述",
+            "type": "string"
+          },
+          "id": {
+            "description": " 报表ID",
+            "type": "string"
+          },
+          "name": {
+            "description": " 报表名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1: 启用 2: 停用",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "ReportUpdateReq",
+        "type": "object"
+      },
+      "ReportView": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "createdUserID": {
+            "description": " 创建者ID",
+            "type": "string"
+          },
+          "desc": {
+            "description": " 报表描述",
+            "type": "string"
+          },
+          "id": {
+            "description": " 报表ID，只读",
+            "type": "string"
+          },
+          "name": {
+            "description": " 报表名称",
+            "type": "string"
+          },
+          "projectID": {
+            "description": " 归属物联网项目ID",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1: 启用 2: 停用",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tenantCode": {
+            "description": " 租户编码",
+            "type": "string"
+          },
+          "updatedTime": {
+            "description": " 更新时间",
+            "type": "string"
+          }
+        },
+        "title": "ReportView",
+        "type": "object"
+      },
+      "SendOption": {
+        "properties": {
+          "requestTimeout": {
+            "description": "请求超时,超时后会进行重试",
+            "format": "int64",
+            "type": "integer"
+          },
+          "retryInterval": {
+            "description": "重试间隔",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeoutToFail": {
+            "description": "超时失败时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "SendOption",
+        "type": "object"
+      },
+      "SystemUptimeResp": {
+        "properties": {
+          "days": {
+            "description": " 运行天数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hours": {
+            "description": " 剩余小时",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": " 服务启动时间",
+            "type": "string"
+          },
+          "uptimeSeconds": {
+            "description": " 运行秒数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "SystemUptimeResp",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "ThirdApp": {
+        "properties": {
+          "filePath": {
+            "description": " 文件路径,拿来下载文件",
+            "type": "string"
+          },
+          "isUpdateFilePath": {
+            "description": " 是否更新固件",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "version": {
+            "description": " 应用版本",
+            "type": "string"
+          },
+          "versionDesc": {
+            "description": "版本说明",
+            "type": "string"
+          }
+        },
+        "title": "ThirdApp",
+        "type": "object"
+      },
+      "ThirdAppConfig": {
+        "properties": {
+          "appID": {
+            "type": "string"
+          },
+          "appKey": {
+            "description": "微信小程序无需填写",
+            "type": "string"
+          },
+          "appSecret": {
+            "type": "string"
+          }
+        },
+        "title": "ThirdAppConfig",
+        "type": "object"
+      },
+      "ThirdEmailConfig": {
+        "properties": {
+          "from": {
+            "description": " 发件人  你自己要发邮件的邮箱",
+            "type": "string"
+          },
+          "host": {
+            "description": " 服务器地址 例如 smtp.qq.com  请前往QQ或者你要发邮件的邮箱查看其smtp协议",
+            "type": "string"
+          },
+          "isSsl": {
+            "description": " 是否SSL   是否开启SSL",
+            "format": "int64",
+            "type": "integer"
+          },
+          "nickname": {
+            "description": " 昵称    发件人昵称 通常为自己的邮箱",
+            "type": "string"
+          },
+          "port": {
+            "description": " 端口     请前往QQ或者你要发邮件的邮箱查看其smtp协议 大多为 465",
+            "format": "int64",
+            "type": "integer"
+          },
+          "secret": {
+            "description": " 密钥    用于登录的密钥 最好不要用邮箱密码 去邮箱smtp申请一个用于登录的密钥",
+            "type": "string"
+          }
+        },
+        "required": [
+          "from",
+          "host",
+          "secret",
+          "nickname",
+          "port",
+          "isSsl"
+        ],
+        "title": "ThirdEmailConfig",
+        "type": "object"
+      },
+      "ThirdMiniCore": {
+        "properties": {
+          "appID": {
+            "type": "string"
+          },
+          "appKey": {
+            "type": "string"
+          }
+        },
+        "title": "ThirdMiniCore",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "description": "开始时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "WithCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "title": "WithCode",
+        "type": "object"
+      },
+      "WithGroupCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "groupCode": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithGroupCode",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      },
+      "WithIDOrCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithIDOrCode",
+        "type": "object"
+      },
+      "WithIDStr": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithIDStr",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "viewsvr-view",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/view/asset/delete": {
+      "post": {
+        "description": "业务说明：删除可视化资源库中的素材记录。用于清理不再使用的资源。",
+        "operationId": "postApiV1ViewAssetDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除资源",
+        "tags": [
+          "view/asset",
+          "viewAsset"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewAsset"
+      }
+    },
+    "/api/v1/view/asset/get-list": {
+      "post": {
+        "description": "业务说明：分页查询可视化资源列表，支持按名称、类型、分组和格式筛选。用于素材库浏览。",
+        "operationId": "postApiV1ViewAssetGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AssetGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取资源列表",
+        "tags": [
+          "view/asset",
+          "viewAsset"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewAsset"
+      }
+    },
+    "/api/v1/view/asset/update": {
+      "post": {
+        "description": "业务说明：更新可视化资源的名称、类型或标签信息，用于素材维护。",
+        "operationId": "postApiV1ViewAssetUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新资源",
+        "tags": [
+          "view/asset",
+          "viewAsset"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewAsset"
+      }
+    },
+    "/api/v1/view/asset/upload": {
+      "post": {
+        "description": "业务说明：上传或登记可视化项目使用的资源文件，包含图片、视频、音频等素材。用于项目素材管理。",
+        "operationId": "postApiV1ViewAssetUpload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssetUploadReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "上传资源",
+        "tags": [
+          "view/asset",
+          "viewAsset"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewAsset"
+      }
+    },
+    "/api/v1/view/asset/upload-zip": {
+      "post": {
+        "description": "业务说明：通过multipart/formdata上传内嵌页面zip页面包（file字段），平台解压托管到对象存储私有桶并登记场景包资产，返回入口页面URL供内嵌页面组件引用。formdata参数：screenId（必传，归属大屏/模板id，按其归属鉴权）、assetId（可选，传则覆盖既有场景包）、name（可选，资产名称）。zip需含index.html（根目录或唯一一级子目录），仅允许静态资源扩展名，大小与文件数受平台限制。",
+        "operationId": "postApiV1ViewAssetUpload-zip",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                    "x-formData-name": "file"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AssetUploadZipResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "上传内嵌页面包",
+        "tags": [
+          "view/asset",
+          "viewAsset"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewAsset"
+      }
+    },
+    "/api/v1/view/component/copy": {
+      "post": {
+        "description": "业务说明：复制现有组件生成新的组件记录，用于快速复用已有组件模板。",
+        "operationId": "postApiV1ViewComponentCopy",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentCopyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "复制组件",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/create": {
+      "post": {
+        "description": "业务说明：创建新的可视化组件，登记组件名称、分类、内容和入口信息。用于组件库建设。",
+        "operationId": "postApiV1ViewComponentCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增组件",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/delete": {
+      "post": {
+        "description": "业务说明：删除组件库中的组件记录。用于清理废弃组件。",
+        "operationId": "postApiV1ViewComponentDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除组件",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/design": {
+      "post": {
+        "description": "业务说明：保存组件的设计内容 JSON，用于组件设计器编辑后的内容持久化。",
+        "operationId": "postApiV1ViewComponentDesign",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentDesignReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "保存组件设计内容",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/get-list": {
+      "post": {
+        "description": "业务说明：分页查询组件库列表，支持按名称、分类、状态、来源、创建人、创建时间、更新时间和分组筛选。用于组件选择和管理。",
+        "operationId": "postApiV1ViewComponentGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ComponentGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取组件列表",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/get-one": {
+      "post": {
+        "description": "业务说明：查询单个组件的完整定义和设计内容，用于组件编辑回显。",
+        "operationId": "postApiV1ViewComponentGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ComponentView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取组件详情",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/component/update": {
+      "post": {
+        "description": "业务说明：更新组件的基础信息、分类、版本、封面或状态。用于组件维护和发布管理。",
+        "operationId": "postApiV1ViewComponentUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ComponentUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新组件",
+        "tags": [
+          "view/component",
+          "viewComponent"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewComponent"
+      }
+    },
+    "/api/v1/view/dataset/create": {
+      "post": {
+        "description": "业务说明：创建新的可视化数据集，配置数据类型、数据源、脚本和输出字段。用于图表和项目的数据准备。",
+        "operationId": "postApiV1ViewDatasetCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增数据集",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/dataset/delete": {
+      "post": {
+        "description": "业务说明：删除可视化数据集记录。用于清理不再使用的数据集。",
+        "operationId": "postApiV1ViewDatasetDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除数据集",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/dataset/get-list": {
+      "post": {
+        "description": "业务说明：分页查询数据集列表，支持按名称、数据源、类型、分组和标签筛选。用于数据集管理页展示。",
+        "operationId": "postApiV1ViewDatasetGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasetGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据集列表",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/dataset/get-one": {
+      "post": {
+        "description": "业务说明：查询单个数据集的完整配置，用于编辑回显和详情查看。",
+        "operationId": "postApiV1ViewDatasetGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasetView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据集详情",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/dataset/preview": {
+      "post": {
+        "description": "业务说明：执行数据集预览，返回行数据、字段定义和 ECharts dataset 结构。用于设计器调试数据效果。",
+        "operationId": "postApiV1ViewDatasetPreview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetPreviewReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasetPreviewResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "预览数据集",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/dataset/update": {
+      "post": {
+        "description": "业务说明：更新数据集的配置、动态参数、缓存和字段定义，用于维护数据处理逻辑。",
+        "operationId": "postApiV1ViewDatasetUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasetUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新数据集",
+        "tags": [
+          "view/dataset",
+          "viewDataset"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewDataset"
+      }
+    },
+    "/api/v1/view/datasource/create": {
+      "post": {
+        "description": "业务说明：在可视化应用中创建新的数据源配置，定义连接类型、配置参数和用途说明。用于数据集和项目的数据接入。",
+        "operationId": "postApiV1ViewDatasourceCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增数据源",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/datasource/delete": {
+      "post": {
+        "description": "业务说明：删除可视化应用中的数据源配置。删除前应确认没有数据集继续引用该数据源。",
+        "operationId": "postApiV1ViewDatasourceDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除数据源",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/datasource/get-list": {
+      "post": {
+        "description": "业务说明：分页查询可视化数据源列表，支持按名称、类型和状态筛选。用于数据源管理页展示。",
+        "operationId": "postApiV1ViewDatasourceGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasourceGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据源列表",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/datasource/get-one": {
+      "post": {
+        "description": "业务说明：查询单个可视化数据源的完整配置，用于编辑回显和连接参数查看。",
+        "operationId": "postApiV1ViewDatasourceGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasourceView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取数据源详情",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/datasource/test": {
+      "post": {
+        "description": "业务说明：测试可视化数据源的连接是否可用，返回连接结果和耗时。用于配置校验。",
+        "operationId": "postApiV1ViewDatasourceTest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DatasourceTestResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "测试数据源连接",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "test",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "test",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/datasource/update": {
+      "post": {
+        "description": "业务说明：更新可视化数据源的名称、类型或连接配置，用于维护数据接入参数。",
+        "operationId": "postApiV1ViewDatasourceUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatasourceUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新数据源",
+        "tags": [
+          "view/datasource",
+          "viewDatasource"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewDatasource"
+      }
+    },
+    "/api/v1/view/group/create": {
+      "post": {
+        "description": "业务说明：创建可视化资源分组，支持数据集、组件、资源库等分组场景。用于左侧分组栏管理。",
+        "operationId": "postApiV1ViewGroupCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建分组",
+        "tags": [
+          "view/group",
+          "viewGroup"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewGroup"
+      }
+    },
+    "/api/v1/view/group/delete": {
+      "post": {
+        "description": "业务说明：删除可视化分组。用于清理无效分组。",
+        "operationId": "postApiV1ViewGroupDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除分组",
+        "tags": [
+          "view/group",
+          "viewGroup"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewGroup"
+      }
+    },
+    "/api/v1/view/group/get-list": {
+      "post": {
+        "description": "业务说明：查询可视化分组列表，支持数据集、组件、资源库等类型。用于页面左侧分组栏展示。",
+        "operationId": "postApiV1ViewGroupGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GroupGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取分组列表",
+        "tags": [
+          "view/group",
+          "viewGroup"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewGroup"
+      }
+    },
+    "/api/v1/view/group/update": {
+      "post": {
+        "description": "业务说明：更新可视化分组名称和排序。用于分组栏维护。",
+        "operationId": "postApiV1ViewGroupUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GroupUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新分组",
+        "tags": [
+          "view/group",
+          "viewGroup"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewGroup"
+      }
+    },
+    "/api/v1/view/project/create": {
+      "post": {
+        "description": "业务说明：创建新的可视化项目或模板，设置封面、名称、类型和发布状态，用于大屏项目初始化。",
+        "operationId": "postApiV1ViewProjectCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增项目",
+        "tags": [
+          "view/project",
+          "viewProject"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewProject"
+      }
+    },
+    "/api/v1/view/project/delete": {
+      "post": {
+        "description": "业务说明：删除可视化项目记录，用于清理废弃项目或模板。",
+        "operationId": "postApiV1ViewProjectDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除项目",
+        "tags": [
+          "view/project",
+          "viewProject"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewProject"
+      }
+    },
+    "/api/v1/view/project/detail/get-one": {
+      "post": {
+        "description": "业务说明：查询可视化项目的详细内容定义，用于设计器加载项目内容。",
+        "operationId": "postApiV1ViewProjectDetailGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProjectDetail"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取项目详情内容",
+        "tags": [
+          "view/project/detail",
+          "viewProjectDetail"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewProjectDetail"
+      }
+    },
+    "/api/v1/view/project/detail/update": {
+      "post": {
+        "description": "业务说明：保存可视化项目的详细内容定义，用于项目设计稿和画布内容更新。",
+        "operationId": "postApiV1ViewProjectDetailUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectDetail"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新项目详情",
+        "tags": [
+          "view/project/detail",
+          "viewProjectDetail"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewProjectDetail"
+      }
+    },
+    "/api/v1/view/project/get-list": {
+      "post": {
+        "description": "业务说明：分页查询可视化项目列表，支持按类型、作用域、来源、名称、状态、创建人和时间范围筛选，用于项目管理页面。",
+        "operationId": "postApiV1ViewProjectGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoGetListReqEx"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProjectInfoGetListRespView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取项目列表",
+        "tags": [
+          "view/project",
+          "viewProject"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewProject"
+      }
+    },
+    "/api/v1/view/project/get-one": {
+      "post": {
+        "description": "业务说明：查询单个可视化项目的基础信息，用于项目编辑回显和详情查看。",
+        "operationId": "postApiV1ViewProjectGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProjectInfoView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取项目详情",
+        "tags": [
+          "view/project",
+          "viewProject"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewProject"
+      }
+    },
+    "/api/v1/view/project/update": {
+      "post": {
+        "description": "业务说明：更新可视化项目的基础信息，如封面、名称、描述和状态，用于项目维护。",
+        "operationId": "postApiV1ViewProjectUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectInfoUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新项目",
+        "tags": [
+          "view/project",
+          "viewProject"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewProject"
+      }
+    },
+    "/api/v1/view/report/create": {
+      "post": {
+        "description": "业务说明：创建报表（按项目组织），初始详情内容为空。",
+        "operationId": "postApiV1ViewReportCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "新增报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/delete": {
+      "post": {
+        "description": "业务说明：删除报表及其详情内容。",
+        "operationId": "postApiV1ViewReportDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "delete",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/detail/get-one": {
+      "post": {
+        "description": "业务说明：加载报表设计内容供设计器回显。",
+        "operationId": "postApiV1ViewReportDetailGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportDetail"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取报表详情内容",
+        "tags": [
+          "view/report/detail",
+          "viewReportDetail"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewReportDetail"
+      }
+    },
+    "/api/v1/view/report/detail/update": {
+      "post": {
+        "description": "业务说明：保存报表设计内容（Univer workbook JSON）。",
+        "operationId": "postApiV1ViewReportDetailUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportDetail"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新报表详情内容",
+        "tags": [
+          "view/report/detail",
+          "viewReportDetail"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewReportDetail"
+      }
+    },
+    "/api/v1/view/report/export": {
+      "post": {
+        "description": "业务说明：按模板渲染后生成 xlsx 文件并上传 OSS，返回受控下载地址。",
+        "operationId": "postApiV1ViewReportExport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportExportReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportExportResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "导出报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "export",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "export",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/export-by-id": {
+      "post": {
+        "description": "业务说明：按报表 ID 加载设计内容、渲染并导出 xlsx，返回受控下载地址（列表页一键导出）。",
+        "operationId": "postApiV1ViewReportExport-by-id",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportExportByIdReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportExportResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "按ID导出报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "export",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "export",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/get-list": {
+      "post": {
+        "description": "业务说明：分页查询报表列表，支持按项目、名称筛选。",
+        "operationId": "postApiV1ViewReportGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取报表列表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/get-one": {
+      "post": {
+        "description": "业务说明：查询单个报表基础信息。",
+        "operationId": "postApiV1ViewReportGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportView"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取报表详情",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/render": {
+      "post": {
+        "description": "业务说明：执行绑定数据集并按模板替换/展开，返回计算后的 workbook JSON，供设计器预览与导出共用。",
+        "operationId": "postApiV1ViewReportRender",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportRenderReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportRenderResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "渲染报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/report/update": {
+      "post": {
+        "description": "业务说明：更新报表基础信息。",
+        "operationId": "postApiV1ViewReportUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新报表",
+        "tags": [
+          "view/report",
+          "viewReport"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "viewReport"
+      }
+    },
+    "/api/v1/view/system/energy/dashboard/device-status": {
+      "post": {
+        "description": "业务说明：查询能源大屏设备状态统计，返回在线、离线、未激活和总数，并输出可直接绑定环图的数据集结构。用于系统内置能源大屏数据集消费。",
+        "operationId": "postApiV1ViewSystemEnergyDashboardDevice-status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyDashboardQueryReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EnergyDeviceStatusResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取能源大屏设备状态统计",
+        "tags": [
+          "view/system",
+          "viewSystem"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewSystem"
+      }
+    },
+    "/api/v1/view/system/energy/dashboard/overview": {
+      "post": {
+        "description": "业务说明：查询能源大屏顶部统计数据，返回实时功率、今日用电、平均功率、最小功率和最大功率。用于系统内置能源大屏数据集消费。",
+        "operationId": "postApiV1ViewSystemEnergyDashboardOverview",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyDashboardQueryReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EnergyOverviewResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取能源大屏顶部统计",
+        "tags": [
+          "view/system",
+          "viewSystem"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewSystem"
+      }
+    },
+    "/api/v1/view/system/uptime": {
+      "post": {
+        "description": "业务说明：查询可视化服务运行时长。用于系统运行状态展示。",
+        "operationId": "postApiV1ViewSystemUptime",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Empty"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SystemUptimeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取平台运行时间",
+        "tags": [
+          "view/system",
+          "viewSystem"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "可视化管理",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "viewSystem"
+      }
+    }
+  }
+}

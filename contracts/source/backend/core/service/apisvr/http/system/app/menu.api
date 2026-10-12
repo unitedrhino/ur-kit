@@ -1,0 +1,80 @@
+info(
+    desc: "菜单权限"
+	author: "lbs"
+	email: "174805676@qq.com"
+)
+
+@server(
+    group: system/app/menu
+    prefix: /api/v1/system/app/menu
+    accessCodePrefix: "systemAppMenu"
+    accessNamePrefix: "应用菜单"
+    accessGroup: "应用管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "添加菜单"
+        description: "业务说明：为指定应用创建新的菜单项，包括菜单路径、权限码、图标等配置。菜单是应用的功能导航结构，用于控制用户可见的功能入口和权限粒度。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/app/menu"
+        resource: "system/app/menu"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (MenuInfo) returns (WithID)
+
+    @doc(
+        summary: "获取菜单列表"
+        description: "业务说明：查询指定应用下的菜单列表，支持按路径筛选、返回树形结构、筛选收藏菜单等。用于应用菜单管理页面的菜单树展示和权限配置。"
+        authType: "platform"
+        group: "system/app/menu"
+        resource: "system/app/menu"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (MenuInfoGetListReq) returns (MenuInfoGetListResp)
+
+    @doc(
+        summary: "更新菜单"
+        description: "业务说明：修改菜单配置（名称、路径、图标、排序等），支持部分更新。用于菜单结构调整和权限码变更，变更后立即影响用户可见的功能入口。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/app/menu"
+        resource: "system/app/menu"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (MenuInfo) returns ()
+
+    @doc(
+        summary: "删除菜单"
+        description: "业务说明：删除指定的菜单项，删除后该菜单及关联的权限配置将不可用。删除前需确认无角色绑定该菜单权限，避免权限失效。"
+        authType: "platform"
+        isNeedAuth: "true"
+        group: "system/app/menu"
+        resource: "system/app/menu"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+}
+type (
+
+    MenuInfoGetListReq  {
+        AppID int64 `json:"appID,string"`                               // 应用编号
+        Path string `json:"path,optional"` // 按菜单路径筛选
+        IsRetTree bool `json:"isRetTree,optional"` // 是否返回树形结构
+        IsStar   int64 `json:"isStar,optional"`  // 是否收藏菜单 1-是 2-否
+    }
+
+    MenuInfoGetListResp  {
+        List []*MenuInfo `json:"list"` //菜单列表
+    }
+
+)

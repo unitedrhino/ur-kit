@@ -1,0 +1,88 @@
+//--------------------角色管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message RoleWithID{
+  int64 id = 1; //ID值
+}
+message RoleEmpty{
+}
+
+service RoleManage {
+  rpc roleInfoCreate(RoleInfo) returns(RoleWithID); //创建角色信息
+  rpc roleInfoGetList(RoleInfoGetListReq) returns(RoleInfoGetListResp); //获取角色列表（支持分页和过滤）
+  rpc roleInfoUpdate(RoleInfo) returns(RoleEmpty); //更新角色信息
+  rpc roleInfoDelete(RoleWithID) returns(RoleEmpty); //删除角色
+
+  rpc roleMenuGetList(RoleMenuGetListReq) returns (RoleMenuGetListResp); //获取角色菜单权限列表
+  rpc roleMenuBatchUpdate(RoleMenuBatchUpdateReq) returns(RoleEmpty); //批量更新角色菜单权限
+
+  rpc roleAppGetList(RoleAppGetListReq) returns (RoleAppGetListResp); //获取角色应用权限列表
+  rpc roleAppBatchUpdate(RoleAppBatchUpdateReq) returns(RoleEmpty);  //批量更新角色应用权限
+
+//  rpc roleModuleGetList(RoleModuleGetListReq) returns (RoleModuleGetListResp); //获取角色模块权限列表
+//  rpc roleModuleBatchUpdate(RoleModuleBatchUpdateReq) returns(RoleEmpty);  //批量更新角色模块权限
+
+
+  rpc roleApiAuth(RoleApiAuthReq) returns(RoleApiAuthResp);   //角色API接口鉴权
+}
+
+message RoleInfo{
+  int64   id = 1;
+  string  name = 2;
+  google.protobuf.StringValue  desc = 3;
+  int64   createdTime  =4;
+  int64   status = 5;
+  string code =6;
+  int64 isFullAuth =7; // 是否完全授权（1:是，2:否）
+}
+message RoleInfoGetListReq{
+  PageInfo page = 1;//分页信息
+  string name = 2;
+  int64 status = 3;
+  repeated int64 ids =4;//角色id列表
+  repeated   string codes =5;
+
+}
+message RoleInfoGetListResp{
+  repeated  RoleInfo list =1;
+  int64 total = 2;
+}
+message RoleMenuGetListReq{
+  repeated int64 ids = 1; // 角色ID列表
+  int64 id = 4; // 单个角色ID
+  int64  appID = 2; // 应用ID
+}
+message RoleMenuGetListResp{
+  int64 total = 1; // 总条数
+  repeated int64 menuIDs = 3; // 菜单ID列表
+}
+message RoleMenuBatchUpdateReq{
+  int64 id = 1; // 角色ID
+  int64  appID = 2; // 应用ID
+  repeated int64 menuIDs = 4; // 菜单ID列表
+}
+message RoleAppGetListReq{
+  repeated int64 ids = 1; // 角色ID列表
+  int64 id = 2; // 单个角色ID
+}
+message RoleAppGetListResp{
+  int64 total = 1; // 总条数
+  repeated int64  appIDs = 3; // 应用ID列表
+}
+message RoleAppBatchUpdateReq{
+  int64 id = 1; // 角色ID
+  repeated int64  appIDs = 3; // 应用ID列表
+}
+message RoleApiAuthReq{
+  string path = 1;
+  string method = 2;
+}
+message RoleApiAuthResp{
+  string operType = 1;     // 操作类型（create/update/delete/get/other）
+  string name =2;//操作名
+  int64 recordLogMode = 3; //1为自动模式(读取类型忽略,其他类型记录日志) 2全部记录 3不记录
+}

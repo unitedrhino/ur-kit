@@ -1,0 +1,107 @@
+syntax = "v1"
+
+// 实时播放接口
+
+info(
+    title: "实时播放"
+    desc: "获取实时播放地址、保活、停止播放"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+// AvStreamLiveAddr 单条流的所有协议播放地址，与 owl StreamLiveAddr 对齐
+type AvStreamLiveAddr {
+    Label   string `json:"label"`   // 媒体服务器标签，如 ZLM
+    WSFLV   string `json:"ws_flv"`  // WS-FLV 播放地址
+    HTTPFLV string `json:"http_flv"` // HTTP-FLV 播放地址
+    HLS     string `json:"hls"`     // HLS 播放地址
+    RTMP    string `json:"rtmp"`    // RTMP 播放地址
+    RTSP    string `json:"rtsp"`    // RTSP 播放地址
+    WebRTC  string `json:"webrtc"`  // WebRTC 播放地址
+}
+
+// AvPlayStreamInfo 实时播放响应，与 owl playOutput 对齐：返回 app/stream 及地址列表
+type AvPlayStreamInfo {
+    App    string             `json:"app"`    // 应用名
+    Stream string             `json:"stream"` // 流 ID
+    Items  []AvStreamLiveAddr `json:"items"`  // 播放地址列表（通常一条）
+}
+
+type AvPlayLiveStartReq {
+    ChannelID string `json:"channelID"`          // 通道 ID
+    Protocol  string `json:"protocol,optional"`  // 期望协议，默认 webrtc
+}
+
+type AvPlayLiveStopReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+    StreamID  string `json:"streamID,optional"` // 流 ID
+}
+
+type AvPlayLiveKeepaliveReq {
+    ChannelID string `json:"channelID"` // 通道 ID
+    StreamID  string `json:"streamID"`  // 流 ID
+}
+
+type AvPlayLiveStreamListReq {
+    PageInfo
+    DeviceID string `json:"deviceID,optional"`  // 按设备过滤
+}
+
+type AvPlayLiveStreamListResp {
+    PageResp
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "启动实时播放"
+        description: "业务说明：按通道 ID 启动实时播放，返回各协议播放地址。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlayLiveStart
+    post /api/v1/av/play/live/start (AvPlayLiveStartReq) returns (AvPlayStreamInfo)
+
+    @doc(
+        summary: "停止实时播放"
+        description: "业务说明：停止指定通道的实时播放流。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlayLiveStop
+    post /api/v1/av/play/live/stop (AvPlayLiveStopReq) returns (EmptyResp)
+
+    @doc(
+        summary: "实时播放保活"
+        description: "业务说明：对指定播放流发送保活心跳，避免被服务端自动清理。"
+        authType: "admin"
+        resource: "av"
+        action: "execute"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlayLiveKeepalive
+    post /api/v1/av/play/live/keepalive (AvPlayLiveKeepaliveReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取实时流列表"
+        description: "业务说明：按设备过滤分页查询当前活跃的实时流列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvPlayLiveStreamList
+    post /api/v1/av/play/live/stream/list (AvPlayLiveStreamListReq) returns (AvPlayLiveStreamListResp)
+}

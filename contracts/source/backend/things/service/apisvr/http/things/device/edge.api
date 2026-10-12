@@ -1,0 +1,49 @@
+info(
+    title: "设备边缘接口"
+    desc: "设备通过HTTP协议与云端交互"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/device/edge
+    prefix: /api/v1/things/device/edge
+    middleware: InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "设备使用http协议用云端交互,需要在http头中带上mqtt的账号密码(basic auth)"
+        description: "设备通过HTTP协议与云端进行物模型交互（替代MQTT）。设备在HTTP请求头中使用Basic Auth携带MQTT格式的账号密码进行身份验证。路径参数handle指定交互类型（thing/ota/config等），type指定操作类型（property/event/action等）。适用于不支持MQTT的设备或需要HTTP直连的场景。"
+        authType: "device"
+        group: "things/device/edge"
+        resource: "things/device/edge"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler send
+    post /send/:handle/:type (DeviceInteractEdgeSendReq) returns (DeviceInteractEdgeSendResp)
+
+    @doc(
+        summary: "设备文件直传,需要在http头中带上mqtt的账号密码(basic auth)"
+        description: "设备通过HTTP直接上传文件到云端OSS。设备使用Basic Auth进行身份验证，上传文件后返回文件存储路径和访问URI。适用于设备上报日志文件、图片、录音等文件数据的场景。"
+        injectFormdataParam: "file"
+        authType: "device"
+        group: "things/device/edge"
+        resource: "things/device/edge"
+        action: "upload"
+        recordLogMode: "1"
+    )
+    @handler uploadFile
+    post /upload-file (EdgeUploadFileReq) returns (EdgeUploadFileResp)
+}
+
+type (
+    EdgeUploadFileReq {
+        Authorization string `header:"authorization"` // basic auth 账号密码使用mqtt格式生成的账号密码
+    }
+    EdgeUploadFileResp {
+        FilePath string `json:"filePath"` // 文件路径(带文件名)
+        FileUri  string `json:"fileUri"`  // 文件uri 相对路径
+    }
+)

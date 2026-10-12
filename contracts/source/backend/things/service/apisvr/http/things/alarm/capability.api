@@ -1,0 +1,71 @@
+info (
+	title:   "告警能力矩阵"
+	desc:    "告警能力矩阵"
+	author:  "Codex"
+	email:   ""
+	version: "v1"
+)
+
+import "alarmCommon.api"
+
+@server (
+	group:            things/alarm/capability
+	prefix:           /api/v1/things/alarm/capability
+	accessCodePrefix: "thingsAlarmCapability"
+	accessNamePrefix: "告警能力"
+	accessGroup:      "规则引擎"
+	middleware:       CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+		summary: "获取告警能力矩阵"
+		description: "返回告警数据源、判据、目标和通知的统一可配置能力"
+		resource: "things/alarm/capability"
+		action: "view"
+		authType: "admin"
+		recordLogMode: "1"
+		group: "things/alarm/capability"
+	)
+	@handler getOne
+	post /get-one (ShareEmpty) returns (AlarmCapability)
+}
+
+type AlarmCapability {
+	Version  string                      `json:"version"`
+	Sources  []*AlarmSourceCapability    `json:"sources"`
+	Criteria []*AlarmCriterionCapability `json:"criteria"`
+	Targets  []string                    `json:"targets"`
+	Notify   *AlarmNotifyCapability      `json:"notify"`
+}
+
+type AlarmSourceCapability {
+	SourceType      string                      `json:"sourceType"`
+	DataTypes       []string                    `json:"dataTypes"`
+	CompareTypes    []string                    `json:"compareTypes"`
+	SupportsFilters bool                        `json:"supportsFilters"`
+	Aggregates      []*AlarmAggregateCapability `json:"aggregates"`
+}
+
+type AlarmAggregateCapability {
+	DataType string                             `json:"dataType"`
+	Values   []string                           `json:"values"`
+	Compares map[string]*AlarmCompareCapability `json:"compares"`
+}
+
+type AlarmCompareCapability {
+	Values []string `json:"values"`
+}
+
+type AlarmCriterionCapability {
+	Type            string   `json:"type"`
+	AllowedChildren []string `json:"allowedChildren"`
+}
+
+type AlarmNotifyCapability {
+	Channels          []string `json:"channels"`
+	Timings           []string `json:"timings"`
+	CallbackMethods   []string `json:"callbackMethods"`
+	CallbackAuthTypes []string `json:"callbackAuthTypes"`
+}

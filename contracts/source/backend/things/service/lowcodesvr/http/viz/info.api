@@ -1,0 +1,154 @@
+syntax = "v1"
+
+info(
+    title: "type title here"
+    desc: "type desc here"
+    author: "type author here"
+    email: "type email here"
+    version: "type version here"
+)
+
+
+@server(
+    group: lowcode/viz/info
+    prefix: /api/v1/lowcode/viz/info
+    accessCodePrefix: "thingsVizInfo"
+    accessNamePrefix: "可视化"
+    accessGroup: "可视化"
+    defaultIsNeedAuth: "true"
+    defaultAuthType: "admin"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service lowcode {
+    @doc(
+        summary: "新增可视化"
+        description: "业务说明：新增可视化"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler create
+    post /create (VizInfoCreateReq) returns (WithIDStr)
+    @doc(
+        summary: "更新可视化"
+        description: "业务说明：更新可视化"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler update
+    post /update (VizInfo) returns ()
+    @doc(
+        summary: "删除可视化"
+        description: "业务说明：删除可视化"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithIDStr) returns ()
+    @doc(
+        summary: "获取可视化信息列表"
+        description: "业务说明：获取可视化信息列表"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (VizInfoGetListReq) returns (VizInfoGetListResp)
+    @doc(
+        summary: "获取可视化详情"
+        description: "业务说明：获取可视化详情"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (VizInfoGetOneReq) returns (VizInfo)
+
+    @doc(
+        summary: "导出可视化"
+        description: "业务说明：导出可视化"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler export
+    post /export (VizInfoExportReq) returns (VizInfoExportResp)
+    @doc(
+        summary: "导入可视化"
+        description: "业务说明：导入可视化"
+        injectFormdataParam: "file"
+        authType: "admin"
+    resource: "lowcode"
+    action: "view"
+    group: "things/lowcode"
+    recordLogMode: "1"
+    )
+    @handler import
+    post /import (VizInfoImportReq) returns ()
+}
+
+type (
+    VizInfoExportReq{
+        ID int64 `json:"id,string,optional"`
+    }
+    VizInfoExportResp{
+        FileUrl string  `json:"fileUrl"`
+    }
+    VizInfoImportReq{
+        ID int64 `form:"id,string,optional"`
+    }
+    VizInfoCreateReq{
+        ProjectID int64 `json:"projectID,string,optional"`//所属项目ID(雪花ID),默认为2,未分类
+        AreaID int64 `json:"areaID,string,optional"`//区域ID(雪花ID),默认为2 未分类
+        Code string `json:"code,optional"`//编码,相同区域下的code不能重复
+        Name string  `json:"name,optional"` //名称,创建必传
+        GroupID int64  `json:"groupID,string,optional"` //分组ID,不填默认为1
+        CopyFromID int64 `json:"copyFromID,string,optional"` //从别的可视化复制,别的可视化的ID
+        Desc *string  `json:"desc,optional"`
+    }
+    VizInfo {
+        ID int64 `json:"id,string,optional"`
+        ProjectID int64 `json:"projectID,string,optional"`//所属项目ID(雪花ID),默认为2,未分类
+        AreaID int64 `json:"areaID,string,optional"`//区域ID(雪花ID),默认为2 未分类
+        Code string `json:"code,optional"`//编码,相同区域下的code不能重复
+        Name string  `json:"name,optional"` //名称,创建必传
+        GroupID int64  `json:"groupID,string,optional"` //分组ID,不填默认为1
+        Image string `json:"image,optional"` //略缩图路径
+        Data string `json:"data,optional"` //可视化数据
+        Desc *string  `json:"desc,optional"`
+        AreaName string `json:"areaName,optional"`//只读,区域的名称
+        ProjectName string `json:"projectName,optional"`//只读,项目的名称
+    }
+    VizInfoGetOneReq{
+        ID int64 `json:"id,string,optional"` //如果填写id,则会以此获取,如果不填id,则下面三个参数必填
+        ProjectID int64 `json:"projectID,string,optional"`//所属项目ID(雪花ID),默认为2,未分类
+        AreaID int64 `json:"areaID,string,optional"`//区域ID(雪花ID),默认为2 未分类
+        Code string `json:"code,optional"`//编码,相同区域下的code不能重复
+    }
+    VizInfoGetListReq{
+        Page *PageInfo `json:"page,optional"`             //分页信息 只获取一个则不填
+        Name string  `json:"name,optional"` //名称,创建必传
+        GroupID int64  `json:"groupID,string,optional"` //分组ID,不填默认为1
+        ProjectID int64 `json:"projectID,string,optional"`//所属项目ID(雪花ID),默认为2,未分类
+        AreaID int64 `json:"areaID,string,optional"`//区域ID(雪花ID),默认为2 未分类
+        Code string `json:"code,optional"`//编码,相同区域下的code不能重复
+    }
+    VizInfoGetListResp{
+        List []*VizInfo `json:"list"`    //可视化信息
+        PageResp
+    }
+)

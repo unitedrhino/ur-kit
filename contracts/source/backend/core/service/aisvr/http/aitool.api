@@ -1,0 +1,320 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-工具管理"
+	desc:    "AI Tool Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 工具基础类型 ----
+
+type ToolInfo {
+	id           int64  `json:"id,string"`                    // 工具ID
+	tenantCode   string `json:"tenantCode,optional"`          // 租户编码
+	agentGroupID int64  `json:"agentGroupID,optional,string"` // 关联AgentGroup ID（兼容）
+	cloneGroupID int64  `json:"cloneGroupID,optional,string"` // 所属CloneGroup ID
+	groupName    string `json:"groupName,optional"`           // 分组名称
+	code         string `json:"code"`                         // 工具编码
+	name         string `json:"name"`                         // 工具名称
+	description  string `json:"description,optional"`         // 工具描述
+	toolType     string `json:"toolType,optional"`            // 工具类型
+	config       string `json:"config,optional"`              // 工具配置（JSON）
+	inputSchema  string `json:"inputSchema,optional"`         // 输入参数schema（JSON）
+	outputSchema string `json:"outputSchema,optional"` // 输出契约（JSON）
+	status       int64  `json:"status,string"`                // 状态 1-草稿 2-已发布 3-已停用
+	version      int64  `json:"version,string"`               // 版本号
+	createdTime  int64  `json:"createdTime,optional"`         // 创建时间
+}
+
+type ToolArtifact {
+	executorJs   string `json:"executorJs"`             // executor.js 内容
+	documentMd   string `json:"documentMd,optional"`             // document.md 内容
+	manifestJson string `json:"manifestJson,optional"`  // manifest.json 内容
+}
+
+// ---- 工具 CRUD 类型 ----
+
+type ToolGetListReq {
+	page         PageInfo `json:"page,optional"`                  // 分页信息
+	name         string   `json:"name,optional"`                  // 名称模糊搜索
+	agentGroupID int64    `json:"agentGroupID,optional,string"`   // AgentGroup过滤（兼容）
+	cloneGroupID int64    `json:"cloneGroupID,optional,string"`   // CloneGroup过滤
+	toolType     string   `json:"toolType,optional"`              // 工具类型过滤
+	status       int64    `json:"status,optional,string"`         // 状态过滤
+}
+
+type ToolGetListResp {
+	list  []ToolInfo `json:"list"`  // 工具列表
+	total int64      `json:"total"` // 总数
+}
+
+type ToolGetOneReq {
+	id            int64    `json:"id,string"`                  // 工具ID
+	artifactFiles []string `json:"artifactFiles,optional"`     // 需读取的产物文件；空值兼容读取全部三件套
+}
+
+type ToolGetOneResp {
+	info     ToolInfo     `json:"info"`     // 工具基本信息
+	artifact ToolArtifact `json:"artifact"` // 三件套内容
+}
+
+type ToolCreateReq {
+	agentGroupID int64  `json:"agentGroupID,optional,string"` // 关联AgentGroup ID（兼容）
+	cloneGroupID int64  `json:"cloneGroupID,optional,string"` // 所属CloneGroup ID
+	code         string `json:"code"`                         // 工具编码
+	name         string `json:"name"`                         // 工具名称
+	description  string `json:"description,optional"`         // 工具描述
+	toolType     string `json:"toolType,optional"`            // 工具类型
+	config       string `json:"config,optional"`              // 工具配置（JSON）
+	inputSchema  string `json:"inputSchema,optional"`         // 输入参数schema（JSON）
+	outputSchema string `json:"outputSchema,optional"` // 输出契约（JSON）
+}
+
+type ToolUpdateReq {
+	id          int64  `json:"id,string"`           // 工具ID
+	name        string `json:"name,optional"`       // 工具名称
+	description string `json:"description,optional"` // 工具描述
+	inputSchema string `json:"inputSchema,optional"` // 输入契约（JSON）
+	outputSchema string `json:"outputSchema,optional"` // 输出契约（JSON）
+}
+
+type ToolSaveArtifactReq {
+	id           int64  `json:"id,string"`             // 工具ID
+	executorJs   string `json:"executorJs"`            // executor.js 内容
+	documentMd   string `json:"documentMd,optional"`            // document.md 内容
+	manifestJson string `json:"manifestJson,optional"` // manifest.json 内容
+}
+
+// ---- 工具 zip 导入/导出类型 ----
+
+type ToolImportReq {
+	id      int64  `json:"id,string"` // 工具ID
+	zipData string `json:"zipData"`   // Base64编码的zip包数据
+}
+
+type ToolExportReq {
+	id int64 `json:"id,string"` // 工具ID
+}
+
+type ToolExportResp {
+	zipData  string `json:"zipData"`  // Base64编码的zip包数据
+	fileName string `json:"fileName"` // 下载文件名
+}
+
+// ---- 工具执行类型 ----
+
+type ToolRunReq {
+	toolID int64  `json:"toolID,string"` // 工具ID
+	inputs string `json:"inputs"`        // 输入参数（JSON字符串）
+}
+
+type ToolRunResp {
+	runID string `json:"runID"` // 运行标识UUID
+}
+
+type ToolRunStatusReq {
+	runID string `json:"runID"` // 运行标识UUID
+}
+
+type ToolRunStatusResp {
+	runID      string `json:"runID"`                // 运行标识UUID
+	status     string `json:"status"`               // 执行状态 running/success/failed
+	state      string `json:"state,optional"`       // 执行状态JSON
+	output     string `json:"output,optional"`      // 执行输出JSON
+	logs       string `json:"logs,optional"`        // 执行日志
+	durationMs int64  `json:"durationMs,string"`    // 执行耗时(毫秒)
+	errorMsg   string `json:"errorMsg,optional"`    // 错误信息
+}
+
+type ToolRunHistoryReq {
+	toolID int64    `json:"toolID,string"` // 工具ID
+	page   PageInfo `json:"page,optional"` // 分页信息
+}
+
+type ToolRunHistoryResp {
+	list  []ToolRunStatusResp `json:"list"`  // 执行历史列表
+	total int64               `json:"total"` // 总数
+}
+
+// ---- 工具 CRUD 服务 ----
+
+@server(
+	group:               ai/tool
+	prefix:              /api/v1/ai/tool
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiToolManage"
+	accessNamePrefix:    "AI工具管理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "获取工具列表"
+		description: "业务说明：分页查询AI工具列表，支持按名称、AgentGroup、状态过滤。返回工具基本信息列表，包含编码、名称、版本、状态等。用于工具管理页面展示。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "view"
+		group: "ai/tool"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ToolGetListReq) returns (ToolGetListResp)
+
+	@doc(
+		summary: "获取工具详情"
+		description: "业务说明：根据工具ID查询完整信息，包含工具元数据和三件套内容（executor.js、document.md、manifest.json）。用于工具编辑页回显、详情查看等场景。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "view"
+		group: "ai/tool"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ToolGetOneReq) returns (ToolGetOneResp)
+
+	@doc(
+		summary: "创建工具"
+		description: "业务说明：创建新的AI工具，设置编码、名称、描述并关联AgentGroup。创建后自动初始化空三件套到S3，状态为草稿。创建完成后可通过编辑页完善工具内容。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "create"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (ToolCreateReq) returns (WithID)
+
+	@doc(
+		summary: "更新工具"
+		description: "业务说明：修改工具基础信息，支持更新名称和描述。部分更新，空值字段保持原值。不支持修改code和agentGroupID。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "update"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (ToolUpdateReq)
+
+	@doc(
+		summary: "删除工具"
+		description: "业务说明：软删除指定工具，工具记录标记删除时间戳，不物理删除数据。删除后工具不再出现在列表中，但历史执行记录保留。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "delete"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (WithID)
+
+	@doc(
+		summary: "发布工具"
+		description: "业务说明：将草稿状态工具发布上线，版本号加1，状态变更为已发布。发布后工具可被规则引擎引用执行。已发布工具不能修改三件套内容，需重新创建新版本。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "publish"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler publish
+	post /publish (WithID)
+
+	@doc(
+		summary: "停用工具"
+		description: "业务说明：将已发布工具停用，状态变更为已停用。停用后工具不可被规则引擎调用，但历史执行记录和工具定义保留。可重新发布恢复使用。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "update"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler disable
+	post /disable (WithID)
+
+	@doc(
+		summary: "保存三件套"
+		description: "业务说明：保存工具的三件套内容（executor.js、document.md、manifest.json）到S3存储。用于工具编辑页保存代码和文档内容。仅草稿状态工具可保存。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "update"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler saveArtifact
+	post /save-artifact (ToolSaveArtifactReq)
+
+	@doc(
+		summary: "导入工具zip包"
+		description: "业务说明：在工具详情页导入zip包，覆盖当前工具的executor.js、manifest.json、skill.md三件套。仅草稿状态允许覆盖三件套，已发布或停用工具拒绝写入。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "update"
+		group: "ai/tool"
+		recordLogMode: "2"
+	)
+	@handler importTool
+	post /import (ToolImportReq) returns (WithID)
+
+	@doc(
+		summary: "导出工具zip包"
+		description: "业务说明：导出当前工具的三件套内容为zip包，包含executor.js、manifest.json、skill.md，用于备份和离线编辑。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "view"
+		group: "ai/tool"
+		recordLogMode: "1"
+	)
+	@handler exportTool
+	post /export (ToolExportReq) returns (ToolExportResp)
+}
+
+// ---- 工具执行服务 ----
+
+@server(
+	group:               ai/tool/run
+	prefix:              /api/v1/ai/tool
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiToolManage"
+	accessNamePrefix:    "AI工具运行"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "手动运行工具"
+		description: "业务说明：异步执行指定工具，传入输入参数JSON，返回运行标识runID。工具在QuickJS沙箱中执行，可通过run-status接口轮询执行状态和结果。用于工具调试和手动触发场景。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "execute"
+		group: "ai/tool/run"
+		recordLogMode: "2"
+	)
+	@handler run
+	post /run (ToolRunReq) returns (ToolRunResp)
+
+	@doc(
+		summary: "查询执行状态"
+		description: "业务说明：根据runID轮询查询工具执行状态，返回当前状态（running/success/failed）、实时state、累积logs、耗时等。前端定时轮询直到状态变为success或failed。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "view"
+		group: "ai/tool/run"
+		recordLogMode: "1"
+	)
+	@handler runStatus
+	post /run-status (ToolRunStatusReq) returns (ToolRunStatusResp)
+
+	@doc(
+		summary: "执行历史列表"
+		description: "业务说明：分页查询指定工具的执行历史记录，按创建时间倒序排列。返回每次执行的runID、状态、耗时、错误信息等。用于工具执行记录查看和问题排查。"
+		authType: "admin"
+		resource: "ai/tool"
+		action: "view"
+		group: "ai/tool/run"
+		recordLogMode: "1"
+	)
+	@handler runHistory
+	post /run-history (ToolRunHistoryReq) returns (ToolRunHistoryResp)
+}

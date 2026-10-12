@@ -1,0 +1,68 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡操作日志"
+    desc: "物联卡状态/连接状态变更等关键操作日志查询与记录"
+    version: "v1"
+)
+
+type (
+    CardOperating {
+        ID            int64  `json:"id,string"`
+        Iccid         string `json:"iccid"`
+        Operating     string `json:"operating,optional"`
+        OperatingType int64  `json:"operatingType"`
+        BeforeStatus  string `json:"beforeStatus,optional"`
+        AfterStatus   string `json:"afterStatus,optional"`
+        Result        int64  `json:"result"`
+        FailReason    string `json:"failReason,optional"`
+        Remarks       string `json:"remarks,optional"`
+        CreatedBy     int64  `json:"createdBy"`
+        CreatedTime   string `json:"createdTime,optional"`
+    }
+
+    CardOperatingGetListReq {
+        PageInfo
+        Iccid         string    `json:"iccid,optional"`
+        OperatingType int64     `json:"operatingType,optional"`
+        CreatedBy     int64     `json:"createdBy,optional"`
+        TimeRange     TimeRange `json:"timeRange,optional"`
+    }
+
+    CardOperatingGetListResp {
+        PageResp
+        List []*CardOperating `json:"list"`
+    }
+)
+
+@server(
+    group: card/operating
+    prefix: /api/v1/things/card/operating
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取操作日志列表"
+        description: "业务说明：分页查询物联卡操作日志"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardOperatingGetListReq) returns (CardOperatingGetListResp)
+
+    @doc(
+        summary: "获取操作日志详情"
+        description: "业务说明：按租户和主键查询单条操作日志"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardOperating)
+}

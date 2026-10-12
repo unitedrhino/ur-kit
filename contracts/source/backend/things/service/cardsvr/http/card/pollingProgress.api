@@ -1,0 +1,105 @@
+syntax = "v1"
+
+info(
+    title: "物联卡轮询进度"
+    desc: "持久化轮询批次、游标和恢复请求"
+    version: "v1"
+)
+
+type (
+    // CardPollingProgress 描述可恢复的轮询批次。
+    CardPollingProgress {
+        ID            int64  `json:"id,string"`
+        PollingNo     string `json:"pollingNo"`
+        RouteCode     string `json:"routeCode"`
+        PollingType   string `json:"pollingType"`
+        Status        string `json:"status"`
+        Total         int64  `json:"total"`
+        Succeeded     int64  `json:"succeeded"`
+        Failed        int64  `json:"failed"`
+        Cursor        int64  `json:"cursor"`
+        RetryRequested bool  `json:"retryRequested"`
+        CancelRequested bool `json:"cancelRequested"`
+        HeartbeatTime string `json:"heartbeatTime,optional"`
+        UpdatedTime   string `json:"updatedTime,optional"`
+    }
+
+    // CardPollingProgressGetListReq 查询轮询批次。
+    CardPollingProgressGetListReq {
+        PageInfo
+        RouteCode   string `json:"routeCode,optional"`
+        PollingType string `json:"pollingType,optional"`
+        Status      string `json:"status,optional"`
+    }
+
+    // CardPollingProgressGetListResp 返回轮询批次列表。
+    CardPollingProgressGetListResp {
+        PageResp
+        List []*CardPollingProgress `json:"list"`
+    }
+
+    // CardPollingProgressGetOneReq 按稳定批次号查询详情。
+    CardPollingProgressGetOneReq {
+        PollingNo string `json:"pollingNo"`
+    }
+
+    // CardPollingProgressCommandReq 提交持久化状态请求。
+    CardPollingProgressCommandReq {
+        PollingNo string `json:"pollingNo"`
+    }
+)
+
+@server(
+    group: card/pollingProgress
+    prefix: /api/v1/things/card/polling-progress
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "查询轮询批次"
+        description: "业务说明：分页查询持久化轮询批次和恢复状态"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardPollingProgressGetListReq) returns (CardPollingProgressGetListResp)
+
+    @doc(
+        summary: "查询轮询批次详情"
+        description: "业务说明：按轮询批次号查询持久化进度、游标与请求状态"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (CardPollingProgressGetOneReq) returns (CardPollingProgress)
+
+    @doc(
+        summary: "请求重试轮询批次"
+        description: "业务说明：仅持久化重试请求，实际恢复执行由后台执行器处理"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler retry
+    post /retry (CardPollingProgressCommandReq) returns (CardPollingProgress)
+
+    @doc(
+        summary: "请求取消轮询批次"
+        description: "业务说明：仅持久化取消请求，实际停止由后台执行器处理"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler cancel
+    post /cancel (CardPollingProgressCommandReq) returns (CardPollingProgress)
+}

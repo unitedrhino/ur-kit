@@ -1,0 +1,44 @@
+info (
+	title:   "租户配置管理"
+	desc:    "租户配置的查询和更新"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/config
+	prefix:           /api/v1/system/tenant/config
+	accessNamePrefix: "租户配置"
+	accessGroup:      "租户管理"
+	defaultAuthType:  "admin"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:    "更新租户配置"
+		description: "业务说明：更新租户级配置信息，如注册角色、自动创建项目等配置项。仅租户管理员可操作，用于定制租户的默认行为策略。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/config"
+		resource: "system/tenant/config"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (TenantConfig)
+
+	@doc (
+		summary:    "获取租户配置"
+		description: "业务说明：查询当前租户的配置详情，包括注册默认角色、自动创建项目/区域策略等。用于租户管理页面展示和编辑配置。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/config"
+		resource: "system/tenant/config"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithTenantCode) returns (TenantConfig)
+}

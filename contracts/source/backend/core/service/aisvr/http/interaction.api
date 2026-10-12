@@ -1,0 +1,125 @@
+syntax = "v1"
+
+info (
+ title: "AI 对话结构化结果"
+ desc: "保存的结果快照与分页查询，按当前用户和权限范围隔离"
+ author: "unitedrhino"
+ version: "v1"
+)
+
+// InteractionReference 是已保存结果的长期引用。
+type InteractionReference {
+ schemaVersion string `json:"schemaVersion"`
+ resultID string `json:"resultID"`
+ sessionID string `json:"sessionID"`
+ messageID string `json:"messageID"`
+ turnIndex int32 `json:"turnIndex"`
+ toolCallID string `json:"toolCallID"`
+}
+
+type InteractionGetReq {
+ resultID string `json:"resultID"` // 服务端结果 ID
+}
+
+type InteractionGetResp {
+ result map[string]interface{} `json:"result"` // v1 结构化协议，数据集仅内联前 20 行
+}
+
+type InteractionRowsReq {
+ resultID string `json:"resultID"`
+ datasetID string `json:"datasetID"`
+ page PageInfo `json:"page"`
+ sortField string `json:"sortField,optional"` // 数据集中的字段
+ sortDirection string `json:"sortDirection,optional"` // asc 或 desc
+}
+
+type InteractionRowsResp {
+ rows []map[string]interface{} `json:"rows"`
+ total int64 `json:"total"`
+}
+
+type InteractionSeriesReq {
+ resultID string `json:"resultID"`
+ blockID string `json:"blockID"`
+}
+
+type InteractionSeriesResp {
+ rows []map[string]interface{} `json:"rows"`
+ sampled bool `json:"sampled"`
+ originalRowCount int64 `json:"originalRowCount"`
+}
+
+type InteractionHistoryReq {
+ sessionID string `json:"sessionID"` // 目标会话
+ page PageInfo `json:"page,optional"` // 最多每页 100 条引用
+}
+
+// InteractionHistoryTurn 只恢复消息和附件引用，下载地址需单独鉴权。
+type InteractionHistoryTurn {
+ turnIndex int32 `json:"turnIndex"` // 本轮顺序
+ userContents []ContentPart `json:"userContents"` // 原始文字及附件 ID
+ aiResponse string `json:"aiResponse"` // 助手文本
+}
+
+type InteractionHistoryResp {
+ results []InteractionReference `json:"results"` // 当前页轻量引用
+ total int64 `json:"total"` // 当前范围的结果总数
+ turns []InteractionHistoryTurn `json:"turns"` // 同页已完成的消息轮次
+ turnTotal int64 `json:"turnTotal"` // 已完成轮次总数
+}
+
+@server (
+ group: ai/interaction
+ prefix: /api/v1/ai/chat/result
+ middleware: CheckTokenWare,InitCtxsWare
+ defaultAuthType: "all"
+)
+service ai {
+ @doc(
+  summary: "获取对话结果"
+  description: "业务说明：鉴权后读取不可变结果定义及预览数据。只允许当前用户、应用、企业与实际数据权限范围访问。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler getOne
+ post /get-one (InteractionGetReq) returns (InteractionGetResp)
+
+ @doc(
+  summary: "查询结果表格数据"
+  description: "业务说明：按保存的数据快照进行分页和排序，字段必须来自数据集定义，不重新执行任意查询。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler rows
+ post /rows (InteractionRowsReq) returns (InteractionRowsResp)
+
+ @doc(
+  summary: "查询结果图表序列"
+  description: "业务说明：读取保存结果的图表数据，趋势超限时保留分桶极值，分类图超限返回明确提示。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler series
+ post /series (InteractionSeriesReq) returns (InteractionSeriesResp)
+
+ @doc(
+  summary: "恢复会话结果引用"
+  description: "业务说明：重新进入会话或 SSE 断线后，恢复当前有权访问的会话结果引用。"
+  authType: "all"
+  resource: "ai/chat"
+  action: "view"
+  group: "ai/chat"
+  recordLogMode: "1"
+ )
+ @handler history
+ post /history (InteractionHistoryReq) returns (InteractionHistoryResp)
+}

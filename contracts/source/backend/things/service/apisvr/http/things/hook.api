@@ -1,0 +1,26 @@
+info(
+	title: "Hook扩展模块"
+	desc: "Hook扩展统一入口，通过method字段路由到具体处理函数"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: things/hook
+	prefix: /api/v1/things/hook
+	middleware: HookServerWare
+)
+service api {
+	@doc(
+	    summary: "Hook扩展统一入口"
+	    description: "业务说明：Hook扩展机制统一入口，通过请求中的method字段路由到具体处理函数。支持多种Hook类型：设备绑定Hook、设备数据上报Hook、告警触发Hook等。用于业务定制扩展、数据回调通知、第三方系统集成"
+	    authType: "public"
+	    group: "things/hook"
+	    resource: "things/hook"
+	    action: "hook"
+	    recordLogMode: "3"
+	)
+	@handler hookEntry
+	post / returns ()
+}

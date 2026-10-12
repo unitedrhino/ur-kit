@@ -1,0 +1,94 @@
+info(
+    title: "网关路由管理模块"
+    desc: "网关反向代理动态路由的查看与管理（服务自注册 + 配置文件 + 应用代理三来源合并展示）"
+    author: "unitedrhino"
+    email: "unitedrhino@unitedrhino.com"
+    version: "v1"
+)
+
+@server(
+    group: system/route
+    prefix: /api/v1/system/route
+    accessCodePrefix: "systemRouteManage"
+    accessNamePrefix: "路由管理"
+    accessGroup: "路由管理"
+    defaultAuthType: "platform"
+    defaultNeedAuth: "true"
+    middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "获取网关路由列表"
+        description: "业务说明：查询网关反向代理的全量路由清单，合并三个来源：数据库动态路由（各后端服务启动时自注册）、应用代理（应用管理中开启代理的应用）、配置文件路由（apisvr etc/*.yaml 的 Proxy 段）。支持按来源、服务标识、状态、location 关键字过滤并分页。数据库路由可启停/删除；配置文件与应用代理路由仅展示。"
+        authType: "platform"
+        group: "system/route"
+        resource: "system/route"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (RouteInfoGetListReq) returns (RouteInfoGetListResp)
+
+    @doc(
+        summary: "更新网关路由"
+        description: "业务说明：更新数据库动态路由的状态（启用/停用）、描述与排序。出于安全考虑（防 SSRF/越权转发），location/proxy 等转发配置字段不接受修改，仅状态类字段生效。配置来源与应用代理路由不允许修改。状态变更经 NATS 事件触发热重载，无需重启网关。"
+        authType: "platform"
+        group: "system/route"
+        resource: "system/route"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (RouteInfoUpdateReq) returns ()
+
+    @doc(
+        summary: "删除网关路由"
+        description: "业务说明：删除数据库动态路由（软删）。仅允许删除来源为服务自注册/手工的数据库路由；配置文件与应用代理路由不允许删除。删除后经 NATS 事件触发热重载。注意：若对应服务仍在运行，其下次重启会重新注册该路由，需长期下线请使用停用。"
+        authType: "platform"
+        group: "system/route"
+        resource: "system/route"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+}
+
+type (
+    // RouteInfoGetListReq 路由列表查询请求
+    RouteInfoGetListReq {
+        Page        *PageInfo `json:"page,optional"`        // 分页信息,不分页则不填
+        Source      string    `json:"source,optional"`      // 来源过滤 service:服务自注册 manual:手工 config:配置文件 app:应用代理
+        ServiceCode string    `json:"serviceCode,optional"` // 服务标识过滤
+        Status      int64     `json:"status,optional"`      // 状态过滤 1:启用 2:停用
+        Location    string    `json:"location,optional"`    // location 关键字模糊过滤
+    }
+    // RouteInfoGetListResp 路由列表查询响应
+    RouteInfoGetListResp {
+        PageResp
+        List []*RouteInfoItem `json:"list"` // 路由列表
+    }
+    // RouteInfoItem 单条路由（合并三来源后的展示结构）
+    RouteInfoItem {
+        ID          int64  `json:"id,string,optional"`          // 路由ID(配置文件/应用代理来源为0)
+        ServiceCode string `json:"serviceCode,optional"`        // 所属服务标识
+        Name        string `json:"name,optional"`               // 路由名称
+        Desc        *string `json:"desc,optional"`              // 路由描述
+        Location    string `json:"location"`                    // 匹配路径
+        Type        string `json:"type"`                        // 类型 reverse:反向代理 static:静态代理 redirect:重定向
+        Target      string `json:"target,optional"`             // 目标地址(proxyPass/root/return)
+        Proxy       string `json:"proxy,optional"`              // 完整代理配置JSON
+        Source      string `json:"source"`                      // 来源 service:服务自注册 manual:手工 config:配置文件 app:应用代理
+        Status      int64  `json:"status,optional"`             // 状态 1:启用 2:停用(配置文件/应用代理恒为启用)
+        Sort        int64  `json:"sort,optional"`               // 排序
+        CreatedTime int64  `json:"createdTime,string,optional"` // 创建时间
+        UpdatedTime int64  `json:"updatedTime,string,optional"` // 更新时间
+    }
+    // RouteInfoUpdateReq 路由更新请求(仅状态类字段白名单)
+    RouteInfoUpdateReq {
+        ID     int64   `json:"id,string"`        // 路由ID
+        Status int64   `json:"status,optional"`  // 状态 1:启用 2:停用
+        Desc   *string `json:"desc,optional"`    // 描述
+        Sort   int64   `json:"sort,optional"`    // 排序
+    }
+)

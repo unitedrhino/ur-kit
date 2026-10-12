@@ -1,0 +1,330 @@
+//--------------------流程审批中心服务--------------------
+// 对应 REST 层 apisvr /api/v1/system/flow/*（全 POST），命名遵守项目规范
+// get-one/get-list 惯例；详情/记录等聚合视图按设计文档第 5 节使用例外路径词。
+// 权限口径：流程定义/分类/表单为租户管理员（admin）；审批/实例操作为所有登录用户（all）。
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message FlowWithID{
+  int64 id = 1; //ID值
+}
+message FlowEmpty{
+}
+
+service FlowManage{
+  //----------------流程发起（authType=all）----------------
+  rpc processGetLaunchList(ProcessGetLaunchListReq) returns(ProcessGetLaunchListResp); //获取可发起流程列表（分类分组+卡片聚合）
+  rpc processLaunch(ProcessLaunchReq) returns(ProcessLaunchResp); //发起流程实例
+
+  //----------------流程定义（authType=admin）----------------
+  rpc processDefCreate(ProcessDefInfo) returns(FlowWithID); //创建流程定义
+  rpc processDefUpdate(ProcessDefInfo) returns(FlowEmpty); //更新流程定义（支持部分更新）
+  rpc processDefDelete(FlowWithID) returns(FlowEmpty); //删除流程定义（存在运行实例时禁止删除）
+  rpc processDefGetOne(ProcessDefGetOneReq) returns(ProcessDefInfo); //获取流程定义详情（含流程JSON模型）
+  rpc processDefGetList(ProcessDefGetListReq) returns(ProcessDefGetListResp); //获取流程定义列表（支持分页和过滤）
+  rpc processDefDeploy(FlowWithID) returns(FlowEmpty); //发布流程定义（版本+1，同编码旧版本转history）
+  rpc processDefUnpublish(FlowWithID) returns(FlowEmpty); //停用流程定义（state转stopped）
+
+  //----------------流程分类（authType=admin）----------------
+  rpc processCategoryCreate(ProcessCategoryInfo) returns(FlowWithID); //创建流程分类
+  rpc processCategoryUpdate(ProcessCategoryInfo) returns(FlowEmpty); //更新流程分类（支持部分更新）
+  rpc processCategoryDelete(FlowWithID) returns(FlowEmpty); //删除流程分类
+  rpc processCategoryGetList(ProcessCategoryGetListReq) returns(ProcessCategoryGetListResp); //获取流程分类列表（支持分页和过滤）
+
+  //----------------表单模板（authType=admin）----------------
+  rpc formTemplateCreate(FormTemplateInfo) returns(FlowWithID); //创建表单模板
+  rpc formTemplateUpdate(FormTemplateInfo) returns(FlowEmpty); //更新表单模板（支持部分更新）
+  rpc formTemplateDelete(FlowWithID) returns(FlowEmpty); //删除表单模板（被任一流程定义引用时禁止删除）
+  rpc formTemplateGetOne(FormTemplateGetOneReq) returns(FormTemplateInfo); //获取表单模板详情
+  rpc formTemplateGetList(FormTemplateGetListReq) returns(FormTemplateGetListResp); //获取表单模板列表（支持分页和过滤）
+
+  //----------------审批任务（authType=all）----------------
+  rpc taskGetPendingList(TaskGetPendingListReq) returns(TaskGetPendingListResp); //我的待办任务分页
+  rpc taskGetApprovedList(TaskGetApprovedListReq) returns(TaskGetApprovedListResp); //我的已办任务分页
+  rpc taskGetClaimList(TaskGetClaimListReq) returns(TaskGetClaimListResp); //可认领任务分页（组任务）
+  rpc taskClaim(TaskOperateReq) returns(FlowEmpty); //认领任务（组任务办理人收敛为认领人）
+  rpc taskGetDetail(TaskGetDetailReq) returns(TaskDetail); //获取审批详情（表单+当前任务+操作权限+审批记录）
+  rpc taskConsent(TaskConsentReq) returns(FlowEmpty); //同意（完成任务并驱动流转，事务）
+  rpc taskReject(TaskRejectReq) returns(FlowEmpty); //驳回（按strategy回退到指定节点）
+  rpc taskTransfer(TaskTransferReq) returns(FlowEmpty); //转办（办理人替换为受让人）
+  rpc taskAddSign(TaskSignReq) returns(FlowEmpty); //加签（当前节点新增办理人）
+  rpc taskRemoveSign(TaskSignReq) returns(FlowEmpty); //减签（移除指定办理人，删空则任务作废回退）
+  rpc taskReclaim(TaskOperateReq) returns(FlowEmpty); //拿回（下一节点未办理前撤回重办）
+  rpc taskUrge(TaskOperateReq) returns(FlowEmpty); //催办（remind_count+1并发催办事件）
+
+  //----------------抄送（authType=all）----------------
+  rpc ccGetList(CcGetListReq) returns(CcGetListResp); //我收到的抄送分页
+  rpc ccMarkRead(CcMarkReadReq) returns(FlowEmpty); //抄送标记已阅
+
+  //----------------流程实例（authType=all，监控类为admin）----------------
+  rpc instanceGetMyList(InstanceGetListReq) returns(InstanceGetListResp); //我的申请分页
+  rpc instanceRevoke(InstanceRevokeReq) returns(FlowEmpty); //撤销（仅发起人，实例active时作废整单）
+  rpc instanceGetRecord(InstanceGetRecordReq) returns(InstanceGetRecordResp); //获取审批记录时间线（历史任务+办理人）
+  rpc instanceGetMonitorList(InstanceGetListReq) returns(InstanceGetListResp); //实例监控分页（本租户全部实例，P1）
+  rpc instanceTerminate(InstanceOperateReq) returns(FlowEmpty); //终止实例（挂起运行中流程，P1）
+  rpc instanceResume(InstanceOperateReq) returns(FlowEmpty); //恢复实例（从suspend回到active，P1）
+  rpc instanceDestroy(InstanceOperateReq) returns(FlowEmpty); //作废实例（归档并标记destroy，P1）
+}
+
+// ============ 流程分类 ============
+message ProcessCategoryInfo{
+  int64 id = 1; //分类ID
+  string name = 2; //分类名称
+  string code = 3; //分类编码（租户内唯一）
+  int64 sort = 4; //排序
+  google.protobuf.StringValue remark = 5; //备注
+}
+message ProcessCategoryGetListReq{
+  PageInfo page = 1; //分页信息
+  string name = 2; //分类名称（模糊匹配）
+  string code = 3; //分类编码（精确匹配）
+}
+message ProcessCategoryGetListResp{
+  repeated ProcessCategoryInfo list = 1; //分类列表
+  int64 total = 2; //总数
+}
+
+// ============ 表单模板 ============
+message FormTemplateInfo{
+  int64 id = 1; //表单模板ID
+  string name = 2; //表单名称
+  string category = 3; //表单分类编码
+  string formSchema = 4; //表单JSON schema（组件树+属性+校验规则，见设计方案2.6）
+  int64 version = 5; //版本号（修改发布自增）
+  string status = 6; //状态:draft草稿/published已发布
+  google.protobuf.StringValue remark = 7; //备注
+}
+message FormTemplateGetOneReq{
+  int64 id = 1; //表单模板ID
+}
+message FormTemplateGetListReq{
+  PageInfo page = 1; //分页信息
+  string name = 2; //表单名称（模糊匹配）
+  string category = 3; //表单分类编码
+  string status = 4; //状态:draft/published
+}
+message FormTemplateGetListResp{
+  repeated FormTemplateInfo list = 1; //表单模板列表
+  int64 total = 2; //总数
+}
+
+// ============ 流程定义 ============
+message ProcessDefInfo{
+  int64 id = 1; //流程定义ID
+  string processCode = 2; //流程编码（业务唯一，发布后不可改）
+  string name = 3; //流程名称
+  string category = 4; //分类编码
+  string icon = 5; //流程图标URL
+  string modelContent = 6; //流程JSON模型（节点树，见设计方案2.1）
+  int64 version = 7; //版本号（发布自增）
+  string state = 8; //状态:draft草稿/published已发布/history历史版本/stopped停用
+  int64 formTemplateId = 9; //绑定的表单模板ID（0=未绑定）
+  google.protobuf.StringValue remark = 10; //备注
+  string formTemplateName = 11; //表单模板名称（仅查询返回，冗余展示）
+  int64 sort = 12; //分组内排序，数值越小越靠前
+}
+message ProcessDefGetOneReq{
+  int64 id = 1; //流程定义ID
+}
+message ProcessDefGetListReq{
+  PageInfo page = 1; //分页信息
+  string processCode = 2; //流程编码（精确匹配）
+  string name = 3; //流程名称（模糊匹配）
+  string category = 4; //分类编码
+  string state = 5; //状态:draft/published/history/stopped
+}
+message ProcessDefGetListResp{
+  repeated ProcessDefInfo list = 1; //流程定义列表
+  int64 total = 2; //总数
+}
+
+// ============ 流程发起 ============
+message ProcessGetLaunchListReq{
+  PageInfo page = 1; //分页信息
+  string name = 2; //流程名称（模糊匹配）
+  string category = 3; //分类编码
+}
+message ProcessGetLaunchListResp{
+  repeated ProcessDefInfo list = 1; //可发起流程列表（仅published，按最近使用排序）
+  repeated ProcessCategoryInfo categories = 2; //分类分组列表
+}
+message ProcessLaunchReq{
+  string processCode = 1; //流程编码
+  string businessKey = 2; //业务单据键（业务方关联自查表，可空）
+  string title = 3; //实例标题（列表展示，可空）
+  string variable = 4; //流程变量JSON（表单数据扁平化{key:value}，见设计方案2.2.1）
+  string forcedBranch = 5; //手选条件分支JSON（条件分支容器nodeKey -> 分支nodeKey）
+  string nodeAssigneeMap = 6; //发起人自选办理人JSON（审批节点nodeKey -> 人员或角色ID数组，类型由selectMode决定）
+}
+message ProcessLaunchResp{
+  int64 instanceId = 1; //流程实例ID
+}
+
+// ============ 审批任务 ============
+message TaskItem{
+  int64 id = 1; //任务ID（待办为flw_task.id，已办为flw_his_task.id）
+  int64 instanceId = 2; //流程实例ID
+  string instanceTitle = 3; //实例标题
+  string processCode = 4; //流程编码
+  string processName = 5; //流程名称
+  string nodeKey = 6; //节点key
+  string taskName = 7; //任务名（节点名）
+  string taskState = 8; //任务状态（已办：complete/reject/autoPass/autoReject等）
+  string initiator = 9; //发起人userID
+  string currentNodeName = 10; //实例当前节点名（待办场景展示）
+  int64 createTime = 11; //任务创建时间（ms）
+  int64 finishTime = 12; //办理时间（ms，已办有效）
+  int64 duration = 13; //办理耗时（ms，已办有效）
+}
+message TaskGetPendingListReq{
+  PageInfo page = 1; //分页信息
+  string taskName = 2; //任务名（模糊匹配）
+  string processName = 3; //流程名称（模糊匹配）
+}
+message TaskGetPendingListResp{
+  repeated TaskItem list = 1; //待办任务列表
+  int64 total = 2; //总数
+}
+message TaskGetApprovedListReq{
+  PageInfo page = 1; //分页信息
+  string taskName = 2; //任务名（模糊匹配）
+  string processName = 3; //流程名称（模糊匹配）
+  string taskState = 4; //办理结论筛选（complete/reject等，可空=全部）
+}
+message TaskGetApprovedListResp{
+  repeated TaskItem list = 1; //已办任务列表
+  int64 total = 2; //总数
+}
+message TaskGetClaimListReq{
+  PageInfo page = 1; //分页信息
+  repeated string actorIDs = 2; //当前用户可认领的候选对象ID列表（角色/部门ID，由网关按用户身份解析传入）
+  string taskName = 3; //任务名（模糊匹配）
+}
+message TaskGetClaimListResp{
+  repeated TaskItem list = 1; //可认领任务列表
+  int64 total = 2; //总数
+}
+message TaskOperateReq{
+  int64 taskId = 1; //任务ID
+  string comment = 2; //操作意见（可空）
+}
+message TaskGetDetailReq{
+  int64 taskId = 1; //任务ID
+}
+message TaskDetail{
+  TaskItem task = 1; //当前任务信息
+  int64 instanceId = 2; //流程实例ID
+  string formSchema = 3; //表单JSON schema（来自绑定表单模板）
+  string variable = 4; //表单数据JSON（实例流程变量）
+  string operationPerm = 5; //当前用户操作权限JSON（操作开关组allowTransfer等，见设计方案2.1）
+  repeated TaskRecordItem records = 6; //已产生的审批记录
+}
+message TaskConsentReq{
+  int64 taskId = 1; //任务ID
+  string comment = 2; //审批意见
+  string signature = 3; //签名图片URL（可空）
+  string variable = 4; //修改后的表单数据JSON（可空，审批人可改部分字段）
+}
+message TaskRejectReq{
+  int64 taskId = 1; //任务ID
+  string strategy = 2; //驳回策略:toInitiator/toPreviousNode/toSpecifiedNode/terminateApproval/toParentNode
+  string targetNodeKey = 3; //目标节点key（strategy=toSpecifiedNode时必填）
+  string comment = 4; //审批意见
+}
+message TaskTransferReq{
+  int64 taskId = 1; //任务ID
+  string toUserId = 2; //受让人userID
+  string comment = 3; //转办意见
+}
+message TaskSignReq{
+  int64 taskId = 1; //任务ID
+  repeated string userIds = 2; //加签/减签的用户ID列表
+  string comment = 3; //操作意见
+}
+
+// ============ 抄送 ============
+message CcItem{
+  int64 id = 1; //抄送记录ID（flw_his_task_actor.id）
+  int64 taskId = 2; //历史任务ID
+  int64 instanceId = 3; //流程实例ID
+  string instanceTitle = 4; //实例标题
+  string taskName = 5; //任务名
+  string initiator = 6; //发起人userID
+  int64 createTime = 7; //抄送时间（ms）
+}
+message CcGetListReq{
+  PageInfo page = 1; //分页信息
+}
+message CcGetListResp{
+  repeated CcItem list = 1; //抄送列表
+  int64 total = 2; //总数
+}
+message CcMarkReadReq{
+  repeated int64 ids = 1; //抄送记录ID列表
+}
+
+// ============ 流程实例 ============
+message InstanceItem{
+  int64 id = 1; //实例ID
+  string processCode = 2; //流程编码
+  string processName = 3; //流程名称
+  string title = 4; //实例标题
+  string state = 5; //状态:active/suspend/finish/rejectEnd/autoPass/autoReject/timeout/terminate/cancel/destroy
+  string initiator = 6; //发起人userID
+  string currentNodeName = 7; //当前节点名
+  string businessKey = 8; //业务单据键
+  int64 version = 9; //发起时定义版本
+  int64 createTime = 10; //发起时间（ms）
+  int64 duration = 11; //耗时（ms，历史实例有效）
+}
+message InstanceGetListReq{
+  PageInfo page = 1; //分页信息
+  string title = 2; //实例标题（模糊匹配）
+  string processCode = 3; //流程编码
+  string state = 4; //实例状态
+  string initiator = 5; //发起人userID（监控列表过滤用，留空=按接口语义限定）
+}
+message InstanceGetListResp{
+  repeated InstanceItem list = 1; //实例列表
+  int64 total = 2; //总数
+}
+message InstanceRevokeReq{
+  int64 instanceId = 1; //实例ID
+  string comment = 2; //撤销原因
+}
+message InstanceOperateReq{
+  int64 instanceId = 1; //实例ID
+  string comment = 2; //操作原因
+}
+message InstanceGetRecordReq{
+  int64 instanceId = 1; //实例ID
+}
+message InstanceGetRecordResp{
+  repeated TaskRecordItem list = 1; //审批记录时间线（按办理时间升序）
+}
+
+// ============ 审批记录（时间线） ============
+message TaskRecordItem{
+  int64 taskId = 1; //历史任务ID
+  string nodeKey = 2; //节点key
+  string taskName = 3; //任务名（节点名）
+  string taskType = 4; //类型:approval/major/cc/transfer/delegate/reclaim/jump/rejectJump/withdraw
+  string taskState = 5; //状态:complete/reject/autoPass/autoReject/autoJump/timeout/terminate/cancel
+  string approver = 6; //实际办理人userID
+  string approverName = 7; //实际办理人名
+  string assignor = 8; //转办/委派原办理人（可空）
+  string comment = 9; //审批意见
+  int64 createTime = 10; //任务到达时间（ms）
+  int64 finishTime = 11; //办理时间（ms）
+  int64 duration = 12; //办理耗时（ms）
+  repeated TaskRecordActor actors = 13; //参与人列表
+}
+message TaskRecordActor{
+  string actorId = 1; //参与人ID（用户/角色/部门）
+  string actorName = 2; //参与人名称
+  string actorType = 3; //类型:user/role/department
+  int64 weight = 4; //权重（6=抄送人）
+}

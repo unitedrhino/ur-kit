@@ -1,0 +1,266 @@
+//--------------------用户设备服务----
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "deviceManage.proto";
+import "deviceGroup.proto";
+
+// UserDeviceEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message UserDeviceEmpty {
+}
+
+// UserDeviceWithID 带ID的消息
+// 定义只包含ID的消息类型
+message UserDeviceWithID{
+  int64 id = 1; // ID值
+}
+
+// UserDeviceWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message UserDeviceWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+service userDevice{
+  //用户收藏的设备
+  rpc userDeviceCollectBatchCreate(UserDeviceCollectSave)returns(UserDeviceEmpty);
+  rpc userDeviceCollectBatchDelete(UserDeviceCollectSave)returns(UserDeviceEmpty);
+  rpc userDeviceCollectGetList(UserDeviceEmpty)returns(UserDeviceCollectSave);
+
+  //分享设备
+  rpc userDeviceShareCreate(UserDeviceShareInfo)returns(UserDeviceWithID);
+  //更新权限
+  rpc userDeviceShareUpdate(UserDeviceShareInfo)returns(UserDeviceEmpty);
+  //取消分享设备
+  rpc userDeviceShareDelete(UserDeviceShareGetOneReq)returns(UserDeviceEmpty);
+  //取消分享设备
+  rpc userDeviceShareBatchDelete(UserDeviceShareBatchDeleteReq)returns(UserDeviceEmpty);
+  //获取设备分享列表(只有设备的所有者才能获取)
+  rpc userDeviceShareGetList(UserDeviceShareGetListReq)returns(UserDeviceShareGetListResp);
+  //获取设备分享的详情
+  rpc userDeviceShareGetOne(UserDeviceShareGetOneReq)returns(UserDeviceShareInfo);
+
+  //转让设备
+  rpc userDeviceTransfer(UserDeviceTransferReq)returns(UserDeviceEmpty);
+
+//  rpc userDeviceOtaGetVersion(UserDeviceOtaGetVersionReq)returns(userDeviceOtaGetVersionResp);
+//创建批量分享二维码，设备列表写入缓存
+  rpc userDeviceShareBatchCreate(UserDeviceShareBatchInfo)returns(UserDeviceShareBatchToken);
+  //扫码后获取设备列表
+  rpc userDeivceShareBatchGetList(UserDeviceShareBatchToken)returns(UserDeviceShareBatchInfo);
+  //接受批量分享的设备
+  rpc userDeivceShareBatchAccept(UserDeviceShareBatchAcceptReq)returns(UserDeviceEmpty);
+  //获取当前用户的批量分享 token 列表
+  rpc userDeviceShareBatchGetTokenList(UserDeviceEmpty)returns(UserDeviceShareBatchGetTokenListResp);
+  //删除批量分享 token
+  rpc userDeviceShareBatchDeleteToken(UserDeviceShareBatchDeleteTokenReq)returns(UserDeviceEmpty);
+
+  //生成设备分享码
+  rpc userDeviceShareCodeGen(UserDeviceShareCodeGenReq)returns(UserDeviceShareCodeGenResp);
+  //通过分享码接受设备
+  rpc userDeviceShareCodeAccept(UserDeviceShareCodeAcceptReq)returns(UserDeviceShareCodeAcceptResp);
+  //通过分享码查询分享信息（公开接口）
+  rpc userDeviceShareCodeGetInfo(UserDeviceShareCodeGetInfoReq)returns(UserDeviceShareCodeGetInfoResp);
+  //获取分享码列表
+  rpc userDeviceShareCodeGetList(UserDeviceEmpty)returns(UserDeviceShareCodeGetListResp);
+  //删除分享码
+  rpc userDeviceShareCodeDelete(UserDeviceShareCodeDeleteReq)returns(UserDeviceEmpty);
+}
+
+// UserDeviceCollectSave 用户设备收藏保存
+message UserDeviceCollectSave{
+  repeated DeviceCore devices = 1;
+}
+
+// UserDeviceShareGetOneReq 用户设备分享读取请求
+message UserDeviceShareGetOneReq{
+  int64 id = 1;
+  string useBy =3; //用途
+  DeviceCore device = 2; //设备信息
+}
+
+// UserDeviceShareGetListReq 用户设备分享列表查询请求
+message UserDeviceShareGetListReq{
+  PageInfo page = 1;
+  DeviceCore device = 2; //设备信息
+}
+
+// UserDeviceShareGetListResp 用户设备分享列表查询响应
+message UserDeviceShareGetListResp{
+  repeated UserDeviceShareInfo list = 1;
+  int64 total = 2;
+}
+
+// UserDeviceShareBatchDeleteReq 用户设备分享批量删除请求
+message UserDeviceShareBatchDeleteReq{
+    repeated int64 ids =1;
+    int64 projectID =2; //指定项目的情况下删除分享的所有设备
+}
+
+// UserDeviceShareInfo 用户设备分享信息
+message UserDeviceShareInfo{
+  int64 id = 1;
+  DeviceCore device = 2; //设备信息
+  int64 sharedUserID = 3; //分享的对象
+  string sharedUserAccount =7; //分享的账号(只读)
+  map<string,SharePerm>  schemaPerm = 4; //物模型权限,只需要填写需要授权并授权的物模型id
+  map<string,SharePerm> accessPerm = 5; //操作权限 hubLog:设备消息记录,ota:ota升级权限,deviceTiming:设备定时
+  int64 authType =9; //授权类型:1:全部授权 2:部分授权
+  int64 projectID =6; //设备归属的项目
+  string useBy =11; //用途,默认为空
+  google.protobuf.Int64Value  expTime =10; //到期时间,如果为0,则不限制
+  int64 createdTime =8;
+}
+
+// SharePerm 分享权限
+message SharePerm{
+  int64 perm =1; //1:r(只读) 3(默认):rw(可读可写)
+}
+
+// DeviceShareInfo 设备分享信息
+message DeviceShareInfo{
+  string   productID = 1; //产品id
+  string productName = 4; //产品名称 只读
+  string  deviceName = 2; //设备名称
+  string productImg = 3; //产品图片
+  google.protobuf.StringValue  deviceAlias = 5; //设备别名 读写
+}
+
+// UserDeviceShareBatchInfo 用户设备批量分享信息
+message UserDeviceShareBatchInfo{
+  repeated DeviceShareInfo devices = 1; //设备信息
+  map<string,SharePerm>  schemaPerm = 2; //物模型权限,只需要填写需要授权并授权的物模型id
+  map<string,SharePerm> accessPerm = 3; //操作权限 hubLog:设备消息记录,ota:ota升级权限,deviceTiming:设备定时
+  int64 authType =4; //授权类型:1:全部授权 2:部分授权
+  int64 projectID =5; //设备归属的项目
+  int64 expTime =6; //有效期,如果为0,则不限制
+  int64 createdTime =7;
+  int64 userID = 8; //生成分享的人id
+  string useBy = 9;
+}
+
+// UserDeviceShareBatchToken 用户设备批量分享令牌
+message UserDeviceShareBatchToken{
+  string shareToken = 1;
+  int64 linkExpireAt = 2; //分享链接过期时间，Unix 秒
+  int64 authExpireAt = 3; //分享授权过期时间，Unix 秒
+  int64 createdTime = 4; //Token 创建时间，Unix 秒
+  string useBy = 5; //用途
+}
+
+// UserDeviceShareBatchAcceptReq 用户设备批量分享接受请求
+message UserDeviceShareBatchAcceptReq{
+  string shareToken = 1;
+  int64 sharedUserID = 3; //分享的对象
+  string sharedUserAccount =2; //分享的账号(只读)
+  repeated DeviceCore devices = 4;
+}
+
+// UserDeviceShareBatchListItem 批量分享 Token 列表项
+message UserDeviceShareBatchListItem{
+  string shareToken = 1; //分享 Token
+  int64 deviceCount = 2; //设备数量
+  int64 createdTime = 3; //创建时间
+  int64 expTime = 4; //分享过期时间
+  int64 authType =5; //授权类型
+  string useBy = 6; //用途
+}
+
+// UserDeviceShareBatchGetTokenListResp 获取批量分享 Token 列表响应
+message UserDeviceShareBatchGetTokenListResp{
+  repeated UserDeviceShareBatchListItem list = 1; //Token 列表
+  int64 total = 2; //总数
+}
+
+// UserDeviceShareBatchDeleteTokenReq 删除批量分享 Token 请求
+message UserDeviceShareBatchDeleteTokenReq{
+  string shareToken = 1; //要删除的分享 Token
+}
+
+// UserDeviceTransferReq 设备转移请求
+message UserDeviceTransferReq{
+  DeviceCore device = 1; //设备信息
+  repeated DeviceCore devices = 2; //设备信息
+  int64 srcProjectID =3; //指定原来的项目ID,不写使用头
+  int64  transferTo = 4; //转让给: 1: 某个人 2: 自己的某个项目
+  int64 userID =5; //用户id
+  int64 projectID =6; //项目id
+  int64 areaID = 7; //转移到项目时指定区域ID
+  int64 isCleanData =8; //是否清除数据:1是 2否
+}
+
+// UserDeviceShareCodeGenReq 生成设备分享码请求
+message UserDeviceShareCodeGenReq{
+  repeated DeviceCore devices = 1; //要分享的设备列表
+  int64 authType =2; //授权类型:1全部授权 2部分授权
+  map<string,SharePerm> schemaPerm =3; //物模型权限
+  map<string,SharePerm> accessPerm =4; //系统功能权限
+  int64 expTime =5; //分享过期时间,如果为0,则不限制
+  string useBy =6; //用途
+  int64 validHours =7; //分享码有效时长（小时），默认24，最大72
+}
+
+// UserDeviceShareCodeGenResp 生成设备分享码响应
+message UserDeviceShareCodeGenResp{
+  string code =1; //分享码
+  int64 validUntilTime =2; //有效期截止时间（毫秒时间戳）
+  int64 deviceCount =3; //分享设备数量
+}
+
+// UserDeviceShareCodeAcceptReq 接受分享码请求
+message UserDeviceShareCodeAcceptReq{
+  string code =1; //分享码
+  int64 sharedUserID =2; //被分享用户ID
+  string sharedUserAccount =3; //被分享用户账号
+}
+
+// UserDeviceShareCodeAcceptResp 接受分享码响应
+message UserDeviceShareCodeAcceptResp{
+  repeated DeviceShareInfo devices =1; //已接受的设备列表
+}
+
+// UserDeviceShareCodeGetInfoReq 查询分享码信息请求（无需登录）
+message UserDeviceShareCodeGetInfoReq{
+  string code =1; //分享码
+}
+
+// UserDeviceShareCodeGetInfoResp 查询分享码信息响应
+message UserDeviceShareCodeGetInfoResp{
+  repeated DeviceShareInfo devices =1; //设备列表
+  int64 authType =2; //授权类型
+  map<string,SharePerm> schemaPerm =3; //物模型权限
+  map<string,SharePerm> accessPerm =4; //系统功能权限
+  int64 expTime =5; //分享过期时间
+  int64 validUntilTime =6; //分享码有效期截止时间
+  int64 deviceCount =7; //设备数量
+}
+
+// UserDeviceShareCodeListItem 分享码列表项
+message UserDeviceShareCodeListItem{
+  string code =1; //分享码
+  int64 validUntilTime =2; //有效期截止时间
+  int64 authType =3; //授权类型
+  map<string,SharePerm> schemaPerm =4; //物模型权限
+  map<string,SharePerm> accessPerm =5; //系统功能权限
+  int64 expTime =6; //分享过期时间
+  string useBy =7; //用途
+  repeated DeviceShareInfo devices =8; //设备列表
+  int64 deviceCount =9; //设备数量
+  int64 createdTime =10; //创建时间
+}
+
+// UserDeviceShareCodeGetListResp 获取分享码列表响应
+message UserDeviceShareCodeGetListResp{
+  repeated UserDeviceShareCodeListItem list =1; //分享码列表
+  int64 total =2; //总数
+}
+
+// UserDeviceShareCodeDeleteReq 删除分享码请求
+message UserDeviceShareCodeDeleteReq{
+  string code =1; //要删除的分享码
+}

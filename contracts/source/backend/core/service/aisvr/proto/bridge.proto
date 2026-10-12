@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+message ControlListenReq {
+  string sessionID = 1;
+  string paramsJson = 2;
+  int32 sampleRate = 3;
+  int32 channels = 4;
+  int32 frameDuration = 5;
+}
+
+message ControlCommonReq {
+  string sessionID = 1; // 平台语音会话 ID。
+  string responseID = 2; // 可选的目标回复 ID；仅 Abort 在全双工模式下使用。
+}
+
+message ControlInjectTextReq {
+  string sessionID = 1; // 会话ID
+  string text = 2; // 用户输入的文字内容
+}
+
+message ControlInputSendReq {
+  string sessionID = 1; // 会话ID
+  string contentsJson = 2; // JSON 序列化的 []ContentPart 多模态内容
+  repeated string modalities = 3; // 期望输出模态 ["text","audio"]
+}
+
+message ControlEmpty {}
+
+message ControlTextActivateReq {
+  string sessionID   = 1;     // 已创建的 session ID（来自 UdpTokenCreate）
+  int64  agentID     = 2;     // Agent ID
+  int64  cloneID     = 3;     // Clone ID
+  repeated string modalities = 4; // 期望输出模态 ["text"]
+  string tenantCode  = 5;     // 租户代码（用于 LLM provider 查询隔离）
+  string extraSystemPrompt = 6; // 调用方注入的额外 system prompt（通用，aisvr 不关心内容）
+  int32 sampleRate = 7;       // 设备上行音频采样率；语音处理器启动前必须设置
+  int32 channels = 8;         // 设备上行音频声道数
+  int32 frameDuration = 9;    // 设备上行 Opus 单帧时长（毫秒）
+}
+
+service Control {
+  rpc Listen(ControlListenReq) returns(ControlEmpty);
+  rpc Abort(ControlCommonReq) returns(ControlEmpty);
+  rpc Goodbye(ControlCommonReq) returns(ControlEmpty);
+  rpc InjectText(ControlInjectTextReq) returns(ControlEmpty); // 注入文字消息到会话
+  rpc InputSend(ControlInputSendReq) returns(ControlEmpty);   // 注入多模态输入到会话
+  rpc TextActivate(ControlTextActivateReq) returns(ControlEmpty); // 激活纯文字 session（无 UDP）
+}
+
+message DownlinkSubscribeReq {
+  string tenantCode = 1;
+  int64 nodeID = 2;
+}
+
+message DownlinkMsg {
+  string sessionID = 1;
+  string kind = 2;
+  string bodyJson = 3;
+}
+
+service Downlink {
+  rpc Subscribe(DownlinkSubscribeReq) returns(stream DownlinkMsg);
+}

@@ -1,0 +1,134 @@
+//--------------------平台级服务管理--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "share.proto";
+import "google/protobuf/wrappers.proto";
+package sys;//必须为服务名
+
+message PlatformEmpty{
+}
+
+message PlatformWithID{
+  int64 id = 1; //ID值
+}
+
+service Platform {
+  rpc hookServerCreate(HookServer) returns(PlatformWithID);                       //创建Hook服务
+  rpc hookServerUpdate(HookServer) returns(PlatformEmpty);                        //更新Hook服务
+  rpc hookServerDelete(PlatformWithID) returns(PlatformEmpty);                    //删除Hook服务（级联删除能力）
+  rpc hookServerGetOne(PlatformWithID) returns(HookServer);                       //获取Hook服务详情（含能力列表）
+  rpc hookServerGetList(HookServerGetListReq) returns(HookServerGetListResp);     //获取Hook服务列表
+  rpc hookServerMatch(HookServerMatchReq) returns(HookServerMatchResp);           //根据code+subCode匹配Hook服务列表
+
+  rpc hookCapabilityCreate(HookCapability) returns(PlatformWithID);               //创建Hook能力
+  rpc hookCapabilityUpdate(HookCapability) returns(PlatformEmpty);                //更新Hook能力
+  rpc hookCapabilityDelete(PlatformWithID) returns(PlatformEmpty);                //删除Hook能力
+  rpc hookCapabilityGetList(HookCapabilityGetListReq) returns(HookCapabilityGetListResp); //获取Hook能力列表
+
+  rpc agreementCreate(Agreement) returns(PlatformWithID);                         //创建协议
+  rpc agreementGetList(AgreementGetListReq) returns(AgreementGetListResp);        //获取协议列表
+  rpc agreementUpdate(Agreement) returns(PlatformEmpty);                          //更新协议
+  rpc agreementDelete(PlatformWithID) returns(PlatformEmpty);                     //删除协议
+  rpc agreementGetOne(PlatformWithID) returns(Agreement);                         //获取协议详情
+  rpc agreementPreviewRender(AgreementPreviewRenderReq) returns(AgreementPreviewRenderResp); //预览协议渲染
+}
+
+// HookServer Hook服务注册信息
+message HookServer {
+  int64 id = 1;                                        //服务ID
+  string tenantCode = 14;                              //租户编码：common=全平台可用，其余=仅该租户
+  string name = 2;                                     //服务名称（租户内唯一）
+  google.protobuf.StringValue desc = 3;                //描述（可清空）
+  string endpoint = 4;                                 //服务端点URL
+  string authType = 5;                                 //鉴权类型 none/hmac
+  google.protobuf.StringValue authConfig = 6;          //鉴权配置JSON，如 {"secret":"xxx"}（authType=none时可为空）
+  int64 status = 7;                                    //状态 1:启用 2:禁用
+  int64 timeoutSec = 8;                                //超时秒数（默认10）
+  google.protobuf.Int64Value maxRetry = 9;             //最大重试次数（0=不重试，默认3）
+  string failPolicy = 10;                              //失败策略 fail/ignore
+  repeated HookCapability capabilities = 11;           //关联的能力列表（详情时返回）
+  int64 createdTime = 12;                              //创建时间（毫秒时间戳）
+  int64 updatedTime = 13;                              //更新时间（毫秒时间戳）
+}
+
+message HookServerGetListReq {
+  PageInfo page = 1;
+  string name = 2;
+  int64 status = 3;
+  string tenantCode = 4;    //租户编码筛选，为空不过滤
+}
+
+message HookServerGetListResp {
+  repeated HookServer list = 1;
+  int64 total = 2;
+}
+
+message HookServerMatchReq {
+  string code = 1;
+  string subCode = 2;
+  string tenantCode = 3;    //租户编码：匹配 common（全平台）+ 该租户的服务，为空仅匹配 common
+}
+
+message HookServerMatchResp {
+  repeated HookServer list = 1;
+}
+
+message HookCapability {
+  int64 id = 1;
+  int64 serverID = 2;
+  string code = 3;
+  string subCode = 4;
+  google.protobuf.StringValue desc = 5;
+  string kind = 6;          //能力类型 sync=同步扩展点 async=异步事件通知（说明性元数据）
+  int64 createdTime = 7;
+  int64 updatedTime = 8;
+}
+
+message HookCapabilityGetListReq {
+  PageInfo page = 1;
+  int64 serverID = 2;
+  string code = 3;
+  string subCode = 4;
+}
+
+message HookCapabilityGetListResp {
+  repeated HookCapability list = 1;
+  int64 total = 2;
+}
+
+message Agreement {
+  int64 id = 1;
+  string code = 2;
+  string name = 3;
+  string title = 4;
+  string content = 5;
+  int64 status = 6;
+  string remark = 7;
+  int64 createdTime = 8;
+  int64 updatedTime = 9;
+}
+
+message AgreementGetListReq {
+  PageInfo page = 1;
+  string code = 2;
+  string name = 3;
+  string title = 4;
+  int64 status = 5;
+  int64 appID = 6;
+}
+
+message AgreementGetListResp {
+  repeated Agreement list = 1;
+  int64 total = 2;
+}
+
+message AgreementPreviewRenderReq {
+  int64 id = 1;
+  int64 appID = 2;
+  string tenantCode = 3;
+  string content = 4;
+}
+
+message AgreementPreviewRenderResp {
+  string content = 1;
+}

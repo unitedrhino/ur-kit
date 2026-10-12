@@ -1,0 +1,90 @@
+// 本人AI上下文授权：只分享可信服务导出的原完成文本，不接收自由正文或替本人授权。
+type (
+	ImContextConsentCreateReq {
+		MsgToken string `json:"msgToken"` // 本人原固定创建幂等键，同键换参数拒绝。
+		SourceSessionId string `json:"sourceSessionId"` // 当前本人的原IM AI源会话。
+		ServiceId string `json:"serviceId"` // 当前显式服务目录项，不接受自由设备身份。
+		FirstTurnIndex uint64 `json:"firstTurnIndex"` // 原完成轮首项，自1开始。
+		LastTurnIndex uint64 `json:"lastTurnIndex"` // 原完成轮末项，范围最多32轮。
+		SnapshotVersion string `json:"snapshotVersion,optional"` // 可选期望原版本，只比较不自赋。
+		ExpiresAt int64 `json:"expiresAt"` // UTC毫秒绝对截止，不超过实际源及服务目录授权。
+	}
+	ImContextConsentGetReq {
+		ConsentId string `json:"consentId"` // 原本人授权引用。
+	}
+	ImContextConsentRevokeReq {
+		ConsentId string `json:"consentId"` // 原本人授权引用，不支持管理员代撤销。
+		ExpectedRevision uint64 `json:"expectedRevision"` // 原授权代次，重复原撤销保持原结果。
+	}
+	ImContextConsentMetadata {
+		ConsentId string `json:"consentId"` // 不透明原授权ID，不表示媒体或接听许可。
+		SourceSessionId string `json:"sourceSessionId"` // 原IM AI源会话，不是aisvr内部ID。
+		ServiceId string `json:"serviceId"` // 原授权显式服务。
+		ServiceRevision string `json:"serviceRevision"` // 原服务目录修订，换修订后不自动迁移授权。
+		RecipientSubject string `json:"recipientSubject"` // 原精确接收设备，不包含连接凭据。
+		Scope string `json:"scope"` // 固定completedText：有序本人user及assistant完成文本。
+		SnapshotVersion string `json:"snapshotVersion"` // 真实可信服务不可变版本。
+		SnapshotDigest string `json:"snapshotDigest"` // 原完整私有快照SHA256，不授予正文读取权限。
+		FirstTurnIndex uint64 `json:"firstTurnIndex"` // 实际原授权首轮。
+		LastTurnIndex uint64 `json:"lastTurnIndex"` // 实际原授权末轮。
+		ExpiresAt int64 `json:"expiresAt"` // 原UTC毫秒截止，重放不续期。
+		GrantedAt int64 `json:"grantedAt"` // 首次服务端授权时间。
+		Revision uint64 `json:"revision"` // 当前持久授权代次。
+		RevokedAt int64 `json:"revokedAt"` // 零表示未撤销，不代表未到期。
+		Consumed bool `json:"consumed"` // 已绑定唯一handoff意图，不表示实际文本已投递。
+	}
+	ImContextConsentCreateResp {
+		Consent ImContextConsentMetadata `json:"consent"` // 仅元数据，不返回任何私有正文。
+		Replay bool `json:"replay"` // 相同原请求重放，不刷新版本或期限。
+	}
+	ImContextConsentGetResp {
+		Consent ImContextConsentMetadata `json:"consent"` // 仅本人可查看的原元数据。
+	}
+	ImContextConsentRevokeResp {
+		Consent ImContextConsentMetadata `json:"consent"` // 原持久撤销事实，不伪造已送达内容的回收。
+	}
+)
+
+@server (
+	group: im/contextconsent
+	prefix: /api/v1/im/context-consents
+	accessCodePrefix: "imContextConsent"
+	accessNamePrefix: "IM上下文授权"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary: "授权本人已完成AI文本上下文"
+		description: "当前登录本人明确选择原AI源、显式人工服务、完成轮范围及截止时间。服务器复核原设备绑定、服务目录和既有IM权限，经aisvr本人授权导出后保存不可变快照；不接受客户端正文、管理员代签、未完成流或音视频，不自动创建转人工候选。"
+		authType: "all"
+		group: "im/contextconsent"
+		resource: "im/contextconsent"
+		action: "create"
+		recordLogMode: "3"
+	)
+	@handler create
+	post /create (ImContextConsentCreateReq) returns (ImContextConsentCreateResp)
+	@doc (
+		summary: "查询本人上下文授权"
+		description: "仅当前登录本人可查询原授权元数据和撤销状态，不返回私有正文、不赋予新媒体或设备权限。"
+		authType: "all"
+		group: "im/contextconsent"
+		resource: "im/contextconsent"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler get
+	post /get (ImContextConsentGetReq) returns (ImContextConsentGetResp)
+	@doc (
+		summary: "撤销本人上下文授权"
+		description: "仅本人按原授权代次撤销，重复原撤销返回同一持久结果。撤销或到期会阻止后继接受、最终移交与尚未发送的正文投递；不声称已发给接收方的文本可被回收。"
+		authType: "all"
+		group: "im/contextconsent"
+		resource: "im/contextconsent"
+		action: "update"
+		recordLogMode: "3"
+	)
+	@handler revoke
+	post /revoke (ImContextConsentRevokeReq) returns (ImContextConsentRevokeResp)
+}

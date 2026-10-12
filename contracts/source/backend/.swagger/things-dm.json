@@ -1,0 +1,819 @@
+{
+  "components": {
+    "schemas": {
+      "AreaInfo": {
+        "properties": {
+          "areaID": {
+            "description": "项目区域id（只读）",
+            "type": "string"
+          },
+          "areaName": {
+            "description": "项目区域名称（读写）",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "项目id（只读）",
+            "type": "string"
+          }
+        },
+        "title": "AreaInfo",
+        "type": "object"
+      },
+      "ClientsReq": {
+        "properties": {
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "title": "ClientsReq",
+        "type": "object"
+      },
+      "CodeReq": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "CodeReq",
+        "type": "object"
+      },
+      "CommonResp": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "CommonResp",
+        "type": "object"
+      },
+      "CompareInt64": {
+        "properties": {
+          "cmpType": {
+            "description": "\"=\":相等 \"!=\":不相等 \">\":大于\">=\":大于等于\"<\":小于\"<=\":小于等于 \"like\":模糊查询",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cmpType",
+          "value"
+        ],
+        "title": "CompareInt64",
+        "type": "object"
+      },
+      "DateRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 格式：yyyy-mm-dd",
+            "type": "string"
+          },
+          "start": {
+            "description": "开始时间 格式：yyyy-mm-dd",
+            "type": "string"
+          }
+        },
+        "title": "DateRange",
+        "type": "object"
+      },
+      "DeviceCore": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品ID",
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceCore",
+        "type": "object"
+      },
+      "DeviceError": {
+        "properties": {
+          "code": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "msg": {
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          }
+        },
+        "title": "DeviceError",
+        "type": "object"
+      },
+      "GetClientsData": {
+        "properties": {
+          "clientid": {
+            "type": "string"
+          },
+          "connected": {
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "connected_at": {
+            "type": "string"
+          },
+          "created_at": {
+            "type": "string"
+          },
+          "expiry_interval": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "ip_address": {
+            "type": "string"
+          },
+          "keepalive": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "mountpoint": {
+            "type": "string"
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "proto_name": {
+            "type": "string"
+          },
+          "proto_ver": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "created_at",
+          "connected",
+          "ip_address",
+          "proto_ver",
+          "mountpoint",
+          "proto_name",
+          "port",
+          "connected_at",
+          "expiry_interval",
+          "username",
+          "keepalive",
+          "clientid"
+        ],
+        "title": "GetClientsData",
+        "type": "object"
+      },
+      "GetClientsMeta": {
+        "properties": {
+          "count": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "limit": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "page": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "count",
+          "limit",
+          "page"
+        ],
+        "title": "GetClientsMeta",
+        "type": "object"
+      },
+      "GetClientsResp": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/GetClientsData"
+            },
+            "type": "array"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/GetClientsMeta"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ],
+        "title": "GetClientsResp",
+        "type": "object"
+      },
+      "IDPath": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "idPath": {
+            "type": "string"
+          }
+        },
+        "title": "IDPath",
+        "type": "object"
+      },
+      "OrderBy": {
+        "properties": {
+          "field": {
+            "description": "排序的字段名",
+            "type": "string"
+          },
+          "sort": {
+            "description": "排序方式：1 从小到大, 2 从大到小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "OrderBy",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": "排序",
+            "items": {
+              "$ref": "#/components/schemas/OrderBy"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "latitude": {
+            "description": "纬度",
+            "format": "double",
+            "maximum": 90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "经度",
+            "format": "double",
+            "maximum": 180,
+            "type": "number"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "PublishMsg": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "explain": {
+            "description": "内部使用的拓展字段",
+            "type": "string"
+          },
+          "handle": {
+            "description": "对应 mqtt topic的第一个 thing ota config 等等",
+            "type": "string"
+          },
+          "payload": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "protocolCode": {
+            "description": "如果有该字段则回复的时候也会带上该字段",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "毫秒时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为",
+            "type": "string"
+          }
+        },
+        "required": [
+          "handle",
+          "type",
+          "payload",
+          "timestamp",
+          "productID",
+          "deviceName",
+          "explain",
+          "protocolCode"
+        ],
+        "title": "PublishMsg",
+        "type": "object"
+      },
+      "SendOption": {
+        "properties": {
+          "requestTimeout": {
+            "description": "请求超时,超时后会进行重试",
+            "format": "int64",
+            "type": "integer"
+          },
+          "retryInterval": {
+            "description": "重试间隔",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeoutToFail": {
+            "description": "超时失败时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "SendOption",
+        "type": "object"
+      },
+      "SubscribeBulkReq": {
+        "properties": {
+          "nl": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "qos": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rap": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "rh": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "topic": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "topic"
+        ],
+        "title": "SubscribeBulkReq",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "description": "开始时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "UnsubscribeBulkReq": {
+        "title": "UnsubscribeBulkReq",
+        "type": "object"
+      },
+      "UserCore": {
+        "properties": {
+          "avatar": {
+            "description": " 用户头像",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "email": {
+            "description": " 邮箱",
+            "type": "string"
+          },
+          "lastIP": {
+            "description": " 最后登录ip",
+            "type": "string"
+          },
+          "nickName": {
+            "description": " 用户的昵称",
+            "type": "string"
+          },
+          "phone": {
+            "description": " 手机号",
+            "type": "string"
+          },
+          "regIP": {
+            "description": " 注册ip",
+            "type": "string"
+          },
+          "userID": {
+            "description": " 用户id",
+            "type": "string"
+          },
+          "userName": {
+            "description": " 用户名(唯一)",
+            "type": "string"
+          }
+        },
+        "title": "UserCore",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      },
+      "WithIDChildren": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withChildren": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "WithIDChildren",
+        "type": "object"
+      },
+      "WithIDOrCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithIDOrCode",
+        "type": "object"
+      },
+      "WithIDStr": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithIDStr",
+        "type": "object"
+      },
+      "WithStrID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "type": "string"
+          }
+        },
+        "title": "WithStrID",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "things-mqtt",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/mqtt/api/v5/clients": {
+      "get": {
+        "description": "业务说明：分页查询 dmsvr 当前内置 MQTT 在线客户端列表，支持按用户名过滤，用于协议服务查询在线网关客户端并做订阅管理。",
+        "operationId": "getApiV1MqttApiV5Clients",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "username",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GetClientsResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取客户端列表",
+        "tags": [
+          "mqtt"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/mqtt/client",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "mqttClient"
+      }
+    },
+    "/api/v1/mqtt/api/v5/clients/{clientID}/subscribe/bulk": {
+      "post": {
+        "description": "业务说明：为指定 MQTT 客户端批量增加订阅主题，用于协议网关按设备在线状态动态调整客户端订阅列表。",
+        "operationId": "postApiV1MqttApiV5Clients:clientIDSubscribeBulk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "clientID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeBulkReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubscribeBulkReq"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量订阅",
+        "tags": [
+          "mqtt"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/mqtt/client",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "mqttClient"
+      }
+    },
+    "/api/v1/mqtt/api/v5/clients/{clientID}/subscriptions": {
+      "get": {
+        "description": "业务说明：查询指定 MQTT 客户端当前持有的订阅主题列表，用于协议网关在增量订阅前判断已有订阅状态。",
+        "operationId": "getApiV1MqttApiV5Clients:clientIDSubscriptions",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubscribeBulkReq"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取订阅topic列表",
+        "tags": [
+          "mqtt"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/mqtt/client",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "mqttClient"
+      }
+    },
+    "/api/v1/mqtt/api/v5/clients/{clientID}/unsubscribe/bulk": {
+      "post": {
+        "description": "业务说明：为指定 MQTT 客户端批量移除订阅主题，用于协议网关在设备离线或解绑后回收不再需要的订阅。",
+        "operationId": "postApiV1MqttApiV5Clients:clientIDUnsubscribeBulk",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "clientID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SubscribeBulkReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SubscribeBulkReq"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量取消订阅",
+        "tags": [
+          "mqtt"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/mqtt/client",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "mqttClient"
+      }
+    }
+  }
+}

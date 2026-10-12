@@ -1,0 +1,355 @@
+info(
+    title: "认证管理(p2)"
+    desc: "认证管理(p2)"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/device/interact
+    prefix: /api/v1/things/device/interact
+    accessCodePrefix: "thingsDeviceInteract"
+    accessNamePrefix: "设备交互"
+    accessGroup: "设备管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "调用设备行为"
+        description: "向设备下发行为调用指令。行为是物模型中定义的可执行操作（如重启、复位、配置更新等）。支持同步调用（等待设备返回结果）和异步调用（通过msgToken查询结果）。设备执行后返回输出参数。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler actionSend
+    post /action-send (DeviceInteractSendActionReq) returns (DeviceInteractSendActionResp)
+
+    @doc(
+        summary: "获取调用设备行为的结果"
+        description: "查询异步行为调用的执行结果。通过msgToken（调用ID）查询设备是否已响应、返回的输出参数、执行状态码等。用于异步调用场景的结果追踪。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler actionGetOne
+    post /action-get-one (DeviceInteractRespGetOneReq) returns (DeviceInteractSendActionResp)
+
+    @doc(
+        summary: "回复设备行为调用结果"
+        description: "设备发起行为调用（上行行为）时，云端通过此接口回复执行结果。用于云端处理设备请求后返回响应，如设备请求云端执行某操作，云端完成后告知结果。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "reply"
+        recordLogMode: "1"
+    )
+    @handler actionResp
+    post /action-resp (DeviceInteractActionRespReq) returns ()
+
+    @doc(
+        summary: "生成物模型模拟数据"
+        description: "根据设备的物模型定义，生成符合数据类型的模拟数据。用于设备调试、测试场景，无需真实设备即可模拟上报数据。支持生成属性、事件、行为的模拟参数。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "generate"
+        recordLogMode: "1"
+    )
+    @handler schemaMockGen
+    post /schema-mock-gen (DeviceInteractSchemaMockGenReq) returns (DeviceInteractSchemaMockGenResp)
+
+    @doc(
+        summary: "下行事件通知设备"
+        description: "向设备下发事件通知。云端主动向设备发送事件消息，用于通知设备执行某些操作或告警。事件类型包括info（信息）、alert（告警）、fault（故障）。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler eventSend
+    post /event-send (DeviceInteractEventSendReq) returns ()
+
+    @doc(
+        summary: "调用设备属性"
+        description: "向设备下发属性控制指令，修改设备的属性值。属性控制是物模型中最常用的交互方式，如开关设备、设置温度、调节亮度等。支持同步/异步模式，支持设备影子机制（离线时写影子，在线时下发）。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler propertyControlSend
+    post /property-control-send (DeviceInteractSendPropertyReq) returns (DeviceInteractSendPropertyResp)
+    @doc(
+        summary: "批量调用设备属性"
+        description: "批量向多个设备下发相同的属性控制指令。支持按区域、分组、设备列表批量控制。适用于批量开关灯、批量调温等场景。返回每个设备的执行结果。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler propertyControlBatchSend
+    post /property-control-batch-send (DeviceInteractBatchSendPropertyReq) returns (DeviceInteractBatchSendPropertyResp)
+    @doc(
+        summary: "获取调用设备属性的结果"
+        description: "查询异步属性控制调用的执行结果。通过msgToken查询设备是否已响应、返回的状态码、消息等。用于异步控制场景的结果追踪。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler propertyControlGetOne
+    post /property-control-get-one (DeviceInteractRespGetOneReq) returns (DeviceInteractSendPropertyResp)
+
+
+    @doc(
+        summary: "下行透传消息给设备"
+        description: "通过平台标准设备下行通道发送原始文本载荷。仅组织管理员和平台管理员可操作；接口成功仅表示消息已交给设备通信链路。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler sendMsg
+    post /message-send (DeviceInteractSendMsgReq) returns (ShareEmpty)
+    @doc(
+        summary: "请求设备获取设备最新属性"
+        description: "向设备下发获取属性请求，要求设备上报最新的属性值。设备收到请求后，主动上报当前属性状态。用于需要获取设备实时状态但设备未自动上报的场景。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler propertyGetReportSend
+    post /property-get-report-send (DeviceInteractPropertyGetReportSendReq) returns (DeviceInteractPropertyGetReportSendResp)
+    @doc(
+        summary: "批量请求设备获取设备最新属性"
+        description: "批量向多个设备下发获取属性请求。支持按区域、分组、设备列表批量请求。适用于需要刷新多个设备实时状态的场景，如大屏展示前获取最新数据。"
+        authType: "admin"
+        group: "things/device/interact"
+        resource: "things/device/interact"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler propertyGetReportBatchSend
+    post /property-get-report-batch-send (DeviceInteractPropertyGetReportBatchSendReq) returns (DeviceInteractPropertyGetReportBatchSendResp)
+
+    @doc(
+        summary: "通知网关绑定子设备"
+        description: "通知网关设备绑定指定的子设备列表。网关收到通知后，与子设备建立拓扑关系，子设备可通过网关与云端通信。用于网关添加子设备的场景。"
+        authType: "admin"
+        group: "things/device/interact/gateway"
+        resource: "things/device/interact/gateway"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler gatewayNotifyBindSend
+    post /gateway-notify-bind-send (GatewayNotifyBindSendReq) returns ()
+
+    @doc(
+        summary: "请求网关上报拓扑关系"
+        description: "请求网关设备上报当前的子设备拓扑关系。网关收到请求后，上报已绑定的子设备列表。用于查询网关与子设备的连接状态、发现拓扑变化。"
+        authType: "admin"
+        group: "things/device/interact/gateway"
+        resource: "things/device/interact/gateway"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler gatewayGetFoundSend
+    post /gateway-get-found-send (GatewayGetFoundReq) returns ()
+}
+
+
+type (
+    DeviceInteractEdgeSendReq{
+        Handle       string `path:"handle"` //对应 mqtt topic的第一个 thing ota config 等等
+        Type         string `path:"type"`   //操作类型 从topic中提取 物模型下就是   property属性 event事件 action行为
+        ProductID    string `header:"productID,optional"`//如果网关类型要操作子设备的topic,需要指定子设备的产品ID和设备ID,如果没有填写则默认是账号里的设备
+        DeviceName   string `header:"deviceName,optional"`//如果网关类型要操作子设备的topic,需要指定子设备的产品ID和设备ID,如果没有填写则默认是账号里的设备
+        Authorization string  `header:"authorization"`//basic auth  账号密码使用mqtt格式生成的账号密码
+    }
+    DeviceInteractEdgeSendResp{
+
+    }
+)
+
+type (
+    GatewayNotifyBindSendReq{
+        Gateway       *DeviceCore `json:"gateway"` //如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+        SubDevices       []*DeviceCore `json:"subDevices"` //如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+    }
+
+    GatewayGetFoundReq{
+        ProductID  string   `json:"productID"`   //产品id (必填)
+        DeviceName string   `json:"deviceName"` //设备名(必填)
+    }
+)
+
+type DeviceInteractPropertyGetReportSendReq {
+    ProductID  string   `json:"productID"`   //产品id (必填)
+    DeviceName string   `json:"deviceName"` //设备名(必填)
+    DataIDs    []string `json:"dataIDs,optional"`       //获取的具体标识符的数据 如果不指定则获取所有属性数据,一个属性一条
+}
+
+type DeviceInteractPropertyGetReportSendResp  {
+        ReceivedTime int64 `json:"receivedTime"` // 平台接收时间，毫秒；历史未知为0
+        Quality map[string]string `json:"quality"` // 本次回复每个属性的质量
+
+    Code        int64  `json:"code"`              //设备返回状态码
+    Msg      string `json:"msg"`           //返回状态
+    MsgToken string `json:"msgToken"` //调用id
+    Timestamp   int64  `json:"timestamp"`    //上报时间戳(毫秒时间戳)
+    Params      string `json:"params"`           //获取到的值
+}
+
+type DeviceInteractPropertyGetReportBatchSendReq{
+    DataIDs  []string `json:"dataIDs,optional"` //获取的具体标识符的数据 如果不指定则获取所有属性数据,一个属性一条
+    ProductID  string `json:"productID,optional"` //产品id
+    DeviceNames  []string `json:"deviceNames,optional"` //设备名
+    Devices  []*DeviceCore `json:"devices,optional"`//如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+    AreaID  int64 `json:"areaID,string,optional"`//控制一个区域的设备
+    AreaIDPath  string `json:"areaIDPath,optional"`//根据区域路径控制设备
+    GroupID  int64 `json:"groupID,string,optional"`//控制一个组的设备
+}
+
+type DeviceInteractPropertyGetReportSendMsg  {
+        ReceivedTime int64 `json:"receivedTime"` // 平台接收时间，毫秒；历史未知为0
+        Quality map[string]string `json:"quality"` // 本次回复每个属性的质量
+
+    Code        int64  `json:"code"`              //设备返回状态码
+    Msg      string `json:"msg"`           //返回状态
+    MsgToken string `json:"msgToken"` //调用id
+    Timestamp   int64  `json:"timestamp"`    //上报时间戳(毫秒时间戳)
+    Params      string `json:"params"`           //获取到的值
+    ProductID     string `json:"productID"`     //产品id
+    DeviceName    string `json:"deviceName"`    //设备名
+    SysCode     int64  `json:"sysCode"`      //系统错误码
+    sysMsg      string `json:"sysMsg"`      //系统错误信息
+}
+
+type DeviceInteractPropertyGetReportBatchSendResp{
+    List []*DeviceInteractPropertyGetReportSendMsg `json:"list"` //批量设备返回结果列表
+
+}
+
+type DeviceInteractSendMsgReq {
+    ProductID  string `json:"productID"`  //目标产品ID
+    DeviceName string `json:"deviceName"` //目标设备名称
+    Handle     string `json:"handle"`     //下行通道，仅支持thing、ota、config、log、shadow、gateway、ext
+    Type       string `json:"type"`       //消息类型，必须是单个Topic路径段
+    Payload    string `json:"payload"`    //原始文本载荷
+}
+
+type DeviceInteractSendPropertyReq  {
+    ProductID     string `json:"productID"`     //产品id
+    DeviceName    string `json:"deviceName"`    //设备名
+    Data          string `json:"data"`          //属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义
+    IsAsync       bool `json:"isAsync,optional"` //是否异步操作 异步情况通过获取接口来获取
+    SyncTimeout int64 `json:"syncTimeout,optional"` //同步超时时间(单位:秒,不填默认3秒)
+    ShadowControl  int64 `json:"shadowControl,optional"` //设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错 2:如果有设备影子只修改影子,没有的也不下发 3:只修改云端的值 4:只修改云端的值并记录操作日志
+    WithProfile *WithProfile `json:"withProfile,optional"` //同时修改该设备的配置信息
+}
+
+type WithProfile{
+    Code   string      `json:"code"`
+    Params string      `json:"params"`
+}
+
+type DeviceInteractSendPropertyResp  {
+    Code        int64  `json:"code"`        //设备返回状态码
+    Msg      string `json:"msg"`      //返回状态
+    MsgToken string `json:"msgToken"` //调用id
+}
+type DeviceInteractRespGetOneReq {
+    ProductID   string `json:"productID"`   //产品id
+    DeviceName  string `json:"deviceName"`  //设备名
+    MsgToken  string `json:"msgToken"`  //调用id
+}
+
+
+
+type DeviceInteractSendActionReq  {
+    ProductID   string `json:"productID"`   //产品id
+    DeviceName  string `json:"deviceName"`  //设备名
+    ActionID    string `json:"actionID"`    //产品数据模板中行为功能的标识符，由开发者自行根据设备的应用场景定义
+    InputParams string `json:"inputParams,optional"` //输入参数
+    OutputParams string `json:"outputParams,optional"` //输出参数(模拟的时候才需要填写) ,如果填写该参数,那么不会下发给设备,直接记录操作记录
+    IsAsync     bool `json:"isAsync,optional"` //是否异步操作 异步情况通过获取接口来获取
+    Option *SendOption `json:"option,optional"`//异步重试选项
+}
+
+type DeviceInteractSendActionResp  {
+        ReceivedTime int64 `json:"receivedTime"` // 平台接收时间，毫秒；历史未知为0
+
+    MsgToken  string `json:"msgToken"`  //调用id
+    OutputParams string `json:"outputParams"` //输出参数 注意：此字段可能返回 null，表示取不到有效值。
+    Msg       string `json:"msg"`       //返回状态
+    Code         int64  `json:"code"`         //设备返回状态码
+}
+
+type DeviceInteractActionRespReq  {
+    ProductID   string `json:"productID"`   //产品id
+    DeviceName  string `json:"deviceName"`  //设备名
+    MsgToken    string `json:"msgToken"`    //调用id
+    OutputParams string `json:"outputParams,optional"` //输出参数 注意：此字段可能返回 null，表示取不到有效值。
+    Msg         string `json:"msg"`         //返回状态
+    Code        int64  `json:"code"`        //设备返回状态码
+}
+
+type DeviceInteractSchemaMockGenReq {
+    ProductID   string   `json:"productID"`   //产品id
+    DeviceName  string   `json:"deviceName,optional"`  //设备名
+    Type        int64    `json:"type"`        //物模型类型 1:property属性 2:event事件 3:action行为
+    DataIDs     []string `json:"dataIDs,optional"`     //功能标识符；属性不填生成全部属性，事件不填生成全部上行事件，行为不填生成全部下行行为
+}
+
+type DeviceInteractSchemaMockGenResp {
+    Params string `json:"params"` //模拟数据参数,json字符串
+}
+
+type DeviceInteractEventSendReq {
+    ProductID   string `json:"productID"`   //产品id 获取产品id下的所有设备信息
+    DeviceName  string `json:"deviceName"`  //设备名
+    EventID     string `json:"eventID"`     //产品数据模板中事件功能的标识符，由开发者自行根据设备的应用场景定义
+    Type        string `json:"type,optional"` //事件类型:info(默认)：信息,alert：告警,fault：故障
+    Params      string `json:"params"`      //通知内容,json字符串
+}
+
+type DeviceInteractBatchSendPropertyReq  {
+    AreaID int64 `json:"areaID,string,optional"` //项目区域id,传了优先从项目区域中获取设备列表
+    AreaIDPath string `json:"areaIDPath,optional"` //根据区域路径控制设备
+    GroupID   int64  `json:"groupID,string,optional"`           //分组ID,传了会从分组下获取设备
+    ProductID     string `json:"productID,optional"`      //产品id
+    DeviceNames   []string `json:"deviceNames,optional"`  //设备名列表
+    Devices       []*DeviceCore `json:"devices,optional"` //如果是不同的产品,则传这个字段,上面两个参数填了优先使用
+    IsAsync       bool `json:"isAsync,optional"` //是否异步操作 异步情况通过获取接口来获取
+    SyncTimeout int64 `json:"syncTimeout,optional"` //同步超时时间(单位:秒,不填默认3秒)
+    ShadowControl  int64 `json:"shadowControl,optional"` //设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错 2:如果有设备影子只修改影子,没有的也不下发
+    Data          string `json:"data"`           //属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义
+}
+
+type DeviceInteractBatchSendPropertyMsg  {
+    ProductID   string `json:"productID"`   //产品id
+    DeviceName  string `json:"deviceName"`  //设备名
+    Code        int64  `json:"code"`        //设备返回状态码
+    Msg      string `json:"msg"`      //返回状态
+    MsgToken string `json:"msgToken"` //调用id
+    SysCode     int64  `json:"sysCode"`      //系统错误码
+    sysMsg      string `json:"sysMsg"`      //系统错误信息
+}
+
+type DeviceInteractBatchSendPropertyResp  {
+    List []*DeviceInteractBatchSendPropertyMsg `json:"list"` //批量设备返回结果列表
+}

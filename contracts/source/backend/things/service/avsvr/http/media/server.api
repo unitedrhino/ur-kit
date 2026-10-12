@@ -1,0 +1,177 @@
+syntax = "v1"
+
+// 媒体服务器（ZLM）配置管理
+
+info(
+    title: "媒体服务器配置"
+    desc: "ZLM 等媒体服务器的增删改查及健康检查"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvMediaServer {
+    ServerID          string `json:"serverID"`                     // 服务 ID
+    ServerName        string `json:"serverName"`                   // 服务名称
+    ServerIP          string `json:"serverIP"`                     // 服务 IP（API/Hook 回连地址）
+    HookIP            string `json:"hookIP,optional"`              // ZLM webhook 回连 IP
+    SDPIP             string `json:"sdpIP,optional"`               // SDP 外网 IP（GB28181 设备回连）
+    StreamIP          string `json:"streamIP,optional"`            // 播放流外网 IP
+    StreamHttpPort    int64  `json:"streamHttpPort,optional"`      // 播放流外网 HTTP 端口（HLS/HTTP-FLV/WS-FLV/WebRTC）
+    ServerPort        int64  `json:"serverPort"`                   // 服务端口（保留字段）
+    Secret            string `json:"secret,optional"`              // 密钥
+    HttpPort          int64  `json:"httpPort"`                     // HTTP 端口
+    HttpsPort         int64  `json:"httpsPort,optional"`           // HTTPS 端口
+    RtspPort          int64  `json:"rtspPort,optional"`            // RTSP 端口
+    RtmpPort          int64  `json:"rtmpPort,optional"`            // RTMP 端口
+    WsFlvPort         int64  `json:"wsFlvPort,optional"`           // WebSocket-FLV 端口
+    WebrtcPort        int64  `json:"webrtcPort,optional"`          // WebRTC 端口
+    RTPPortRange      string `json:"rtpPortRange,optional"`        // RTP 收流端口范围，如 30000-30500
+    SendRTPPortRange  string `json:"sendRtpPortRange,optional"`    // RTP 发流端口范围
+    RecordAssistPort  int64  `json:"recordAssistPort,optional"`    // 录像辅助端口
+    RecordDay         int64  `json:"recordDay,optional"`           // 录像保留天数
+    RecordPath        string `json:"recordPath,optional"`          // 录像存储路径
+    Type              string `json:"type,optional"`                // 媒体服务器类型：zlm/lalmax
+    AutoConfig        bool   `json:"autoConfig,optional"`          // 是否自动下发 ZLM 配置
+    HookAliveInterval int64  `json:"hookAliveInterval,optional"`   // webhook 心跳上报间隔（秒）
+    RTPEnable         bool   `json:"rtpEnable,optional"`           // 是否启用 RTP 服务
+    Status            string `json:"status"`                       // 在线状态
+    CreatedTime       int64  `json:"createdTime"`                  // 创建时间
+}
+
+type AvMediaServerCreateReq {
+    ServerName        string `json:"serverName"`                   // 服务名称
+    ServerIP          string `json:"serverIP"`                     // 服务 IP
+    HookIP            string `json:"hookIP,optional"`              // ZLM webhook 回连 IP
+    SDPIP             string `json:"sdpIP,optional"`               // SDP 外网 IP
+    StreamIP          string `json:"streamIP,optional"`            // 播放流外网 IP
+    StreamHttpPort    int64  `json:"streamHttpPort,optional"`      // 播放流外网 HTTP 端口
+    ServerPort        int64  `json:"serverPort,optional"`          // 服务端口
+    Secret            string `json:"secret,optional"`              // 密钥
+    HttpPort          int64  `json:"httpPort"`                     // HTTP 端口
+    HttpsPort         int64  `json:"httpsPort,optional"`           // HTTPS 端口
+    RtspPort          int64  `json:"rtspPort,optional"`            // RTSP 端口
+    RtmpPort          int64  `json:"rtmpPort,optional"`            // RTMP 端口
+    WsFlvPort         int64  `json:"wsFlvPort,optional"`           // WebSocket-FLV 端口
+    WebrtcPort        int64  `json:"webrtcPort,optional"`          // WebRTC 端口
+    RTPPortRange      string `json:"rtpPortRange,optional"`        // RTP 收流端口范围
+    SendRTPPortRange  string `json:"sendRtpPortRange,optional"`    // RTP 发流端口范围
+    RecordAssistPort  int64  `json:"recordAssistPort,optional"`    // 录像辅助端口
+    RecordDay         int64  `json:"recordDay,optional"`           // 录像保留天数
+    RecordPath        string `json:"recordPath,optional"`          // 录像存储路径
+    Type              string `json:"type,optional"`                // 媒体服务器类型
+    AutoConfig        bool   `json:"autoConfig,optional"`          // 是否自动下发配置
+    HookAliveInterval int64  `json:"hookAliveInterval,optional"`   // webhook 心跳间隔（秒）
+    RTPEnable         bool   `json:"rtpEnable,optional"`           // 是否启用 RTP 服务
+}
+
+type AvMediaServerUpdateReq {
+    ServerID          string `json:"serverID"`                     // 服务 ID
+    ServerName        string `json:"serverName,optional"`          // 服务名称
+    ServerIP          string `json:"serverIP,optional"`            // 服务 IP
+    HookIP            string `json:"hookIP,optional"`              // ZLM webhook 回连 IP
+    SDPIP             string `json:"sdpIP,optional"`               // SDP 外网 IP
+    StreamIP          string `json:"streamIP,optional"`            // 播放流外网 IP
+    StreamHttpPort    int64  `json:"streamHttpPort,optional"`      // 播放流外网 HTTP 端口
+    ServerPort        int64  `json:"serverPort,optional"`          // 服务端口
+    Secret            string `json:"secret,optional"`              // 密钥
+    HttpPort          int64  `json:"httpPort,optional"`            // HTTP 端口
+    HttpsPort         int64  `json:"httpsPort,optional"`           // HTTPS 端口
+    RtspPort          int64  `json:"rtspPort,optional"`            // RTSP 端口
+    RtmpPort          int64  `json:"rtmpPort,optional"`            // RTMP 端口
+    WsFlvPort         int64  `json:"wsFlvPort,optional"`           // WebSocket-FLV 端口
+    WebrtcPort        int64  `json:"webrtcPort,optional"`          // WebRTC 端口
+    RTPPortRange      string `json:"rtpPortRange,optional"`        // RTP 收流端口范围
+    SendRTPPortRange  string `json:"sendRtpPortRange,optional"`    // RTP 发流端口范围
+    RecordAssistPort  int64  `json:"recordAssistPort,optional"`    // 录像辅助端口
+    RecordDay         int64  `json:"recordDay,optional"`           // 录像保留天数
+    RecordPath        string `json:"recordPath,optional"`          // 录像存储路径
+    Type              string `json:"type,optional"`                // 媒体服务器类型
+    AutoConfig        bool   `json:"autoConfig,optional"`          // 是否自动下发配置
+    HookAliveInterval int64  `json:"hookAliveInterval,optional"`   // webhook 心跳间隔（秒）
+    RTPEnable         bool   `json:"rtpEnable,optional"`           // 是否启用 RTP 服务
+}
+
+type AvMediaServerDeleteReq {
+    ServerID string `json:"serverID"` // 服务 ID
+}
+
+type AvMediaServerGetOneReq {
+    ServerID string `json:"serverID"` // 服务 ID
+}
+
+type AvMediaServerGetListReq {
+    PageInfo
+    ServerName string `json:"serverName,optional"` // 按名称模糊查询
+    Status     string `json:"status,optional"`     // 按状态过滤
+}
+
+type AvMediaServerGetListResp {
+    PageResp
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "创建媒体服务器"
+        description: "业务说明：新增 ZLM 等媒体服务器配置，用于推流、拉流、录像等能力调度。"
+        authType: "admin"
+        resource: "av"
+        action: "create"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvMediaServerCreate
+    post /api/v1/av/media/server/create (AvMediaServerCreateReq) returns (AvMediaServer)
+
+    @doc(
+        summary: "更新媒体服务器"
+        description: "业务说明：按服务 ID 更新媒体服务器配置，支持部分字段更新。"
+        authType: "admin"
+        resource: "av"
+        action: "update"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvMediaServerUpdate
+    post /api/v1/av/media/server/update (AvMediaServerUpdateReq) returns (AvMediaServer)
+
+    @doc(
+        summary: "删除媒体服务器"
+        description: "业务说明：按服务 ID 删除媒体服务器配置。"
+        authType: "admin"
+        resource: "av"
+        action: "delete"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvMediaServerDelete
+    post /api/v1/av/media/server/delete (AvMediaServerDeleteReq) returns (EmptyResp)
+
+    @doc(
+        summary: "获取媒体服务器详情"
+        description: "业务说明：按服务 ID 查询单条媒体服务器配置详情。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvMediaServerGetOne
+    post /api/v1/av/media/server/get-one (AvMediaServerGetOneReq) returns (AvMediaServer)
+
+    @doc(
+        summary: "获取媒体服务器列表"
+        description: "业务说明：按名称、状态等条件分页查询媒体服务器列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvMediaServerGetList
+    post /api/v1/av/media/server/get-list (AvMediaServerGetListReq) returns (AvMediaServerGetListResp)
+}

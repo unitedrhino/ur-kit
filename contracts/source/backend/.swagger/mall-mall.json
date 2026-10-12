@@ -1,0 +1,5434 @@
+{
+  "components": {
+    "schemas": {
+      "ApplyToDistributorReq": {
+        "properties": {
+          "bankAccount": {
+            "description": "银行账户",
+            "type": "string"
+          },
+          "bankName": {
+            "description": "开户银行",
+            "type": "string"
+          },
+          "company": {
+            "$ref": "#/components/schemas/Company"
+          },
+          "parentDistributorID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          }
+        },
+        "required": [
+          "parentDistributorID",
+          "phone",
+          "bankName",
+          "bankAccount",
+          "company"
+        ],
+        "title": "ApplyToDistributorReq",
+        "type": "object"
+      },
+      "Brand": {
+        "properties": {
+          "name": {
+            "description": " 品牌名称",
+            "type": "string"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          }
+        },
+        "title": "Brand",
+        "type": "object"
+      },
+      "ClientGoodInfoGetListReq": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          }
+        },
+        "required": [
+          "device"
+        ],
+        "title": "ClientGoodInfoGetListReq",
+        "type": "object"
+      },
+      "CodeReq": {
+        "properties": {
+          "code": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "CodeReq",
+        "type": "object"
+      },
+      "CommonResp": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "CommonResp",
+        "type": "object"
+      },
+      "Company": {
+        "properties": {
+          "address": {
+            "description": "地址",
+            "type": "string"
+          },
+          "code": {
+            "description": "统一社会信用代码",
+            "type": "string"
+          },
+          "legalName": {
+            "description": "法人名字",
+            "type": "string"
+          },
+          "name": {
+            "description": "公司名称",
+            "type": "string"
+          }
+        },
+        "title": "Company",
+        "type": "object"
+      },
+      "CompareInt64": {
+        "properties": {
+          "cmpType": {
+            "description": "\"=\":相等 \"!=\":不相等 \">\":大于\">=\":大于等于\"<\":小于\"<=\":小于等于 \"like\":模糊查询",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "cmpType",
+          "value"
+        ],
+        "title": "CompareInt64",
+        "type": "object"
+      },
+      "CompareString": {
+        "properties": {
+          "cmpType": {
+            "description": "默认为=,\"=\":相等 \"!=\":不相等 \">\":大于\">=\":大于等于\"<\":小于\"<=\":小于等于 \"like\":模糊查询",
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "value"
+        ],
+        "title": "CompareString",
+        "type": "object"
+      },
+      "DateRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 格式：yyyy-mm-dd",
+            "type": "string"
+          },
+          "start": {
+            "description": "开始时间 格式：yyyy-mm-dd",
+            "type": "string"
+          }
+        },
+        "title": "DateRange",
+        "type": "object"
+      },
+      "DeviceCore": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品ID",
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceCore",
+        "type": "object"
+      },
+      "DeviceInfo": {
+        "properties": {
+          "address": {
+            "description": "所在地址",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": "创建时间 只读",
+            "type": "string"
+          },
+          "deviceAlias": {
+            "description": "设备别名 读写",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "设备名称 读写",
+            "type": "string"
+          },
+          "deviceType": {
+            "description": "设备类型:1:设备,2:网关,3:子设备",
+            "format": "int64",
+            "type": "integer"
+          },
+          "distributor": {
+            "$ref": "#/components/schemas/IDPathWithUpdate"
+          },
+          "expTime": {
+            "description": "到期时间",
+            "type": "string"
+          },
+          "firstBind": {
+            "type": "string"
+          },
+          "firstLogin": {
+            "description": "激活时间 只读",
+            "type": "string"
+          },
+          "hardInfo": {
+            "description": " 模组硬件型号 只读",
+            "type": "string"
+          },
+          "iccid": {
+            "description": "SIM卡卡号",
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "imei": {
+            "description": " IMEI号信息 只读",
+            "type": "string"
+          },
+          "isEnable": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isOnline": {
+            "description": " 在线状态  1离线 2在线 只读",
+            "format": "int64",
+            "maximum": 2,
+            "type": "integer"
+          },
+          "lastLogin": {
+            "description": "最后上线时间 只读",
+            "type": "string"
+          },
+          "logLevel": {
+            "description": " 日志级别:1)关闭 2)错误 3)告警 4)信息 5)调试  读写",
+            "format": "int64",
+            "maximum": 5,
+            "type": "integer"
+          },
+          "mac": {
+            "description": " MAC号信息 只读",
+            "type": "string"
+          },
+          "mobileOperator": {
+            "description": "移动运营商:1)移动 2)联通 3)电信 4)广电",
+            "format": "int64",
+            "maximum": 4,
+            "type": "integer"
+          },
+          "needConfirmVersion": {
+            "description": "待确认升级的版本",
+            "type": "string"
+          },
+          "netType": {
+            "description": "通讯方式:1:其他,2:wi-fi,3:2G/3G/4G,4:5G,5:BLE,6:LoRaWAN,7:wifi+ble,8:有线网",
+            "format": "int64",
+            "maximum": 8,
+            "type": "integer"
+          },
+          "owner": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "phone": {
+            "description": "手机号",
+            "type": "string"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "productID": {
+            "description": "产品id 只读",
+            "type": "string"
+          },
+          "productImg": {
+            "description": "产品图片",
+            "type": "string"
+          },
+          "productName": {
+            "type": "string"
+          },
+          "rssi": {
+            "description": "信号强度",
+            "format": "int64",
+            "type": "integer"
+          },
+          "softInfo": {
+            "description": " 模组软件版本 只读",
+            "type": "string"
+          },
+          "status": {
+            "description": "设备状态 1-未激活，2-在线，3-离线 4-异常(频繁上下线,告警中)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " 设备tag",
+            "type": "object"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "userID": {
+            "type": "string"
+          },
+          "version": {
+            "description": " 固件版本  读写",
+            "type": "string"
+          },
+          "withProperties": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/DeviceInfoWithProperty"
+            },
+            "description": "获取的属性列表,如果不传withProperty,则不会返回",
+            "type": "object"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceInfo",
+        "type": "object"
+      },
+      "DeviceInfoGetListReq": {
+        "properties": {
+          "areaID": {
+            "description": "项目区域ids",
+            "type": "string"
+          },
+          "areaIDPath": {
+            "description": "区域路径过滤",
+            "type": "string"
+          },
+          "areaIDPaths": {
+            "description": "区域路径过滤",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "areaIDs": {
+            "description": "项目区域ids",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deviceAlias": {
+            "description": "过滤条件:模糊查询 设备别名",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "过滤条件:模糊查询 设备名",
+            "type": "string"
+          },
+          "deviceNames": {
+            "description": "过滤条件:精准查询 设备名",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deviceTypes": {
+            "description": "设备类型:1:设备,2:网关,3:子设备设备类型:1:设备,2:网关,3:子设备",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "devices": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceCore"
+            },
+            "type": "array"
+          },
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "expTime": {
+            "$ref": "#/components/schemas/CompareInt64"
+          },
+          "gateway": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "groupID": {
+            "type": "string"
+          },
+          "groupIDPath": {
+            "type": "string"
+          },
+          "groupIDPaths": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "groupIDs": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "groupName": {
+            "type": "string"
+          },
+          "groupPurpose": {
+            "description": "设备分组用途 不填默认为default",
+            "type": "string"
+          },
+          "hasOwner": {
+            "description": "是否被人拥有,1为是 2为否",
+            "format": "int64",
+            "type": "integer"
+          },
+          "iccid": {
+            "description": "SIM卡卡号",
+            "type": "string"
+          },
+          "isOnline": {
+            "description": " 在线状态过滤  1离线 2在线",
+            "format": "int64",
+            "maximum": 2,
+            "type": "integer"
+          },
+          "isOnlyCore": {
+            "description": "只返回核心信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "netType": {
+            "description": "通讯方式:1:其他,2:wi-fi,3:2G/3G/4G,4:5G,5:BLE,6:LoRaWAN,7:wifi+ble,8:有线网",
+            "format": "int64",
+            "type": "integer"
+          },
+          "notAreaID": {
+            "type": "string"
+          },
+          "notGroupID": {
+            "type": "string"
+          },
+          "notVersion": {
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "parentGroupID": {
+            "type": "string"
+          },
+          "position": {
+            "$ref": "#/components/schemas/Point"
+          },
+          "productCategoryID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "productCategoryIDs": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "productID": {
+            "description": "产品id 为空时获取所有产品",
+            "type": "string"
+          },
+          "productIDs": {
+            "description": "产品id 为空时获取所有产品",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "property": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/CompareString"
+            },
+            "description": "设备最新属性过滤,key为属性的id,如果是结构体则key为 aaa.bbb 数组为aaa.1",
+            "type": "object"
+          },
+          "range": {
+            "description": "过滤条件:距离坐标点固定范围内的设备 单位：米",
+            "format": "int64",
+            "type": "integer"
+          },
+          "ratedPower": {
+            "$ref": "#/components/schemas/CompareInt64"
+          },
+          "rssi": {
+            "$ref": "#/components/schemas/CompareInt64"
+          },
+          "status": {
+            "description": "设备状态 1-未激活，2-在线，3-离线 4-异常(频繁上下线,告警中)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "statuses": {
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "tags": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": " key tag过滤查询,非模糊查询 为tag的名,value为tag对应的值",
+            "type": "object"
+          },
+          "tenantCode": {
+            "type": "string"
+          },
+          "userID": {
+            "type": "string"
+          },
+          "versions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withArea": {
+            "description": "同时返回区域信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withChildren": {
+            "description": "1,同时获取下级的设备列表 2,只获取下级的设备列表",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withCollect": {
+            "description": " 过滤收藏的设备(这里只获取收藏的设备) 1: 同时获取收藏的设备 2:只获取收藏的设备",
+            "format": "int64",
+            "maximum": 2,
+            "type": "integer"
+          },
+          "withGateway": {
+            "description": "同时返回子设备绑定的网关信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withGroups": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withOwner": {
+            "description": "同时获取拥有人的信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withProfiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withProperties": {
+            "description": "如果不为nil,如果为空,获取设备所有最新属性 如果传了属性列表,则会返回属性列表,如果没有匹配的则不会返回",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withShared": {
+            "description": " 过滤分享的设备1: 同时获取分享的设备 2:只获取分享的设备",
+            "format": "int64",
+            "maximum": 2,
+            "type": "integer"
+          }
+        },
+        "title": "DeviceInfoGetListReq",
+        "type": "object"
+      },
+      "DeviceInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": "设备信息",
+            "items": {
+              "$ref": "#/components/schemas/DeviceInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DeviceInfoGetListResp",
+        "type": "object"
+      },
+      "DeviceInfoGetOneReq": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名称 读写",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品id 为空时获取所有产品",
+            "type": "string"
+          },
+          "withOwner": {
+            "description": "同时获取拥有人的信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withProfiles": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "withProperties": {
+            "description": "如果不为nil,如果为空,获取设备所有最新属性 如果传了属性列表,则会返回属性列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "deviceName"
+        ],
+        "title": "DeviceInfoGetOneReq",
+        "type": "object"
+      },
+      "DeviceInfoWithProperty": {
+        "properties": {
+          "timestamp": {
+            "description": "发生时间戳",
+            "type": "string"
+          },
+          "value": {
+            "description": "获取到的值",
+            "type": "string"
+          }
+        },
+        "required": [
+          "value",
+          "timestamp"
+        ],
+        "title": "DeviceInfoWithProperty",
+        "type": "object"
+      },
+      "DeviceInteractMultiSendPropertyMsg": {
+        "properties": {
+          "code": {
+            "description": "设备返回状态码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceName": {
+            "description": "设备名",
+            "type": "string"
+          },
+          "msg": {
+            "description": "返回状态",
+            "type": "string"
+          },
+          "msgToken": {
+            "description": "调用id",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "sysCode": {
+            "description": "系统错误码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sysMsg": {
+            "description": "系统错误信息",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName",
+          "code",
+          "msg",
+          "msgToken",
+          "sysCode",
+          "sysMsg"
+        ],
+        "title": "DeviceInteractMultiSendPropertyMsg",
+        "type": "object"
+      },
+      "DeviceInteractMultiSendPropertyReq": {
+        "properties": {
+          "areaID": {
+            "description": "项目区域id,传了优先从项目区域中获取设备列表",
+            "type": "string"
+          },
+          "areaIDPath": {
+            "description": "根据区域路径控制设备",
+            "type": "string"
+          },
+          "data": {
+            "description": "属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义",
+            "type": "string"
+          },
+          "deviceNames": {
+            "description": "设备名列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "devices": {
+            "description": "如果是不同的产品,则传这个字段,上面两个参数填了优先使用",
+            "items": {
+              "$ref": "#/components/schemas/DeviceCore"
+            },
+            "type": "array"
+          },
+          "groupID": {
+            "description": "分组ID,传了会从分组下获取设备",
+            "type": "string"
+          },
+          "isAsync": {
+            "description": "是否异步操作 异步情况通过获取接口来获取",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "shadowControl": {
+            "description": "设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错 2:如果有设备影子只修改影子,没有的也不下发",
+            "format": "int64",
+            "type": "integer"
+          },
+          "syncTimeout": {
+            "description": "同步超时时间(单位:秒,不填默认3秒)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "data"
+        ],
+        "title": "DeviceInteractMultiSendPropertyReq",
+        "type": "object"
+      },
+      "DeviceInteractMultiSendPropertyResp": {
+        "properties": {
+          "list": {
+            "description": "批量设备返回结果列表",
+            "items": {
+              "$ref": "#/components/schemas/DeviceInteractMultiSendPropertyMsg"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DeviceInteractMultiSendPropertyResp",
+        "type": "object"
+      },
+      "DeviceInteractSendPropertyReq": {
+        "properties": {
+          "data": {
+            "description": "属性数据, JSON格式字符串, 注意字段需要在物模型属性里定义",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "设备名",
+            "type": "string"
+          },
+          "isAsync": {
+            "description": "是否异步操作 异步情况通过获取接口来获取",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "shadowControl": {
+            "description": "设备影子控制 0:自动,当设备不在线的时候设置设备影子,设备在线时直接下发给设备 1:只实时下发,不在线报错 2:如果有设备影子只修改影子,没有的也不下发 3:只修改云端的值 4:只修改云端的值并记录操作日志",
+            "format": "int64",
+            "type": "integer"
+          },
+          "syncTimeout": {
+            "description": "同步超时时间(单位:秒,不填默认3秒)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName",
+          "data"
+        ],
+        "title": "DeviceInteractSendPropertyReq",
+        "type": "object"
+      },
+      "DeviceInteractSendPropertyResp": {
+        "properties": {
+          "code": {
+            "description": "设备返回状态码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "msg": {
+            "description": "返回状态",
+            "type": "string"
+          },
+          "msgToken": {
+            "description": "调用id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "msg",
+          "msgToken"
+        ],
+        "title": "DeviceInteractSendPropertyResp",
+        "type": "object"
+      },
+      "DeviceMoveReq": {
+        "properties": {
+          "new": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "old": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "withTarget": {
+            "description": "设备配置-profile,schemaAlias:profile",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "old",
+          "new"
+        ],
+        "title": "DeviceMoveReq",
+        "type": "object"
+      },
+      "DeviceMsgEventLogGetListReq": {
+        "properties": {
+          "dataID": {
+            "description": "获取的具体标识符的数据 如果不指定则获取所有属性数据,一个属性一条,如果没有获取到的不会返回值",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "设备名(不填获取产品下所有设备)",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "productID": {
+            "description": "产品id 获取产品id下的所有设备信息",
+            "type": "string"
+          },
+          "timeEnd": {
+            "description": "时间的结束",
+            "type": "string"
+          },
+          "timeStart": {
+            "description": "获取时间的开始",
+            "type": "string"
+          },
+          "types": {
+            "description": "类型 事件类型: 信息:info  告警alert  故障:fault",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "title": "DeviceMsgEventLogGetListReq",
+        "type": "object"
+      },
+      "DeviceMsgEventLogGetListResp": {
+        "properties": {
+          "list": {
+            "description": "数据",
+            "items": {
+              "$ref": "#/components/schemas/DeviceMsgEventLogInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DeviceMsgEventLogGetListResp",
+        "type": "object"
+      },
+      "DeviceMsgEventLogInfo": {
+        "properties": {
+          "dataID": {
+            "description": "获取的具体属性值",
+            "type": "string"
+          },
+          "params": {
+            "description": "获取到的值",
+            "type": "string"
+          },
+          "timestamp": {
+            "description": "发生时间戳",
+            "type": "string"
+          },
+          "type": {
+            "description": "类型 事件类型: 信息:info  告警alert  故障:fault",
+            "type": "string"
+          }
+        },
+        "required": [
+          "timestamp",
+          "dataID"
+        ],
+        "title": "DeviceMsgEventLogInfo",
+        "type": "object"
+      },
+      "DeviceMsgSendLogGetListReq": {
+        "properties": {
+          "actions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "areaID": {
+            "description": "只有管理员有权限",
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaIDPath": {
+            "description": "只有管理员有权限",
+            "type": "string"
+          },
+          "areaIDs": {
+            "description": "只有管理员有权限",
+            "items": {
+              "format": "int64",
+              "type": "integer"
+            },
+            "type": "array"
+          },
+          "dataID": {
+            "description": "模糊查询",
+            "type": "string"
+          },
+          "dataIDs": {
+            "description": "精确查询",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "deviceName": {
+            "description": "设备名",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "productCategoryID": {
+            "description": "只有管理员有权限",
+            "format": "int64",
+            "type": "integer"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "projectID": {
+            "description": "只有管理员有权限",
+            "format": "int64",
+            "type": "integer"
+          },
+          "resultCode": {
+            "description": "请求结果状态,200为成功",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeEnd": {
+            "description": "时间的结束(毫秒时间戳)",
+            "type": "string"
+          },
+          "timeStart": {
+            "description": "获取时间的开始(毫秒时间戳)",
+            "type": "string"
+          },
+          "userID": {
+            "type": "string"
+          },
+          "withUser": {
+            "description": "同时返回用户信息",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "DeviceMsgSendLogGetListReq",
+        "type": "object"
+      },
+      "DeviceMsgSendLogGetListResp": {
+        "properties": {
+          "list": {
+            "description": "数据",
+            "items": {
+              "$ref": "#/components/schemas/DeviceMsgSendLogInfo"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DeviceMsgSendLogGetListResp",
+        "type": "object"
+      },
+      "DeviceMsgSendLogInfo": {
+        "properties": {
+          "account": {
+            "type": "string"
+          },
+          "action": {
+            "description": "操作类型 propertySend:属性控制 actionSend:操作控制 propertyGetReportSend:获取最新属性请求",
+            "type": "string"
+          },
+          "content": {
+            "description": "操作的内容",
+            "type": "string"
+          },
+          "dataID": {
+            "description": "identify",
+            "type": "string"
+          },
+          "deviceName": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "resultCode": {
+            "description": "请求结果状态,200为成功",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timestamp": {
+            "description": "发生时间戳(毫秒时间戳)",
+            "type": "string"
+          },
+          "traceID": {
+            "description": "服务器端事务id",
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "userID": {
+            "type": "string"
+          }
+        },
+        "title": "DeviceMsgSendLogInfo",
+        "type": "object"
+      },
+      "DeviceMsgStatusLogGetListReq": {
+        "properties": {
+          "deviceName": {
+            "description": "设备名",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "status": {
+            "description": "在线状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeEnd": {
+            "description": "时间的结束(毫秒时间戳)",
+            "type": "string"
+          },
+          "timeStart": {
+            "description": "获取时间的开始(毫秒时间戳)",
+            "type": "string"
+          }
+        },
+        "title": "DeviceMsgStatusLogGetListReq",
+        "type": "object"
+      },
+      "DeviceMsgStatusLogGetListResp": {
+        "properties": {
+          "list": {
+            "description": "数据",
+            "items": {
+              "$ref": "#/components/schemas/DeviceMsgStatusLogInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DeviceMsgStatusLogGetListResp",
+        "type": "object"
+      },
+      "DeviceMsgStatusLogInfo": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          },
+          "status": {
+            "description": "过滤请求ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timestamp": {
+            "description": "发生时间戳(毫秒时间戳)",
+            "type": "string"
+          }
+        },
+        "title": "DeviceMsgStatusLogInfo",
+        "type": "object"
+      },
+      "DeviceMultiImportReq": {
+        "properties": {
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "opt": {
+            "description": "1:绑定 2:解绑",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DeviceMultiImportReq",
+        "type": "object"
+      },
+      "DeviceMultiImportResp": {
+        "properties": {
+          "errorList": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceMultiImportRow"
+            },
+            "type": "array"
+          },
+          "noList": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceMultiImportRow"
+            },
+            "type": "array"
+          },
+          "successList": {
+            "items": {
+              "$ref": "#/components/schemas/DeviceMultiImportRow"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "当前表格数据量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "successList",
+          "errorList",
+          "noList"
+        ],
+        "title": "DeviceMultiImportResp",
+        "type": "object"
+      },
+      "DeviceMultiImportRow": {
+        "properties": {
+          "code": {
+            "description": "错误码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "msg": {
+            "description": "错误信息",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName",
+          "msg",
+          "code"
+        ],
+        "title": "DeviceMultiImportRow",
+        "type": "object"
+      },
+      "DeviceSaveReq": {
+        "properties": {
+          "deviceName": {
+            "description": "【必填】设备名称",
+            "type": "string"
+          },
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "productID": {
+            "description": "产品名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "distributorID",
+          "productID",
+          "deviceName"
+        ],
+        "title": "DeviceSaveReq",
+        "type": "object"
+      },
+      "DeviceSet": {
+        "properties": {
+          "amount": {
+            "description": "量:",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": "套餐类型: 计时(useTime)，功耗(power)，3语音(voice)，4短信(sms)",
+            "type": "string"
+          },
+          "unit": {
+            "description": "单位: 年(y) 天(d) 度(d)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type",
+          "amount",
+          "unit"
+        ],
+        "title": "DeviceSet",
+        "type": "object"
+      },
+      "DistributorApply": {
+        "properties": {
+          "admin": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "adminUserID": {
+            "description": "管理员账号",
+            "type": "string"
+          },
+          "approvedTime": {
+            "description": "通过申请时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "bankAccount": {
+            "description": "银行账户",
+            "type": "string"
+          },
+          "bankName": {
+            "description": "开户银行",
+            "type": "string"
+          },
+          "company": {
+            "$ref": "#/components/schemas/Company"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "parentDistributorID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          },
+          "reviewContent": {
+            "description": "审核内容批语记录",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1待审批，2已通过，3已拒绝",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorApply",
+        "type": "object"
+      },
+      "DistributorApplyGetListReq": {
+        "properties": {
+          "WithAdmin": {
+            "description": "同时获取拥有人的信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "companyCode": {
+            "description": "统一社会信用代码",
+            "type": "string"
+          },
+          "companyLegalName": {
+            "description": "法人名字",
+            "type": "string"
+          },
+          "companyName": {
+            "description": "公司名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1待审批，2已通过，3已拒绝",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "DistributorApplyGetListReq",
+        "type": "object"
+      },
+      "DistributorApplyGetListResp": {
+        "properties": {
+          "list": {
+            "description": "分组信息",
+            "items": {
+              "$ref": "#/components/schemas/DistributorApply"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DistributorApplyGetListResp",
+        "type": "object"
+      },
+      "DistributorApplyGetOneReq": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorApplyGetOneReq",
+        "type": "object"
+      },
+      "DistributorInfo": {
+        "properties": {
+          "admin": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "adminUserID": {
+            "description": "管理员账号",
+            "type": "string"
+          },
+          "bankAccount": {
+            "description": "银行账户",
+            "type": "string"
+          },
+          "bankName": {
+            "description": "开户银行",
+            "type": "string"
+          },
+          "bindProductIDs": {
+            "description": "绑定的产品ID列表,如果绑定了产品,这个产品的设备会自动入库到这个经销商下面,一个产品同时只能绑定一个经销商,只有管理员可以操作",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "brand": {
+            "$ref": "#/components/schemas/Brand"
+          },
+          "children": {
+            "description": "子节点",
+            "items": {
+              "$ref": "#/components/schemas/DistributorInfo"
+            },
+            "type": "array"
+          },
+          "company": {
+            "$ref": "#/components/schemas/Company"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "idPath": {
+            "description": " 1-2-3-的格式记录顶级区域到当前区域的路径",
+            "type": "string"
+          },
+          "isBrand": {
+            "description": "是否是品牌商(只有品牌商可以修改,要成为品牌商需要品牌商上级或管理员修改)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isManufacturer": {
+            "description": "是否是制造商(只有制造商可以修改,要成为制造商需要制造商上级或管理员修改)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "manufacturer": {
+            "$ref": "#/components/schemas/Manufacturer"
+          },
+          "parentID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          },
+          "static": {
+            "$ref": "#/components/schemas/DistributorStatic"
+          },
+          "status": {
+            "description": "状态：1有效，2无效，3注销，4封号",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorInfo",
+        "type": "object"
+      },
+      "DistributorInfoClientGetOneReq": {
+        "properties": {
+          "distributorID": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "distributorID"
+        ],
+        "title": "DistributorInfoClientGetOneReq",
+        "type": "object"
+      },
+      "DistributorInfoClientInfo": {
+        "properties": {
+          "brand": {
+            "$ref": "#/components/schemas/Brand"
+          },
+          "manufacturer": {
+            "$ref": "#/components/schemas/Manufacturer"
+          }
+        },
+        "title": "DistributorInfoClientInfo",
+        "type": "object"
+      },
+      "DistributorInfoGetListReq": {
+        "properties": {
+          "WithAdmin": {
+            "description": "同时获取拥有人的信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "bindProductIDs": {
+            "description": "绑定的产品ID,如果绑定了产品,这个产品的设备会自动入库到这个经销商下面,一个产品同时只能绑定一个经销商,只有管理员可以操作",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "companyCode": {
+            "description": "统一社会信用代码",
+            "type": "string"
+          },
+          "companyLegalName": {
+            "description": "法人名字",
+            "type": "string"
+          },
+          "companyName": {
+            "description": "公司名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "parentID": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1有效，2无效，3注销，4封号",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorInfoGetListReq",
+        "type": "object"
+      },
+      "DistributorInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": "分组信息",
+            "items": {
+              "$ref": "#/components/schemas/DistributorInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DistributorInfoGetListResp",
+        "type": "object"
+      },
+      "DistributorInfoGetOneReq": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "withChildren": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "DistributorInfoGetOneReq",
+        "type": "object"
+      },
+      "DistributorStatic": {
+        "properties": {
+          "allDeviceCount": {
+            "description": "经销商及其下级的设备总数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "canExtract": {
+            "description": "可提现金额",
+            "format": "int64",
+            "type": "integer"
+          },
+          "childrenCount": {
+            "description": "经销商下级数量统计",
+            "format": "int64",
+            "type": "integer"
+          },
+          "dayEarnings": {
+            "description": "日收益",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceCount": {
+            "description": "经销商自己的设备总数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "monthEarnings": {
+            "description": "月收益",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalEarnings": {
+            "description": "总收益",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalExtract": {
+            "description": "总提现",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorStatic",
+        "type": "object"
+      },
+      "DistributorWithdraw": {
+        "properties": {
+          "applyAmount": {
+            "description": "申请金额",
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdTime": {
+            "description": "申请时间",
+            "type": "string"
+          },
+          "desc": {
+            "description": "申请备注",
+            "type": "string"
+          },
+          "distributor": {
+            "$ref": "#/components/schemas/DistributorInfo"
+          },
+          "distributorID": {
+            "description": "经销商ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "distributorIDPath": {
+            "description": "经销商ID路径",
+            "type": "string"
+          },
+          "finishTime": {
+            "description": "完成时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "invoiceFile": {
+            "description": "发票文件",
+            "type": "string"
+          },
+          "isUpdateInvoiceFile": {
+            "description": "是否更新发票文件",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "isUseInvoice": {
+            "description": "是否提供发票了",
+            "format": "int64",
+            "type": "integer"
+          },
+          "reviewContent": {
+            "description": "审核内容批语记录",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1,待审批 2,处理中 3,已完成 4,已拒绝",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withdrawAmount": {
+            "description": "提现金额",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorWithdraw",
+        "type": "object"
+      },
+      "DistributorWithdrawGetListReq": {
+        "properties": {
+          "distributorID": {
+            "description": "经销商id,管理员不填为所有,非管理员不填为自己",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": "状态：1,待审批 2,处理中 3,已完成 4,已拒绝",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withDistributor": {
+            "description": "同时返回经销商信息",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "DistributorWithdrawGetListReq",
+        "type": "object"
+      },
+      "DistributorWithdrawGetListResp": {
+        "properties": {
+          "list": {
+            "description": "分组信息",
+            "items": {
+              "$ref": "#/components/schemas/DistributorWithdraw"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "DistributorWithdrawGetListResp",
+        "type": "object"
+      },
+      "DistributorWithdrawGetOneReq": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DistributorWithdrawGetOneReq",
+        "type": "object"
+      },
+      "GoodInfoGetListReq": {
+        "properties": {
+          "isPlatformSale": {
+            "description": "平台是否参与销售",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "商品名称",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "setType": {
+            "description": " 套餐类型 device(设备套餐) user(用户套餐)",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态1=上架,2=下架)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subType": {
+            "description": " 子类型 套餐(set)",
+            "type": "string"
+          },
+          "type": {
+            "description": " 商品类型 实物商品(physical)虚拟商品(virtual)",
+            "type": "string"
+          }
+        },
+        "title": "GoodInfoGetListReq",
+        "type": "object"
+      },
+      "GoodInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": "列表",
+            "items": {
+              "$ref": "#/components/schemas/SaleGoodInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "GoodInfoGetListResp",
+        "type": "object"
+      },
+      "GoodInfoGetOneReq": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "GoodInfoGetOneReq",
+        "type": "object"
+      },
+      "GoodInfoOfferReq": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "goodID": {
+            "description": "商品ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "goodID",
+          "device"
+        ],
+        "title": "GoodInfoOfferReq",
+        "type": "object"
+      },
+      "IDPathWithUpdate": {
+        "properties": {
+          "bankAccount": {
+            "description": "银行账户",
+            "type": "string"
+          },
+          "bankName": {
+            "description": "开户银行",
+            "type": "string"
+          },
+          "company": {
+            "$ref": "#/components/schemas/Company"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "idPath": {
+            "description": " 1-2-3-的格式记录顶级区域到当前区域的路径",
+            "type": "string"
+          },
+          "phone": {
+            "description": "联系电话",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1有效，2无效，3注销，4封号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "updatedTime": {
+            "description": "更新时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "IDPathWithUpdate",
+        "type": "object"
+      },
+      "Manufacturer": {
+        "properties": {
+          "name": {
+            "description": " 制造商名称",
+            "type": "string"
+          }
+        },
+        "title": "Manufacturer",
+        "type": "object"
+      },
+      "OrderCreateReq": {
+        "properties": {
+          "code": {
+            "description": "用户的code",
+            "type": "string"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceCore"
+          },
+          "goodID": {
+            "description": "商品ID",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "goodID",
+          "code",
+          "device"
+        ],
+        "title": "OrderCreateReq",
+        "type": "object"
+      },
+      "OrderCreateResp": {
+        "properties": {
+          "codeUrl": {
+            "description": "返回的body参数",
+            "type": "string"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "expTime": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderNum": {
+            "description": "不填默认200",
+            "type": "string"
+          },
+          "prepayParam": {
+            "description": "返回的body参数",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderNum",
+          "codeUrl",
+          "prepayParam",
+          "expTime",
+          "createdTime"
+        ],
+        "title": "OrderCreateResp",
+        "type": "object"
+      },
+      "OrderInfo": {
+        "properties": {
+          "createdTime": {
+            "type": "string"
+          },
+          "device": {
+            "$ref": "#/components/schemas/DeviceInfo"
+          },
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "distributor": {
+            "$ref": "#/components/schemas/DistributorInfo"
+          },
+          "expTime": {
+            "description": "过期时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "good": {
+            "$ref": "#/components/schemas/SaleGoodInfo"
+          },
+          "goodID": {
+            "description": "商品ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderNum": {
+            "description": "订单编号",
+            "type": "string"
+          },
+          "payPrice": {
+            "description": "支付金额 单位为分",
+            "format": "int64",
+            "type": "integer"
+          },
+          "payType": {
+            "description": "支付方式  wechat alipay",
+            "type": "string"
+          },
+          "prepayParam": {
+            "description": "预支付参数",
+            "type": "string"
+          },
+          "productID": {
+            "description": "产品id",
+            "type": "string"
+          },
+          "reason": {
+            "description": "异常原因备注",
+            "type": "string"
+          },
+          "status": {
+            "description": "支付状态  1:支付中 2:支付成功 3:支付关闭",
+            "format": "int64",
+            "type": "integer"
+          },
+          "succTime": {
+            "description": "支付成功时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "userID": {
+            "description": "支付用户ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderNum",
+          "payType",
+          "payPrice",
+          "goodID",
+          "userID",
+          "productID",
+          "deviceName",
+          "expTime",
+          "prepayParam",
+          "reason",
+          "createdTime"
+        ],
+        "title": "OrderInfo",
+        "type": "object"
+      },
+      "OrderInfoGetListReq": {
+        "properties": {
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": "支付状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "withDevice": {
+            "description": "同时获取设备信息(如果有的话)",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withGood": {
+            "description": "同时返回商品信息",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "OrderInfoGetListReq",
+        "type": "object"
+      },
+      "OrderInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": "列表",
+            "items": {
+              "$ref": "#/components/schemas/OrderInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "OrderInfoGetListResp",
+        "type": "object"
+      },
+      "OtaFirmwareDeviceConfirmReq": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "productID": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "OtaFirmwareDeviceConfirmReq",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pageSize": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "total": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      },
+      "PayNotifyReq": {
+        "title": "PayNotifyReq",
+        "type": "object"
+      },
+      "PayNotifyResp": {
+        "properties": {
+          "body": {
+            "description": "返回的body参数",
+            "type": "string"
+          },
+          "httpCode": {
+            "description": "不填默认200",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "body",
+          "httpCode"
+        ],
+        "title": "PayNotifyResp",
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "latitude": {
+            "description": "纬度",
+            "format": "double",
+            "maximum": 90,
+            "type": "number"
+          },
+          "longitude": {
+            "description": "经度",
+            "format": "double",
+            "maximum": 180,
+            "type": "number"
+          }
+        },
+        "required": [
+          "longitude",
+          "latitude"
+        ],
+        "title": "Point",
+        "type": "object"
+      },
+      "SaleConfiInfo": {
+        "properties": {
+          "minWithdraw": {
+            "description": "最小提现金额(单位为分)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "vat": {
+            "description": "税率(单位为百分之一)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "minWithdraw",
+          "vat"
+        ],
+        "title": "SaleConfiInfo",
+        "type": "object"
+      },
+      "SaleDistributorGood": {
+        "properties": {
+          "costPrice": {
+            "description": "成本价(上级结算价)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceSet": {
+            "$ref": "#/components/schemas/DeviceSet"
+          },
+          "distributorID": {
+            "description": "经销商ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "distributorIDPath": {
+            "description": "经销商ID路径",
+            "type": "string"
+          },
+          "goodID": {
+            "description": "商品ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "description": "ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isJoinDistribution": {
+            "description": " 是否参与分销",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isTimeLimit": {
+            "description": " 是否是限时商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "limitNum": {
+            "description": " 限购数量(0为不限购)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "商品名称",
+            "type": "string"
+          },
+          "originalPrice": {
+            "description": "原价 非分销商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "parentStatus": {
+            "description": "批发状态(如果下架,则直接看不到这个商品)1=上架,2=下架)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "salePrice": {
+            "description": "销售价(对外售价)非分销商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeApplyIDs": {
+            "description": "适用范围",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeType": {
+            "description": "适用范围的类型(product:产品)",
+            "type": "string"
+          },
+          "setType": {
+            "description": " 套餐类型 device(设备套餐) user(用户套餐)",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "零售状态1=上架,2=下架)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subType": {
+            "description": " 子类型 套餐(set)",
+            "type": "string"
+          },
+          "tags": {
+            "description": " 标签: 购买最多 标签: 购买最多",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timeLimitEnd": {
+            "description": " 活动商品结束时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeLimitStart": {
+            "description": " 活动商品开始时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 商品类型 实物商品(physical)虚拟商品(virtual)",
+            "type": "string"
+          }
+        },
+        "required": [
+          "goodID",
+          "distributorID"
+        ],
+        "title": "SaleDistributorGood",
+        "type": "object"
+      },
+      "SaleDistributorGoodGetListReq": {
+        "properties": {
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "setType": {
+            "description": " 套餐类型 device(设备套餐) user(用户套餐)",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态1=上架,2=下架)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subType": {
+            "description": " 子类型 套餐(set)",
+            "type": "string"
+          },
+          "type": {
+            "description": " 商品类型 实物商品(physical)虚拟商品(virtual)",
+            "type": "string"
+          }
+        },
+        "title": "SaleDistributorGoodGetListReq",
+        "type": "object"
+      },
+      "SaleDistributorGoodGetListResp": {
+        "properties": {
+          "list": {
+            "description": "列表",
+            "items": {
+              "$ref": "#/components/schemas/SaleDistributorGood"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "SaleDistributorGoodGetListResp",
+        "type": "object"
+      },
+      "SaleDistributorOrderGetListReq": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderNum": {
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": "支付状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "withChildren": {
+            "description": "同时获取下级的设备列表",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withDevice": {
+            "description": "同时获取设备信息(如果有的话)",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withDistributor": {
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withGood": {
+            "description": "同时返回商品信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withUser": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "SaleDistributorOrderGetListReq",
+        "type": "object"
+      },
+      "SaleDistributorOrderGetListResp": {
+        "properties": {
+          "list": {
+            "description": "列表",
+            "items": {
+              "$ref": "#/components/schemas/OrderInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "SaleDistributorOrderGetListResp",
+        "type": "object"
+      },
+      "SaleDistributorWater": {
+        "properties": {
+          "brokerage": {
+            "description": "佣金",
+            "format": "int64",
+            "type": "integer"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "deviceName": {
+            "description": "设备名称",
+            "type": "string"
+          },
+          "distributorID": {
+            "description": "经销商ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "distributorIDPath": {
+            "description": "经销商ID路径",
+            "type": "string"
+          },
+          "good": {
+            "$ref": "#/components/schemas/SaleGoodInfo"
+          },
+          "goodID": {
+            "description": "套餐ID",
+            "format": "int64",
+            "type": "integer"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "orderNum": {
+            "description": "订单编号",
+            "type": "string"
+          },
+          "payPrice": {
+            "description": "支付金额",
+            "format": "int64",
+            "type": "integer"
+          },
+          "productID": {
+            "description": " 产品id",
+            "type": "string"
+          },
+          "status": {
+            "description": "状态：1待结算，2已结算",
+            "format": "int64",
+            "type": "integer"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserCore"
+          },
+          "userID": {
+            "description": "支付用户ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "orderNum",
+          "distributorIDPath",
+          "distributorID",
+          "payPrice",
+          "goodID",
+          "userID",
+          "productID",
+          "deviceName",
+          "brokerage",
+          "status",
+          "createdTime",
+          "good"
+        ],
+        "title": "SaleDistributorWater",
+        "type": "object"
+      },
+      "SaleDistributorWaterGetListReq": {
+        "properties": {
+          "deviceName": {
+            "type": "string"
+          },
+          "distributorID": {
+            "description": "经销商id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "status": {
+            "description": "分佣状态",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          },
+          "withChildren": {
+            "description": "同时获取下级的设备列表",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withGood": {
+            "description": "同时返回商品信息",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "withUser": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "SaleDistributorWaterGetListReq",
+        "type": "object"
+      },
+      "SaleDistributorWaterGetListResp": {
+        "properties": {
+          "list": {
+            "description": "列表",
+            "items": {
+              "$ref": "#/components/schemas/SaleDistributorWater"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": "总数(只有分页的时候会返回)",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "total"
+        ],
+        "title": "SaleDistributorWaterGetListResp",
+        "type": "object"
+      },
+      "SaleGoodInfo": {
+        "properties": {
+          "costPrice": {
+            "description": "成本价(上级结算价)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceSet": {
+            "$ref": "#/components/schemas/DeviceSet"
+          },
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "isJoinDistribution": {
+            "description": " 是否参与分销",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isPlatformSale": {
+            "description": "平台是否参与销售",
+            "format": "int64",
+            "type": "integer"
+          },
+          "isTimeLimit": {
+            "description": " 是否是限时商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "limitNum": {
+            "description": " 限购数量(0为不限购)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": "商品名称",
+            "type": "string"
+          },
+          "originalPrice": {
+            "description": "原价 非分销商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "salePrice": {
+            "description": "销售价(对外售价)非分销商品",
+            "format": "int64",
+            "type": "integer"
+          },
+          "scopeApplyIDs": {
+            "description": "适用范围",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "scopeType": {
+            "description": "适用范围的类型(product:产品)",
+            "type": "string"
+          },
+          "setType": {
+            "description": " 套餐类型 device(设备套餐) user(用户套餐)",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": "状态1=上架,2=下架)",
+            "format": "int64",
+            "type": "integer"
+          },
+          "subType": {
+            "description": " 子类型 套餐(set)",
+            "type": "string"
+          },
+          "tags": {
+            "description": " 标签: 购买最多 标签: 购买最多",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "timeLimitEnd": {
+            "description": " 活动商品结束时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeLimitStart": {
+            "description": " 活动商品开始时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 商品类型 实物商品(physical)虚拟商品(virtual)",
+            "type": "string"
+          }
+        },
+        "title": "SaleGoodInfo",
+        "type": "object"
+      },
+      "SendOption": {
+        "properties": {
+          "requestTimeout": {
+            "description": "请求超时,超时后会进行重试",
+            "format": "int64",
+            "type": "integer"
+          },
+          "retryInterval": {
+            "description": "重试间隔",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeoutToFail": {
+            "description": "超时失败时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "SendOption",
+        "type": "object"
+      },
+      "Tag": {
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "value": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "value"
+        ],
+        "title": "Tag",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": "结束时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          },
+          "start": {
+            "description": "开始时间 unix时间戳",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "Tree": {
+        "properties": {
+          "id": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "idPath": {
+            "description": " 1-2-3-的格式记录顶级区域到当前区域的路径",
+            "type": "string"
+          },
+          "parentID": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "Tree",
+        "type": "object"
+      },
+      "UserCore": {
+        "properties": {
+          "avatar": {
+            "description": " 用户头像",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "email": {
+            "description": " 邮箱",
+            "type": "string"
+          },
+          "lastIP": {
+            "description": " 最后登录ip",
+            "type": "string"
+          },
+          "nickName": {
+            "description": " 用户的昵称",
+            "type": "string"
+          },
+          "phone": {
+            "description": " 手机号",
+            "type": "string"
+          },
+          "regIP": {
+            "description": " 注册ip",
+            "type": "string"
+          },
+          "userID": {
+            "description": " 用户id",
+            "type": "string"
+          },
+          "userName": {
+            "description": " 用户名(唯一)",
+            "type": "string"
+          }
+        },
+        "title": "UserCore",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithID",
+        "type": "object"
+      },
+      "WithIDChildren": {
+        "properties": {
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          },
+          "withChildren": {
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "title": "WithIDChildren",
+        "type": "object"
+      },
+      "WithIDOrCode": {
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "id": {
+            "description": " id",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "WithIDOrCode",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "sale",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/sale/config/info/get-one": {
+      "post": {
+        "description": "获取营销配置详情信息，包括最小提现金额和税率",
+        "operationId": "postApiV1SaleConfigInfoGet-one",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleConfiInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取营销配置详情",
+        "tags": [
+          "sale/config/info",
+          "saleConfigInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/config/info",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/config/info"
+      }
+    },
+    "/api/v1/sale/distributor/apply/create": {
+      "post": {
+        "description": "提交经销商申请，包含公司信息、联系方式及上级经销商",
+        "operationId": "postApiV1SaleDistributorApplyCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ApplyToDistributorReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "申请成为经销商",
+        "tags": [
+          "sale/distributor/apply",
+          "saleDistributorApply"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/apply",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/apply"
+      }
+    },
+    "/api/v1/sale/distributor/apply/delete": {
+      "post": {
+        "description": "根据ID删除指定的经销商申请记录",
+        "operationId": "postApiV1SaleDistributorApplyDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除经销商申请信息",
+        "tags": [
+          "sale/distributor/apply",
+          "saleDistributorApply"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/distributor/apply",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/distributor/apply"
+      }
+    },
+    "/api/v1/sale/distributor/apply/get-list": {
+      "post": {
+        "description": "按状态、公司信息等条件分页查询经销商申请记录",
+        "operationId": "postApiV1SaleDistributorApplyGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorApplyGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorApplyGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取申请经销商列表",
+        "tags": [
+          "sale/distributor/apply",
+          "saleDistributorApply"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/apply",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/apply"
+      }
+    },
+    "/api/v1/sale/distributor/apply/get-one": {
+      "post": {
+        "description": "根据ID查询单个经销商申请的完整信息",
+        "operationId": "postApiV1SaleDistributorApplyGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorApply"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取申请经销商信息详情",
+        "tags": [
+          "sale/distributor/apply",
+          "saleDistributorApply"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/apply",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/apply"
+      }
+    },
+    "/api/v1/sale/distributor/apply/update": {
+      "post": {
+        "description": "审批或更新经销商申请信息，只能由上级经销商操作",
+        "operationId": "postApiV1SaleDistributorApplyUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorApply"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新申请经销商信息",
+        "tags": [
+          "sale/distributor/apply",
+          "saleDistributorApply"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/apply",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/apply"
+      }
+    },
+    "/api/v1/sale/distributor/device/create": {
+      "post": {
+        "description": "将指定设备绑定到当前经销商",
+        "operationId": "postApiV1SaleDistributorDeviceCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceSaveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "绑定设备",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/delete": {
+      "post": {
+        "description": "将指定设备从当前经销商解绑",
+        "operationId": "postApiV1SaleDistributorDeviceDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceSaveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "解绑设备",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/get-list": {
+      "post": {
+        "description": "按经销商、产品、区域、分组等条件分页查询设备列表，支持同时返回设备扩展信息",
+        "operationId": "postApiV1SaleDistributorDeviceGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取设备列表",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/get-one": {
+      "post": {
+        "description": "根据产品ID和设备名称查询单个设备详情，支持同时返回拥有人、最新属性等扩展信息",
+        "operationId": "postApiV1SaleDistributorDeviceGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取设备详情",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/interact/property-control-multi-send": {
+      "post": {
+        "description": "按区域、分组或设备列表批量下发属性控制指令",
+        "operationId": "postApiV1SaleDistributorDeviceInteractProperty-control-multi-send",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInteractMultiSendPropertyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceInteractMultiSendPropertyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量调用设备属性",
+        "tags": [
+          "sale/distributor/device/interact",
+          "saleDistributorDeviceInteract"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/device/interact",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/device/interact"
+      }
+    },
+    "/api/v1/sale/distributor/device/interact/property-control-send": {
+      "post": {
+        "description": "向单个设备下发属性控制指令，支持同步/异步、设备影子等控制策略",
+        "operationId": "postApiV1SaleDistributorDeviceInteractProperty-control-send",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceInteractSendPropertyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceInteractSendPropertyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "调用设备属性",
+        "tags": [
+          "sale/distributor/device/interact",
+          "saleDistributorDeviceInteract"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/device/interact",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/device/interact"
+      }
+    },
+    "/api/v1/sale/distributor/device/move": {
+      "post": {
+        "description": "将设备从一个产品/设备迁移到另一个产品/设备，可携带配置项",
+        "operationId": "postApiV1SaleDistributorDeviceMove",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceMoveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "迁移设备数据",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/msg/event-log/get-list": {
+      "post": {
+        "description": "按时间范围和事件类型分页查询设备上报的事件历史",
+        "operationId": "postApiV1SaleDistributorDeviceMsgEvent-logGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceMsgEventLogGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceMsgEventLogGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取事件历史记录",
+        "tags": [
+          "sale/distributor/device/msg",
+          "saleDistributorDeviceMsg"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/device/msg",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/device/msg"
+      }
+    },
+    "/api/v1/sale/distributor/device/msg/send-log/get-list": {
+      "post": {
+        "description": "按时间范围分页查询设备下发的命令及执行结果日志",
+        "operationId": "postApiV1SaleDistributorDeviceMsgSend-logGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceMsgSendLogGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceMsgSendLogGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取设备命令日志",
+        "tags": [
+          "sale/distributor/device/msg",
+          "saleDistributorDeviceMsg"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/device/msg",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/device/msg"
+      }
+    },
+    "/api/v1/sale/distributor/device/msg/status-log/get-list": {
+      "post": {
+        "description": "按时间范围分页查询设备上下线状态变更日志",
+        "operationId": "postApiV1SaleDistributorDeviceMsgStatus-logGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceMsgStatusLogGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceMsgStatusLogGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取设备状态日志",
+        "tags": [
+          "sale/distributor/device/msg",
+          "saleDistributorDeviceMsg"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/device/msg",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/device/msg"
+      }
+    },
+    "/api/v1/sale/distributor/device/multi-import": {
+      "post": {
+        "description": "通过上传Excel批量导入设备，支持绑定或解绑操作",
+        "operationId": "postApiV1SaleDistributorDeviceMulti-import",
+        "parameters": [
+          {
+            "description": "经销商id",
+            "in": "query",
+            "name": "distributorID",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          },
+          {
+            "description": "1:绑定 2:解绑",
+            "in": "query",
+            "name": "opt",
+            "schema": {
+              "format": "int64",
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "properties": {
+                  "distributorid": {
+                    "description": "//经销商id",
+                    "format": "int64",
+                    "type": "integer",
+                    "x-formData-name": "distributorid"
+                  },
+                  "file": {
+                    "format": "binary",
+                    "type": "string",
+                    "x-formData-name": "file"
+                  },
+                  "opt": {
+                    "description": "//1:绑定 2:解绑",
+                    "format": "int64",
+                    "type": "integer",
+                    "x-formData-name": "opt"
+                  }
+                },
+                "required": [
+                  "file"
+                ],
+                "type": "object"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DeviceMultiImportResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量导入设备",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/ota/confirm": {
+      "post": {
+        "description": "确认对指定设备执行OTA固件升级",
+        "operationId": "postApiV1SaleDistributorDeviceOtaConfirm",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OtaFirmwareDeviceConfirmReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "确认升级设备",
+        "tags": [
+          "sale/distributor/device/ota",
+          "saleDistributorDeviceOta"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/device/ota",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/device/ota"
+      }
+    },
+    "/api/v1/sale/distributor/device/reset": {
+      "post": {
+        "description": "重置指定设备的状态或数据",
+        "operationId": "postApiV1SaleDistributorDeviceReset",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCore"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "重置设备",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/device/unbind": {
+      "post": {
+        "description": "解除设备与用户的绑定关系",
+        "operationId": "postApiV1SaleDistributorDeviceUnbind",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeviceCore"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "解绑用户设备",
+        "tags": [
+          "sale/distributor/device",
+          "saleDistributorDevice"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/distributor/device",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/distributor/device"
+      }
+    },
+    "/api/v1/sale/distributor/good/get-list": {
+      "post": {
+        "description": "按经销商、商品类型等条件分页查询商品售价列表",
+        "operationId": "postApiV1SaleDistributorGoodGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleDistributorGoodGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleDistributorGoodGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取商品售价列表",
+        "tags": [
+          "sale/distributor/good",
+          "saleDistributorGood"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/good",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/good"
+      }
+    },
+    "/api/v1/sale/distributor/good/update": {
+      "post": {
+        "description": "调整经销商商品的零售价、批发价及上下架状态",
+        "operationId": "postApiV1SaleDistributorGoodUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleDistributorGood"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新商品售价",
+        "tags": [
+          "sale/distributor/good",
+          "saleDistributorGood"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/good",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/good"
+      }
+    },
+    "/api/v1/sale/distributor/info/client/get-one": {
+      "post": {
+        "description": "面向C端，查询当前所属经销商的工厂和品牌等信息",
+        "operationId": "postApiV1SaleDistributorInfoClientGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorInfoClientGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorInfoClientInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "客户端获取经销商信息详情",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/client"
+      }
+    },
+    "/api/v1/sale/distributor/info/create": {
+      "post": {
+        "description": "创建新的经销商记录并指定上级经销商",
+        "operationId": "postApiV1SaleDistributorInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorInfo"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建经销商",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/info"
+      }
+    },
+    "/api/v1/sale/distributor/info/delete": {
+      "post": {
+        "description": "根据ID删除指定经销商记录",
+        "operationId": "postApiV1SaleDistributorInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除经销商",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/distributor/info"
+      }
+    },
+    "/api/v1/sale/distributor/info/get-list": {
+      "post": {
+        "description": "按名称、状态、上级经销商等条件分页查询经销商列表",
+        "operationId": "postApiV1SaleDistributorInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取经销商列表",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/info"
+      }
+    },
+    "/api/v1/sale/distributor/info/get-one": {
+      "post": {
+        "description": "根据经销商ID查询单个经销商的完整信息",
+        "operationId": "postApiV1SaleDistributorInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取经销商信息详情",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/info"
+      }
+    },
+    "/api/v1/sale/distributor/info/update": {
+      "post": {
+        "description": "修改经销商的基本信息、状态及绑定产品等，只能由上级经销商审核修改",
+        "operationId": "postApiV1SaleDistributorInfoUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorInfo"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新经销商信息",
+        "tags": [
+          "sale/distributor/info",
+          "saleDistributorInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/info",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/info"
+      }
+    },
+    "/api/v1/sale/distributor/order/get-list": {
+      "post": {
+        "description": "按经销商、订单状态、时间范围等条件分页查询销售订单列表",
+        "operationId": "postApiV1SaleDistributorOrderGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleDistributorOrderGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleDistributorOrderGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取经销商下面的销售订单列表",
+        "tags": [
+          "sale/distributor/order",
+          "saleDistributorOrder"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/order",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/order"
+      }
+    },
+    "/api/v1/sale/distributor/water/get-list": {
+      "post": {
+        "description": "按经销商、分佣状态、时间范围等条件分页查询销售流水列表",
+        "operationId": "postApiV1SaleDistributorWaterGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleDistributorWaterGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleDistributorWaterGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取经销商下面的销售流水列表",
+        "tags": [
+          "sale/distributor/water",
+          "saleDistributorWater"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/water",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/water"
+      }
+    },
+    "/api/v1/sale/distributor/withdraw/create": {
+      "post": {
+        "description": "经销商提交提现申请，填写提现金额、发票等信息",
+        "operationId": "postApiV1SaleDistributorWithdrawCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorWithdraw"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "申请提现",
+        "tags": [
+          "sale/distributor/withdraw",
+          "saleDistributorWithdraw"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/distributor/withdraw",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/distributor/withdraw"
+      }
+    },
+    "/api/v1/sale/distributor/withdraw/delete": {
+      "post": {
+        "description": "删除处于待审批状态的经销商提现申请",
+        "operationId": "postApiV1SaleDistributorWithdrawDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除经销商提现(只有待审批的可以删除)",
+        "tags": [
+          "sale/distributor/withdraw",
+          "saleDistributorWithdraw"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/distributor/withdraw",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/distributor/withdraw"
+      }
+    },
+    "/api/v1/sale/distributor/withdraw/get-list": {
+      "post": {
+        "description": "按经销商、状态等条件分页查询提现申请记录",
+        "operationId": "postApiV1SaleDistributorWithdrawGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorWithdrawGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DistributorWithdrawGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取经销商提现列表",
+        "tags": [
+          "sale/distributor/withdraw",
+          "saleDistributorWithdraw"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/distributor/withdraw",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/distributor/withdraw"
+      }
+    },
+    "/api/v1/sale/distributor/withdraw/update": {
+      "post": {
+        "description": "审批或更新经销商提现申请，修改状态、审批备注等信息",
+        "operationId": "postApiV1SaleDistributorWithdrawUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DistributorWithdraw"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新经销商提现信息",
+        "tags": [
+          "sale/distributor/withdraw",
+          "saleDistributorWithdraw"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/distributor/withdraw",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/distributor/withdraw"
+      }
+    },
+    "/api/v1/sale/good/info/client/get-list": {
+      "post": {
+        "description": "面向C端用户，根据设备信息查询其可购买的商品及套餐列表。",
+        "operationId": "postApiV1SaleGoodInfoClientGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ClientGoodInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GoodInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "c端获取商品列表",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/good/client"
+      }
+    },
+    "/api/v1/sale/good/info/create": {
+      "post": {
+        "description": "创建新的商品记录，支持实物商品、虚拟商品及设备/用户套餐等多种类型。",
+        "operationId": "postApiV1SaleGoodInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleGoodInfo"
+              }
+            }
+          },
+          "description": " 商品信息表",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建商品信息",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/good/info/delete": {
+      "post": {
+        "description": "根据商品ID删除指定商品记录。",
+        "operationId": "postApiV1SaleGoodInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除商品",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/good/info/get-list": {
+      "post": {
+        "description": "按条件分页查询商品列表，支持按商品名称、类型、子类型、套餐类型、上架状态、平台销售状态等维度过滤。",
+        "operationId": "postApiV1SaleGoodInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoodInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/GoodInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取商品列表",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/good/info/get-one": {
+      "post": {
+        "description": "根据商品ID查询单个商品的完整信息。",
+        "operationId": "postApiV1SaleGoodInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoodInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/SaleGoodInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取商品详情",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/good/info/offer": {
+      "post": {
+        "description": "将指定商品免费赠送给某个设备或用户，通常用于运营活动或补偿场景。",
+        "operationId": "postApiV1SaleGoodInfoOffer",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GoodInfoOfferReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "将商品免费赠与某人",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/good/info/update": {
+      "post": {
+        "description": "修改商品的名称、售价、套餐内容、上下架状态、适用范围等基础信息。",
+        "operationId": "postApiV1SaleGoodInfoUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaleGoodInfo"
+              }
+            }
+          },
+          "description": " 商品信息表",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新商品信息",
+        "tags": [
+          "sale/good/info",
+          "saleGoodInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "update",
+        "x-group": "sale/good/info",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "sale/good/info"
+      }
+    },
+    "/api/v1/sale/hook/": {
+      "post": {
+        "description": "Hook扩展统一入口，通过method字段路由到具体处理函数，用于接收外部系统回调",
+        "operationId": "postApiV1SaleHook",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "Hook扩展统一入口",
+        "tags": [
+          "sale/hook",
+          "saleHook"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/hook",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "sale/hook"
+      }
+    },
+    "/api/v1/sale/order/info/create": {
+      "post": {
+        "description": "创建订单",
+        "operationId": "postApiV1SaleOrderInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OrderCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建订单",
+        "tags": [
+          "sale/order/info",
+          "saleOrderInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "create",
+        "x-group": "sale/order/info",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "sale/order/info"
+      }
+    },
+    "/api/v1/sale/order/info/delete": {
+      "post": {
+        "description": "删除订单",
+        "operationId": "postApiV1SaleOrderInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除订单",
+        "tags": [
+          "sale/order/info",
+          "saleOrderInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "delete",
+        "x-group": "sale/order/info",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "sale/order/info"
+      }
+    },
+    "/api/v1/sale/order/info/get-list": {
+      "post": {
+        "description": "获取订单列表",
+        "operationId": "postApiV1SaleOrderInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OrderInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取订单列表",
+        "tags": [
+          "sale/order/info",
+          "saleOrderInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/order/info",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/order/info"
+      }
+    },
+    "/api/v1/sale/order/info/get-one": {
+      "post": {
+        "description": "获取订单详情",
+        "operationId": "postApiV1SaleOrderInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OrderInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取订单详情",
+        "tags": [
+          "sale/order/info",
+          "saleOrderInfo"
+        ],
+        "x-auth-type": "admin",
+        "x-action": "view",
+        "x-group": "sale/order/info",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "sale/order/info"
+      }
+    },
+    "/api/v1/sale/order/pay/notify/{tenantCode}/{appCode}/{payType}": {
+      "post": {
+        "description": "支付回调",
+        "operationId": "postApiV1SaleOrderPayNotify:tenantCode:appCode:payType",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tenantCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "appCode",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "payType",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayNotifyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PayNotifyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "支付回调",
+        "tags": [
+          "sale/order/pay",
+          "saleOrderPay"
+        ],
+        "x-auth-type": "public",
+        "x-action": "create",
+        "x-group": "sale/order/pay",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "sale/order/pay"
+      }
+    }
+  }
+}

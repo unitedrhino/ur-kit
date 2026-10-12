@@ -1,0 +1,98 @@
+
+info(
+	title: "用户管理模块"
+	desc: "用户操作租户的接口"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group: system/user/self/tenant
+	prefix: /api/v1/system/user/self/tenant
+	accessCode: "systemUserSelf"
+	accessName: "用户基础操作"
+	accessGroup: "用户管理"
+	defaultAuthType: "all"
+	middleware:  CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "获取当前用户在当前租户的详情"
+        description: "业务说明：获取当前登录用户在当前请求租户下的详细信息，包括用户状态、部门归属、角色列表、标签等。可指定是否同时返回角色详情和用户基本信息。用于用户个人中心展示、当前租户权限查看等场景。"
+        authType: "all"
+        group: "system/user/self/tenant"
+        resource: "system/user/self/tenant"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (UserSelfTenantGetOneReq) returns (UserTenant)
+     @doc(
+        summary: "获取用户所处的租户列表"
+        description: "业务说明：查询当前登录用户所属的所有租户列表，返回租户编码、用户在各租户的状态、角色等信息。用于用户切换租户、查看可访问的租户范围等场景。可同时返回角色详情。"
+        authType: "all"
+        group: "system/user/self/tenant"
+        resource: "system/user/self/tenant"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (UserSelfTenantGetListReq) returns (UserSelfTenantGetListResp)
+    @doc(
+        summary: "更新当前用户在当前租户的信息"
+        description: "业务说明：更新当前用户在当前租户下的个人信息，如公共标签（pubTags）等用户可自行修改的字段。管理员设置的私有标签（tags）用户无权修改。用于用户设置个人偏好标签等场景。"
+        authType: "all"
+        group: "system/user/self/tenant"
+        resource: "system/user/self/tenant"
+        action: "update"
+        recordLogMode: "3"
+    )
+    @handler update
+    post /update (UserTenant) returns (CommonResp)
+
+    @doc(
+        summary: "退出当前租户"
+        description: "业务说明：当前用户退出当前所在的租户。退出后用户不再属于该租户，失去该租户的所有权限和数据访问资格。用于用户主动离开租户、清理租户归属等场景。退出后需切换到其他租户或重新加入。"
+        authType: "all"
+        group: "system/user/self/tenant"
+        resource: "system/user/self/tenant"
+        action: "delete"
+        recordLogMode: "3"
+    )
+    @handler delete
+    post /delete returns (CommonResp)
+
+    @doc(
+        summary: "用户加入租户（通过邀请码、邮件、手机或客户端应用）"
+        description: "业务说明：用户加入指定租户。支持多种加入方式：code（邀请码）、email（邮件邀请）、phone（手机邀请）、client（客户端应用直接加入）。client 方式无需邀请码，只需传入 tenantCode 和 method=client，角色自动使用租户配置的注册角色。加入成功后用户成为该租户成员，获得对应权限。"
+        authType: "all"
+        group: "system/user/self/tenant"
+        resource: "system/user/self/tenant"
+        action: "invite"
+        recordLogMode: "3"
+    )
+    @handler join
+    post /join (TenantUserJoinReq) returns (CommonResp)
+}
+type(
+    UserSelfTenantGetListReq{
+	    Page *PageInfo `json:"page,optional"` //分页信息
+        WithRole bool `json:"withRole,optional"` // 同时返回角色信息
+    }
+    UserSelfTenantGetOneReq{
+	    WithRole bool `json:"withRole,optional"` //同时返回角色信息
+	    WithUser bool `json:"withUser,optional"` //同时返回用户信息
+    }
+    UserSelfTenantGetListResp{
+        List []*UserTenant `json:"list"` // 用户租户列表
+        Total int64 `json:"total"`
+    }
+
+    // 用户加入租户请求
+    TenantUserJoinReq {
+        Code string `json:"code"` // 邀请码（code/email/phone 方式时填写，client 方式可为空）
+        Method string `json:"method,optional"` // 加入方法：code（邀请码）、email（邮件邀请）、phone（手机邀请）、client（客户端应用直接加入）
+        TenantCode string `json:"tenantCode,optional"` // 租户编码（client 方式时必填，其他方式可选）
+    }
+)

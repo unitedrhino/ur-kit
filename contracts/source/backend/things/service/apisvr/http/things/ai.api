@@ -1,0 +1,77 @@
+info(
+    title: "场景联动信息模块"
+    desc: "场景联动信息模块"
+    author: "杨磊"
+    email: "603685348@qq.com"
+    version: "v1"
+)
+
+@server(
+    group: things/ai/mcp
+    prefix: /api/v1/things/ai/mcp
+    accessCodePrefix: "thingsAiMcp"
+    accessNamePrefix: "mcp服务"
+    accessGroup: "ai"
+    middleware:  InitCtxsWare
+    timeout: 10s
+)
+
+service api {
+    @doc(
+        summary: "Stateless MCP HTTP"
+        description: "业务说明：提供给 aisvr 直连调用的无状态 MCP HTTP 入口，用于 tools/list 与 tools/call 等 JSON-RPC 请求。"
+        authType: "all"
+        group: "things/ai/mcp"
+        resource: "things/ai/mcp"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler run
+    post /run () returns ()
+}
+
+// 旧SSE/消息路由保留原宿主预算，不将媒体工具调用的十秒窗口施加到长连接。
+@server(
+    group: things/ai/mcp
+    prefix: /api/v1/things/ai/mcp
+    accessCodePrefix: "thingsAiMcp"
+    accessNamePrefix: "mcp服务"
+    accessGroup: "ai"
+    middleware: InitCtxsWare
+)
+
+service api {
+    @doc(
+        summary: "SSE连接"
+        description: "业务说明：建立Server-Sent Events连接，用于MCP服务端向客户端推送实时消息。支持GET请求建立长连接。"
+        authType: "all"
+        group: "things/ai/mcp"
+        resource: "things/ai/mcp"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler sseGet
+    get /sse () returns ()
+    @doc(
+        summary: "SSE连接（POST）"
+        description: "业务说明：通过POST请求建立Server-Sent Events连接，用于MCP服务端向客户端推送实时消息。"
+        authType: "all"
+        group: "things/ai/mcp"
+        resource: "things/ai/mcp"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler ssePost
+    post /sse () returns ()
+    @doc(
+        summary: "MCP消息发送"
+        description: "业务说明：向MCP服务发送消息，用于AI工具调用、设备控制等场景。支持JSON-RPC格式的请求和响应。"
+        authType: "all"
+        group: "things/ai/mcp"
+        resource: "things/ai/mcp"
+        action: "send"
+        recordLogMode: "3"
+    )
+    @handler message
+    post /message () returns ()
+}

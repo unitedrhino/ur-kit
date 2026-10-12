@@ -1,0 +1,120 @@
+info (
+    title:   "用户访问令牌管理"
+    desc:    "用户访问令牌相关接口（参考GitHub PAT）"
+    author:  "L"
+    email:   "174805676@qq.com"
+    version: "v0.1.0"
+)
+
+type (
+    // 用户访问令牌
+    UserAccessToken {
+        ID           int64    `json:"id,string,optional"`           // 令牌ID
+        UserID       int64    `json:"userID,string,optional"`       // 绑定的用户ID
+        AccessKey    string   `json:"accessKey,optional"`           // 访问密钥标识
+        AccessSecret string   `json:"accessSecret,optional"`        // 访问密钥（仅创建时返回完整值）
+        TenantCodes  []string `json:"tenantCodes,optional"`         // 可访问的租户列表（空表示所有租户）
+        Desc         string   `json:"desc,optional"`                // 令牌描述/用途说明
+        ExpTime      *int64   `json:"expTime,string,optional"`      // 到期时间（0或null不限制）
+        CreatedTime  int64    `json:"createdTime,string,optional"`  // 创建时间
+    }
+
+    // 创建访问令牌请求
+    UserAccessTokenCreateReq {
+        TenantCodes []string `json:"tenantCodes,optional"` // 可访问的租户列表
+        Desc        string   `json:"desc,optional"`        // 令牌描述
+        ExpTime     *int64   `json:"expTime,string,optional"` // 到期时间
+    }
+
+    // 更新访问令牌请求
+    UserAccessTokenUpdateReq {
+        ID          int64    `json:"id,string"`            // 令牌ID
+        TenantCodes []string `json:"tenantCodes,optional"` // 可访问的租户列表
+        Desc        string   `json:"desc,optional"`        // 令牌描述
+        ExpTime     *int64   `json:"expTime,string,optional"` // 到期时间
+    }
+
+    // 获取访问令牌列表请求
+    UserAccessTokenGetListReq {
+        Page      *PageInfo `json:"page,optional"`      // 分页信息
+        AccessKey string    `json:"accessKey,optional"` // 按访问密钥标识过滤
+    }
+
+    // 获取访问令牌列表响应
+    UserAccessTokenGetListResp {
+        PageResp
+        List []*UserAccessToken `json:"list"` // 访问令牌列表
+    }
+)
+
+@server (
+    group:           system/user/self/accessToken
+    prefix:          /api/v1/system/user/self/access-token
+    accessCodePrefix: "userAccessToken"
+    accessNamePrefix: "访问令牌"
+    accessGroup:     "用户管理"
+    defaultAuthType: "all"
+    defaultNeedAuth: "true"
+    middleware:      CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "创建访问令牌"
+        description: "业务说明：为当前用户创建个人访问令牌（类似GitHub PAT），用于API调用认证、脚本自动化等场景。可设置可访问的租户范围、到期时间和用途描述。创建成功后返回完整的访问密钥，密钥仅在创建时可见，后续查询只显示访问密钥标识。"
+        authType: "all"
+        group: "system/user/self/accessToken"
+        resource: "system/user/self/accessToken"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler create
+    post /create (UserAccessTokenCreateReq) returns (UserAccessToken)
+
+    @doc(
+        summary: "更新访问令牌"
+        description: "业务说明：更新指定访问令牌的配置，包括可访问租户范围、到期时间、用途描述等。用于调整令牌权限范围、延长或缩短有效期等场景。不支持更新访问密钥本身。"
+        authType: "all"
+        group: "system/user/self/accessToken"
+        resource: "system/user/self/accessToken"
+        action: "update"
+        recordLogMode: "3"
+    )
+    @handler update
+    post /update (UserAccessTokenUpdateReq) returns ()
+
+    @doc(
+        summary: "删除访问令牌"
+        description: "业务说明：删除指定的访问令牌。删除后该令牌立即失效，使用该令牌的API调用将认证失败。用于令牌不再需要、安全风险清理等场景。"
+        authType: "all"
+        group: "system/user/self/accessToken"
+        resource: "system/user/self/accessToken"
+        action: "delete"
+        recordLogMode: "3"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取访问令牌详情"
+        description: "业务说明：获取指定访问令牌的详细信息，包括访问密钥标识、可访问租户范围、到期时间、创建时间等。注意：访问密钥（secret）仅在创建时返回，后续查询不显示。用于令牌管理、查看令牌配置等场景。"
+        authType: "all"
+        group: "system/user/self/accessToken"
+        resource: "system/user/self/accessToken"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (UserAccessToken)
+
+    @doc(
+        summary: "获取访问令牌列表"
+        description: "业务说明：分页查询当前用户创建的所有访问令牌列表，支持按访问密钥标识过滤。返回令牌基本信息（不含密钥本身）。用于令牌管理界面展示、查看已有令牌等场景。"
+        authType: "all"
+        group: "system/user/self/accessToken"
+        resource: "system/user/self/accessToken"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler getList
+    post /get-list (UserAccessTokenGetListReq) returns (UserAccessTokenGetListResp)
+}

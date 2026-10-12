@@ -1,0 +1,102 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡月流量报表"
+    desc: "按 ICCID 号段与年份查询物联卡每月流量使用情况，支持导出 Excel"
+    version: "v1"
+)
+
+type (
+    // CardMonthFlow 月流量报表单行数据
+    CardMonthFlow {
+        Msisdn       string    `json:"msisdn,optional"`       // SIM 号码
+        Iccid        string    `json:"iccid"`                 // SIM 卡号
+        Imsi         string    `json:"imsi,optional"`         // SIM 识别码
+        StatusID     string    `json:"statusID,optional"`     // 卡状态描述
+        StatusShowID int64     `json:"statusShowID,optional"` // 卡状态显示值
+        Months       []float64 `json:"months,optional"`       // 1~12 月流量（MB），下标 0 对应 1 月
+    }
+
+    // CardMonthFlowGetListReq 月流量报表列表查询请求
+    CardMonthFlowGetListReq {
+        PageInfo
+        IccidStart string `json:"iccidStart,optional"` // ICCID 号段开始
+        IccidEnd   string `json:"iccidEnd,optional"`   // ICCID 号段结束
+        Year       int64  `json:"year,optional"`       // 查询年份，如 2024/2025
+        RouteIDs   []int64 `json:"routeIds,string,optional"` // 通道ID集合，集合内取并集
+        PackageIDs []string `json:"packageIds,optional"` // 资费组ID集合，集合内取并集
+    }
+
+    // CardMonthFlowGetListResp 月流量报表列表查询响应
+    CardMonthFlowGetListResp {
+        PageResp
+        List []*CardMonthFlow `json:"list"`
+    }
+
+    // CardMonthFlowExportReq 月流量报表导出请求
+    CardMonthFlowExportReq {
+        IccidStart string `json:"iccidStart,optional"` // ICCID 号段开始
+        IccidEnd   string `json:"iccidEnd,optional"`   // ICCID 号段结束
+        Year       int64  `json:"year,optional"`       // 查询年份，如 2024/2025
+        RouteIDs   []int64 `json:"routeIds,string,optional"` // 通道ID集合，集合内取并集
+        PackageIDs []string `json:"packageIds,optional"` // 资费组ID集合，集合内取并集
+    }
+
+    // CardMonthFlowExportResp 月流量报表导出响应
+    CardMonthFlowExportResp {
+        FileUrl string `json:"fileUrl"` // OSS 下载地址
+    }
+
+    // CardMonthFlowStatisticsResp 返回指定范围的聚合统计。
+    CardMonthFlowStatisticsResp {
+        CardCount int64   `json:"cardCount"` // 有流量记录的卡数
+        TotalFlow float64 `json:"totalFlow"` // 指定年份总流量（MB）
+        AverageFlow float64 `json:"averageFlow"` // 单卡平均流量（MB）
+        MaxFlow float64 `json:"maxFlow"` // 单卡最大流量（MB）
+        MinFlow float64 `json:"minFlow"` // 单卡最小流量（MB）
+    }
+)
+
+@server(
+    group: card/monthFlow
+    prefix: /api/v1/things/card/month-flow
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取月流量报表列表"
+        description: "业务说明：按 ICCID 号段与年份分页查询物联卡 1~12 月流量使用情况"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardMonthFlowGetListReq) returns (CardMonthFlowGetListResp)
+
+    @doc(
+        summary: "获取月流量统计"
+        description: "业务说明：按租户、ICCID 号段和年份汇总真实月用量数据"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler statistics
+    post /statistics (CardMonthFlowExportReq) returns (CardMonthFlowStatisticsResp)
+
+    @doc(
+        summary: "导出月流量报表"
+        description: "业务说明：按 ICCID 号段与年份导出物联卡月流量报表，生成 Excel 后上传到 OSS 返回下载地址"
+        authType: "admin"
+        resource: "card"
+        action: "export"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler export
+    post /export (CardMonthFlowExportReq) returns (CardMonthFlowExportResp)
+}

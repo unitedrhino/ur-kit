@@ -1,0 +1,59 @@
+syntax = "v1"
+
+info(
+    title: "物联卡公共结构体"
+    desc: "物联卡通信管理模块公共请求/响应结构体"
+    author: "unitedrhino"
+    email: "dev@unitedrhino.com"
+    version: "v1"
+)
+
+type(
+    PageInfo {
+        Page   int64    `json:"page,optional" form:"page,optional"`   // 页码
+        Size   int64    `json:"size,optional" form:"size,optional"`   // 每页大小
+        Orders []*OrderBy `json:"orders,optional"`                     // 排序
+    }
+
+    PageResp {
+        Page     int64 `json:"page"`       // 页码
+        PageSize int64 `json:"pageSize"`   // 每页大小
+        Total    int64 `json:"total"`      // 总记录数
+    }
+
+    OrderBy {
+        Field string `json:"field"`         // 排序字段名
+        Sort  int64  `json:"sort"`          // 排序方式：1 升序，2 降序
+    }
+
+    CommonResp {
+        ID int64 `json:"id,string"`        // 主键ID
+    }
+
+    WithID {
+        ID int64 `json:"id,string"`        // 主键ID
+    }
+
+    WithCode {
+        Code string `json:"code"`          // 业务编码
+    }
+
+    ICCIDReq {
+        Iccid string `json:"iccid"`        // SIM卡号
+    }
+
+    DateRange {
+        Start string `json:"start,optional"` // 开始时间 yyyy-MM-dd
+        End   string `json:"end,optional"`   // 结束时间 yyyy-MM-dd
+    }
+
+    TimeRange {
+        Start int64 `json:"start,optional"` // 开始时间 unix时间戳毫秒
+        End   int64 `json:"end,optional"`   // 结束时间 unix时间戳毫秒
+    }
+
+    CardStatus {
+        StatusID    string `json:"statusID,optional"`    // 卡状态描述
+        StatusShowID int64  `json:"statusShowID,optional"` // 卡状态显示值
+    }
+)

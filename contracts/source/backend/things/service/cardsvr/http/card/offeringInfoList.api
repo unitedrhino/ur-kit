@@ -1,0 +1,86 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡单卡已订购资费"
+    desc: "物联卡单卡已订购资费信息查询"
+    version: "v1"
+)
+
+type (
+    CardApiOfferingInfoList {
+        ID            int64   `json:"id,string"`
+        Iccid         string  `json:"iccid"`
+        OfferingID    string  `json:"offeringId"`
+        OfferingName  string  `json:"offeringName"`
+        EffectiveDate string  `json:"effectiveDate,optional"`
+        ExpiredDate   string  `json:"expiredDate,optional"`
+        ApnName       string  `json:"apnName,optional"`
+        RouteCode     string  `json:"routeCode"`
+        // FactType 区分基础/排队资费事实 rating 与事件资费事实 event。
+        FactType      string  `json:"factType"`
+        // EventInstanceID 是联通事件订购实例标识，仅事件事实存在。
+        EventInstanceID string `json:"eventInstanceId,optional"`
+        // ActiveStatus 是联通事件激活方式：0 空、1 首月激活、2 其他、3 续约激活，不表示生命周期状态。
+        ActiveStatus string `json:"activeStatus,optional"`
+        // Price 是事件价格；空值表示上游未知，零值表示明确免费。
+        Price *float64 `json:"price,optional"`
+        // IncludedData 是事件包含流量，单位 MB。
+        IncludedData *float64 `json:"includedData,optional"`
+        // RemainingData 是事件剩余流量，单位 MB。
+        RemainingData *float64 `json:"remainingData,optional"`
+        // IncludedSMS 是事件包含短信数量。
+        IncludedSMS *float64 `json:"includedSms,optional"`
+        // RemainingSMS 是事件剩余短信数量。
+        RemainingSMS *float64 `json:"remainingSms,optional"`
+        // IncludedVoice 是事件包含语音量。
+        IncludedVoice *float64 `json:"includedVoice,optional"`
+        // RemainingVoice 是事件剩余语音量。
+        RemainingVoice *float64 `json:"remainingVoice,optional"`
+        CreateDate    string  `json:"createDate"`
+        UpdateDate    string  `json:"updateDate"`
+    }
+
+    CardApiOfferingInfoListGetListReq {
+        PageInfo
+        Iccid      string `json:"iccid,optional"`
+        OfferingID string `json:"offeringId,optional"`
+        RouteCode  string `json:"routeCode,optional"`
+    }
+
+    CardApiOfferingInfoListGetListResp {
+        PageResp
+        List []*CardApiOfferingInfoList `json:"list"`
+    }
+)
+
+@server(
+    group: card/offeringInfoList
+    prefix: /api/v1/things/card/offering-info/list
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "获取单卡已订购资费列表"
+        description: "业务说明：按 ICCID 分页查询物联卡已订购资费"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardApiOfferingInfoListGetListReq) returns (CardApiOfferingInfoListGetListResp)
+
+    @doc(
+        summary: "获取单卡已订购资费详情"
+        description: "业务说明：按租户和主键查询单条已订购资费快照"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardApiOfferingInfoList)
+}

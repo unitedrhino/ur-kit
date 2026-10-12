@@ -1,0 +1,213 @@
+syntax = "v1"
+
+info (
+	title:   "AI中心-会话管理"
+	desc:    "AI Session Management HTTP API"
+	author:  "auto"
+	version: "v1"
+)
+
+// ---- 会话类型定义 ----（PageInfo 和 WithID 定义在 common.api）
+
+type SessionInfo {
+	title string `json:"title,optional"` // 首条用户文字或附件名称
+	ID              int64  `json:"id,optional"`              // 会话ID
+	sessionID       string `json:"sessionID,optional"`       // 会话唯一标识
+	tenantCode      string `json:"tenantCode,optional"`      // 租户编码
+	agentID         int64  `json:"agentID"`                  // 关联Agent ID
+	cloneID         int64  `json:"cloneID,optional"`         // 关联Clone ID（0=无分身）
+	userID          int64  `json:"userID,optional"`          // 用户ID
+	channel         string `json:"channel,optional"`         // 渠道 text/voice
+	turnCount       int64  `json:"turnCount,optional"`       // 对话轮次
+	status          int64  `json:"status,optional"`          // 状态 1-活跃 2-已结束 3-已归档
+	transcriptOssKey string `json:"transcriptOssKey,optional"` // 对话记录OSS Key
+	lastActiveAt    int64  `json:"lastActiveAt,optional"`    // 最后活跃时间
+	createdTime     int64  `json:"createdTime,optional"`     // 创建时间
+}
+
+type SessionCreateReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	agentID    int64  `json:"agentID"`             // 关联Agent ID
+	cloneID    int64  `json:"cloneID,optional"`    // 关联Clone ID（0=无分身）
+	userID     int64  `json:"userID,optional"`     // 用户ID
+	channel    string `json:"channel,optional"`    // 渠道 text/voice
+}
+
+type SessionGetOneReq {
+	ID        int64  `json:"id,optional"`        // 会话ID
+	sessionID string `json:"sessionID,optional"` // 会话唯一标识（与ID二选一）
+}
+
+type SessionGetListReq {
+	currentScope bool `json:"currentScope,optional"` // 仅当前登录用户及应用项目权限范围的文字聊天
+	page       PageInfo `json:"page"`                 // 分页信息
+	tenantCode string   `json:"tenantCode,optional"`  // 租户编码过滤
+	agentID    int64    `json:"agentID,optional"`     // 按Agent ID过滤
+	cloneID    int64    `json:"cloneID,optional"`     // 按Clone ID过滤
+	userID     int64    `json:"userID,optional"`      // 按用户ID过滤
+	status     int64    `json:"status,optional"`      // 状态过滤
+	startTime  int64    `json:"startTime,optional"`   // 开始时间戳
+	endTime    int64    `json:"endTime,optional"`     // 结束时间戳
+}
+
+type SessionGetListResp {
+	list  []SessionInfo `json:"list"`  // 会话列表
+	total int64         `json:"total"` // 总数
+}
+
+// SessionMessagesReq 会话消息列表请求
+type SessionMessagesReq {
+	tenantCode string   `json:"tenantCode,optional"` // 租户编码
+	sessionID  string   `json:"sessionID"`            // 会话ID
+	toolID     int64    `json:"toolID,optional"`      // 工具ID；固定会话无消息时用于恢复当前用户的旧工具会话
+	page       PageInfo `json:"page"`                 // 分页信息
+}
+
+// SessionMessageItem 会话消息项
+type SessionMessageItem {
+	turnIndex  int32  `json:"turnIndex"`           // 对话轮次
+	userInput  string `json:"userInput"`           // 用户输入
+	aiResponse string `json:"aiResponse"`          // AI回复
+	summary    string `json:"summary"`             // 摘要
+	keyTopics  string `json:"keyTopics,optional"`  // 关键主题（JSON数组）
+}
+
+// SessionMessagesResp 会话消息列表响应
+type SessionMessagesResp {
+	sessionID string               `json:"sessionID"` // 实际返回消息所属会话ID
+	list      []SessionMessageItem `json:"list"`      // 消息列表
+	total     int64                `json:"total"`     // 总数
+}
+
+// SessionDeleteReq 删除会话请求
+type SessionDeleteReq {
+	tenantCode string `json:"tenantCode,optional"` // 租户编码
+	sessionID  string `json:"sessionID"`            // 会话ID
+}
+
+// SessionDeleteResp 删除会话响应
+type SessionDeleteResp {
+	success bool `json:"success"` // 是否成功
+}
+
+// SessionInjectReq 注入消息请求
+type SessionInjectReq {
+	sessionID   string `json:"sessionID"`             // 会话ID
+	message     string `json:"message"`               // 注入消息内容
+	messageType string `json:"messageType,optional"` // 消息类型
+}
+
+// SessionInjectResp 注入消息响应
+type SessionInjectResp {
+	success bool   `json:"success"`          // 是否成功
+	message string `json:"message,optional"` // 返回消息
+}
+
+// ---- 会话服务定义 ----
+
+@server(
+	group:               ai/session
+	prefix:              /api/v1/ai/session
+	middleware:          CheckTokenWare,InitCtxsWare
+	defaultAuthType:     "admin"
+	accessCodePrefix:    "aiSessionManage"
+	accessNamePrefix:    "会话管理"
+	accessGroup:         "AI中台"
+)
+service ai {
+	@doc(
+		summary: "创建会话"
+		description: "业务说明：创建新的AI对话会话实例，绑定到指定助手和可选分身。会话是用户与AI交互的上下文容器，记录对话轮次、状态、渠道等。创建后返回会话ID，后续对话请求使用该ID维持上下文连续性。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "create"
+		group: "ai/session"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (SessionCreateReq) returns (WithID)
+
+	@doc(
+		summary: "获取会话详情"
+		description: "业务说明：根据会话ID或内部ID查询完整的会话信息，包括绑定助手、分身、用户、渠道、状态、对话轮次等。用于会话详情查看、状态监控、历史追溯等场景。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "view"
+		group: "ai/session"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (SessionGetOneReq) returns (SessionInfo)
+
+	@doc(
+		summary: "获取会话列表"
+		description: "业务说明：分页查询会话列表，支持按租户、助手、分身、用户、状态过滤。用于会话管理页面、历史会话查看等场景。返回结果按最后活跃时间倒序排列，活跃会话优先展示。"
+		authType: "all"
+		resource: "ai/session"
+		action: "view"
+		group: "ai/session"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (SessionGetListReq) returns (SessionGetListResp)
+
+	@doc(
+		summary: "结束会话"
+		description: "业务说明：将活跃状态的会话标记为已结束，停止后续对话，保留会话记录供后续查询。结束后会话不再接受新消息，但历史记录仍然可用。用于用户主动结束对话、超时自动结束等场景。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "update"
+		group: "ai/session"
+		recordLogMode: "2"
+	)
+	@handler end
+	post /end (WithID)
+
+	@doc(
+		summary: "归档会话"
+		description: "业务说明：将已结束的会话归档，归档后的会话从活跃列表隐藏，但仍可通过历史查询访问。归档操作触发对话记录持久化到OSS，释放内存资源。用于会话清理、历史管理等场景。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "update"
+		group: "ai/session"
+		recordLogMode: "2"
+	)
+	@handler archive
+	post /archive (WithID)
+
+	@doc(
+		summary: "获取会话消息列表"
+		description: "业务说明：查询指定会话的对话消息记录，按轮次返回用户输入、AI回复、摘要、关键主题等。用于对话历史回放、内容分析、质量评估等场景。支持分页，每轮对话包含完整的问答对。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "view"
+		group: "ai/session"
+		recordLogMode: "1"
+	)
+	@handler messages
+	post /messages (SessionMessagesReq) returns (SessionMessagesResp)
+
+	@doc(
+		summary: "删除会话"
+		description: "业务说明：删除指定的会话记录及其关联的对话消息。删除后会话ID失效，历史记录不可恢复。用于清理过期会话、用户主动删除对话历史等场景。删除前应确保会话已结束。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "delete"
+		group: "ai/session"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (SessionDeleteReq) returns (SessionDeleteResp)
+
+	@doc(
+		summary: "注入消息到会话"
+		description: "业务说明：向已存在的会话注入外部消息，用于模拟用户输入、插入系统提示、补充上下文等场景。注入的消息会被记录到对话历史，参与后续AI推理。支持指定消息类型区分注入来源。"
+		authType: "admin"
+		resource: "ai/session"
+		action: "update"
+		group: "ai/session"
+		recordLogMode: "2"
+	)
+	@handler inject
+	post /inject (SessionInjectReq) returns (SessionInjectResp)
+}

@@ -1,0 +1,383 @@
+//--------------------通知管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message NotifyWithID{
+  int64 id = 1; //ID值
+}
+message NotifyEmpty{
+}
+
+message NotifyWithIDCode{
+  int64 id =1; //ID
+  string code=2; //Code值
+}
+
+service NotifyManage {
+  //站内信功能
+  rpc messageInfoSend(MessageInfoSendReq)returns(NotifyWithID);//发送站内信给用户
+  rpc messageInfoGetList(MessageInfoGetListReq)returns(MessageInfoGetListResp);//获取全局站内信列表
+  rpc messageInfoUpdate(MessageInfo)returns(NotifyEmpty);//更新站内信
+  rpc messageInfoDelete(NotifyWithID)returns(NotifyEmpty);//删除站内信
+
+  //资讯管理
+  rpc newsCreate(News)returns(NotifyWithID);//创建资讯
+  rpc newsRead(NotifyWithID)returns(News);//获取资讯详情
+  rpc newsUpdate(News)returns(NotifyEmpty);//更新资讯
+  rpc newsDelete(NotifyWithID)returns(NotifyEmpty);//删除资讯
+  rpc newsIndex(NewsIndexReq)returns(NewsIndexResp);//资讯列表查询
+  rpc newsPublish(NotifyWithID)returns(NotifyEmpty);//发布资讯
+  rpc newsOffline(NotifyWithID)returns(NotifyEmpty);//下架资讯
+
+  //通知配置信息管理
+  rpc notifyConfigGetOne(NotifyWithIDCode)returns(NotifyConfig);//获取通知配置详情
+  rpc notifyConfigCreate(NotifyConfig)returns(NotifyWithID);//创建通知配置
+  rpc notifyConfigUpdate(NotifyConfig)returns(NotifyEmpty);//更新通知配置
+  rpc notifyConfigGetList(NotifyConfigGetListReq)returns(NotifyConfigGetListResp);//获取通知配置列表
+  rpc notifyConfigDelete(NotifyWithID)returns(NotifyEmpty);//删除通知配置
+  rpc notifyConfigSend(NotifyConfigSendReq)returns(NotifyEmpty);//发送消息通知(支持短信,邮箱,钉钉推送,微信推送,app推送)
+  rpc notifyConfigSendTest(NotifyConfigSendReq)returns(NotifyEmpty);//测试发送通知
+
+  //通知模板管理
+  rpc notifyTemplateGetOne(NotifyWithID)returns(NotifyTemplate);//获取通知模板详情
+  rpc notifyTemplateCreate(NotifyTemplate)returns(NotifyWithID);//创建通知模板
+  rpc notifyTemplateUpdate(NotifyTemplate)returns(NotifyEmpty);//更新通知模板
+  rpc notifyTemplateGetList(NotifyTemplateGetListReq)returns(NotifyTemplateGetListResp);//获取通知模板列表
+  rpc notifyTemplateDelete(NotifyWithID)returns(NotifyEmpty);//删除通知模板
+
+  //通知配置模板关联管理
+  rpc notifyConfigTemplateUpdate(NotifyConfigTemplate)returns(NotifyEmpty);//更新通知配置模板关联
+  rpc notifyConfigTemplateDelete(NotifyConfigTemplateDeleteReq)returns(NotifyEmpty);//删除通知配置模板关联
+  rpc notifyConfigTemplateGetList(NotifyConfigTemplateGetListReq)returns(NotifyConfigTemplateGetListResp);//获取通知配置模板关联列表
+
+  //手动通知/公告管理
+  rpc notificationCreate(Notification)returns(NotifyWithID);//创建手动通知（草稿）
+  rpc notificationRead(NotifyWithID)returns(Notification);//获取手动通知详情
+  rpc notificationUpdate(Notification)returns(NotifyEmpty);//更新手动通知（仅草稿状态可编辑）
+  rpc notificationDelete(NotifyWithID)returns(NotifyEmpty);//删除手动通知（仅草稿状态可删除）
+  rpc notificationIndex(NotificationIndexReq)returns(NotificationIndexResp);//手动通知列表查询
+  rpc notificationSend(NotificationSendReq)returns(NotifyEmpty);//发送手动通知（含定时发送）
+  rpc notificationRevoke(NotifyWithID)returns(NotifyEmpty);//撤回已发送的通知
+  rpc notificationCopy(NotifyWithID)returns(NotifyWithID);//复制通知为新草稿
+  rpc notificationEstimateUsers(NotifyWithID)returns(NotificationEstimateResp);//预估通知送达用户数
+
+  //用户消息中心
+  rpc userMessageIndex(NotifyUserMsgIndexReq)returns(NotifyUserMsgIndexResp);//获取当前用户消息列表
+  rpc userMessageStatistics(NotifyEmpty)returns(NotifyUserMsgStatisticsResp);//获取当前用户消息统计（未读数等）
+  rpc userMessageMarkRead(NotifyUserMsgMarkReadReq)returns(NotifyEmpty);//批量标记消息已读
+  rpc userMessageMarkAllRead(NotifyEmpty)returns(NotifyEmpty);//标记全部消息已读
+  rpc userMessageHandle(NotifyWithID)returns(NotifyEmpty);//标记消息已处理
+  rpc userMessageGetPending(NotifyUserMsgGetPendingReq)returns(NotifyUserMsgIndexResp);//获取待处理消息列表
+  rpc userMessageMultiDelete(NotifyUserMsgMultiDeleteReq)returns(NotifyEmpty);//批量删除用户消息
+
+  //用户通知偏好
+  rpc userNotifyPreferenceRead(NotifyEmpty)returns(UserNotifyPreference);//获取当前用户通知偏好
+  rpc userNotifyPreferenceUpdate(UserNotifyPreference)returns(NotifyEmpty);//更新当前用户通知偏好
+
+  //内部发送接口
+  rpc sendNotify(SendNotifyReq)returns(NotifyEmpty);//内部RPC发送通知接口
+}
+
+//==================== 站内信 ====================
+
+message MessageInfoSendReq{
+  repeated int64 userIDs     =1; //指定用户ID列表
+  int64 isGlobal =2;//是否全局消息（1:是，2:否）
+  string notifyCode  =4;         //通知的code
+  string subject     =5; //通知主题
+  string body        =6; //通知内容
+  string str1        =7; //预留字符串参数1
+  string str2        =8; //预留字符串参数2
+  string str3        =9; //预留字符串参数3
+  repeated string withTypes =10;  //同时推送指定方式 sms email
+  map<string,string> params =12;//通知变量参数
+  int64 NotifyTime = 11;//通知时间,不传为立刻通知（毫秒时间戳）
+  repeated string accounts =13; //直接填写的接收账号列表（手机号/邮箱）；按渠道语义解析：sms 渠道为手机号，email 渠道为邮箱；站内信渠道不支持
+}
+message MessageInfoGetListReq{
+  PageInfo page =1; //分页信息
+  string group =2; //分组
+  string notifyCode  =4; //通知编码
+  int64 notificationID = 5; //关联手动通知ID（按此字段筛选时不限制 isDirectNotify）
+}
+message MessageInfoGetListResp{
+  repeated MessageInfo list=1; //消息列表
+  int64 total = 2; //总条数
+}
+message MessageInfo {
+  int64 id=10; //消息ID
+  string group =1; //消息分组
+  string notifyCode =2; //通知编码
+  string notifyName =12; //通知名称
+  string subject=3; //消息主题
+  string body=4; //消息内容
+  string str1=5; //预留字符串参数1
+  string str2=6; //预留字符串参数2
+  string str3=7; //预留字符串参数3
+  int64 isGlobal =8; //是否全局消息（1:是，2:否）
+  int64 createdTime=9; //创建时间（毫秒时间戳）
+  int64 notifyTime = 11;//通知时间（毫秒时间戳）
+  int64 notificationID = 13; //关联的手动通知ID（手动通知时有值，0表示事件触发）
+  string type = 14; //渠道类型：sms/email/message等
+  int64 priority = 15; //优先级 1:P0紧急 2:P1重要 3:P2普通
+  string actionText = 16; //操作按钮文案
+  string actionURL = 17; //操作跳转URL
+  int64 expireTime = 18; //有效期截止时间（毫秒时间戳）
+  int64 isDirectNotify = 19; //是否是发送通知消息创建（1:是，2:否）
+  string emailFormat = 20;        // email专属：邮件格式 richtext/html
+  int64 showAsModal = 21;         // message/news专属：是否弹窗 1=是 2=否(默认)
+  int64 modalShowStartTime = 22;  // message/news专属：弹窗开始时间(毫秒)
+  int64 modalShowEndTime = 23;    // message/news专属：弹窗结束时间(毫秒)
+  string severity = 24;           // banner专属：严重等级 info/warning/error
+  int64 allowDismiss = 25;        // banner专属：允许关闭 1=是 2=否
+  string coverImage = 26;         // news专属：封面图URL
+  string videoUrl = 27;           // news专属：视频URL
+}
+
+//==================== 资讯管理 ====================
+
+message News {
+  int64 id = 1; //资讯ID
+  string title = 2; //标题
+  string coverImage = 3; //封面图URL
+  string body = 4; //正文内容（HTML格式）
+  string summary = 5; //摘要
+  string actionURL = 6; //跳转链接
+  int64 notifyTime = 7; //发布时间（毫秒时间戳）
+  int64 expireTime = 8; //过期时间（毫秒时间戳）
+  int64 status = 9; //状态 1:草稿 2:已发布 3:已下架
+  int64 createdTime = 10; //创建时间（毫秒时间戳）
+  string tenantCode = 11; //租户编码
+}
+message NewsIndexReq {
+  PageInfo page = 1; //分页信息
+  string title = 2; //标题模糊搜索
+  int64 status = 3; //状态筛选
+  int64 notifyTimeStart = 4; //发布时间开始（毫秒时间戳）
+  int64 notifyTimeEnd = 5; //发布时间结束（毫秒时间戳）
+  string tenantCode = 6; //租户编码筛选
+}
+message NewsIndexResp {
+  repeated News list = 1; //资讯列表
+  int64 total = 2; //总条数
+}
+
+//==================== 通知配置 ====================
+
+message NotifyConfig{
+  int64 id =1; // 配置ID编号
+  string group =2; //通知分组
+  string code =3; // 通知类型编码
+  string name =4; //通知名称
+  repeated string supportTypes =5; //支持的通知类型（如sms、email、dingtalk等）
+  string desc =6; // 配置备注说明
+  int64 isRecord =7; //是否记录消息（1:是，2:否），是的情况下会将消息存一份到消息中心
+  map<string,string> params =12; //通知变量属性（key是参数名，value是参数描述）
+  repeated NotifyConfigTemplate templates =13;//绑定的模板信息列表
+  int64 isEnabled = 14; //是否启用（1:启用，2:禁用）
+  int64 throttle = 15; //防抖间隔（秒），0表示不防抖
+  int64 lastTriggerTime = 16; //最后触发时间（毫秒时间戳）
+}
+message NotifyConfigGetListReq{
+  PageInfo page =1; //分页信息
+  string group =2; //通知分组
+  string code =3; // 通知类型编码
+  string name =4; //通知名称
+  bool withTemplates =5; //是否包含关联的模板信息
+  int64 isEnabled = 6; //是否启用筛选（1:启用，2:禁用）
+}
+message NotifyConfigGetListResp{
+  repeated NotifyConfig list =1; //配置列表
+  int64 total= 2; //总条数
+}
+message NotifyConfigSendReq{
+  repeated int64 userIDs     =1; // 接收通知的用户ID列表（只有填写了用户ID才会记录）
+  repeated string accounts    =2; // 接收通知的账号列表
+  string notifyCode  =4;         // 通知编码
+  string type        =5;         // 通知类型（如sms、email、dingtalk等）
+  map<string,string> params      =6; // 通知参数
+  string str1        =7;         // 自定义参数1
+  string str2        =8;         // 自定义参数2
+  string str3        =9;         // 自定义参数3
+  int64 templateID =10;          // 指定使用的模板ID
+}
+
+//==================== 通知模板 ====================
+
+message NotifyTemplate{
+  int64 id =1;  // 模板ID编号
+  string name =3;  //模板名称
+  string notifyCode =4;  //对应的通知配置编码
+  string type =5;  //通知类型（如sms、email、dingtalk等）
+  string templateCode =6;  // 短信通知模板编码
+  string subject =8;  //消息主题（邮件、站内信等使用）
+  string body =9;  //模板内容
+  string desc =10;  // 模板备注
+  string webhook =11;//钉钉或企微webhook地址
+  string emailFormat = 15;        // email专属：邮件格式 richtext/html
+  int64 showAsModal = 16;         // message/news专属：是否弹窗 1=是 2=否(默认)
+  int64 modalShowStartTime = 17;  // message/news专属：弹窗开始时间(毫秒)
+  int64 modalShowEndTime = 18;    // message/news专属：弹窗结束时间(毫秒)
+  string severity = 19;           // banner专属：严重等级 info/warning/error
+  int64 allowDismiss = 20;        // banner专属：允许关闭 1=是 2=否
+  string coverImage = 21;         // news专属：封面图URL
+  string videoUrl = 22;           // news专属：视频URL
+}
+message NotifyTemplateGetListReq{
+  PageInfo page =1; //分页信息
+  string name =3;  //通知的命名
+  string notifyCode =4;  //对应的配置Code
+  string type =5;  //对应的配置类型 sms email
+}
+message NotifyTemplateGetListResp{
+  repeated NotifyTemplate list =1; //模板列表
+  int64 total= 2; //总条数
+}
+
+//==================== 通知配置模板关联 ====================
+
+message NotifyConfigTemplate{
+  int64 id =1;               // 关联ID
+  string notifyCode =2;      // 通知配置编码
+  string type =3;            // 通知类型（如sms、email、dingtalk等）
+  int64 templateID =4;       // 模板ID
+}
+message NotifyConfigTemplateDeleteReq{
+  string notifyCode =2; // 通知配置编码
+  string type =3;       // 通知类型（如sms、email、dingtalk等）
+}
+message NotifyConfigTemplateGetListReq{
+  string notifyCode =2; // 通知配置编码
+  string type =3;       // 通知类型（如sms、email、dingtalk等）
+}
+message NotifyConfigTemplateGetListResp{
+  repeated NotifyConfigTemplate list =1; // 通知配置模板列表
+}
+
+//==================== 手动通知/公告 ====================
+
+message Notification{
+  int64 id = 1; //通知ID
+  string tenantCode = 2; //租户编码，空=平台级
+  string title = 3; //标题（最大256字符）
+  string content = 4; //内容
+  string group = 5; //分组
+  repeated string channels = 6; //发送渠道列表
+  int64 priority = 7; //优先级 1:P0紧急 2:P1重要 3:P2普通
+  int64 status = 8; //状态 1:草稿 2:已规划 3:运行中 4:已发送 5:已撤回
+  string actionText = 9; //操作按钮文案
+  string actionURL = 10; //操作跳转URL
+  int64 expireTime = 11; //有效期截止时间（毫秒时间戳）
+  int64 scheduleTime = 12; //计划发送时间（毫秒时间戳）
+  int64 sentTime = 13; //实际发送时间（毫秒时间戳）
+  int64 audienceType = 14; //受众类型 1:指定用户 2:全局广播
+  repeated int64 targetUserIDs = 15; //目标用户ID列表
+  int64 estimatedUsers = 16; //预计送达数
+  int64 actualUsers = 17; //实际送达数
+  int64 creatorID = 18; //创建者ID
+  int64 createdTime = 19; //创建时间（毫秒时间戳）
+  int64 updatedTime = 20; //更新时间（毫秒时间戳）
+  string emailFormat = 21;        // email专属：邮件格式 richtext/html
+  int64 showAsModal = 22;         // message/news专属：是否弹窗 1=是 2=否(默认)
+  int64 modalShowStartTime = 23;  // message/news专属：弹窗开始时间(毫秒)
+  int64 modalShowEndTime = 24;    // message/news专属：弹窗结束时间(毫秒)
+  string severity = 25;           // banner专属：严重等级 info/warning/error
+  int64 allowDismiss = 26;        // banner专属：允许关闭 1=是 2=否
+  string coverImage = 27;         // news专属：封面图URL
+  string videoUrl = 28;           // news专属：视频URL
+}
+message NotificationIndexReq{
+  PageInfo page = 1; //分页信息
+  int64 status = 2; //状态筛选
+  string group = 3; //分组筛选
+  int64 priority = 4; //优先级筛选
+  string tenantCode = 5; //租户编码筛选
+  string title = 6; //标题模糊搜索
+}
+message NotificationIndexResp{
+  repeated Notification list = 1; //通知列表
+  int64 total = 2; //总条数
+}
+message NotificationSendReq{
+  int64 id = 1; //通知ID
+  int64 scheduleTime = 2; //计划发送时间（毫秒时间戳），0表示立即发送
+}
+message NotificationEstimateResp{
+  int64 estimatedCount = 1; //预估送达用户数
+}
+
+//==================== 用户消息中心 ====================
+
+message NotifyUserMsg{
+  int64 id = 1; //用户消息ID
+  int64 userID = 2; //用户ID
+  string group = 3; //消息分组
+  int64 messageID = 4; //关联消息ID
+  int64 isRead = 5; //是否已读（1:已读，2:未读）
+  int64 isHandled = 6; //是否已处理（1:已处理，2:未处理）
+  MessageInfo message = 7; //关联的消息详情
+  int64 createdTime = 8; //创建时间（毫秒时间戳）
+}
+message NotifyUserMsgIndexReq{
+  PageInfo page = 1; //分页信息
+  string group = 2; //消息分组筛选
+  string type = 3; //渠道类型筛选
+  int64 isRead = 4; //已读状态筛选（1:已读，2:未读）
+  int64 isHandled = 5; //已处理状态筛选（1:已处理，2:未处理）
+  TimeRange createdTime = 6; //创建时间范围
+}
+message NotifyUserMsgIndexResp{
+  repeated NotifyUserMsg list = 1; //用户消息列表
+  int64 total = 2; //总条数
+}
+message NotifyUserMsgStatisticsResp{
+  map<string,int64> unreadCounts = 1; //各分组未读数
+  int64 totalUnread = 2; //总未读数
+  int64 totalPending = 3; //总待处理数
+}
+message NotifyUserMsgMarkReadReq{
+  repeated int64 ids = 1; //要标记已读的消息ID列表
+}
+message NotifyUserMsgGetPendingReq{
+  PageInfo page = 1; //分页信息
+}
+message NotifyUserMsgMultiDeleteReq{
+  repeated int64 ids = 1; //要删除的消息ID列表
+}
+
+//==================== 用户通知偏好 ====================
+
+message UserNotifyPreference{
+  int64 id = 1; //偏好ID
+  string tenantCode = 2; //租户编码
+  int64 userID = 3; //用户ID
+  string quietStartTime = 4; //免打扰开始时间 HH:MM
+  string quietEndTime = 5; //免打扰结束时间 HH:MM
+  repeated string quietChannels = 6; //免打扰渠道列表
+  repeated UserNotifySubscription subscriptions = 7; //订阅控制列表
+}
+message UserNotifySubscription{
+  string group = 1; //通知分组
+  string type = 2; //渠道类型
+  int64 isEnabled = 3; //是否启用（1:启用，2:禁用）
+}
+
+//==================== 内部发送接口 ====================
+
+message SendNotifyReq{
+  repeated int64 userIDs = 1; //接收用户ID列表
+  repeated string accounts = 2; //接收账号列表
+  string notifyCode = 3; //通知编码
+  repeated string types = 4; //通知渠道类型列表
+  map<string,string> params = 5; //模板变量参数
+  string str1 = 6; //自定义参数1
+  string str2 = 7; //自定义参数2
+  string str3 = 8; //自定义参数3
+  int64 noRecord = 9; //是否不记录（1:不记录，2:记录）
+  int64 priority = 10; //优先级 1:P0紧急 2:P1重要 3:P2普通
+  string actionText = 11; //操作按钮文案
+  string actionURL = 12; //操作跳转URL
+}

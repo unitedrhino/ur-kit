@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+// ChatMessage 对话消息（与 HTTP 层 types.ChatMessage 对齐的最小集）
+message ChatMessage {
+  // role 角色：system / user / assistant
+  string role = 1;
+  // content 文本内容（IM 场景只传文本）
+  string content = 2;
+}
+
+// ChatCompletionsReq AI 对话请求（IM 阶段 2：人与 Clone 沟通）
+message ChatCompletionsReq {
+  // agent_id 关联 Agent ID（能力载体）
+  int64 agent_id = 1;
+  // clone_id 分身 ID
+  int64 clone_id = 2;
+  // session_id 会话 ID（IM 映射规则：im_{conversationID}，为空时自动生成）
+  string session_id = 3;
+  // messages 本次输入的消息列表（通常只含最新一条用户消息，历史由服务端按 session 加载）
+  repeated ChatMessage messages = 4;
+  // current_app_id 当前应用 ID（上下文感知，可选）
+  string current_app_id = 5;
+  // current_app_name 当前应用名称（可选）
+  string current_app_name = 6;
+  // current_route 当前页面路由（可选）
+  string current_route = 7;
+  // tenant_code 租户编码
+  string tenant_code = 8;
+  // user_id 调用方用户 ID（用于记忆隔离与限流）
+  int64 user_id = 9;
+  // enable_im_tools 是否注册 IM 历史工具（im.history / im.search）
+  bool enable_im_tools = 10;
+  // im_conversation_id IM 会话 ID（IM 历史工具的查询范围）
+  int64 im_conversation_id = 11;
+}
+
+// ChatCompletionsResp AI 对话响应（非流式，同步收集完整回复）
+message ChatCompletionsResp {
+  // session_id 会话 ID
+  string session_id = 1;
+  // content AI 完整回复文本
+  string content = 2;
+}
+
+// Chat AI 对话服务（IM 阶段 2：imsvr 调用）
+service Chat {
+  // Completions 非流式对话：agentruntime 同步收集完整回复
+  rpc Completions(ChatCompletionsReq) returns (ChatCompletionsResp);
+}

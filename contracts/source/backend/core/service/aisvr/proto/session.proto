@@ -1,0 +1,162 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// SessionEmpty Session 服务通用空响应。
+message SessionEmpty {
+}
+
+// SessionWithID Session 服务通用 ID 响应。
+message SessionWithID {
+  int64 ID = 1;
+}
+
+// SessionInfo AI 会话信息（ai_sessions）。
+message SessionInfo {
+  int64 ID = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userID 归属用户 ID
+  int64 userID = 3;
+  // cloneID 关联的 Clone ID
+  int64 cloneID = 4;
+  // title 会话标题
+  string title = 5;
+  // status 会话状态（1-活跃 2-已结束 3-已归档）
+  int64 status = 6;
+  // startTime 开始时间（Unix 秒）
+  int64 startTime = 7;
+  // endTime 结束时间（Unix 秒）
+  int64 endTime = 8;
+  // messageCount 消息数量
+  int64 messageCount = 9;
+  // lastMessageTime 最后消息时间（Unix 秒）
+  int64 lastMessageTime = 10;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 11;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 12;
+  // 统一会话业务返回的运行标识和渠道信息。
+  string sessionID = 13;
+  int64 agentID = 14;
+  string channel = 15;
+  int64 turnCount = 16;
+  string transcriptOssKey = 17;
+  int64 lastActiveAt = 18;
+}
+
+// SessionCreateReq 创建会话请求。
+message SessionCreateReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // userID 归属用户 ID
+  int64 userID = 2;
+  // cloneID 关联的 Clone ID
+  int64 cloneID = 3;
+  // title 会话标题
+  string title = 4;
+  // 与统一会话业务一致的助手及渠道。
+  int64 agentID = 5;
+  string channel = 6;
+}
+
+// SessionGetOneReq 读取单个会话请求。
+message SessionGetOneReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 会话 ID
+  int64 ID = 2;
+  // 会话字符串标识，可与 ID 二选一。
+  string sessionID = 3;
+}
+
+// SessionGetListReq 会话列表查询请求。
+message SessionGetListReq {
+  // page 分页参数
+  PageInfo page = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // userID 归属用户（0 表示不筛）
+  int64 userID = 3;
+  // cloneID 关联的 Clone ID（0 表示不筛）
+  int64 cloneID = 4;
+  // status 会话状态筛选（0 表示不筛）
+  int64 status = 5;
+  // title 标题模糊筛选
+  string title = 6;
+  // 当前用户范围及已有 HTTP 查询条件。
+  bool currentScope = 7;
+  int64 agentID = 8;
+  int64 startTime = 9;
+  int64 endTime = 10;
+}
+
+// SessionGetListResp 会话列表查询响应。
+message SessionGetListResp {
+  repeated SessionInfo list = 1;
+  int64 total = 2;
+}
+
+// SessionEndReq 结束会话请求。
+message SessionEndReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 会话 ID
+  int64 ID = 2;
+}
+
+// SessionArchiveReq 归档会话请求。
+message SessionArchiveReq {
+  // tenantCode 租户编码
+  string tenantCode = 1;
+  // id 会话 ID
+  int64 ID = 2;
+}
+
+// SessionContextSnapshotReq 只指定原 AISVR 会话和明确轮次范围，身份来自已鉴权 RPC 上下文。
+message SessionContextSnapshotReq {
+  string aiSessionID = 1; // 原 AISVR 运行会话键，不是 IM 会话或数据库主键。
+  uint64 firstTurnIndex = 2; // 原一基首轮，必填。
+  uint64 lastTurnIndex = 3; // 原一基末轮，含首尾最多 32 对。
+  string expectedVersion = 4; // 可选；提供时必须与原范围稳定版本相同。
+}
+
+// SessionContextTurn 已完成本人 user/assistant 文本；不提供系统、工具、附件或原始媒体字段。
+message SessionContextTurn {
+  string messageID = 1; // 原摘要与角色的稳定消息键。
+  uint64 sequence = 2; // 原轮次推导的单调文本序号。
+  uint64 turnIndex = 3; // 原摘要轮次。
+  string role = 4; // user 或 assistant，同轮按此顺序成对。
+  int64 ownerUserID = 5; // 原本人用户。
+  bool completed = 6; // 原生产终态明确完成。
+  string text = 7; // 单条有界完整文本。
+}
+
+// SessionContextSnapshotResp 返回原绑定、完成文本、原范围与内容版本，供 IM 再核实际 source。
+message SessionContextSnapshotResp {
+  string aiSessionID = 1;
+  string tenantCode = 2;
+  int64 ownerUserID = 3;
+  string channelType = 4; // 原可信 device 入口。
+  string channelID = 5; // 原 product:device 绑定，不来自导出请求。
+  string channel = 6; // 原 text 或 voice。
+  uint64 firstTurnIndex = 7;
+  uint64 lastTurnIndex = 8;
+  string version = 9;
+  string exportDigest = 10; // AISVR 原范围 hash，不等于 IM 加 source 后的 digest。
+  repeated SessionContextTurn turns = 11;
+}
+
+// Session AI 会话服务（一个 proto 一个 service）。
+service Session {
+  // SessionContextSnapshot 严格本人原设备已完成文本导出，不使用管理员代读或旧查询兜底。
+  rpc SessionContextSnapshot(SessionContextSnapshotReq) returns(SessionContextSnapshotResp);
+  rpc SessionCreate(SessionCreateReq) returns(SessionWithID);
+  rpc SessionGetOne(SessionGetOneReq) returns(SessionInfo);
+  rpc SessionGetList(SessionGetListReq) returns(SessionGetListResp);
+  rpc SessionEnd(SessionEndReq) returns(SessionEmpty);
+  rpc SessionArchive(SessionArchiveReq) returns(SessionEmpty);
+}

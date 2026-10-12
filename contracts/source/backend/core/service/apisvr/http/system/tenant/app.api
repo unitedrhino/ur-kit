@@ -1,0 +1,216 @@
+info (
+	title:   "租户管理模块"
+	desc:    "租户管理"
+	author:  "L"
+	email:   "174805676@qq.com"
+	version: "v0.1.0"
+)
+
+@server (
+	group:            system/tenant/app
+	prefix:           /api/v1/system/tenant/app
+	accessCodePrefix: "systemTenantManage"
+	accessNamePrefix: "租户应用"
+	accessGroup:      "租户管理"
+	defaultNeedAuth:  "true"
+	defaultAuthType:  "platform"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:    "获取租户应用列表"
+		description: "业务说明：查询租户已开通的应用列表，支持按应用类型、状态过滤。租户管理员可查看自己租户的应用，平台管理员可查看任意租户的应用绑定情况。用于应用管理列表页。"
+		authType:   "admin"
+		accessCode: "systemTenantManageApp"
+		accessName: "租户获取应用信息"
+		group: "system/tenant/app"
+		resource: "system/tenant/app"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantAppGetListReq) returns (TenantAppGetListResp)
+
+	@doc (
+		summary:  "绑定租户应用"
+		description: "业务说明：为租户开通指定应用，付费应用需提供授权码。平台管理员可跨租户操作；租户用户只能为自己的租户开通，需提供授权码。开通后租户用户可使用该应用。"
+		authType: "all"
+		group: "system/tenant/app"
+		resource: "system/tenant/app"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /create (TenantAppCreateReq)
+
+	@doc (
+		summary:  "更新租户应用"
+		description: "业务说明：修改租户应用的配置，如状态、排序、过期时间等。仅平台管理员可操作，用于平台后台的应用配置管理。"
+		authType: "platform"
+		group: "system/tenant/app"
+		resource: "system/tenant/app"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (TenantAppInfo)
+
+	@doc (
+		summary:  "解绑租户应用"
+		description: "业务说明：解除租户与应用的绑定关系，租户用户将无法继续使用该应用。仅平台管理员可操作，用于平台后台的应用授权注销功能。"
+		authType: "platform"
+		group: "system/tenant/app"
+		resource: "system/tenant/app"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler delete
+	post /delete (WithTenantAppID)
+
+	@doc(
+	    summary: "获取应用信息"
+	    description: "业务说明：查询单个租户应用的详细配置信息，包括状态、过期时间、应用详情等。用于应用详情页或编辑表单初始化。"
+	    authType: "platform"
+	    group: "system/tenant/app"
+	    resource: "system/tenant/app"
+	    action: "view"
+	    recordLogMode: "3"
+	)
+	@handler getOne
+	post /get-one (WithTenantAppID) returns (TenantAppInfo)
+}
+
+@server (
+	group:            system/tenant/app/menu
+	prefix:           /api/v1/system/tenant/app/menu
+	accessCodePrefix: "systemTenantManage"
+	accessNamePrefix: "租户管理"
+	accessGroup:      "租户管理"
+	defaultNeedAuth:  "true"
+	middleware:       CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc (
+		summary:    "获取租户应用菜单列表"
+		description: "业务说明：查询租户在指定应用下的菜单配置列表，支持返回树形结构。用于应用菜单配置管理页面，可查看和编辑租户对应用菜单的定制。"
+		authType:   "admin"
+		accessCode: "systemTenantManageApp"
+		accessName: "租户获取应用信息"
+		group: "system/tenant/app/menu"
+		resource: "system/tenant/app/menu"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /get-list (TenantMenuGetListReq) returns (TenantMenuGetListResp)
+
+	@doc (
+		summary:    "更新租户应用菜单"
+		description: "业务说明：修改租户应用菜单的配置，如菜单名称、图标、排序、是否收藏/隐藏等。租户管理员可修改本租户的菜单配置，平台管理员可修改任意租户的菜单配置。"
+		authType:   "admin"
+		isNeedAuth: "true"
+		group: "system/tenant/app/menu"
+		resource: "system/tenant/app/menu"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler update
+	post /update (TenantMenu) returns (WithID)
+}
+
+type (
+	WithTenantAppID {
+		AppID      int64  `json:"appID,string"`
+		TenantCode string `json:"tenantCode,optional"` //指定租户,只有平台可以指定
+	}
+	WithAppID {
+		AppID int64 `json:"appID,string"`
+	}
+	TenantMenuGetListReq {
+		TenantCode string  `json:"tenantCode,optional"` //指定租户,只有平台可以指定
+		AppID      int64   `json:"appID,string"`
+		IsRetTree  bool    `json:"isRetTree,optional"`
+		MenuIDs    []int64 `json:"menuIDs,string,optional"`
+		IsStar     int64   `json:"isStar,optional"` // 是否收藏 1:是 2:否
+	}
+	TenantMenuGetListResp {
+		List []*TenantMenu `json:"list"`
+	}
+	TenantMenu {
+		ID           int64         `json:"id,string,optional"` // 编号
+		AppID        int64         `json:"appID,string,optional"` // 应用ID,新增必填,不可修改
+		MenuID       int64         `json:"menuID,string,optional"` // 菜单ID,不可修改
+		ParentMenuID int64         `json:"parentMenuID,string,optional"` // 父菜单ID，一级菜单为1
+		Name         string        `json:"name,optional"` // 菜单名称
+		Sort         int64         `json:"sort,optional"` // 左侧table排序序号
+		Icon         string        `json:"icon,optional"` // 图标
+		IsStar       int64         `json:"isStar,optional"` //是否收藏 1:是 2:否
+		IsHideInMenu int64         `json:"isHideInMenu,optional"` // 是否隐藏菜单 1-是 2-否
+		Menu         MenuInfo      `json:"menu,optional"` // 菜单信息
+		Children     []*TenantMenu `json:"children,optional"`
+	}
+)
+
+type (
+	TenantAppCreateReq {
+		TenantCode  string `json:"tenantCode,optional"` // 指定租户,只有平台可以指定
+		AppID       int64  `json:"appID,string"` // 应用ID
+		LicenseCode string `json:"licenseCode,optional"` // 授权码（付费应用必填，免费/试用应用可留空）
+	}
+	TenantAppGetListReq {
+		TenantCode string    `json:"tenantCode,optional"` //指定租户,租户下只能过滤 common或他自己的  common的是通用应用,非common的是租户应用
+		Page       *PageInfo `json:"page,optional"` // 分页信息
+		AppIDs     []int64   `json:"appIDs,string,optional"`
+		NotAppID   int64     `json:"notAppID,string,optional"` //排除某个应用ID
+		Type       string    `json:"type,optional"` //应用类型 web:web页面  native:原生  mini:小程序
+		SubType    string    `json:"subType,optional"` //子类型 mini:(wx:微信小程序,ding:钉钉小程序)  native:安卓,ios,鸿蒙,win
+		AppID      int64     `json:"appID,string,optional"`
+		Status     int64     `json:"status,optional"` // 应用状态 1 正常(默认)，2 禁用，3 过期
+		UseBy      string    `json:"useBy,optional"` // 使用对象 client:登录直接授权该应用 admin:管理员使用,需要邀请 
+		WithApp    bool      `json:"withApp,optional"` //同时返回应用信息
+	}
+	TenantAppGetListResp {
+		List []*TenantAppInfo `json:"list"` // 租户列表数据
+		PageResp
+	}
+	//    TenantAppModuleBatchCreate{
+	//        Code string `json:"code,optional"`                     // 租户编号
+	//        AppID int64 `json:"appID,string"`
+	//        Modules []*TenantAppModule `json:"modules"`
+	//    }
+	//    ResCore{
+	//        ID int64 `json:"id,string"`
+	//        Code string `json:"code"`
+	//        Name string `json:"name"`
+	//        Type string `json:"type"` // menu:菜单 api:接口
+	//    }
+	//    AppCore{
+	//        ID int64 `json:"id,string,optional"`                                      // 编号
+	//        Code string `json:"code"`                               // 应用编码
+	//        Type string `json:"type"` //应用类型 web:web页面  app:应用  mini:小程序
+	//        SubType string `json:"subType,optional"`//子类型  wx:微信小程序  ding:钉钉小程序
+	//        Name string `json:"name,optional"`                                 // 应用名称
+	//        LoginTypes []string `json:"loginTypes,optional"`//支持的登录类型(不填支持全部登录方式):    "email":邮箱 "phone":手机号  "wxMiniP":微信小程序  "wxOpen": 微信开放平台登录   "dingApp":钉钉应用(包含小程序,h5等方式)  "pwd":账号密码注册
+	//        WxOpen *ThirdMiniCore `json:"wxOpen,optional,omitempty"`//微信开放 web app有
+	//        IsAutoRegister int64 `json:"isAutoRegister,optional"` //登录未注册是否自动注册
+	//        Config string `json:"config,optional"` //自定义配置json
+	//        Android *ThirdApp `json:"android,optional,omitempty"`
+	//        Tenant *TenantCore `json:"tenant"` //租户信息
+	//    }
+	TenantAppInfo {
+		TenantCode  string   `json:"tenantCode,optional"` //指定租户,只有平台可以指定
+		ID          int64    `json:"id,string"` // 编号
+		AppID       int64    `json:"appID,string"` // 应用ID
+		Status      int64    `json:"status,optional"` // 应用状态(平台才可以修改) 1 正常(默认)，2 禁用，3 过期
+		Sort        int64    `json:"sort,optional"` //排序,不能小于等于0,默认为1
+		ExpTime     *int64   `json:"expTime,optional"` //过期时间(平台才可以修改),为0不限制
+		CreatedTime int64    `json:"createdTime,string,optional"` //只读
+		App         *AppInfo `json:"app,optional"` //只读
+	}
+//    TenantAppModule{
+//        Code string `json:"code"`                     // 应用编号
+//        MenuIDs []int64 `json:"menuIDs,optional"`
+//        ApiIDs []int64 `json:"apiIDs,optional"`
+//    }
+)
+

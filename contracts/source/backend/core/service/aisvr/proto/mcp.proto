@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+// McpEmpty Mcp 服务通用空响应。
+message McpEmpty {
+}
+
+// McpWithID Mcp 服务通用 ID 响应。
+message McpWithID {
+  int64 ID = 1;
+}
+
+// McpServiceInfo MCP 服务注册信息（ai_mcp_services）。
+message McpServiceInfo {
+  int64 ID = 1;
+  // tenantCode 租户编码
+  string tenantCode = 2;
+  // name 服务名称（租户内唯一）
+  string name = 3;
+  // description 服务描述
+  string description = 4;
+  // endpoint MCP 服务地址（URL）
+  string endpoint = 5;
+  // authType 鉴权类型（none/bearer/apikey/...）
+  string authType = 6;
+  // authConfig 鉴权配置（JSON 字符串）
+  string authConfig = 7;
+  // tools 工具清单（JSON 字符串）
+  string tools = 8;
+  // enabled 是否启用
+  bool enabled = 9;
+  // createdTime 创建时间（Unix 秒）
+  int64 createdTime = 10;
+  // updatedTime 更新时间（Unix 秒）
+  int64 updatedTime = 11;
+}
+
+// McpServiceGetOneReq 读取单个 MCP 服务请求。
+message McpServiceGetOneReq {
+  string tenantCode = 1;
+  int64 ID = 2;
+}
+
+// McpServiceGetListReq MCP 服务列表查询请求。
+message McpServiceGetListReq {
+  PageInfo page = 1;
+  string tenantCode = 2;
+  string name = 3;
+}
+
+// McpServiceGetListResp MCP 服务列表查询响应。
+message McpServiceGetListResp {
+  repeated McpServiceInfo list = 1;
+  int64 total = 2;
+}
+
+// McpEndpointResolveReq 解析 MCP 服务 endpoint 请求（按名称）。
+message McpEndpointResolveReq {
+  string tenantCode = 1;
+  string name = 2;
+}
+
+// McpEndpointResolveResp MCP 服务 endpoint 解析响应。
+message McpEndpointResolveResp {
+  string endpoint = 1;
+  string authType = 2;
+  string authConfig = 3;
+  string tools = 4;
+  bool enabled = 5;
+}
+
+// Mcp MCP 服务（一个 proto 一个 service）。
+service Mcp {
+  rpc McpServiceRegister(McpServiceInfo) returns(McpWithID);
+  rpc McpServiceGetOne(McpServiceGetOneReq) returns(McpServiceInfo);
+  rpc McpServiceDelete(McpServiceGetOneReq) returns(McpEmpty);
+  rpc McpServiceGetList(McpServiceGetListReq) returns(McpServiceGetListResp);
+  rpc McpEndpointResolve(McpEndpointResolveReq) returns(McpEndpointResolveResp);
+}

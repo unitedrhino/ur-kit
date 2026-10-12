@@ -1,0 +1,14 @@
+info(
+	title: "imsvr 公共类型定义"
+	desc: "imsvr REST 接口公共结构体定义"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+type (
+	// Empty 空响应（无返回体的接口统一使用）
+	Empty {
+
+	}
+)

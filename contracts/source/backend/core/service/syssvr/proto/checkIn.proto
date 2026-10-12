@@ -1,0 +1,82 @@
+syntax = "proto3";
+option go_package = "/sys";
+import "share.proto";
+package sys;
+
+// -------- 签到/积分服务专用 ID 和空消息 --------
+message CheckInWithID {
+  int64 id = 1; // ID值
+}
+message CheckInEmpty {}
+
+service checkIn {
+  // 用户签到（当日首次成功，重复返回 alreadyDone=true）
+  rpc checkInDo(CheckInDoReq) returns (CheckInDoResp);
+  // 获取签到记录列表（普通用户看自己，管理员可指定 userID）
+  rpc checkInGetList(CheckInGetListReq) returns (CheckInGetListResp);
+  // 获取积分流水列表
+  rpc pointLogGetList(PointLogGetListReq) returns (PointLogGetListResp);
+  // 管理员调整积分（增/减，留存备注）
+  rpc pointLogAdjust(PointLogAdjustReq) returns (CheckInEmpty);
+  // 获取用户当前积分余额
+  rpc pointBalanceGet(CheckInWithID) returns (PointBalanceGetResp);
+}
+
+// -------- 签到 --------
+message CheckInDoReq {}
+message CheckInDoResp {
+  int64 pointDelta   = 1; // 本次获得积分（重复签到时为 0）
+  int64 totalBalance = 2; // 当前总积分
+  bool  alreadyDone  = 3; // 今日是否已签到
+}
+
+message CheckInGetListReq {
+  PageInfo page      = 1; // 分页信息
+  int64    userID    = 2; // 0=当前用户，非0=管理员指定用户
+  int64    startTime = 3; // 开始时间（Unix秒，按 created_time 过滤）
+  int64    endTime   = 4; // 结束时间（Unix秒）
+}
+message CheckInItem {
+  int64  id           = 1; // 签到记录ID
+  int64  userID       = 2; // 用户ID
+  string checkDate    = 3; // 签到日期 YYYY-MM-DD
+  bool   isContinuous = 4; // 是否连续签到
+  int64  pointDelta   = 5; // 本次获得积分
+  int64  createdTime  = 6; // 签到时间（Unix毫秒）
+}
+message CheckInGetListResp {
+  repeated CheckInItem list  = 1; // 签到记录列表
+  int64                total = 2; // 总数
+}
+
+// -------- 积分流水 --------
+message PointLogGetListReq {
+  PageInfo page      = 1; // 分页信息
+  int64    userID    = 2; // 0=当前用户
+  string   source    = 3; // 来源过滤: checkIn/admin/""=全部
+  int64    startTime = 4; // 开始时间（Unix秒）
+  int64    endTime   = 5; // 结束时间（Unix秒）
+}
+message PointLogItem {
+  int64  id          = 1; // 流水ID
+  int64  userID      = 2; // 用户ID
+  int64  delta       = 3; // 积分变动量（正/负）
+  int64  balance     = 4; // 变动后余额
+  string source      = 5; // 来源: checkIn / admin
+  string remark      = 6; // 备注
+  int64  createdTime = 7; // 创建时间（Unix毫秒）
+}
+message PointLogGetListResp {
+  repeated PointLogItem list  = 1; // 流水列表
+  int64                 total = 2; // 总数
+}
+
+message PointLogAdjustReq {
+  int64  targetUserID = 1; // 被调整的用户ID（必填）
+  int64  delta        = 2; // 变动量（正=增加，负=减少，不得为0）
+  string remark       = 3; // 原因（必填，最长200字）
+}
+
+message PointBalanceGetResp {
+  int64 balance = 1; // 当前积分余额
+}

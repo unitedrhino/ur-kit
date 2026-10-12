@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+// CommonEmpty 通用空消息（仅用于共享 message，不绑定具体 service）。
+message CommonEmpty {
+}
+
+// CommonWithID 通用 ID 消息（仅用于共享 message，不绑定具体 service）。
+message CommonWithID {
+  int64 id = 1;
+}
+
+// PageInfo 通用分页信息。
+message PageInfo {
+  // page 页码（从 1 开始）
+  int64 page = 1;
+  // size 每页大小
+  int64 size = 2;
+  // orders 排序字段
+  repeated OrderBy orders = 3;
+  message OrderBy {
+    // field 字段名
+    string field = 1;
+    // sort 排序方向（1 升序，-1 降序）
+    int64 sort = 2;
+  }
+}

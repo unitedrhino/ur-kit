@@ -1,0 +1,104 @@
+//--------------------项目管理服务--------------------
+syntax = "proto3";
+option go_package = "/dm";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "area.proto";
+package dm;//必须为服务名
+
+message ProjectWithID{
+  int64 projectID = 1; //项目ID（只读）
+  bool withTopAreas =5;  //是否同时返回顶层的区域列表（true:是，false:否）
+}
+message ProjectEmpty{
+}
+
+
+service ProjectManage {
+  rpc projectInfoCreate (ProjectInfo) returns (ProjectWithID); //创建项目信息
+  rpc projectInfoUpdate (ProjectInfo) returns(ProjectEmpty); //更新项目信息
+  rpc projectInfoDelete (ProjectWithID) returns(ProjectEmpty); //删除项目
+  rpc projectInfoGetOne (ProjectWithID) returns (ProjectInfo); //获取项目信息详情
+  rpc projectInfoGetList (ProjectInfoGetListReq) returns (ProjectInfoGetListResp); //获取项目信息列表（支持分页和过滤）
+
+  rpc projectProfileGetOne(ProjectProfileGetOneReq)returns(ProjectProfile); //获取项目配置文件详情
+  rpc projectProfileUpdate(ProjectProfile)returns(ProjectEmpty); //更新项目配置文件
+  rpc projectProfileGetList(ProjectProfileGetListReq)returns(ProjectProfileGetListResp); //获取项目配置文件列表（支持分页和过滤）
+
+  rpc projectCrudCreate (ProjectCrud) returns(ProjectWithID); //创建项目CRUD操作信息
+  rpc projectCrudUpdate (ProjectCrud) returns(ProjectEmpty); //更新项目CRUD操作信息
+  rpc projectCrudDelete (ProjectWithID) returns(ProjectEmpty); //删除项目CRUD操作信息
+  rpc projectCrudGetOne (ProjectWithID) returns (ProjectCrud); //获取项目CRUD操作详情
+  rpc projectCrudGetList (ProjectCrudGetListReq) returns (ProjectCrudGetListResp); //获取项目CRUD操作列表（支持分页和过滤）
+}
+
+message ProjectInfo {
+  string tenantCode =20;//租户号
+  int64 createdTime = 1; //创建时间（只读）
+  int64 projectID = 2; //项目id（只读）
+  string projectName = 3; //项目名称（读写）
+  int64 adminUserID = 5;//管理员
+  Point Position = 6; //项目区域定位
+  google.protobuf.FloatValue area =7;//建筑面积(单位平米)
+  int64 ppsm =10;//w.h/m2 每平方米功耗 建筑定额能耗 Power per square meter
+  google.protobuf.StringValue desc = 8; //项目备注（读写）
+  google.protobuf.StringValue address = 11;//项目详细地址
+  google.protobuf.Int64Value deviceCount=12;//设备统计
+  google.protobuf.Int64Value deviceOnlineCount=23;//设备统计
+  int64 alarmStatus=24;//报警状态 （1正常 2提醒 3一般 4严重 5紧急 6超紧急）
+  int64 status=25;//项目状态  1 正常，2-禁用，3-过期
+  string type =26;//项目类型
+  int64 areaCount =9;//项目下的区域统计(只读)
+  int64 userCount =17;//项目下用户统计
+  string projectImg =15;//项目图片
+  int64 isSysCreated =18; //是否是系统创建的（1:是，2:否），系统创建的只有管理员可以删除
+  repeated AreaInfo areas =19;//
+  map<string, string> tags = 21;
+  int64 sort = 22;          // 排序标记,不能为0,默认为1
+  repeated Attachment attachments =27;//附件列表
+}
+message ProjectInfoGetListReq {
+  PageInfo page = 1; //进行数据分页（不传默认2000相当于全部）
+  string projectName = 2; //过滤条件: 项目名称
+  bool isGetAll =4;//是否获取所有(管理员获取所有)
+  repeated int64 projectIDs = 3; //过滤条件: 过滤项目id列表
+  bool withTopAreas =5;  //同时返回顶层的区域列表
+  string tenantCode =6;//指定租户(只有default租户下的管理员才有效)
+  int64 adminUserID =7;//过滤条件: 负责人用户id
+  int64 alarmStatus=24;//报警状态 （1:正常，2:提醒，3:一般，4:严重，5:紧急，6:超紧急）
+  int64 status=25;//项目状态（1:正常，2:禁用，3:过期）
+  string type =26;//项目类型
+}
+message ProjectInfoGetListResp {
+  int64 total = 1; //总数
+  repeated ProjectInfo list = 2; //项目列表
+}
+message ProjectProfile{
+  string code =4; //配置编码
+  string params =5; //配置参数
+}
+message ProjectProfileGetOneReq{
+  string code =1; //配置编码
+}
+message ProjectProfileGetListReq{
+  repeated string codes = 2; //配置编码列表
+}
+message ProjectProfileGetListResp{
+  repeated ProjectProfile profiles =1; //项目配置列表
+}
+message ProjectCrud {
+  int64 id = 1;                              // ID
+  string purpose = 2;                        // 用途（新增必填）
+  string params = 5;            // 普通业务参数（可选）
+  int64 sort = 6;                            // 排序（可选）
+  int64 created_time = 7;                    // 创建时间（只读，可选）
+}
+message ProjectCrudGetListReq {
+  PageInfo page = 1;                         // 分页信息（可选，不传默认2000条，相当于全部）
+  string purpose = 2;                        // 用途（必填）
+  map<string, Compare> params = 5;     // 参数过滤查询（可选）
+}
+message ProjectCrudGetListResp {
+  int64 total = 1;                    // 总数
+  repeated ProjectCrud list = 2;             // 项目列表
+}

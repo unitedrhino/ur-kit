@@ -1,0 +1,110 @@
+//--------------------字典管理服务--------------------
+syntax = "proto3";
+option go_package = "/sys";//必须为服务名
+import "google/protobuf/wrappers.proto";
+import "share.proto";
+package sys;//必须为服务名
+
+message DictWithID{
+  int64 id = 1; //ID值
+}
+message DictEmpty{
+}
+
+service DictManage{
+  rpc dictInfoCreate(DictInfo) returns(DictWithID); //创建字典分类信息
+  rpc dictInfoGetList(DictInfoGetListReq) returns(DictInfoGetListResp); //获取字典分类列表（支持分页和过滤）
+  rpc dictInfoUpdate(DictInfo) returns(DictEmpty); //更新字典分类信息
+  rpc dictInfoDelete(DictWithID) returns(DictEmpty); //删除字典分类
+  rpc dictInfoGetOne(DictInfoGetOneReq) returns(DictInfo); //获取字典分类详情
+
+  rpc dictDetailGetOne(DictDetailGetOneReq)returns(DictDetail); //获取字典详情
+  rpc dictDetailCreate(DictDetail) returns(DictWithID); //创建字典详情
+
+  rpc dictDetailBatchCreate(DictDetailBatchCreateReq) returns(DictEmpty); //批量创建字典详情
+  rpc dictDetailGetList(DictDetailGetListReq) returns(DictDetailGetListResp); //获取字典详情列表（支持分页和过滤）
+  rpc dictDetailUpdate(DictDetail) returns(DictEmpty); //更新字典详情
+  rpc dictDetailDelete(DictWithID) returns(DictEmpty); //删除字典详情
+
+  rpc dictBatchImport(DictBatchImportReq) returns(DictBatchImportResp); //批量导入字典数据
+  rpc dictBatchExport(DictBatchExportReq) returns(DictBatchExportResp); //批量导出字典数据
+}
+
+message DictInfo{
+  int64 id = 1;
+  string group =2;//分组
+  string name= 3;          // 字典名（中）
+  string code = 4;          // 字典编码
+  google.protobuf.StringValue desc = 5;        // 模块描述
+  map<string,string> expand = 6; // 自定义数据
+  int64  structType  =7; //结构类型(不可修改) 1:列表(默认) 2:树型
+  repeated DictDetail details = 8; // withDetail 时返回该分类下全部明细
+}
+message DictInfoGetListReq{
+  PageInfo page = 1;//分页信息
+  string name = 2;
+  string group = 3;
+  bool with_detail = 4; // true 时一并返回每条字典分类下的详情列表（仅当前页 code）
+}
+message DictInfoGetListResp{
+  repeated  DictInfo list =1;
+  int64 total = 2;
+}
+message DictInfoGetOneReq{
+  int64 id = 1;
+  string code = 2;
+}
+message DictDetail{
+  int64 id = 1;
+  string dictCode= 2;         // 关联标记
+  string label = 3;           // 展示值
+  string value = 4;           // 字典值
+  int64 sort = 6;          // 排序标记
+  google.protobuf.StringValue desc = 7;        // 模块描述
+  int64 status = 8; // 状态  1:启用,2:禁用
+  int64 isLeaf =9;//是否是叶子节点(不可修改) 1:是 2:否
+  map<string,string> expand = 10; // 自定义数据
+  string idPath =11;//1-2-3-的格式记录顶级区域到当前id的路径
+  int64 parentID =12;//父节点
+  DictDetail parent =13;
+  repeated DictDetail children =14;
+}
+message DictDetailGetOneReq{
+  int64 id = 1;
+  string dictCode= 2;         // 关联标记
+  string value = 3;           // 字典值
+  bool withFather = 4;//是否返回父级
+  bool withChildren =5;//是否返回子级
+}
+message DictDetailBatchCreateReq{
+  string dictCode= 1;         // 关联标记
+  repeated  DictDetail list =2;
+}
+message DictDetailGetListReq{
+  PageInfo page = 1;//分页信息
+  string dictCode= 2;         // 关联标记
+  int64 parentID =11;//父节点
+  int64 status = 8; // 状态  1:启用,2:禁用
+  string label = 3;           // 展示值
+  string value = 4;           // 字典值
+  repeated string values =5;//字典值列表
+}
+message DictDetailGetListResp{
+  repeated  DictDetail list =1;
+  int64 total = 2;
+}
+message DictBatchImportReq{
+  string dicts =1; //导出的菜单json文件
+}
+message DictBatchImportResp{
+  int64 total =1;                                 //导入总接口数
+  int64  errCount =2; //失败数
+  int64  ignoreCount =3; //忽略数
+  int64  succCount =4; //成功数
+}
+message DictBatchExportReq{
+  repeated string dictCodes= 1;         // 关联标记
+}
+message DictBatchExportResp{
+  string dicts =1; //导出的菜单json文件
+}

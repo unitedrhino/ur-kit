@@ -1,0 +1,6615 @@
+{
+  "components": {
+    "schemas": {
+      "AvDeviceChannel": {
+        "properties": {
+          "app": {
+            "description": " 应用名（RTMP/RTSP）",
+            "type": "string"
+          },
+          "authDisabled": {
+            "description": " RTMP 推流是否禁用鉴权",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "channelName": {
+            "description": " 通道名称",
+            "type": "string"
+          },
+          "channelNo": {
+            "description": " 通道号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "channelType": {
+            "description": " 通道类型：rtsp/rtmp/gb28181/onvif",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AvDeviceChannelConfig"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceID": {
+            "description": " 所属设备 ID",
+            "type": "string"
+          },
+          "enabled": {
+            "description": " 是否启用",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "liveStatus": {
+            "description": " 直播状态",
+            "type": "string"
+          },
+          "profileToken": {
+            "description": " ONVIF 媒体 Profile Token",
+            "type": "string"
+          },
+          "pushURL": {
+            "description": " RTMP 推流地址（后端生成）",
+            "type": "string"
+          },
+          "recordMode": {
+            "description": " 录像模式：always（始终录像）/ai（AI 告警触发）/none（关闭）；历史兼容值 off 视同 none",
+            "type": "string"
+          },
+          "recordStatus": {
+            "description": " 录像状态",
+            "type": "string"
+          },
+          "sourceURL": {
+            "description": " 拉流源地址（RTSP）",
+            "type": "string"
+          },
+          "status": {
+            "description": " 在线状态",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID（RTMP/RTSP）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "deviceID",
+          "channelName",
+          "channelNo",
+          "enabled",
+          "status",
+          "createdTime"
+        ],
+        "title": "AvDeviceChannel",
+        "type": "object"
+      },
+      "AvDeviceChannelConfig": {
+        "properties": {
+          "enabled": {
+            "description": " 是否启用，与 owl config.enabled 对齐",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "is_auth_disabled": {
+            "description": " RTMP 推流是否禁用鉴权，与 owl config.is_auth_disabled 对齐",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "push_addr": {
+            "description": " RTMP 推流地址，与 owl config.push_addr 对齐",
+            "type": "string"
+          },
+          "pushed_at": {
+            "description": " RTMP 最后推流时间（Unix 秒），与 owl config.pushed_at 对齐",
+            "format": "int64",
+            "type": "integer"
+          },
+          "source_url": {
+            "description": " 拉流源地址（RTSP），与 owl config.source_url 对齐",
+            "type": "string"
+          },
+          "stopped_at": {
+            "description": " RTMP 最后停流时间（Unix 秒），与 owl config.stopped_at 对齐",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeout_s": {
+            "description": " 拉流超时秒数，默认 10",
+            "format": "int64",
+            "type": "integer"
+          },
+          "transport": {
+            "description": " 拉流传输方式：0=tcp，1=udp（仅 RTSP 有效）",
+            "type": "string"
+          }
+        },
+        "title": "AvDeviceChannelConfig",
+        "type": "object"
+      },
+      "AvDeviceChannelCreateReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名（RTMP/RTSP）",
+            "type": "string"
+          },
+          "authDisabled": {
+            "description": " RTMP 推流是否禁用鉴权，兼容顶层与 config.is_auth_disabled",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "channelName": {
+            "description": " 通道名称/备注，为空时按 owl 规则默认",
+            "type": "string"
+          },
+          "channelNo": {
+            "description": " 通道号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "channelType": {
+            "description": " 通道类型：rtsp/rtmp/gb28181/onvif",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AvDeviceChannelConfig"
+          },
+          "deviceID": {
+            "description": " 设备 ID（与 deviceName 二选一）",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": " 设备名称，传入时自动创建对应协议设备（owl 语义）",
+            "type": "string"
+          },
+          "enabled": {
+            "description": " 是否启用，默认 true",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "sourceURL": {
+            "description": " 拉流源地址（RTSP），兼容顶层与 config.source_url",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID（RTMP/RTSP）",
+            "type": "string"
+          }
+        },
+        "title": "AvDeviceChannelCreateReq",
+        "type": "object"
+      },
+      "AvDeviceChannelDeleteReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvDeviceChannelDeleteReq",
+        "type": "object"
+      },
+      "AvDeviceChannelGetListReq": {
+        "properties": {
+          "channelName": {
+            "description": " 按名称模糊查询",
+            "type": "string"
+          },
+          "channelType": {
+            "description": " 按通道类型过滤：rtsp/rtmp/gb28181/onvif",
+            "type": "string"
+          },
+          "deviceID": {
+            "description": " 按设备过滤",
+            "type": "string"
+          },
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 按状态过滤",
+            "type": "string"
+          }
+        },
+        "title": "AvDeviceChannelGetListReq",
+        "type": "object"
+      },
+      "AvDeviceChannelGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvDeviceChannelGetListResp",
+        "type": "object"
+      },
+      "AvDeviceChannelGetOneReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvDeviceChannelGetOneReq",
+        "type": "object"
+      },
+      "AvDeviceChannelSetRecordModeReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "mode": {
+            "description": " 录像模式：always（始终录像）/ai（AI 告警触发）/none（关闭）；历史兼容值 off 视同 none",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "mode"
+        ],
+        "title": "AvDeviceChannelSetRecordModeReq",
+        "type": "object"
+      },
+      "AvDeviceChannelSetRecordModeResp": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "recordMode": {
+            "description": " 当前录像模式",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "recordMode"
+        ],
+        "title": "AvDeviceChannelSetRecordModeResp",
+        "type": "object"
+      },
+      "AvDeviceChannelUpdateReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名（RTMP/RTSP）",
+            "type": "string"
+          },
+          "authDisabled": {
+            "description": " RTMP 推流是否禁用鉴权",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "channelName": {
+            "description": " 通道名称",
+            "type": "string"
+          },
+          "channelNo": {
+            "description": " 通道号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "channelType": {
+            "description": " 通道类型：rtsp/rtmp/gb28181/onvif",
+            "type": "string"
+          },
+          "config": {
+            "$ref": "#/components/schemas/AvDeviceChannelConfig"
+          },
+          "deviceID": {
+            "description": " 所属设备 ID（可选变更）",
+            "type": "string"
+          },
+          "enabled": {
+            "description": " 是否启用",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "sourceURL": {
+            "description": " 拉流源地址（RTSP）",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID（RTMP/RTSP）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvDeviceChannelUpdateReq",
+        "type": "object"
+      },
+      "AvDeviceInfo": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceID": {
+            "description": " 设备唯一标识",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": " 设备名称",
+            "type": "string"
+          },
+          "expireTime": {
+            "description": " 注册过期时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "firmware": {
+            "description": " 固件版本",
+            "type": "string"
+          },
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "lastConnectTime": {
+            "description": " 最后上线时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "manufacturer": {
+            "description": " 厂商",
+            "type": "string"
+          },
+          "model": {
+            "description": " 型号",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pushSecret": {
+            "description": " RTMP 推流鉴权密钥",
+            "type": "string"
+          },
+          "serialNumber": {
+            "description": " ONVIF 设备序列号",
+            "type": "string"
+          },
+          "status": {
+            "description": " 在线状态",
+            "type": "string"
+          },
+          "streamMode": {
+            "description": " 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效）",
+            "type": "string"
+          },
+          "streamNum": {
+            "description": " 通道数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "transport": {
+            "description": " 传输协议",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceID",
+          "deviceName",
+          "transport",
+          "status",
+          "createdTime"
+        ],
+        "title": "AvDeviceInfo",
+        "type": "object"
+      },
+      "AvDeviceInfoCreateReq": {
+        "properties": {
+          "deviceName": {
+            "description": " 设备名称",
+            "type": "string"
+          },
+          "firmware": {
+            "description": " 固件版本",
+            "type": "string"
+          },
+          "gb28181Realm": {
+            "description": " 国标域",
+            "type": "string"
+          },
+          "gb28181SipID": {
+            "description": " 国标 SIP ID",
+            "type": "string"
+          },
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "manufacturer": {
+            "description": " 厂商",
+            "type": "string"
+          },
+          "model": {
+            "description": " 型号",
+            "type": "string"
+          },
+          "password": {
+            "description": " 密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pushSecret": {
+            "description": " RTMP 推流鉴权密钥",
+            "type": "string"
+          },
+          "serialNumber": {
+            "description": " ONVIF 设备序列号",
+            "type": "string"
+          },
+          "streamMode": {
+            "description": " 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效），默认 1",
+            "type": "string"
+          },
+          "transport": {
+            "description": " 传输协议",
+            "type": "string"
+          },
+          "username": {
+            "description": " 用户名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceName",
+          "transport"
+        ],
+        "title": "AvDeviceInfoCreateReq",
+        "type": "object"
+      },
+      "AvDeviceInfoDeleteReq": {
+        "properties": {
+          "deviceID": {
+            "description": " 设备 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceID"
+        ],
+        "title": "AvDeviceInfoDeleteReq",
+        "type": "object"
+      },
+      "AvDeviceInfoGetListReq": {
+        "properties": {
+          "deviceName": {
+            "description": " 按名称模糊查询",
+            "type": "string"
+          },
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 按状态过滤",
+            "type": "string"
+          },
+          "transport": {
+            "description": " 按协议过滤",
+            "type": "string"
+          }
+        },
+        "title": "AvDeviceInfoGetListReq",
+        "type": "object"
+      },
+      "AvDeviceInfoGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvDeviceInfoGetListResp",
+        "type": "object"
+      },
+      "AvDeviceInfoGetOneReq": {
+        "properties": {
+          "deviceID": {
+            "description": " 设备 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceID"
+        ],
+        "title": "AvDeviceInfoGetOneReq",
+        "type": "object"
+      },
+      "AvDeviceInfoUpdateReq": {
+        "properties": {
+          "deviceID": {
+            "description": " 设备 ID",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": " 设备名称",
+            "type": "string"
+          },
+          "firmware": {
+            "description": " 固件版本",
+            "type": "string"
+          },
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "manufacturer": {
+            "description": " 厂商",
+            "type": "string"
+          },
+          "model": {
+            "description": " 型号",
+            "type": "string"
+          },
+          "password": {
+            "description": " 密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "pushSecret": {
+            "description": " RTMP 推流鉴权密钥",
+            "type": "string"
+          },
+          "serialNumber": {
+            "description": " ONVIF 设备序列号",
+            "type": "string"
+          },
+          "streamMode": {
+            "description": " 收流模式：0 udp, 1 tcpPassive, 2 tcpActive（GB28181 有效）",
+            "type": "string"
+          },
+          "username": {
+            "description": " 用户名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "deviceID"
+        ],
+        "title": "AvDeviceInfoUpdateReq",
+        "type": "object"
+      },
+      "AvDeviceIotBindGetOneReq": {
+        "properties": {
+          "deviceName": {
+            "description": " IoT 设备标识（dm_device_info.device_name）",
+            "type": "string"
+          },
+          "productID": {
+            "description": " IoT 产品 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "AvDeviceIotBindGetOneReq",
+        "type": "object"
+      },
+      "AvDeviceIotBindGetOneResp": {
+        "properties": {
+          "avDeviceID": {
+            "description": " 绑定的音视频设备 ID，空=未绑定",
+            "type": "string"
+          },
+          "channelID": {
+            "description": " 绑定的音视频通道 ID，空=未绑定",
+            "type": "string"
+          },
+          "channels": {
+            "description": " 该音视频设备的通道列表",
+            "items": {
+              "$ref": "#/components/schemas/AvDeviceChannel"
+            },
+            "type": "array"
+          },
+          "device": {
+            "$ref": "#/components/schemas/AvDeviceInfo"
+          }
+        },
+        "title": "AvDeviceIotBindGetOneResp",
+        "type": "object"
+      },
+      "AvDeviceIotBindSaveReq": {
+        "properties": {
+          "avDeviceID": {
+            "description": " 音视频设备 ID（mode=bind 必填）",
+            "type": "string"
+          },
+          "channelID": {
+            "description": " 音视频通道 ID（mode=bind 选填）",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": " IoT 设备标识（dm_device_info.device_name）",
+            "type": "string"
+          },
+          "mode": {
+            "description": " 绑定模式：bind（绑定已有设备）/ quick（按流地址快速建档）",
+            "type": "string"
+          },
+          "name": {
+            "description": " 音视频设备/通道名称（mode=quick 选填，默认取流地址 app/stream）",
+            "type": "string"
+          },
+          "productID": {
+            "description": " IoT 产品 ID",
+            "type": "string"
+          },
+          "streamURL": {
+            "description": " 拉流地址（mode=quick 必填，支持 rtsp: rtmp: webrtc:）",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName",
+          "mode"
+        ],
+        "title": "AvDeviceIotBindSaveReq",
+        "type": "object"
+      },
+      "AvDeviceIotBindSaveResp": {
+        "properties": {
+          "avDeviceID": {
+            "description": " 绑定的音视频设备 ID",
+            "type": "string"
+          },
+          "channelID": {
+            "description": " 绑定的音视频通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "avDeviceID",
+          "channelID"
+        ],
+        "title": "AvDeviceIotBindSaveResp",
+        "type": "object"
+      },
+      "AvDeviceIotBindUnbindReq": {
+        "properties": {
+          "deviceName": {
+            "description": " IoT 设备标识（dm_device_info.device_name）",
+            "type": "string"
+          },
+          "productID": {
+            "description": " IoT 产品 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "productID",
+          "deviceName"
+        ],
+        "title": "AvDeviceIotBindUnbindReq",
+        "type": "object"
+      },
+      "AvDownloadProgressReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 下载结束时间（秒级 UNIX 时间戳，与 download/start 一致）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": " 下载开始时间（秒级 UNIX 时间戳，与 download/start 一致）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "startTime",
+          "endTime"
+        ],
+        "title": "AvDownloadProgressReq",
+        "type": "object"
+      },
+      "AvDownloadProgressResp": {
+        "properties": {
+          "finished": {
+            "description": " 是否已完成",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "progress": {
+            "description": " 下载进度（0~1）",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "progress",
+          "finished"
+        ],
+        "title": "AvDownloadProgressResp",
+        "type": "object"
+      },
+      "AvDownloadStartReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID（GB28181 通道）",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 下载结束时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "speed": {
+            "description": " 下载倍速，默认 4",
+            "format": "double",
+            "type": "number"
+          },
+          "startTime": {
+            "description": " 下载开始时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "startTime",
+          "endTime"
+        ],
+        "title": "AvDownloadStartReq",
+        "type": "object"
+      },
+      "AvEvent": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceID": {
+            "description": " 设备 ID",
+            "type": "string"
+          },
+          "eventData": {
+            "description": " 事件数据 JSON",
+            "type": "string"
+          },
+          "eventID": {
+            "description": " 事件 ID",
+            "type": "string"
+          },
+          "eventType": {
+            "description": " 事件类型",
+            "type": "string"
+          }
+        },
+        "required": [
+          "eventID",
+          "eventType",
+          "createdTime"
+        ],
+        "title": "AvEvent",
+        "type": "object"
+      },
+      "AvEventGetListReq": {
+        "properties": {
+          "channelID": {
+            "description": " 按通道过滤",
+            "type": "string"
+          },
+          "deviceID": {
+            "description": " 按设备过滤",
+            "type": "string"
+          },
+          "eventType": {
+            "description": " 按事件类型过滤",
+            "type": "string"
+          },
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvEventGetListReq",
+        "type": "object"
+      },
+      "AvEventGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvEventGetListResp",
+        "type": "object"
+      },
+      "AvMediaServer": {
+        "properties": {
+          "autoConfig": {
+            "description": " 是否自动下发 ZLM 配置",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hookAliveInterval": {
+            "description": " webhook 心跳上报间隔（秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hookIP": {
+            "description": " ZLM webhook 回连 IP",
+            "type": "string"
+          },
+          "httpPort": {
+            "description": " HTTP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "httpsPort": {
+            "description": " HTTPS 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordAssistPort": {
+            "description": " 录像辅助端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordDay": {
+            "description": " 录像保留天数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordPath": {
+            "description": " 录像存储路径",
+            "type": "string"
+          },
+          "rtmpPort": {
+            "description": " RTMP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rtpEnable": {
+            "description": " 是否启用 RTP 服务",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "rtpPortRange": {
+            "description": " RTP 收流端口范围，如 30000-30500",
+            "type": "string"
+          },
+          "rtspPort": {
+            "description": " RTSP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sdpIP": {
+            "description": " SDP 外网 IP（GB28181 设备回连）",
+            "type": "string"
+          },
+          "secret": {
+            "description": " 密钥",
+            "type": "string"
+          },
+          "sendRtpPortRange": {
+            "description": " RTP 发流端口范围",
+            "type": "string"
+          },
+          "serverID": {
+            "description": " 服务 ID",
+            "type": "string"
+          },
+          "serverIP": {
+            "description": " 服务 IP（API/Hook 回连地址）",
+            "type": "string"
+          },
+          "serverName": {
+            "description": " 服务名称",
+            "type": "string"
+          },
+          "serverPort": {
+            "description": " 服务端口（保留字段）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 在线状态",
+            "type": "string"
+          },
+          "streamHttpPort": {
+            "description": " 播放流外网 HTTP 端口（HLS/HTTP-FLV/WS-FLV/WebRTC）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "streamIP": {
+            "description": " 播放流外网 IP",
+            "type": "string"
+          },
+          "type": {
+            "description": " 媒体服务器类型：zlm/lalmax",
+            "type": "string"
+          },
+          "webrtcPort": {
+            "description": " WebRTC 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "wsFlvPort": {
+            "description": " WebSocket-FLV 端口",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "serverID",
+          "serverName",
+          "serverIP",
+          "serverPort",
+          "httpPort",
+          "status",
+          "createdTime"
+        ],
+        "title": "AvMediaServer",
+        "type": "object"
+      },
+      "AvMediaServerCreateReq": {
+        "properties": {
+          "autoConfig": {
+            "description": " 是否自动下发配置",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "hookAliveInterval": {
+            "description": " webhook 心跳间隔（秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hookIP": {
+            "description": " ZLM webhook 回连 IP",
+            "type": "string"
+          },
+          "httpPort": {
+            "description": " HTTP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "httpsPort": {
+            "description": " HTTPS 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordAssistPort": {
+            "description": " 录像辅助端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordDay": {
+            "description": " 录像保留天数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordPath": {
+            "description": " 录像存储路径",
+            "type": "string"
+          },
+          "rtmpPort": {
+            "description": " RTMP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rtpEnable": {
+            "description": " 是否启用 RTP 服务",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "rtpPortRange": {
+            "description": " RTP 收流端口范围",
+            "type": "string"
+          },
+          "rtspPort": {
+            "description": " RTSP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sdpIP": {
+            "description": " SDP 外网 IP",
+            "type": "string"
+          },
+          "secret": {
+            "description": " 密钥",
+            "type": "string"
+          },
+          "sendRtpPortRange": {
+            "description": " RTP 发流端口范围",
+            "type": "string"
+          },
+          "serverIP": {
+            "description": " 服务 IP",
+            "type": "string"
+          },
+          "serverName": {
+            "description": " 服务名称",
+            "type": "string"
+          },
+          "serverPort": {
+            "description": " 服务端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "streamHttpPort": {
+            "description": " 播放流外网 HTTP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "streamIP": {
+            "description": " 播放流外网 IP",
+            "type": "string"
+          },
+          "type": {
+            "description": " 媒体服务器类型",
+            "type": "string"
+          },
+          "webrtcPort": {
+            "description": " WebRTC 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "wsFlvPort": {
+            "description": " WebSocket-FLV 端口",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "serverName",
+          "serverIP",
+          "httpPort"
+        ],
+        "title": "AvMediaServerCreateReq",
+        "type": "object"
+      },
+      "AvMediaServerDeleteReq": {
+        "properties": {
+          "serverID": {
+            "description": " 服务 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverID"
+        ],
+        "title": "AvMediaServerDeleteReq",
+        "type": "object"
+      },
+      "AvMediaServerGetListReq": {
+        "properties": {
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "serverName": {
+            "description": " 按名称模糊查询",
+            "type": "string"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 按状态过滤",
+            "type": "string"
+          }
+        },
+        "title": "AvMediaServerGetListReq",
+        "type": "object"
+      },
+      "AvMediaServerGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvMediaServerGetListResp",
+        "type": "object"
+      },
+      "AvMediaServerGetOneReq": {
+        "properties": {
+          "serverID": {
+            "description": " 服务 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "serverID"
+        ],
+        "title": "AvMediaServerGetOneReq",
+        "type": "object"
+      },
+      "AvMediaServerUpdateReq": {
+        "properties": {
+          "autoConfig": {
+            "description": " 是否自动下发配置",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "hookAliveInterval": {
+            "description": " webhook 心跳间隔（秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "hookIP": {
+            "description": " ZLM webhook 回连 IP",
+            "type": "string"
+          },
+          "httpPort": {
+            "description": " HTTP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "httpsPort": {
+            "description": " HTTPS 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordAssistPort": {
+            "description": " 录像辅助端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordDay": {
+            "description": " 录像保留天数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordPath": {
+            "description": " 录像存储路径",
+            "type": "string"
+          },
+          "rtmpPort": {
+            "description": " RTMP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "rtpEnable": {
+            "description": " 是否启用 RTP 服务",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "rtpPortRange": {
+            "description": " RTP 收流端口范围",
+            "type": "string"
+          },
+          "rtspPort": {
+            "description": " RTSP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sdpIP": {
+            "description": " SDP 外网 IP",
+            "type": "string"
+          },
+          "secret": {
+            "description": " 密钥",
+            "type": "string"
+          },
+          "sendRtpPortRange": {
+            "description": " RTP 发流端口范围",
+            "type": "string"
+          },
+          "serverID": {
+            "description": " 服务 ID",
+            "type": "string"
+          },
+          "serverIP": {
+            "description": " 服务 IP",
+            "type": "string"
+          },
+          "serverName": {
+            "description": " 服务名称",
+            "type": "string"
+          },
+          "serverPort": {
+            "description": " 服务端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "streamHttpPort": {
+            "description": " 播放流外网 HTTP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "streamIP": {
+            "description": " 播放流外网 IP",
+            "type": "string"
+          },
+          "type": {
+            "description": " 媒体服务器类型",
+            "type": "string"
+          },
+          "webrtcPort": {
+            "description": " WebRTC 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "wsFlvPort": {
+            "description": " WebSocket-FLV 端口",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "serverID"
+        ],
+        "title": "AvMediaServerUpdateReq",
+        "type": "object"
+      },
+      "AvNvrRecordItem": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 结束时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "filePath": {
+            "description": " 设备端文件路径",
+            "type": "string"
+          },
+          "name": {
+            "description": " 录像名称",
+            "type": "string"
+          },
+          "secrecy": {
+            "description": " 保密属性",
+            "type": "string"
+          },
+          "startTime": {
+            "description": " 开始时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 录像类型：all/time/alarm/manual",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "name",
+          "filePath",
+          "startTime",
+          "endTime",
+          "secrecy",
+          "type"
+        ],
+        "title": "AvNvrRecordItem",
+        "type": "object"
+      },
+      "AvNvrRecordQueryReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID（GB28181 通道）",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 检索结束时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": " 检索开始时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "startTime",
+          "endTime"
+        ],
+        "title": "AvNvrRecordQueryReq",
+        "type": "object"
+      },
+      "AvNvrRecordQueryResp": {
+        "properties": {
+          "list": {
+            "description": " 设备端录像片段列表",
+            "items": {
+              "$ref": "#/components/schemas/AvNvrRecordItem"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "AvNvrRecordQueryResp",
+        "type": "object"
+      },
+      "AvOnvifDeviceInfo": {
+        "properties": {
+          "firmware": {
+            "description": " 固件版本",
+            "type": "string"
+          },
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "manufacturer": {
+            "description": " 厂商",
+            "type": "string"
+          },
+          "model": {
+            "description": " 型号",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "serialNumber": {
+            "description": " 序列号",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip",
+          "port"
+        ],
+        "title": "AvOnvifDeviceInfo",
+        "type": "object"
+      },
+      "AvOnvifDiscoverReq": {
+        "properties": {
+          "subnet": {
+            "description": " 网段过滤，例如 192.168.1 或 192.168.1.0/24",
+            "type": "string"
+          },
+          "timeout": {
+            "description": " 发现超时（秒），默认 5",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvOnvifDiscoverReq",
+        "type": "object"
+      },
+      "AvOnvifDiscoverResp": {
+        "properties": {
+          "list": {
+            "description": " 发现的设备列表",
+            "items": {
+              "$ref": "#/components/schemas/AvOnvifDeviceInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "AvOnvifDiscoverResp",
+        "type": "object"
+      },
+      "AvOnvifImportReq": {
+        "properties": {
+          "deviceName": {
+            "description": " 设备名称，为空时按探测信息生成",
+            "type": "string"
+          },
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "password": {
+            "description": " 密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "profileTokens": {
+            "description": " 用户选中的 Profile Token",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "username": {
+            "description": " 用户名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip",
+          "port",
+          "profileTokens"
+        ],
+        "title": "AvOnvifImportReq",
+        "type": "object"
+      },
+      "AvOnvifImportResp": {
+        "properties": {
+          "channels": {
+            "description": " 创建或复用的通道",
+            "items": {
+              "$ref": "#/components/schemas/AvDeviceChannel"
+            },
+            "type": "array"
+          },
+          "createdCount": {
+            "description": " 新增通道数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "device": {
+            "$ref": "#/components/schemas/AvDeviceInfo"
+          },
+          "reusedCount": {
+            "description": " 复用通道数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "device",
+          "channels",
+          "createdCount",
+          "reusedCount"
+        ],
+        "title": "AvOnvifImportResp",
+        "type": "object"
+      },
+      "AvOnvifPreset": {
+        "properties": {
+          "presetID": {
+            "description": " 预置位 ID",
+            "type": "string"
+          },
+          "presetName": {
+            "description": " 预置位名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "presetID",
+          "presetName"
+        ],
+        "title": "AvOnvifPreset",
+        "type": "object"
+      },
+      "AvOnvifPresetListResp": {
+        "properties": {
+          "list": {
+            "description": " 预置位列表",
+            "items": {
+              "$ref": "#/components/schemas/AvOnvifPreset"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "AvOnvifPresetListResp",
+        "type": "object"
+      },
+      "AvOnvifPresetReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "presetID": {
+            "description": " 预置位 ID",
+            "type": "string"
+          },
+          "presetName": {
+            "description": " 预置位名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvOnvifPresetReq",
+        "type": "object"
+      },
+      "AvOnvifProbeReq": {
+        "properties": {
+          "ip": {
+            "description": " 设备 IP",
+            "type": "string"
+          },
+          "password": {
+            "description": " 密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " 设备端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "username": {
+            "description": " 用户名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "ip",
+          "port"
+        ],
+        "title": "AvOnvifProbeReq",
+        "type": "object"
+      },
+      "AvOnvifProbeResp": {
+        "properties": {
+          "device": {
+            "$ref": "#/components/schemas/AvOnvifDeviceInfo"
+          },
+          "profiles": {
+            "description": " 媒体配置列表",
+            "items": {
+              "$ref": "#/components/schemas/AvOnvifProfile"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "device",
+          "profiles"
+        ],
+        "title": "AvOnvifProbeResp",
+        "type": "object"
+      },
+      "AvOnvifProfile": {
+        "properties": {
+          "available": {
+            "description": " 是否可导入",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "bitrate": {
+            "description": " 码率上限（kbps）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "encoding": {
+            "description": " 视频编码",
+            "type": "string"
+          },
+          "error": {
+            "description": " 当前 Profile 不可用原因",
+            "type": "string"
+          },
+          "frameRate": {
+            "description": " 帧率上限",
+            "format": "int64",
+            "type": "integer"
+          },
+          "height": {
+            "description": " 视频高度",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": " Profile 名称",
+            "type": "string"
+          },
+          "streamURI": {
+            "description": " 拉流地址",
+            "type": "string"
+          },
+          "token": {
+            "description": " Profile Token",
+            "type": "string"
+          },
+          "videoSource": {
+            "description": " 视频源 Token",
+            "type": "string"
+          },
+          "width": {
+            "description": " 视频宽度",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "token",
+          "name",
+          "videoSource",
+          "streamURI",
+          "available"
+        ],
+        "title": "AvOnvifProfile",
+        "type": "object"
+      },
+      "AvOnvifPtzControlReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "command": {
+            "description": " 指令：left/right/up/down/zoomIn/zoomOut/stop",
+            "type": "string"
+          },
+          "speed": {
+            "description": " 速度 0-100，默认 50",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "command"
+        ],
+        "title": "AvOnvifPtzControlReq",
+        "type": "object"
+      },
+      "AvPlayLiveKeepaliveReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "streamID": {
+            "description": " 流 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "streamID"
+        ],
+        "title": "AvPlayLiveKeepaliveReq",
+        "type": "object"
+      },
+      "AvPlayLiveStartReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "protocol": {
+            "description": " 期望协议，默认 webrtc",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvPlayLiveStartReq",
+        "type": "object"
+      },
+      "AvPlayLiveStopReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "streamID": {
+            "description": " 流 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvPlayLiveStopReq",
+        "type": "object"
+      },
+      "AvPlayLiveStreamListReq": {
+        "properties": {
+          "deviceID": {
+            "description": " 按设备过滤",
+            "type": "string"
+          },
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvPlayLiveStreamListReq",
+        "type": "object"
+      },
+      "AvPlayLiveStreamListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvPlayLiveStreamListResp",
+        "type": "object"
+      },
+      "AvPlayStreamInfo": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "items": {
+            "description": " 播放地址列表（通常一条）",
+            "items": {
+              "$ref": "#/components/schemas/AvStreamLiveAddr"
+            },
+            "type": "array"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "app",
+          "stream",
+          "items"
+        ],
+        "title": "AvPlayStreamInfo",
+        "type": "object"
+      },
+      "AvPlaybackControlReq": {
+        "properties": {
+          "action": {
+            "description": " 控制动作：pause/resume/seek/scale",
+            "type": "string"
+          },
+          "callID": {
+            "description": " 回放会话 CallID（并发回放多会话时精确指定控制目标）",
+            "type": "string"
+          },
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "scale": {
+            "description": " 倍速（action=scale 时使用，如 0.25/0.5/1/2/4）",
+            "format": "double",
+            "type": "number"
+          },
+          "seekTime": {
+            "description": " 拖动目标位置（秒偏移，action=seek 时使用）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "action"
+        ],
+        "title": "AvPlaybackControlReq",
+        "type": "object"
+      },
+      "AvPlaybackStartReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID（GB28181 通道）",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 回放结束时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": " 回放开始时间（秒级 UNIX 时间戳）",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "startTime",
+          "endTime"
+        ],
+        "title": "AvPlaybackStartReq",
+        "type": "object"
+      },
+      "AvPlaybackStopReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvPlaybackStopReq",
+        "type": "object"
+      },
+      "AvPtzControlReq": {
+        "properties": {
+          "action": {
+            "description": " 动作类型：continuous/stop/preset",
+            "type": "string"
+          },
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "direction": {
+            "description": " 连续移动方向：left/right/up/down/zoomIn/zoomOut",
+            "type": "string"
+          },
+          "presetOp": {
+            "description": " 预置位操作：set/call/delete（Action=preset 时使用）",
+            "type": "string"
+          },
+          "speed": {
+            "description": " 速度 0-1，默认 0.5",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "channelID",
+          "action"
+        ],
+        "title": "AvPtzControlReq",
+        "type": "object"
+      },
+      "AvPtzCruiseReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "cruiseID": {
+            "description": " 巡航组号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "enable": {
+            "description": " 启用/停止",
+            "format": "boolean",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "channelID",
+          "cruiseID",
+          "enable"
+        ],
+        "title": "AvPtzCruiseReq",
+        "type": "object"
+      },
+      "AvPtzPresetReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "presetID": {
+            "description": " 预置位编号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "presetName": {
+            "description": " 预置位名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "presetID"
+        ],
+        "title": "AvPtzPresetReq",
+        "type": "object"
+      },
+      "AvRecordCalendarReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "yearMonth": {
+            "description": " 年月，格式 YYYY-MM",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "yearMonth"
+        ],
+        "title": "AvRecordCalendarReq",
+        "type": "object"
+      },
+      "AvRecordCalendarResp": {
+        "properties": {
+          "dates": {
+            "description": " 有录像的日期列表，格式 YYYY-MM-DD",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "dates"
+        ],
+        "title": "AvRecordCalendarResp",
+        "type": "object"
+      },
+      "AvRecordDeleteReq": {
+        "properties": {
+          "recordID": {
+            "description": " 录像 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordID"
+        ],
+        "title": "AvRecordDeleteReq",
+        "type": "object"
+      },
+      "AvRecordDownloadReq": {
+        "properties": {
+          "recordID": {
+            "description": " 录像 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordID"
+        ],
+        "title": "AvRecordDownloadReq",
+        "type": "object"
+      },
+      "AvRecordDownloadResp": {
+        "properties": {
+          "url": {
+            "description": " 下载地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "url"
+        ],
+        "title": "AvRecordDownloadResp",
+        "type": "object"
+      },
+      "AvRecordGetListReq": {
+        "properties": {
+          "channelID": {
+            "description": " 按通道过滤",
+            "type": "string"
+          },
+          "deviceID": {
+            "description": " 按设备过滤",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 结束时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "recordType": {
+            "description": " 录像类型",
+            "type": "string"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "startTime": {
+            "description": " 开始时间",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvRecordGetListReq",
+        "type": "object"
+      },
+      "AvRecordGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "AvRecordGetListResp",
+        "type": "object"
+      },
+      "AvRecordMonthlyReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "yearMonth": {
+            "description": " 年月，格式 YYYY-MM",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "yearMonth"
+        ],
+        "title": "AvRecordMonthlyReq",
+        "type": "object"
+      },
+      "AvRecordMonthlyResp": {
+        "properties": {
+          "days": {
+            "description": " 按天 bitmap，01 日至当月最后一日，有录像为 1，无为 0",
+            "type": "string"
+          },
+          "yearMonth": {
+            "description": " 年月，格式 YYYY-MM",
+            "type": "string"
+          }
+        },
+        "required": [
+          "yearMonth",
+          "days"
+        ],
+        "title": "AvRecordMonthlyResp",
+        "type": "object"
+      },
+      "AvRecordPlanReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "enable": {
+            "description": " 是否启用录像",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "recordDays": {
+            "description": " 保留天数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "channelID",
+          "enable"
+        ],
+        "title": "AvRecordPlanReq",
+        "type": "object"
+      },
+      "AvRecordPlayStartReq": {
+        "properties": {
+          "recordID": {
+            "description": " 录像 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordID"
+        ],
+        "title": "AvRecordPlayStartReq",
+        "type": "object"
+      },
+      "AvRecordStartReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvRecordStartReq",
+        "type": "object"
+      },
+      "AvRecordStopReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvRecordStopReq",
+        "type": "object"
+      },
+      "AvRecordTimelineReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "date": {
+            "description": " 日期，格式 YYYY-MM-DD",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID",
+          "date"
+        ],
+        "title": "AvRecordTimelineReq",
+        "type": "object"
+      },
+      "AvRecordTimelineResp": {
+        "properties": {
+          "list": {
+            "description": " 当日录像片段列表",
+            "items": {
+              "$ref": "#/components/schemas/AvRecording"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "AvRecordTimelineResp",
+        "type": "object"
+      },
+      "AvRecording": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "deviceID": {
+            "description": " 设备 ID",
+            "type": "string"
+          },
+          "duration": {
+            "description": " 时长（秒）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "endTime": {
+            "description": " 结束时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "filePath": {
+            "description": " 存储路径",
+            "type": "string"
+          },
+          "fileSize": {
+            "description": " 文件大小（字节）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "fileURL": {
+            "description": " 播放/下载地址",
+            "type": "string"
+          },
+          "recordID": {
+            "description": " 录像 ID",
+            "type": "string"
+          },
+          "recordType": {
+            "description": " 录像类型：cloud/local",
+            "type": "string"
+          },
+          "startTime": {
+            "description": " 开始时间",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 状态：recording/complete/uploading",
+            "type": "string"
+          }
+        },
+        "required": [
+          "recordID",
+          "channelID",
+          "deviceID",
+          "startTime",
+          "endTime",
+          "duration",
+          "fileSize",
+          "filePath",
+          "recordType",
+          "status",
+          "createdTime"
+        ],
+        "title": "AvRecording",
+        "type": "object"
+      },
+      "AvSipConfig": {
+        "properties": {
+          "alarmSubscribeCycle": {
+            "description": " 报警订阅周期（秒）",
+            "type": "string"
+          },
+          "alarmSubscribeEnable": {
+            "description": " 报警订阅总开关",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "domain": {
+            "description": " 国标域，如 3402000000",
+            "type": "string"
+          },
+          "password": {
+            "description": " 接入密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " SIP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "registerAuth": {
+            "description": " 注册鉴权模式：0 开放注册, 1 预登记（仅已建档设备可注册）",
+            "type": "string"
+          },
+          "serverIP": {
+            "description": " 服务器外网 IP",
+            "type": "string"
+          },
+          "sipID": {
+            "description": " SIP ID，如 34020000002000000001",
+            "type": "string"
+          },
+          "streamMode": {
+            "description": " 收流模式：0 udp, 1 tcpPassive, 2 tcpActive",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain",
+          "sipID",
+          "port",
+          "streamMode",
+          "registerAuth",
+          "alarmSubscribeEnable",
+          "alarmSubscribeCycle"
+        ],
+        "title": "AvSipConfig",
+        "type": "object"
+      },
+      "AvSipConfigSaveReq": {
+        "properties": {
+          "alarmSubscribeCycle": {
+            "description": " 报警订阅周期（秒）",
+            "type": "string"
+          },
+          "alarmSubscribeEnable": {
+            "description": " 报警订阅总开关",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "domain": {
+            "description": " 国标域",
+            "type": "string"
+          },
+          "password": {
+            "description": " 接入密码",
+            "type": "string"
+          },
+          "port": {
+            "description": " SIP 端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "registerAuth": {
+            "description": " 注册鉴权模式：0 开放注册, 1 预登记（仅已建档设备可注册）",
+            "type": "string"
+          },
+          "serverIP": {
+            "description": " 服务器外网 IP",
+            "type": "string"
+          },
+          "sipID": {
+            "description": " SIP ID",
+            "type": "string"
+          },
+          "streamMode": {
+            "description": " 收流模式：0 udp, 1 tcpPassive, 2 tcpActive",
+            "type": "string"
+          }
+        },
+        "required": [
+          "domain",
+          "sipID",
+          "port",
+          "streamMode",
+          "registerAuth",
+          "alarmSubscribeEnable",
+          "alarmSubscribeCycle"
+        ],
+        "title": "AvSipConfigSaveReq",
+        "type": "object"
+      },
+      "AvSnapReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          },
+          "protocol": {
+            "description": " 用于截图的流协议，默认 webrtc 对应播放地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvSnapReq",
+        "type": "object"
+      },
+      "AvSnapResp": {
+        "properties": {
+          "imageBase64": {
+            "description": " JPEG 图片 Base64",
+            "type": "string"
+          }
+        },
+        "required": [
+          "imageBase64"
+        ],
+        "title": "AvSnapResp",
+        "type": "object"
+      },
+      "AvStreamLiveAddr": {
+        "properties": {
+          "hls": {
+            "description": " HLS 播放地址",
+            "type": "string"
+          },
+          "http_flv": {
+            "description": " HTTP-FLV 播放地址",
+            "type": "string"
+          },
+          "label": {
+            "description": " 媒体服务器标签，如 ZLM",
+            "type": "string"
+          },
+          "rtmp": {
+            "description": " RTMP 播放地址",
+            "type": "string"
+          },
+          "rtsp": {
+            "description": " RTSP 播放地址",
+            "type": "string"
+          },
+          "webrtc": {
+            "description": " WebRTC 播放地址",
+            "type": "string"
+          },
+          "ws_flv": {
+            "description": " WS-FLV 播放地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "label",
+          "ws_flv",
+          "http_flv",
+          "hls",
+          "rtmp",
+          "rtsp",
+          "webrtc"
+        ],
+        "title": "AvStreamLiveAddr",
+        "type": "object"
+      },
+      "AvTalkStartReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvTalkStartReq",
+        "type": "object"
+      },
+      "AvTalkStopReq": {
+        "properties": {
+          "channelID": {
+            "description": " 通道 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "channelID"
+        ],
+        "title": "AvTalkStopReq",
+        "type": "object"
+      },
+      "AvWebhookPlayReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "params": {
+            "description": " 播放 URL 参数",
+            "type": "string"
+          },
+          "schema": {
+            "description": " 协议 schema",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "schema",
+          "vhost"
+        ],
+        "title": "AvWebhookPlayReq",
+        "type": "object"
+      },
+      "AvWebhookPublishReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "params": {
+            "description": " 推流 URL 参数，如 sign=xxx",
+            "type": "string"
+          },
+          "schema": {
+            "description": " 协议 schema",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "schema",
+          "vhost"
+        ],
+        "title": "AvWebhookPublishReq",
+        "type": "object"
+      },
+      "AvWebhookRecordMp4Req": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "file_name": {
+            "description": " 文件名",
+            "type": "string"
+          },
+          "file_path": {
+            "description": " 文件路径",
+            "type": "string"
+          },
+          "file_size": {
+            "description": " 文件大小",
+            "format": "int64",
+            "type": "integer"
+          },
+          "folder": {
+            "description": " 文件目录",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "start_time": {
+            "description": " 开始时间戳（ZLM 可能以浮点数字符串上报）",
+            "format": "double",
+            "type": "number"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "time_len": {
+            "description": " 录像时长（秒，ZLM 可能以浮点数字符串上报）",
+            "format": "double",
+            "type": "number"
+          },
+          "url": {
+            "description": " 相对播放 URL",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "vhost",
+          "file_name",
+          "file_path",
+          "file_size",
+          "start_time",
+          "time_len"
+        ],
+        "title": "AvWebhookRecordMp4Req",
+        "type": "object"
+      },
+      "AvWebhookResp": {
+        "properties": {
+          "code": {
+            "description": " 0 表示成功",
+            "format": "int32",
+            "type": "integer"
+          },
+          "msg": {
+            "description": " 错误信息",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code"
+        ],
+        "title": "AvWebhookResp",
+        "type": "object"
+      },
+      "AvWebhookRtpServerTimeoutReq": {
+        "properties": {
+          "local_port": {
+            "description": " 本地端口",
+            "format": "int64",
+            "type": "integer"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "ssrc": {
+            "description": " SSRC（ZLM 固定上报 JSON number）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "stream_id": {
+            "description": " 流 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "local_port",
+          "ssrc",
+          "stream_id"
+        ],
+        "title": "AvWebhookRtpServerTimeoutReq",
+        "type": "object"
+      },
+      "AvWebhookServerKeepaliveReq": {
+        "properties": {
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId"
+        ],
+        "title": "AvWebhookServerKeepaliveReq",
+        "type": "object"
+      },
+      "AvWebhookServerShutdownReq": {
+        "properties": {
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId"
+        ],
+        "title": "AvWebhookServerShutdownReq",
+        "type": "object"
+      },
+      "AvWebhookServerStartedReq": {
+        "properties": {
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId"
+        ],
+        "title": "AvWebhookServerStartedReq",
+        "type": "object"
+      },
+      "AvWebhookStreamChangedReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "regist": {
+            "description": " 注册/注销",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "schema": {
+            "description": " 协议 schema",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "schema",
+          "vhost",
+          "regist"
+        ],
+        "title": "AvWebhookStreamChangedReq",
+        "type": "object"
+      },
+      "AvWebhookStreamNoneReaderReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "schema": {
+            "description": " 协议 schema",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "schema",
+          "vhost"
+        ],
+        "title": "AvWebhookStreamNoneReaderReq",
+        "type": "object"
+      },
+      "AvWebhookStreamNoneReaderResp": {
+        "properties": {
+          "close": {
+            "description": " 是否关闭流",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "code": {
+            "description": " 0 表示成功",
+            "format": "int32",
+            "type": "integer"
+          },
+          "msg": {
+            "description": " 错误信息",
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "close"
+        ],
+        "title": "AvWebhookStreamNoneReaderResp",
+        "type": "object"
+      },
+      "AvWebhookStreamNotFoundReq": {
+        "properties": {
+          "app": {
+            "description": " 应用名",
+            "type": "string"
+          },
+          "appName": {
+            "description": " lalmax 兼容应用名",
+            "type": "string"
+          },
+          "mediaServerId": {
+            "description": " 媒体服务器 ID",
+            "type": "string"
+          },
+          "schema": {
+            "description": " 协议 schema",
+            "type": "string"
+          },
+          "stream": {
+            "description": " 流 ID",
+            "type": "string"
+          },
+          "streamName": {
+            "description": " lalmax 兼容流名",
+            "type": "string"
+          },
+          "vhost": {
+            "description": " 虚拟主机",
+            "type": "string"
+          }
+        },
+        "required": [
+          "mediaServerId",
+          "app",
+          "stream",
+          "schema",
+          "vhost"
+        ],
+        "title": "AvWebhookStreamNotFoundReq",
+        "type": "object"
+      },
+      "EmptyReq": {
+        "title": "EmptyReq",
+        "type": "object"
+      },
+      "EmptyResp": {
+        "title": "EmptyResp",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": " 排序字段，如 \"created_time desc\"",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码，从 1 开始",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "list": {
+            "description": " 列表数据",
+            "type": "object"
+          },
+          "total": {
+            "description": " 总记录数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total",
+          "list"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "things-av-api",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/av/config/sip/get-one": {
+      "post": {
+        "description": "业务说明：读取当前 GB28181 SIP 平台配置。",
+        "operationId": "postApiV1AvConfigSipGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EmptyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvSipConfig"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取 SIP 平台配置",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/config/sip/save": {
+      "post": {
+        "description": "业务说明：保存 GB28181 SIP 平台配置，覆盖原有配置。",
+        "operationId": "postApiV1AvConfigSipSave",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvSipConfigSaveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "保存 SIP 平台配置",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/create": {
+      "post": {
+        "description": "业务说明：创建一条音视频设备通道，支持 RTSP/RTMP/GB28181/ONVIF 等协议。传入 deviceName 时可自动创建对应协议设备。",
+        "operationId": "postApiV1AvDeviceChannelCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceChannel"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建音视频通道",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/delete": {
+      "post": {
+        "description": "业务说明：按通道 ID 删除音视频通道及其关联配置。",
+        "operationId": "postApiV1AvDeviceChannelDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除音视频通道",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/get-list": {
+      "post": {
+        "description": "业务说明：按设备、名称、状态等条件分页查询音视频通道列表。",
+        "operationId": "postApiV1AvDeviceChannelGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceChannelGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取音视频通道列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/get-one": {
+      "post": {
+        "description": "业务说明：按通道 ID 查询单条音视频通道详情。",
+        "operationId": "postApiV1AvDeviceChannelGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceChannel"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取音视频通道详情",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/record_mode": {
+      "post": {
+        "description": "业务说明：设置指定通道的录像模式，可选 always/ai/none。",
+        "operationId": "postApiV1AvDeviceChannelRecord_mode",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelSetRecordModeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceChannelSetRecordModeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "设置通道录像模式",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/channel/update": {
+      "post": {
+        "description": "业务说明：按通道 ID 更新音视频通道信息，支持部分字段更新。",
+        "operationId": "postApiV1AvDeviceChannelUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceChannelUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceChannel"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新音视频通道",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/info/create": {
+      "post": {
+        "description": "业务说明：创建一条音视频设备记录，用于管理摄像头、NVR、流媒体设备等。",
+        "operationId": "postApiV1AvDeviceInfoCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceInfoCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建音视频设备",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/info/delete": {
+      "post": {
+        "description": "业务说明：按设备 ID 删除音视频设备及其关联通道。",
+        "operationId": "postApiV1AvDeviceInfoDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceInfoDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除音视频设备",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/info/get-list": {
+      "post": {
+        "description": "业务说明：按名称、协议、状态等条件分页查询音视频设备列表。",
+        "operationId": "postApiV1AvDeviceInfoGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceInfoGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceInfoGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取音视频设备列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/info/get-one": {
+      "post": {
+        "description": "业务说明：按设备 ID 查询单条音视频设备详情。",
+        "operationId": "postApiV1AvDeviceInfoGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceInfoGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取音视频设备详情",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/info/update": {
+      "post": {
+        "description": "业务说明：按设备 ID 更新音视频设备信息，支持部分字段更新。",
+        "operationId": "postApiV1AvDeviceInfoUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceInfoUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新音视频设备",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/iot-bind/get-one": {
+      "post": {
+        "description": "业务说明：按 IoT 产品 ID 与设备标识查询其绑定的音视频设备与通道，未绑定时 avDeviceID 返回空。",
+        "operationId": "postApiV1AvDeviceIot-bindGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceIotBindGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceIotBindGetOneResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询音视频设备与 IoT 设备的绑定关系",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/iot-bind/save": {
+      "post": {
+        "description": "业务说明：mode=bind 绑定已有音视频设备与通道；mode=quick 按拉流地址自动建档音视频设备与通道后绑定。同一 IoT 设备重复绑定时先解绑旧绑定再建新绑定。",
+        "operationId": "postApiV1AvDeviceIot-bindSave",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceIotBindSaveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDeviceIotBindSaveResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "保存音视频设备与 IoT 设备的绑定关系",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/device/iot-bind/unbind": {
+      "post": {
+        "description": "业务说明：清除绑定列与 IoT 设备协议配置中的音视频绑定键；若音视频设备为快速建档且无其他引用则删除其通道与设备记录。",
+        "operationId": "postApiV1AvDeviceIot-bindUnbind",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDeviceIotBindUnbindReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "解绑音视频设备与 IoT 设备的绑定关系",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/event/get-list": {
+      "post": {
+        "description": "业务说明：按设备、通道、事件类型等条件分页查询音视频事件列表。",
+        "operationId": "postApiV1AvEventGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvEventGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvEventGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取音视频事件列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/media/server/create": {
+      "post": {
+        "description": "业务说明：新增 ZLM 等媒体服务器配置，用于推流、拉流、录像等能力调度。",
+        "operationId": "postApiV1AvMediaServerCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvMediaServerCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvMediaServer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建媒体服务器",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/media/server/delete": {
+      "post": {
+        "description": "业务说明：按服务 ID 删除媒体服务器配置。",
+        "operationId": "postApiV1AvMediaServerDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvMediaServerDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除媒体服务器",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/media/server/get-list": {
+      "post": {
+        "description": "业务说明：按名称、状态等条件分页查询媒体服务器列表。",
+        "operationId": "postApiV1AvMediaServerGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvMediaServerGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvMediaServerGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取媒体服务器列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/media/server/get-one": {
+      "post": {
+        "description": "业务说明：按服务 ID 查询单条媒体服务器配置详情。",
+        "operationId": "postApiV1AvMediaServerGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvMediaServerGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvMediaServer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取媒体服务器详情",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/media/server/update": {
+      "post": {
+        "description": "业务说明：按服务 ID 更新媒体服务器配置，支持部分字段更新。",
+        "operationId": "postApiV1AvMediaServerUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvMediaServerUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvMediaServer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新媒体服务器",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/discover": {
+      "post": {
+        "description": "业务说明：在指定网段内广播发现 ONVIF 设备。",
+        "operationId": "postApiV1AvOnvifDiscover",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifDiscoverReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvOnvifDiscoverResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 设备发现",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/import": {
+      "post": {
+        "description": "业务说明：重新探测指定设备，并按用户选择的 Profile 原子创建设备与通道。",
+        "operationId": "postApiV1AvOnvifImport",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifImportReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvOnvifImportResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "导入 ONVIF 设备",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "import",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "import",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/preset/add": {
+      "post": {
+        "description": "业务说明：为指定通道添加 ONVIF 预置位。",
+        "operationId": "postApiV1AvOnvifPresetAdd",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvOnvifPreset"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 添加预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/preset/delete": {
+      "post": {
+        "description": "业务说明：按预置位 ID 删除指定通道的 ONVIF 预置位。",
+        "operationId": "postApiV1AvOnvifPresetDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 删除预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/preset/goto": {
+      "post": {
+        "description": "业务说明：按摄像机返回的预置位 Token 调用指定 ONVIF 预置位。",
+        "operationId": "postApiV1AvOnvifPresetGoto",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 调用预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/preset/list": {
+      "post": {
+        "description": "业务说明：查询指定通道的 ONVIF 预置位列表。",
+        "operationId": "postApiV1AvOnvifPresetList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvOnvifPresetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 获取预置位列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/probe": {
+      "post": {
+        "description": "业务说明：按 IP 和端口探测 ONVIF 设备，返回媒体 Profile 列表。",
+        "operationId": "postApiV1AvOnvifProbe",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifProbeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvOnvifProbeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 设备探测",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/onvif/ptz/control": {
+      "post": {
+        "description": "业务说明：通过 ONVIF 协议控制指定通道云台方向与缩放。",
+        "operationId": "postApiV1AvOnvifPtzControl",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvOnvifPtzControlReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ONVIF 云台控制",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/play/live/keepalive": {
+      "post": {
+        "description": "业务说明：对指定播放流发送保活心跳，避免被服务端自动清理。",
+        "operationId": "postApiV1AvPlayLiveKeepalive",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlayLiveKeepaliveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "实时播放保活",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/play/live/start": {
+      "post": {
+        "description": "业务说明：按通道 ID 启动实时播放，返回各协议播放地址。",
+        "operationId": "postApiV1AvPlayLiveStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlayLiveStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvPlayStreamInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动实时播放",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/play/live/stop": {
+      "post": {
+        "description": "业务说明：停止指定通道的实时播放流。",
+        "operationId": "postApiV1AvPlayLiveStop",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlayLiveStopReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "停止实时播放",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/play/live/stream/list": {
+      "post": {
+        "description": "业务说明：按设备过滤分页查询当前活跃的实时流列表。",
+        "operationId": "postApiV1AvPlayLiveStreamList",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlayLiveStreamListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvPlayLiveStreamListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取实时流列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/playback/control": {
+      "post": {
+        "description": "业务说明：对进行中的历史回放发送控制信令，支持暂停、恢复、拖动与倍速。",
+        "operationId": "postApiV1AvPlaybackControl",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlaybackControlReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "回放控制",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/playback/download/progress": {
+      "post": {
+        "description": "业务说明：查询进行中的设备端录像下载进度，进度按媒体流已收时长占比计算。",
+        "operationId": "postApiV1AvPlaybackDownloadProgress",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDownloadProgressReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvDownloadProgressResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询录像下载进度",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/playback/download/start": {
+      "post": {
+        "description": "业务说明：按通道与起止时间启动 GB28181 设备端录像下载，设备推流至媒体服务器落盘为 MP4。",
+        "operationId": "postApiV1AvPlaybackDownloadStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvDownloadStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动录像下载",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/playback/start": {
+      "post": {
+        "description": "业务说明：按通道与起止时间启动 GB28181 设备端录像历史回放，返回各协议播放地址。",
+        "operationId": "postApiV1AvPlaybackStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlaybackStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvPlayStreamInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动历史回放",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/playback/stop": {
+      "post": {
+        "description": "业务说明：停止指定通道的历史回放流并清理回放会话。",
+        "operationId": "postApiV1AvPlaybackStop",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPlaybackStopReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "停止历史回放",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/ptz/control": {
+      "post": {
+        "description": "业务说明：控制指定通道云台连续移动、停止或预置位操作。",
+        "operationId": "postApiV1AvPtzControl",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPtzControlReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "云台控制",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/ptz/cruise": {
+      "post": {
+        "description": "业务说明：启动或停止指定通道的云台巡航组。",
+        "operationId": "postApiV1AvPtzCruise",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPtzCruiseReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "云台巡航控制",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/ptz/preset/call": {
+      "post": {
+        "description": "业务说明：按预置位编号调用指定通道的预置位。",
+        "operationId": "postApiV1AvPtzPresetCall",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPtzPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "调用云台预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/ptz/preset/del": {
+      "post": {
+        "description": "业务说明：按预置位编号删除指定通道的预置位。",
+        "operationId": "postApiV1AvPtzPresetDel",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPtzPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除云台预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/ptz/preset/set": {
+      "post": {
+        "description": "业务说明：为指定通道设置预置位。",
+        "operationId": "postApiV1AvPtzPresetSet",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvPtzPresetReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "设置云台预置位",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/calendar": {
+      "post": {
+        "description": "业务说明：查询指定通道指定年月有录像的日期列表。",
+        "operationId": "postApiV1AvRecordCalendar",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordCalendarReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvRecordCalendarResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取录像日历",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/delete": {
+      "post": {
+        "description": "业务说明：按录像 ID 删除指定录像文件及记录。",
+        "operationId": "postApiV1AvRecordDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordDeleteReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除录像",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/download": {
+      "post": {
+        "description": "业务说明：按录像 ID 获取录像下载地址。",
+        "operationId": "postApiV1AvRecordDownload",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordDownloadReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvRecordDownloadResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取录像下载地址",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/get-list": {
+      "post": {
+        "description": "业务说明：按通道、设备、时间范围等条件分页查询录像列表。",
+        "operationId": "postApiV1AvRecordGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvRecordGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取录像列表",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/monthly": {
+      "post": {
+        "description": "业务说明：查询指定通道指定年月的录像日期 bitmap。",
+        "operationId": "postApiV1AvRecordMonthly",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordMonthlyReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvRecordMonthlyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取录像月历 bitmap",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/nvr/query": {
+      "post": {
+        "description": "业务说明：通过 GB28181 信令检索 NVR 设备端录像片段列表，按通道与起止时间查询。",
+        "operationId": "postApiV1AvRecordNvrQuery",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvNvrRecordQueryReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvNvrRecordQueryResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "检索设备端录像",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/plan": {
+      "post": {
+        "description": "业务说明：设置指定通道是否启用录像及录像保留天数。",
+        "operationId": "postApiV1AvRecordPlan",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordPlanReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "保存录像计划",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/play/start": {
+      "post": {
+        "description": "业务说明：按录像 ID 启动录像回放并返回播放地址。",
+        "operationId": "postApiV1AvRecordPlayStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordPlayStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvPlayStreamInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动录像回放",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/start": {
+      "post": {
+        "description": "业务说明：立即启动指定通道的录像。",
+        "operationId": "postApiV1AvRecordStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动通道录像",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/stop": {
+      "post": {
+        "description": "业务说明：立即停止指定通道的录像。",
+        "operationId": "postApiV1AvRecordStop",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordStopReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "停止通道录像",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/record/timeline": {
+      "post": {
+        "description": "业务说明：查询指定通道指定日期的录像片段列表。",
+        "operationId": "postApiV1AvRecordTimeline",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvRecordTimelineReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvRecordTimelineResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取录像时间轴",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/snap": {
+      "post": {
+        "description": "业务说明：对指定通道调用 ZLM 截图并返回 JPEG 图片 Base64 数据。",
+        "operationId": "postApiV1AvSnap",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvSnapReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvSnapResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "通道实时截图",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "execute",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "execute",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/talk/start": {
+      "post": {
+        "description": "业务说明：ZLM 开启音频发流端口，SIP 邀请设备建立 s=Talk 会话，返回音频流播放地址。",
+        "operationId": "postApiV1AvTalkStart",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvTalkStartReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvPlayStreamInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "启动对讲",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "operate",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "operate",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/talk/stop": {
+      "post": {
+        "description": "业务说明：按通道停止对讲会话（BYE + 停止 ZLM 发流 + 删会话，幂等）。",
+        "operationId": "postApiV1AvTalkStop",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvTalkStopReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EmptyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "停止对讲",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "operate",
+        "x-auth-type": "admin",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "operate",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/play": {
+      "post": {
+        "description": "业务说明：接收 ZLM 播放鉴权请求，返回 code=0 表示允许播放。",
+        "operationId": "postApiV1AvWebhookPlay",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookPlayReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 播放鉴权事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/publish": {
+      "post": {
+        "description": "业务说明：接收 ZLM 推流鉴权请求，返回 code=0 表示允许推流。",
+        "operationId": "postApiV1AvWebhookPublish",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookPublishReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 推流鉴权事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/record/mp4": {
+      "post": {
+        "description": "业务说明：接收 ZLM MP4 录像完成事件，入库录像记录。",
+        "operationId": "postApiV1AvWebhookRecordMp4",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookRecordMp4Req"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 录像完成事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/rtp/server/timeout": {
+      "post": {
+        "description": "业务说明：接收 ZLM RTP 服务器超时事件。",
+        "operationId": "postApiV1AvWebhookRtpServerTimeout",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookRtpServerTimeoutReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM RTP 服务器超时事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/server/keepalive": {
+      "post": {
+        "description": "业务说明：接收 ZLM 心跳事件，更新媒体服务器在线状态。",
+        "operationId": "postApiV1AvWebhookServerKeepalive",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookServerKeepaliveReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 心跳事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/server/shutdown": {
+      "post": {
+        "description": "业务说明：接收 ZLM 关闭事件。",
+        "operationId": "postApiV1AvWebhookServerShutdown",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookServerShutdownReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 关闭事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/server/started": {
+      "post": {
+        "description": "业务说明：接收 ZLM 启动完成事件。",
+        "operationId": "postApiV1AvWebhookServerStarted",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookServerStartedReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 启动事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/stream/changed": {
+      "post": {
+        "description": "业务说明：接收 ZLM 流注册/注销事件。",
+        "operationId": "postApiV1AvWebhookStreamChanged",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookStreamChangedReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 流变更事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/stream/none/reader": {
+      "post": {
+        "description": "业务说明：接收 ZLM 无观众事件，返回是否允许关闭流。",
+        "operationId": "postApiV1AvWebhookStreamNoneReader",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookStreamNoneReaderReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookStreamNoneReaderResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 无观众事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    },
+    "/api/v1/av/webhook/stream/not/found": {
+      "post": {
+        "description": "业务说明：接收 ZLM 流不存在事件，触发按需拉流。",
+        "operationId": "postApiV1AvWebhookStreamNotFound",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AvWebhookStreamNotFoundReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AvWebhookResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "ZLM 流不存在事件回调",
+        "tags": [
+          "av-api"
+        ],
+        "x-action": "create",
+        "x-auth-type": "public",
+        "x-group": "things/av",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "av"
+      }
+    }
+  }
+}

@@ -1,0 +1,33 @@
+info(
+    title: "设备数据模拟模块"
+    desc: "规则引擎设备数据模拟：模拟数据上报【AI 任务可选写入能力】"
+    author: "联犀"
+    email: "dev@unitedrhino.com"
+    version: "v2"
+)
+
+import "simulateCommon.api"
+
+@server(
+    group: things/device/simulate
+    prefix: /api/v1/things/device/simulate
+    accessCodePrefix: "thingsDeviceSimulate"
+    accessNamePrefix: "设备数据模拟"
+    accessGroup: "设备管理"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "模拟数据上报"
+        description: "业务说明：单次向指定设备注入一批属性模拟值【AI 数据任务工具的写入底座，走标准属性上报链路，属性历史/场景联动/告警/WS 推送自动生效】。属性值统一传字符串，平台按物模型类型自动转换；任一属性非法则整体报错不做部分写入。"
+        authType: "admin"
+        group: "things/device/simulate"
+        resource: "things/device/simulate"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler report
+    post /report (SimulateReportReq) returns ()
+}

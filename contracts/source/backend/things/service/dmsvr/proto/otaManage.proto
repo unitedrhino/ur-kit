@@ -1,0 +1,482 @@
+//--------------------OTA升级管理服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+
+// OtaManageEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message OtaManageEmpty {
+}
+
+// OtaManageWithID 带ID的消息
+// 定义只包含ID的消息类型
+message OtaManageWithID{
+  int64 id = 1; // ID值
+}
+
+// OtaManageWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message OtaManageWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+//OTA升级管理
+service OtaManage{
+  //添加升级包
+  rpc otaFirmwareInfoCreate(OtaFirmwareInfoCreateReq) returns (OtaManageWithID);
+  //修改升级包
+  rpc otaFirmwareInfoUpdate(OtaFirmwareInfoUpdateReq) returns (OtaManageWithID);
+  //删除升级包
+  rpc otaFirmwareInfoDelete(OtaManageWithID) returns(OtaManageEmpty);
+  //升级包列表
+  rpc otaFirmwareInfoGetList(OtaFirmwareInfoGetListReq) returns(OtaFirmwareInfoGetListResp);
+  //查询升级包
+  rpc otaFirmwareInfoGetOne(OtaManageWithID) returns(OtaFirmwareInfo);
+
+
+  //创建静态升级批次
+  rpc otaFirmwareJobCreate(OtaFirmwareJobInfo) returns(OtaManageWithID);
+  //获取升级包下的升级任务批次列表
+  rpc otaFirmwareJobGetList(OtaFirmwareJobGetListReq) returns(OtaFirmwareJobGetListResp);
+  //查询指定升级批次的详情
+  rpc otaFirmwareJobGetOne(OtaManageWithID) returns(OtaFirmwareJobInfo);
+  //取消动态升级策略
+  rpc otaFirmwareJobUpdate(OtaFirmwareJobInfo) returns (OtaManageEmpty);
+  //查询指定升级批次下的设备升级作业列表
+  rpc otaFirmwareDeviceGetList(OtaFirmwareDeviceGetListReq) returns(OtaFirmwareDeviceGetListResp);
+  //取消指定批次下的设备升级作业
+  rpc otaFirmwareDeviceCancel(OtaFirmwareDeviceCancelReq) returns(OtaManageEmpty);
+  //重新升级指定批次下升级失败或升级取消的设备升级作业
+  rpc otaFirmwareDeviceRetry(OtaFirmwareDeviceRetryReq) returns(OtaManageEmpty);
+  //app确认设备升级
+  rpc otaFirmwareDeviceConfirm(OtaFirmwareDeviceConfirmReq) returns(OtaManageEmpty);
+
+  rpc otaModuleInfoCreate(OtaModuleInfo)returns(OtaManageWithID);
+  rpc otaModuleInfoUpdate(OtaModuleInfo)returns(OtaManageEmpty);
+  rpc otaModuleInfoDelete(OtaManageWithID)returns(OtaManageEmpty);
+  rpc otaModuleInfoGetList(OtaModuleInfoGetListReq)returns(OtaModuleInfoGetListResp);
+  rpc otaModuleInfoGetOne(OtaManageWithIDCode)returns(OtaModuleInfo);
+}
+
+// OtaModuleInfo OTA模块信息
+message OtaModuleInfo{
+  int64 id = 1; //ID
+  string code = 2; //编码
+  string name = 3; //名称
+  string desc = 4; //描述
+  string productID = 5; //产品ID
+  int64 createdTime = 6; //创建时间
+}
+
+// OtaModuleInfoGetListReq OTA模块信息列表查询请求
+message OtaModuleInfoGetListReq{
+  PageInfo page = 1; //分页信息
+  string name = 2; //名称
+  string productID = 3; //产品ID
+}
+
+// OtaModuleInfoGetListResp OTA模块信息列表查询响应
+message OtaModuleInfoGetListResp{
+  int64 total = 1; //总数
+  repeated OtaModuleInfo list = 2; //列表
+}
+
+// OtaFile OTA文件
+message OtaFile  {
+  int64  size =1; //文件大小
+  string name =2; //文件名
+  string fileUrl =3; //文件URL
+  string fileMd5 =4; //文件MD5
+  string signature =5; //签名
+}
+
+// OtaUpgradeData OTA升级数据
+message OtaUpgradeData{
+  string version      =1; //新固件的版本
+  string name = 2; //固件升级包名称
+  string desc = 3; //文件描述
+  int64 isDiff        =4; //是否差分包
+  /**
+OTA升级包签名方法。取值：
+MD5（默认）：MD5签名。
+SHA256：SHA256签名。
+*/
+  string signMethod   =5; //签名方法
+  string extra        =6; //额外信息
+  repeated  OtaFile files=7; //文件列表
+}
+
+// OtaFirmwareFile OTA固件文件
+message OtaFirmwareFile {
+  string filePath = 1; //文件路径
+  string name = 2; //文件名
+}
+
+// FirmwareFile 固件文件
+message FirmwareFile {
+  string name = 1; //文件名
+  int64 size = 2; //文件大小
+  string filePath = 3; //文件路径
+  string signature = 4; //签名
+  string fileMd5 = 5; //文件MD5
+}
+
+// FirmwareInfoDeleteReq 固件信息删除请求
+message FirmwareInfoDeleteReq {
+  int64 firmwareID = 1; //固件ID
+}
+
+// FirmwareInfoDeleteResp 固件信息删除响应
+message FirmwareInfoDeleteResp {
+  repeated string paths = 1; //文件路径列表
+}
+
+// FirmwareInfoGetListReq 固件信息列表查询请求
+message FirmwareInfoGetListReq {
+  PageInfo page = 1; //分页信息 只获取一个则不填
+  int64 firmwareID = 2; //固件ID
+  string productID = 3; //产品ID
+}
+
+// FirmwareInfoGetListResp 固件信息列表查询响应
+message FirmwareInfoGetListResp {
+  repeated FirmwareInfo list = 1; //固件信息
+  int64  total = 2; //总数(只有分页的时候会返回)
+}
+
+// FirmwareInfoGetOneReq 固件信息读取请求
+message FirmwareInfoGetOneReq {
+  int64 firmwareID = 1; //固件ID
+}
+
+// OtaFirmwareFileReq OTA固件文件请求
+message OtaFirmwareFileReq{
+  int64 fileID = 1; //文件ID
+  string name = 2; //文件名
+  string host = 3; //主机
+  string filePath = 4; //文件路径
+  int64 size = 5; //文件大小
+  string storage = 6; //存储
+  string signMethod = 7; //签名方法
+  string signature = 8; //签名
+}
+
+// OtaFirmwareFileInfo OTA固件文件信息
+message OtaFirmwareFileInfo{
+  int64 fileID = 1; //文件ID
+  int64 firmwareID = 2; //固件ID
+  string name = 3; //文件名
+  string host = 4; //主机
+  string filePath = 5; //文件路径
+  int64 size = 6; //文件大小
+  string storage = 7; //存储
+  string signMethod = 8; //签名方法
+  string signature = 9; //签名
+}
+
+// OtaFirmwareFileResp OTA固件文件响应
+message OtaFirmwareFileResp{
+  int64 fileID = 1; //文件ID
+  string name = 2; //文件名
+  string host = 3; //主机
+  string filePath = 4; //文件路径
+  int64 size = 5; //文件大小
+  string storage = 6; //存储
+  string signature = 7; //签名
+}
+
+// OtaFirmwareFileGetListReq OTA固件文件列表查询请求
+message OtaFirmwareFileGetListReq{
+  PageInfo page = 1; //分页信息
+  int64 firmwareID = 2; //固件ID
+  google.protobuf.Int64Value size = 3; //文件大小
+}
+
+// OtaFirmwareFileGetListResp OTA固件文件列表查询响应
+message OtaFirmwareFileGetListResp{
+  repeated OtaFirmwareFileInfo list = 1; //列表
+  int64 total = 2; //总数
+}
+
+// OtaFirmwareInfoCreateReq OTA固件信息创建请求
+message OtaFirmwareInfoCreateReq {
+  string productID = 2; //产品id
+  string name = 3; //固件升级包名称
+  /**
+  当前OTA升级包的版本号，仅支持英文字母、数字、半角句号（.）、短划线（-）和下划线（_）。长度限制为1~64个字符。
+   */
+  string version = 4; //版本号
+  /**
+  OTA升级包签名方法。取值：
+  MD5（默认）：MD5签名。
+  SHA256：SHA256签名。
+   */
+  string signMethod = 6; //签名方法
+  string desc = 9; //文件描述
+  /**
+  OTA升级包类型。可选：
+  0：整包升级包，您上传的升级包文件包含完整的升级包，将推送整包升级包给设备进行升级。
+  1：差分升级包，您上传的升级包文件仅包含新版本升级包与之前版本的差异部分，仅推送差异部分给设备进行升级。
+  不传入此参数，则默认值为0。
+   */
+  int64 isDiff = 10; //升级包类型
+  string srcVersion = 12; //源版本
+  int64 isNeedToVerify = 13; //是否需要验证
+  google.protobuf.StringValue extra = 14; //自定义数据
+  repeated string filePaths = 15; //文件路径列表
+  string moduleCode =16; //模块编码
+}
+
+// OtaFirmwareInfoUpdateReq OTA固件信息更新请求
+message OtaFirmwareInfoUpdateReq {
+  int64 id = 1; //固件id
+  string name = 2; //固件升级包名称
+  string desc = 3; //文件描述
+  google.protobuf.StringValue extra = 14; //推送设备端的信息
+}
+
+// OtaFirmwareInfoGetListReq OTA固件信息列表查询请求
+message OtaFirmwareInfoGetListReq{
+  PageInfo page = 1; //分页信息
+  string productID = 2; //产品id
+  string name = 3; //产品名称
+}
+
+// OtaFirmwareInfoGetListResp OTA固件信息列表查询响应
+message OtaFirmwareInfoGetListResp{
+  repeated OtaFirmwareInfo list = 1; //列表
+  int64 total = 2; //总数
+}
+
+// OtaFirmwareInfo OTA固件信息
+message OtaFirmwareInfo{
+  int64 id = 1; //固件id
+  string name = 2; //固件升级包名称
+  string version = 3; //版本号
+  string productID = 4; //产品id
+  string productName = 5; //产品名称
+  int64 status = 6; //状态
+  int64 createdTime = 7; //添加时间
+  string signMethod = 8; //签名方式:MD5/SHA256
+  string desc = 9; //文件描述
+  string extra = 10; //推给设备端端消息
+  repeated FirmwareFile fileList = 11; //文件列表
+  int64 isDiff = 12; //整包or差包
+  int64 isNeedToVerify = 13; //是否需要验证
+  string moduleCode = 14; //模块编码
+}
+
+// FirmwareInfo 固件信息（简化版）
+message FirmwareInfo{
+  int64 id = 1; //固件id
+  string name = 2; //固件升级包名称
+  string version = 3; //版本号
+}
+
+// OtaJobDynamicInfo OTA任务动态信息
+message OtaJobDynamicInfo{
+  /*
+    动态升级模式。取值范围：
+    1（默认）：除了升级当前满足升级条件的设备，还将持续检查设备是否满足升级条件，对满足升级条件的设备进行升级。
+    2：仅对后续上报新版本号的设备生效。
+  动态升级
+*/
+    int64 dynamicMode =1; // 动态升级模式
+}
+
+// OtaJobStaticInfo OTA任务静态信息
+message OtaJobStaticInfo{
+  /*
+        定向升级的设备名称列表。
+        使用差分升级包进行定向升级时，要升级的设备的当前 OTA 模块版本号需与差分升级包的待升级版本号（SrcVersion）相同。
+        可以调用 QueryDeviceDetail ，查看设备 OTA 模块版本号（FirmwareVersion）。
+        列表中的设备所属的产品必须与升级包所属产品一致。
+        列表中不能有重复的设备名称。
+        最多可传入 200 个设备名称。
+      静态升级
+    */
+ repeated string targetDeviceNames =1; // 定向升级的设备名称列表。最多可传入200个设备名称。以逗号分隔
+  /*
+      指定结束升级的时间。
+      结束时间距发起时间（ScheduleTime）最少 1 小时，最多为 30 天。取值为 13 位毫秒值时间戳。
+      不传入该参数，则表示不会强制结束升级。
+    静态升级
+  */
+    int64 scheduleFinishTime  =2; // 指定结束升级的时间，单位为毫秒。
+  /*
+      指定发起 OTA 升级的时间。
+      定时时间范围需为当前时间的 5 分钟后至 7 天内。取值为秒时间戳。
+      不传入该参数，则表示立即升级。
+    静态升级
+  */
+  int64 scheduleTime =3; // 定时升级时间
+  int64 grayPercent = 4; //灰度的范围,小数点后两位, 1.23%为 123
+}
+
+// OtaFirmwareJobInfo OTA固件任务信息
+message OtaFirmwareJobInfo{
+  int64 id          =1; //ID
+  int64 firmwareID  =2; // 升级包ID，升级包的唯一标识符。
+  int64 type        =3; // 升级包所属产品的JobType。 验证升级包:1  批量升级:2
+  int64 status   =4; // 批次状态,计划中:1  执行中:2  已完成:3  已取消:4
+  int64 upgradeType =5; // 升级策略，1-静态，2-动态
+  /*
+    待升级版本号列表。
+      发起全量升级（TargetSelection=ALL）和灰度升级（TargetSelection=GRAY）任务时，可以传入该参数。
+      使用差分升级包发起全量升级和灰度升级任务时，该参数值需指定为差分升级包的待升级版本号（SrcVersion）。
+      发起定向升级（TargetSelection=SPECIFIC）或分组升级（TargetSelection=GROUP）任务时，不能传入该参数。
+      可以调用 QueryDeviceDetail ，查看设备 OTA 模块版本号（FirmwareVersion）。
+      列表中不能有重复的版本号。
+      最多可传入 10 个版本号。
+  */
+  repeated string srcVersions =6; // 待升级版本号列表。最多可传入10个版本号。用逗号分隔多个版本号
+  int64 retryInterval =7; // 设备升级失败后，自动重试的时间间隔，单位为分钟。 动态升级 静态升级 -1 为不重试
+  int64 retryCount =8; // 自动重试次数。1/2/5次 动态升级 静态升级
+  int64 timeoutInMinutes =9; // 设备升级超时时间，单位为分钟。 动态升级 静态升级
+  int64 maximumPerMinute =10; // 每分钟最多向多少个设备推送升级包下载URL。 动态升级 静态升级
+  /*
+      是否覆盖之前的升级任务。取值：
+
+      2（默认）：不覆盖。若设备已有升级任务，则只执行已有任务。
+      1：覆盖。设备只执行新的升级任务。此时 BatchModuleMode 不能传入 true。
+    动态升级 静态升级
+  */
+    int64 isOverwriteMode =11; // 是否覆盖之前的升级任务。取值：1（不覆盖）、2（覆盖）。
+  /*
+        物联网平台是否主动向设备推送升级任务。
+      1（默认）：是。批次任务创建完成后，物联网平台主动将升级任务，直接推送给升级范围内的在线设备。
+        此时，设备仍可主动向物联网平台发起请求，来获取 OTA 升级任务信息。
+      2：否。设备必须通过向物联网平台发起请求，来获取 OTA 升级任务信息。
+    动态升级
+  */
+    int64 isNeedPush =12; // 物联网平台是否主动向设备推送升级任务。
+  /*
+    如需自主控制设备 OTA 升级时，可配置此参数，通过手机 App 来控制，设备是否可进行 OTA 升级。手机 App 需您自行开发。
+      2（默认）：否。直接按照 NeedPush 设置，获取 OTA 升级任务信息。
+      1：是。设备无法获取 OTA 升级任务，需 App 侧确认 OTA 升级后，才能按照 NeedPush 设置，获取 OTA 升级任务信息。
+  */
+  int64 isNeedConfirm  =13; // 是否需要App确认
+  int64 targetSelection =14; //升级范围。 1：全量升级。 2：定向升级。 3：灰度升级。 4：分组升级(不做) 5: 区域升级(不做)
+  OtaJobDynamicInfo dynamic =15; //动态升级信息
+  OtaJobStaticInfo static=16; //静态升级信息
+  string target =17; //分组升级和区域升级填写对应的id
+  repeated string tenantCodes = 18; //指定租户
+  int64 createdTime =19; //创建时间
+}
+
+// OtaFirmwareJobGetListReq OTA固件任务列表查询请求
+message OtaFirmwareJobGetListReq{
+  PageInfo page = 1; //分页信息
+  int64 firmwareID = 2; //固件ID
+  string productID = 3; //产品ID
+  string deviceName = 4; //设备名称
+}
+
+// OtaFirmwareJobGetListResp OTA固件任务列表查询响应
+message OtaFirmwareJobGetListResp{
+  repeated OtaFirmwareJobInfo list = 1; //列表
+  int64 total = 2; //总数
+}
+
+// OtaJobByDeviceGetListReq OTA任务按设备查询请求
+message OtaJobByDeviceGetListReq{
+  PageInfo pageInfo = 1; //分页信息
+  int64 firmwareID = 2; //固件ID
+  string productID = 3; //产品ID
+  string deviceName = 4; //设备名称
+}
+
+// OtaFirmwareDeviceGetListReq OTA固件设备列表查询请求
+message OtaFirmwareDeviceGetListReq{
+  PageInfo page = 1; //分页信息
+  int64 firmwareID =2; //固件ID
+  int64 jobID = 3; //任务ID
+  string deviceName = 4; //设备名称
+  string srcVersion = 7; //源版本
+  int64 status = 11; //设备升级作业状态。1：待确认。 2：待推送。 3：已推送。  4：升级中。 5:升级成功 6: 升级失败. 7:已取消
+  int64 isOnline =15; // 设备是否在线
+}
+
+// OtaFirmwareDeviceInfo OTA固件设备信息
+message OtaFirmwareDeviceInfo{
+  int64 id =1; //ID
+  int64 firmwareID = 2; //固件ID
+  int64 jobID =3 ; //任务ID
+  string productID = 4; //产品ID
+  string productName = 5; //产品名称
+  string deviceName = 6; //设备名称
+  string srcVersion = 7; //源版本
+  string destVersion = 8; //目标版本
+  int64 step =9; // 当前的升级进度  0-100%    -1：升级失败。-2：下载失败。-3：校验失败。-4：烧写失败。
+  string detail = 10; //详情
+  int64 status = 11; //设备升级作业状态。1：待确认。 2：待推送。 3：已推送。  4：升级中。 5:升级成功 6: 升级失败. 7:已取消
+  int64 createdTime = 13; //创建时间
+  int64 updatedTime = 14; //更新时间
+  int64 isOnline =15; //只读 设备是否在线
+}
+
+// OtaFirmwareDeviceGetListResp OTA固件设备列表查询响应
+message OtaFirmwareDeviceGetListResp{
+  repeated OtaFirmwareDeviceInfo list = 1; //列表
+  int64 total=2; //总数
+}
+
+// OtaFirmwareDeviceCancelReq 取消OTA固件设备升级请求
+message OtaFirmwareDeviceCancelReq{
+  int64 firmwareID = 1; //固件ID
+  int64 jobID = 2; //任务ID
+  repeated string deviceNames = 3; //设备名称列表
+}
+
+// OtaFirmwareDeviceRetryReq 重试OTA固件设备升级请求
+message OtaFirmwareDeviceRetryReq{
+  int64 firmwareID = 1; //固件ID
+  int64 jobID = 2; //任务ID
+  repeated string deviceNames = 3; //设备名称列表
+}
+
+// OtaFirmwareDeviceConfirmReq 确认OTA固件设备升级请求
+message OtaFirmwareDeviceConfirmReq{
+  string productID =1; //产品ID
+  string deviceName =2; //设备名称
+}
+
+
+
+// Firmware 固件（完整版，用于兼容旧代码）
+message Firmware {
+  int64   createdTime = 1; //创建时间 只读
+  int64 firmwareID = 2;
+  string productID = 3;
+  string name = 4; //升级包名称
+  string version = 5; //升级包版本
+  int32 isDiff = 6; //是否差分包,1:整包,2:差分
+  string signMethod = 7; //签名方法 MD5/SHA
+  google.protobuf.StringValue   desc = 8; //描述
+  google.protobuf.StringValue   extData = 9; //自定义数据
+  repeated OtaFirmwareFile files = 10; //产品信息
+}
+
+// FirmwareResp 固件响应
+message FirmwareResp{
+  int64 firmwareID = 1;
+}
+
+// FirmwareInfoGetOneResp 固件信息读取响应
+message FirmwareInfoGetOneResp{
+  int64   createdTime = 1; //创建时间 只读
+  int64 firmwareID = 2;
+  string productID = 3;
+  string productName = 4;
+  string name = 5; //升级包名称
+  string version = 6; //升级包版本
+  int32 isDiff = 7; //是否差分包,1:整包,2:差分
+  string signMethod = 8;
+  google.protobuf.StringValue   desc = 10; //描述
+  google.protobuf.StringValue   extData = 11; //自定义数据
+  repeated OtaFirmwareFileResp files = 12; //产品信息
+}

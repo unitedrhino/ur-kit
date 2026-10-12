@@ -1,0 +1,86 @@
+info(
+	title: "设备 S01 BLE 安全配对"
+	desc: "为在架 App 提供 S01 BLE 安全配对授权与确认能力"
+	author: "杨磊"
+	email: "603685348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: things/device/pair
+	prefix: /api/v1/things/device/info
+	accessCodePrefix: "thingsDevicePair"
+	accessNamePrefix: "设备配对"
+	accessGroup: "设备管理"
+	middleware: CheckTokenWare,InitCtxsWare
+	defaultAuthType: "all"
+	defaultNeedAuth: "true"
+)
+service api {
+	@doc(
+		summary: "S01 BLE 安全配对授权"
+		description: "业务说明：根据产品 ProductSecret 前 16 个 ASCII 字节为指定设备生成短期配对授权、随机数、认证标签和本次配对密钥。"
+		authType: "all"
+		resource: "things/device/pair"
+		action: "approve"
+		group: "things/device/pair"
+		recordLogMode: "1"
+	)
+	@handler grant
+	post /pair-grant (DevicePairGrantReq) returns (DevicePairGrantResp)
+
+	@doc(
+		summary: "S01 BLE 安全配对确认"
+		description: "业务说明：校验短期配对授权和设备返回的 pairAckPayload，确认随机数、MAC、用户及绑定版本均匹配。"
+		authType: "all"
+		resource: "things/device/pair"
+		action: "verify"
+		group: "things/device/pair"
+		recordLogMode: "1"
+	)
+	@handler confirm
+	post /pair-confirm (DevicePairConfirmReq) returns (DevicePairConfirmResp)
+}
+
+type (
+	// DevicePairGrantReq 是 S01 BLE 配对授权请求。
+	DevicePairGrantReq {
+		ProductID string `json:"productID"`
+		Mac string `json:"mac"`
+		DeviceName string `json:"deviceName,optional"`
+		ObservedBindEpoch int64 `json:"observedBindEpoch,optional"`
+	}
+
+	// DevicePairGrantResp 是下发给 App 和设备的短期配对材料。
+	DevicePairGrantResp {
+		ProductID string `json:"productID"`
+		Mac string `json:"mac"`
+		DeviceName string `json:"deviceName"`
+		GrantToken string `json:"grantToken"`
+		Nonce string `json:"nonce"`
+		AuthTag string `json:"authTag"`
+		BlePairKey string `json:"blePairKey"`
+		TtlSec int64 `json:"ttlSec"`
+	}
+
+	// DevicePairConfirmReq 是设备配对回执确认请求。
+	DevicePairConfirmReq {
+		ProductID string `json:"productID"`
+		Mac string `json:"mac"`
+		DeviceName string `json:"deviceName,optional"`
+		GrantToken string `json:"grantToken"`
+		PairAckPayload string `json:"pairAckPayload"`
+		AreaID int64 `json:"areaID,optional,string"`
+	}
+
+	// DevicePairConfirmResp 是通过配对确认后返回的设备安全上下文。
+	DevicePairConfirmResp {
+		ProductID string `json:"productID"`
+		Mac string `json:"mac"`
+		DeviceName string `json:"deviceName"`
+		BindEpoch int64 `json:"bindEpoch"`
+		BleSecVer int64 `json:"bleSecVer"`
+		BlePairKey string `json:"blePairKey"`
+		Message string `json:"message"`
+	}
+)

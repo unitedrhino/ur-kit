@@ -1,0 +1,550 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡通道管理"
+    desc: "物联卡上游通道 CRUD"
+    version: "v1"
+)
+
+type (
+    CardRoute {
+        ID                     int64   `json:"id,string"`
+        Code                   string  `json:"code"`
+        PlatformType           string  `json:"platformType"`
+        Name                   string  `json:"name"`
+        Username               string  `json:"username,optional"`
+        Password               string  `json:"password,optional"`
+        Key                    string  `json:"key,optional"`
+        HasPassword            bool    `json:"hasPassword"`
+        HasKey                 bool    `json:"hasKey"`
+        URL                    string  `json:"url,optional"`
+        OperatorType           int64   `json:"operatorType"`
+        OperatorTypeName       string  `json:"operatorTypeName,optional"`
+        Concurrency            int64   `json:"concurrency,optional"`
+        IsPolling              int64   `json:"isPolling,optional"`
+        ControlType            int64   `json:"controlType,optional"`
+        MaxUse                 float64 `json:"maxUse,optional"`
+        Algorithm              int64   `json:"algorithm,optional"`
+        Status                 int64   `json:"status"`
+        Alias                  string  `json:"alias,optional"`
+        UserAccount            string  `json:"userAccount,optional"`
+        UserPassword           string  `json:"userPassword,optional"`
+        HasUserPassword        bool    `json:"hasUserPassword"`
+        CredentialMasks        map[string]string `json:"credentialMasks"`
+        ConfiguredCredentials  map[string]bool   `json:"configuredCredentials"`
+        AddressURL             string  `json:"addressUrl,optional"`
+        State                  int64   `json:"state,optional"`
+        SuccessRate            string  `json:"successRate,optional"`
+        Total                  int64   `json:"total,optional"`
+        SuccessTotal           int64   `json:"successTotal,optional"`
+        FailTotal              int64   `json:"failTotal,optional"`
+        Interface              int64   `json:"interface,optional"`
+        SyncUpstream           int64   `json:"syncUpstream,optional"`
+        SyncChangeNotification int64   `json:"syncChangeNotification,optional"`
+        SyncDataType           int64   `json:"syncDataType,optional"`
+        UpstreamCardCount      int64   `json:"upstreamCardCount,optional"`
+        LocalCardCount         int64   `json:"localCardCount"`
+        ReferenceCount         int64   `json:"referenceCount"`
+        Removable              bool    `json:"removable"`
+        Reason                 string  `json:"reason,optional"`
+        SyncField              string  `json:"syncField,optional"`
+        CreatedTime            string  `json:"createdTime,optional"`
+    }
+
+    CardRouteCreateReq {
+        Code                   string  `json:"code"`
+        PlatformType           string  `json:"platformType"`
+        Name                   string  `json:"name"`
+        Username               string  `json:"username,optional"`
+        Password               string  `json:"password,optional"`
+        Key                    string  `json:"key,optional"`
+        URL                    string  `json:"url,optional"`
+        OperatorType           int64   `json:"operatorType"`
+        Concurrency            int64   `json:"concurrency,optional"`
+        IsPolling              int64   `json:"isPolling,optional"`
+        ControlType            int64   `json:"controlType,optional"`
+        MaxUse                 float64 `json:"maxUse,optional"`
+        Algorithm              int64   `json:"algorithm,optional"`
+        Status                 int64   `json:"status,optional"`
+        Alias                  string  `json:"alias,optional"`
+        UserAccount            string  `json:"userAccount,optional"`
+        UserPassword           string  `json:"userPassword,optional"`
+        AddressURL             string  `json:"addressUrl,optional"`
+        State                  int64   `json:"state,optional"`
+        Interface              int64   `json:"interface,optional"`
+        SyncUpstream           int64   `json:"syncUpstream,optional"`
+        SyncChangeNotification int64   `json:"syncChangeNotification,optional"`
+        SyncDataType           int64   `json:"syncDataType,optional"`
+        SyncField              string  `json:"syncField,optional"`
+        Credentials            map[string]string `json:"credentials,optional"`
+    }
+
+    CardRouteUpdateReq {
+        ID                     int64   `json:"id,string"`
+        Code                   string  `json:"code,optional"`
+        PlatformType           string  `json:"platformType,optional"`
+        Name                   string  `json:"name,optional"`
+        Username               string  `json:"username,optional"`
+        Password               string  `json:"password,optional"`
+        Key                    string  `json:"key,optional"`
+        URL                    string  `json:"url,optional"`
+        OperatorType           int64   `json:"operatorType,optional"`
+        Concurrency            int64   `json:"concurrency,optional"`
+        IsPolling              int64   `json:"isPolling,optional"`
+        ControlType            int64   `json:"controlType,optional"`
+        MaxUse                 float64 `json:"maxUse,optional"`
+        Algorithm              int64   `json:"algorithm,optional"`
+        Status                 int64   `json:"status,optional"`
+        Alias                  string  `json:"alias,optional"`
+        UserAccount            string  `json:"userAccount,optional"`
+        UserPassword           string  `json:"userPassword,optional"`
+        AddressURL             string  `json:"addressUrl,optional"`
+        State                  int64   `json:"state,optional"`
+        Interface              int64   `json:"interface,optional"`
+        SyncUpstream           int64   `json:"syncUpstream,optional"`
+        SyncChangeNotification int64   `json:"syncChangeNotification,optional"`
+        SyncDataType           int64   `json:"syncDataType,optional"`
+        SyncField              string  `json:"syncField,optional"`
+        Credentials            map[string]string `json:"credentials,optional"`
+    }
+
+    CardRouteGetListReq {
+        PageInfo
+        Code         string `json:"code,optional"`
+        Name         string `json:"name,optional"`
+        OperatorType int64  `json:"operatorType,optional"`
+        Status       int64  `json:"status,optional"`
+    }
+
+    CardRouteGetListResp {
+        PageResp
+        List []*CardRoute `json:"list"`
+    }
+
+    CardRouteGetOptionResp {
+        List []*CardRouteOption `json:"list"`
+    }
+
+    // CardRouteGetOptionReq 按当前选择的平台资费组反向缩小通道选项。
+    CardRouteGetOptionReq {
+        PackageID string `json:"packageId,optional"`
+    }
+
+    // CardCapability 描述通道能力是否可用及稳定原因。
+    CardCapability {
+        Code      string `json:"code"`
+        Supported bool   `json:"supported"`
+        Reason    string `json:"reason"`
+    }
+
+    // CardRouteGetCapabilitiesResp 返回服务端统一判定的能力矩阵。
+    CardRouteGetCapabilitiesResp {
+        List []*CardCapability `json:"list"`
+    }
+
+    // CardRouteGetCapabilitiesReq 支持已保存通道或未保存平台模板的能力预览。
+    CardRouteGetCapabilitiesReq {
+        ID           int64  `json:"id,string,optional"`
+        PlatformType string `json:"platformType,optional"`
+    }
+
+    // CardRouteCredentialField 描述动态通道配置或凭据字段。
+    CardRouteCredentialField {
+        Code        string `json:"code"`
+        Label       string `json:"label"`
+        Required    bool   `json:"required"`
+        Secret      bool   `json:"secret"`
+        Placeholder string `json:"placeholder,optional"`
+        HelpText    string `json:"helpText,optional"`
+    }
+
+    // CardRoutePlatform 表示一个官方通道模板及其协议和验收元数据。
+    CardRoutePlatform {
+        PlatformType             string                      `json:"platformType"`
+        OfficialCode             string                      `json:"officialCode"`
+        Name                     string                      `json:"name"`
+        OperatorType             int64                       `json:"operatorType"`
+        OperatorName             string                      `json:"operatorName"`
+        ProtocolFamily           string                      `json:"protocolFamily"`
+        DefaultURL               string                      `json:"defaultURL,optional"`
+        Selectable               bool                        `json:"selectable"`
+        BlockedReason            string                      `json:"blockedReason,optional"`
+        SourceContractStatus     string                      `json:"sourceContractStatus"`
+        OfflineContractStatus    string                      `json:"offlineContractStatus"`
+        FieldValidationStatus    string                      `json:"fieldValidationStatus"`
+        OnsiteAcceptanceStatus   string                      `json:"onsiteAcceptanceStatus"`
+        CredentialFields         []*CardRouteCredentialField `json:"credentialFields"`
+        Capabilities             []*CardCapability           `json:"capabilities"`
+        OfficialSourcePath       string                      `json:"officialSourcePath"`
+        SourceUpstreamURL        string                      `json:"sourceUpstreamURL"`
+        SourceCommit             string                      `json:"sourceCommit"`
+        SourceTag                string                      `json:"sourceTag"`
+        SourceLicense            string                      `json:"sourceLicense"`
+    }
+
+    // CardRoutePlatformGetListReq 查询固定官方通道目录。
+    CardRoutePlatformGetListReq {
+        PageInfo
+        Keyword        string `json:"keyword,optional"`        // Keyword 按官方编码、名称或平台类型模糊筛选。
+        OperatorType   int64  `json:"operatorType,optional"`   // OperatorType 按运营商类型筛选。
+        ProtocolFamily string `json:"protocolFamily,optional"` // ProtocolFamily 按协议族精确筛选。
+        Selectable     int64  `json:"selectable,optional"`     // Selectable 按可选状态筛选，1 表示可选，2 表示不可选。
+    }
+
+    // CardRoutePlatformGetListResp 返回官方固定顺序的 30 项通道目录分页结果。
+    CardRoutePlatformGetListResp {
+        PageResp
+        List []*CardRoutePlatform `json:"list"` // List 是当前分页的官方通道模板。
+    }
+
+    // CardRoutePackageGetListReq 查询一个通道可见及已选的平台资费组。
+    CardRoutePackageGetListReq {
+        PageInfo
+        RouteID int64  `json:"routeId,string"`    // RouteID 是当前企业通道主键。
+        Keyword string `json:"keyword,optional"`  // Keyword 按平台资费组编号或名称模糊筛选。
+    }
+
+    // CardRoutePackageItem 返回通道侧的平台资费组关系状态。
+    CardRoutePackageItem {
+        PackageID      string `json:"packageId"`        // PackageID 是平台资费组业务编号。
+        PackageName    string `json:"packageName"`      // PackageName 是平台资费组名称。
+        Selected       bool   `json:"selected"`         // Selected 表示当前通道是否已关联该资费组。
+        ReferenceCount int64  `json:"referenceCount"`   // ReferenceCount 是同时引用该组合的活动卡数量。
+        Removable      bool   `json:"removable"`        // Removable 表示已选关系是否允许移除。
+        Reason         string `json:"reason,optional"`  // Reason 是关系不可移除时的稳定原因。
+    }
+
+    // CardRoutePackageGetListResp 返回通道侧分页关系列表。
+    CardRoutePackageGetListResp {
+        PageResp
+        List []*CardRoutePackageItem `json:"list"` // List 是当前分页可见的平台资费组关系状态。
+    }
+
+    // CardRoutePackageReplaceReq 原子替换一个通道的全部平台资费组关系。
+    CardRoutePackageReplaceReq {
+        RouteID    int64    `json:"routeId,string"` // RouteID 是当前企业通道主键。
+        PackageIDs []string `json:"packageIds"`     // PackageIDs 是替换后的平台资费组业务编号集合，空集合表示清空。
+    }
+
+    // CardRoutePackageReplaceResp 返回关系替换结果计数。
+    CardRoutePackageReplaceResp {
+        Added    int64 `json:"added"`    // Added 是本次新增关系数。
+        Removed  int64 `json:"removed"`  // Removed 是本次移除关系数。
+        Retained int64 `json:"retained"` // Retained 是本次保留关系数。
+    }
+
+    CardRouteOption {
+        ID           int64  `json:"id,string"`
+        Code         string `json:"code"`
+        Name         string `json:"name"`
+        PlatformType string `json:"platformType"`
+        OperatorType int64  `json:"operatorType"`
+        Status       int64  `json:"status"`
+    }
+
+    CardRouteTriggerSyncReq {
+        RouteID    int64    `json:"routeId,string"`
+        SyncType   string   `json:"syncType"`
+		BillingCycle string   `json:"billingCycle,optional"` // monthly-usage 必填，格式 YYYYMM
+		Since       string   `json:"since,optional"`        // modified-terminals 必填，东八区时间 YYYY-MM-DD HH:mm:ss
+		SIMStatus   string   `json:"simStatus,optional"`    // modified-terminals 可选，联通生命周期状态 0-9
+        MessageIDs []string `json:"messageIds,optional"` // provisioning-result 必填
+        Iccids     []string `json:"iccids,optional"`     // 与 messageIds 配对或单值复用
+    }
+
+    CardRouteSyncOfferingInfoListReq {
+        RouteCode string   `json:"routeCode"`
+        Iccids    []string `json:"iccids,optional"` // 指定 ICCID 时只同步这些卡；联通 CMP 必须传
+    }
+
+    // CardRouteTestConnectionReq 使用已保存通道配置执行只读连通测试。
+    CardRouteTestConnectionReq {
+        ID           int64  `json:"id,string,optional"`        // 已保存通道主键；与写入型参数二选一
+        PlatformType string `json:"platformType,optional"`     // 未保存通道的平台类型
+        URL          string `json:"url,optional"`              // 未保存通道的 API 地址
+        Username     string `json:"username,optional"`         // 未保存通道的应用账号
+        Password     string `json:"password,optional"`         // 未保存通道的应用密码
+        Key          string `json:"key,optional"`              // 未保存通道的签名密钥
+        UserAccount  string `json:"userAccount,optional"`      // 未保存通道的企业编号
+        Credentials  map[string]string `json:"credentials,optional"` // 未保存通道的动态凭据
+        Iccid        string `json:"iccid,optional"`            // 只读探测使用的 ICCID
+        Msisdn       string `json:"msisdn,optional"`           // 只读探测使用的 MSISDN
+    }
+
+    // CardRouteAccountScope 返回凭据可见的一条脱敏账户范围摘要。
+    CardRouteAccountScope {
+        AccountID         string `json:"accountId"`                    // 脱敏账户标识
+        AccountName       string `json:"accountName,optional"`         // 脱敏账户名称
+        OperatorAccountID string `json:"operatorAccountId,optional"` // 脱敏运营商账户标识
+        Status            string `json:"status,optional"`              // 上游账户状态原值
+    }
+
+    // CardRouteTestConnectionResp 返回只读状态与通道账户范围探测结果。
+    CardRouteTestConnectionResp {
+        State             string                   `json:"state"`
+        Message           string                   `json:"message,optional"`
+        OnlineStatus      string                   `json:"onlineStatus,optional"`
+        Apn               string                   `json:"apn,optional"` // 最近实际使用的 APN 名称；仅当通道支持 query_apn 且上游有近期数据时返回
+        AccountScopeState string                   `json:"accountScopeState,optional"` // 已识别、空范围、不可用或不支持
+        AccountScopeCount int64                    `json:"accountScopeCount"`
+        AccountScopes     []*CardRouteAccountScope `json:"accountScopes,optional"`
+    }
+
+    // CardRouteModifiedTerminalScheduleGetOneReq 查询联通修改终端周期调度状态。
+    CardRouteModifiedTerminalScheduleGetOneReq {
+        RouteID int64 `json:"routeId,string"` // 当前企业通道主键
+    }
+
+    // CardRouteModifiedTerminalSchedule 返回通道增量周期调度只读视图。
+    CardRouteModifiedTerminalSchedule {
+        RouteID              int64  `json:"routeId,string"`              // 通道主键
+        SyncUpstream         int64  `json:"syncUpstream"`                // 上游卡号同步模式：1 自动，2 仅手动
+        Strategy             string `json:"strategy"`                    // 自动发现策略；联通为 modified-terminals
+        GateEnabled          bool   `json:"gateEnabled"`                 // 全局增量策略门禁是否开启
+        Eligible             bool   `json:"eligible"`                    // 当前是否满足自动增量前置条件
+        IntervalMinutes      int64  `json:"intervalMinutes"`             // 执行周期，仅允许 15/30/60
+        State                string `json:"state"`                       // ready/running/backoff/suspended/disabled
+        LastSuccessWindowEnd string `json:"lastSuccessWindowEnd,optional"` // 最近成功水位，东八区墙钟
+        NextRunTime          string `json:"nextRunTime,optional"`          // 下次计划执行，东八区墙钟
+        ActiveTaskNo         string `json:"activeTaskNo,optional"`         // 当前活动任务号
+        ConsecutiveFailures  int64  `json:"consecutiveFailures"`           // 连续终止失败次数
+        RetryAt              string `json:"retryAt,optional"`              // 补偿可再次创建时刻
+        LastErrorCode        string `json:"lastErrorCode,optional"`        // 脱敏错误分类
+        LastErrorSummary     string `json:"lastErrorSummary,optional"`     // 脱敏错误摘要
+    }
+
+    // CardRouteModifiedTerminalScheduleUpdateReq 仅调整增量周期分钟数。
+    CardRouteModifiedTerminalScheduleUpdateReq {
+        RouteID         int64 `json:"routeId,string"`   // 当前企业通道主键
+        IntervalMinutes int64 `json:"intervalMinutes"`  // 仅允许 15/30/60
+    }
+
+    // CardRouteModifiedTerminalScheduleResumeReq 从暂停状态恢复自动增量调度。
+    CardRouteModifiedTerminalScheduleResumeReq {
+        RouteID int64 `json:"routeId,string"` // 当前企业通道主键
+    }
+)
+
+@server(
+    group: card/route
+    prefix: /api/v1/things/card/route
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "新增通道"
+        description: "业务说明：新增通道"
+        authType: "admin"
+        resource: "card"
+        action: "create"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (CardRouteCreateReq) returns (WithID)
+
+    @doc(
+        summary: "更新通道"
+        description: "业务说明：更新通道"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (CardRouteUpdateReq) returns ()
+
+    @doc(
+        summary: "删除通道"
+        description: "业务说明：删除通道"
+        authType: "admin"
+        resource: "card"
+        action: "delete"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取通道详情"
+        description: "业务说明：获取通道详情"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardRoute)
+
+    @doc(
+        summary: "获取通道列表"
+        description: "业务说明：获取通道列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardRouteGetListReq) returns (CardRouteGetListResp)
+
+    @doc(
+        summary: "获取通道下拉选项"
+        description: "业务说明：获取通道下拉选项"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOption
+    post /get-option (CardRouteGetOptionReq) returns (CardRouteGetOptionResp)
+
+    @doc(
+        summary: "获取通道能力矩阵"
+        description: "业务说明：按通道类型返回支持与不支持能力及稳定原因，前端据此显示或禁用操作"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getCapabilities
+    post /get-capabilities (CardRouteGetCapabilitiesReq) returns (CardRouteGetCapabilitiesResp)
+
+    @doc(
+        summary: "获取官方通道目录"
+        description: "业务说明：返回 IoTLink v2.2.6 官方固定顺序的 30 项通道模板、动态凭据字段、能力及验收状态，测试适配器不包含在该目录"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler platformGetList
+    post /platform/get-list (CardRoutePlatformGetListReq) returns (CardRoutePlatformGetListResp)
+
+    @doc(
+        summary: "获取通道关联平台资费组"
+        description: "业务说明：分页查询当前企业指定通道可见的平台资费组，返回已选状态、组合引用数及可移除原因"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler packageGetList
+    post /package/get-list (CardRoutePackageGetListReq) returns (CardRoutePackageGetListResp)
+
+    @doc(
+        summary: "替换通道关联平台资费组"
+        description: "业务说明：在当前企业内原子替换指定通道的全部平台资费组关系，空集合表示清空可移除关系"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler packageReplace
+    post /package/replace (CardRoutePackageReplaceReq) returns (CardRoutePackageReplaceResp)
+
+    @doc(
+        summary: "测试通道连通性"
+        description: "业务说明：使用已保存凭据执行受支持的卡状态、APN 和在线状态只读查询"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler testConnection
+    post /test-connection (CardRouteTestConnectionReq) returns (CardRouteTestConnectionResp)
+
+    @doc(
+        summary: "同步上游卡号数据"
+        description: "业务说明：同步上游卡号数据"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncUpstream
+    post /sync-upstream (WithID) returns (WithCode)
+
+    @doc(
+        summary: "同步上游套餐数据"
+        description: "业务说明：同步上游套餐数据"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncOffering
+    post /sync-offering (WithID) returns ()
+
+    @doc(
+        summary: "手动触发通道轮询同步"
+        description: "业务说明：手动触发通道异步同步，支持 status/usage/monthly-usage/modified-terminals/usage-details/audit-trail/provisioning-result/offering/all"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler triggerSync
+    post /trigger-sync (CardRouteTriggerSyncReq) returns (WithCode)
+
+    @doc(
+        summary: "同步已订购套餐数据"
+        description: "业务说明：按通道同步该通道下所有物联卡的已订购套餐"
+        authType: "admin"
+        resource: "card"
+        action: "sync"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler syncOfferingInfoList
+    post /sync-offering-info-list (CardRouteSyncOfferingInfoListReq) returns (WithCode)
+
+    @doc(
+        summary: "获取联通修改终端周期调度"
+        description: "业务说明：返回通道增量周期、运行状态、成功水位与活动任务；自动/仅手动模式仍由通道更新接口维护"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler modifiedTerminalScheduleGetOne
+    post /modified-terminal-schedule/get-one (CardRouteModifiedTerminalScheduleGetOneReq) returns (CardRouteModifiedTerminalSchedule)
+
+    @doc(
+        summary: "更新联通修改终端周期"
+        description: "业务说明：仅允许调整 15/30/60 分钟执行周期，不接受账户标识或水位字段"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler modifiedTerminalScheduleUpdate
+    post /modified-terminal-schedule/update (CardRouteModifiedTerminalScheduleUpdateReq) returns (CardRouteModifiedTerminalSchedule)
+
+    @doc(
+        summary: "恢复联通修改终端自动调度"
+        description: "业务说明：管理员处理凭据或冲突后，从原成功水位恢复暂停的自动增量调度"
+        authType: "admin"
+        resource: "card"
+        action: "operate"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler modifiedTerminalScheduleResume
+    post /modified-terminal-schedule/resume (CardRouteModifiedTerminalScheduleResumeReq) returns (CardRouteModifiedTerminalSchedule)
+}

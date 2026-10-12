@@ -1,0 +1,74 @@
+//--------------------远程配置服务----
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "productManage.proto";
+
+// RemoteConfigEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message RemoteConfigEmpty {
+}
+
+// RemoteConfigWithID 带ID的消息
+// 定义只包含ID的消息类型
+message RemoteConfigWithID{
+  int64 id = 1; // ID值
+}
+
+// RemoteConfigWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message RemoteConfigWithIDCode{
+  int64 id = 1; // ID值
+  string code=2; // Code值
+}
+
+service RemoteConfig {
+  rpc remoteConfigCreate(RemoteConfigCreateReq) returns (RemoteConfigEmpty);
+  rpc remoteConfigGetList(RemoteConfigGetListReq) returns (RemoteConfigGetListResp);
+  rpc remoteConfigPushAll(RemoteConfigPushAllReq) returns (RemoteConfigEmpty);
+  rpc remoteConfigLastGetOne(RemoteConfigLastGetOneReq) returns (RemoteConfigLastGetOneResp);
+}
+
+// RemoteConfigCreateReq 远程配置创建请求
+message RemoteConfigCreateReq{
+  string productID = 1;
+  string content = 2;
+}
+
+// RemoteConfigGetListReq 远程配置列表查询请求
+message RemoteConfigGetListReq{
+  PageInfo page = 1;
+  string productID = 2;
+}
+
+// RemoteConfigGetListResp 远程配置列表查询响应
+message RemoteConfigGetListResp{
+  repeated ProductRemoteConfig list = 1;
+  int64 total = 2;
+}
+
+// ProductRemoteConfig 产品远程配置
+message ProductRemoteConfig{
+  int64 id = 1;
+  string productID = 2;
+  string content = 3;
+  int64 createdTime = 4;
+}
+
+// RemoteConfigPushAllReq 远程配置推送请求
+message RemoteConfigPushAllReq{
+  string productID = 1;
+}
+
+// RemoteConfigLastGetOneReq 远程配置最后推送读取请求
+message RemoteConfigLastGetOneReq{
+  string productID = 1;
+}
+
+// RemoteConfigLastGetOneResp 远程配置最后推送读取响应
+message RemoteConfigLastGetOneResp{
+  ProductRemoteConfig info = 1;
+}

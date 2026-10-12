@@ -1,0 +1,30 @@
+info(
+	title: "web端网关"
+	desc: "负责http协议的网关"
+	author: "杨磊"
+	email: "603685348@qq.com"
+	version: "v1"
+)
+import "system/system.api" //用户相关功能
+import "system/notify.api"
+import "system/user.api" //用户相关功能
+import "system/role.api" //角色相关功能
+import "system/resource.api"//资源权限管理
+import "system/log.api" //日志相关功能
+import "system/app.api" //接口相关功能
+import "system/app.api" //应用相关功能
+import "system/common.api" //系统配置相关功能
+import "system/hook.api" //Hook扩展管理
+import "system/job.api" //区域管理相关功能
+import "system/tenant.api" //租户管理相关功能
+
+import "system/dict.api"
+import "system/route.api" //网关路由管理
+import "system/ops.api"
+import "system/dept.api"
+import "system/mall.api"
+import "system/checkIn.api"
+import "system/mcp.api" //系统级MCP服务
+import "system/agreement.api"
+import "system/flow.api" //流程审批中心
+import "system/client-debug.api" //客户端实时调试

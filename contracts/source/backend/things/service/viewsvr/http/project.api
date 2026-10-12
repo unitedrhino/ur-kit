@@ -1,0 +1,172 @@
+import "common.api"
+
+@server(
+	group: view/project
+	prefix: /api/v1/view/project
+	middleware: CheckTokenWare, InitCtxsWare
+)
+service view {
+	@doc(
+		summary: "新增项目"
+		authType: "admin"
+		description: "业务说明：创建新的可视化项目或模板，设置封面、名称、类型和发布状态，用于大屏项目初始化。"
+		resource: "viewProject"
+		action: "create"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler create
+	post /create (ProjectInfoCreateReq) returns ()
+
+	@doc(
+		summary: "更新项目"
+		authType: "admin"
+		description: "业务说明：更新可视化项目的基础信息，如封面、名称、描述和状态，用于项目维护。"
+		resource: "viewProject"
+		action: "update"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (ProjectInfoUpdateReq) returns ()
+
+	@doc(
+		summary: "删除项目"
+		authType: "admin"
+		description: "业务说明：删除可视化项目记录，用于清理废弃项目或模板。"
+		resource: "viewProject"
+		action: "delete"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (ProjectInfoDeleteReq) returns ()
+
+	@doc(
+		summary: "获取项目列表"
+		authType: "admin"
+		description: "业务说明：分页查询可视化项目列表，支持按类型、作用域、来源、名称、状态、创建人和时间范围筛选，用于项目管理页面。"
+		resource: "viewProject"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (ProjectInfoGetListReqEx) returns (ProjectInfoGetListRespView)
+
+	@doc(
+		summary: "获取项目详情"
+		authType: "admin"
+		description: "业务说明：查询单个可视化项目的基础信息，用于项目编辑回显和详情查看。"
+		resource: "viewProject"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ProjectInfoGetOneReq) returns (ProjectInfoView)
+}
+
+@server(
+	group: view/project/detail
+	prefix: /api/v1/view/project/detail
+	middleware: CheckTokenWare, InitCtxsWare
+)
+service view {
+	@doc(
+		summary: "更新项目详情"
+		authType: "admin"
+		description: "业务说明：保存可视化项目的详细内容定义，用于项目设计稿和画布内容更新。"
+		resource: "viewProjectDetail"
+		action: "update"
+		group: "可视化管理"
+		recordLogMode: "2"
+	)
+	@handler update
+	post /update (ProjectDetail) returns ()
+
+	@doc(
+		summary: "获取项目详情内容"
+		authType: "admin"
+		description: "业务说明：查询可视化项目的详细内容定义，用于设计器加载项目内容。"
+		resource: "viewProjectDetail"
+		action: "view"
+		group: "可视化管理"
+		recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (ProjectInfoGetOneReq) returns (ProjectDetail)
+}
+
+type (
+	ProjectDetail {
+		ID int64 `json:"id,string,optional"` // 项目id，只读
+		Content string `json:"content"` // 项目详情内容（草稿）
+		PublishedContent string `json:"publishedContent,optional"` // 已发布快照内容
+	}
+
+	ProjectInfoGetOneReq {
+		ID int64 `json:"id,string"` // 项目id
+		ForView bool `json:"forView,optional"` // /view/ 路由请求时传 true，返回已发布内容
+	}
+
+	ProjectInfoCreateReq {
+		ProjectID int64 `json:"projectID,string,optional"` // 归属物联网项目ID
+		IndexImage string `json:"indexImage,optional"` // 图片地址
+		Name string `json:"name,optional"` // 项目名称
+		Desc string `json:"desc,optional"` // 项目描述
+		Type string `json:"type,optional"` // screen/template
+		IsSystem bool `json:"isSystem,optional"` // 是否系统模板
+		Status int64 `json:"status,optional"` // 项目状态 1: 已发布 2: 未发布
+	}
+
+	ProjectInfoUpdateReq {
+		ID int64 `json:"id,string"` // 项目id
+		ProjectID int64 `json:"projectID,string,optional"` // 归属物联网项目ID
+		IndexImage string `json:"indexImage,optional"` // 图片地址
+		Name string `json:"name,optional"` // 项目名称
+		Desc string `json:"desc,optional"` // 项目描述
+		Status int64 `json:"status,optional"` // 项目状态 1: 已发布 2: 未发布
+	}
+
+	ProjectInfoView {
+		ID int64 `json:"id,string,optional"` // 项目id，只读
+		ProjectID int64 `json:"projectID,string,optional"` // 归属物联网项目ID
+		TenantCode string `json:"tenantCode,optional"` // 租户编码
+		IndexImage string `json:"indexImage,optional"` // 图片地址
+		Name string `json:"name,optional"` // 项目名称
+		Desc string `json:"desc,optional"` // 项目描述
+		CreatedUserID int64 `json:"createdUserID,string,optional"` // 创建者ID
+		Type string `json:"type,optional"` // screen/template
+		IsSystem bool `json:"isSystem,optional"` // 是否系统模板
+		Source string `json:"source,optional"` // 来源 system/custom
+		Status int64 `json:"status,optional"` // 项目状态 1: 已发布 2: 未发布
+		Resolution string `json:"resolution,optional"` // 分辨率
+		CreatedTime int64 `json:"createdTime,string,optional"` // 创建时间
+		UpdatedTime int64 `json:"updatedTime,string,optional"` // 更新时间
+	}
+
+	ProjectInfoDeleteReq {
+		ID int64 `json:"id,string"` // 项目id
+	}
+
+	ProjectInfoGetListReqEx {
+		Page *PageInfo `json:"page,optional"` // 分页信息
+		ProjectID int64 `json:"projectID,string,optional"` // 归属物联网项目ID
+		Type string `json:"type,optional"` // screen/template
+		Scope string `json:"scope,optional"` // all/private/system
+		Source string `json:"source,optional"` // 来源别名 all/custom/system
+		Name string `json:"name,optional"` // 名称模糊查询
+		Status int64 `json:"status,optional"` // 状态
+		CreatedUserID int64 `json:"createdUserID,string,optional"` // 创建者ID
+		CreatedTime *TimeRange `json:"createdTime,optional"` // 创建时间范围
+		UpdatedTime *TimeRange `json:"updatedTime,optional"` // 更新时间范围
+		AllProjects bool `json:"allProjects,optional"` // 跨项目查询（不过滤项目ID，用于未归属大屏查询）
+	}
+
+	ProjectInfoGetListRespView {
+		List []*ProjectInfoView `json:"list"` // 项目信息
+		Total int64 `json:"total,optional"` // 总数
+		Num int64 `json:"num,optional"` // 返回数量
+	}
+)

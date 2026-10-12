@@ -1,0 +1,99 @@
+info(
+    title: "产品远程配置模块"
+    desc: "产品远程配置模块"
+    author: "liuboshu"
+    version: "v1"
+)
+
+
+@server(
+    group: things/product/remoteConfig
+    prefix: /api/v1/things/product
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+service api {
+    @doc(
+        summary: "创建配置"
+        description: "业务说明：创建产品远程配置版本。远程配置用于批量下发配置参数到设备，如阈值设置、运行参数、功能开关等。每次创建生成新版本号"
+        authType: "admin"
+        group: "things/product/remoteConfig"
+        resource: "things/product/remoteConfig"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /remote-config/create (ProductRemoteConfigCreateReq) returns ()
+
+    @doc(
+        summary: "获取配置列表"
+        description: "业务说明：分页查询产品远程配置版本历史列表。返回配置ID、内容、创建时间。用于配置版本管理、历史回溯"
+        authType: "admin"
+        group: "things/product/remoteConfig"
+        resource: "things/product/remoteConfig"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /remote-config/get-list (ProductRemoteConfigGetListReq) returns (ProductRemoteConfigGetListResp)
+
+    @doc(
+        summary: "推送配置"
+        description: "业务说明：将最新远程配置推送到产品下所有在线设备。设备收到配置后自动应用并上报确认。用于批量设备参数更新"
+        authType: "admin"
+        group: "things/product/remoteConfig"
+        resource: "things/product/remoteConfig"
+        action: "send"
+        recordLogMode: "1"
+    )
+    @handler pushAll
+    post /remote-config/push-all (ProductRemoteConfigPushAllReq) returns ()
+
+    @doc(
+        summary: "获取最新配置"
+        description: "业务说明：获取产品当前最新的远程配置版本。返回配置ID、内容、创建时间。用于查看待推送配置、设备配置同步"
+        authType: "admin"
+        group: "things/product/remoteConfig"
+        resource: "things/product/remoteConfig"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler lastestGetOne
+    post /remote-config/lastest-read (ProductRemoteConfigLastestGetOneReq) returns (ProductRemoteConfigLastestGetOneResp)
+}
+
+type (
+    ProductRemoteConfig  {
+        ID int64 `json:"id,string"`                  //配置编号
+        Content string `json:"content"`       //配置内容
+        CreateTime string `json:"createTime"` //创建时间
+    }
+
+    ProductRemoteConfigCreateReq  {
+        ProductID string `json:"productID"` //产品id
+        Content string `json:"content"`     //配置内容
+    }
+
+    ProductRemoteConfigGetListReq  {
+        ProductID string `json:"productID"` //产品id
+        Page *PageInfo `json:"page,optional"` //分页信息
+    }
+
+    ProductRemoteConfigGetListResp  {
+        List []*ProductRemoteConfig `json:"list"` //产品信息
+        PageResp
+    }
+
+    ProductRemoteConfigPushAllReq  {
+        ProductID string `json:"productID"` //产品id
+    }
+
+    ProductRemoteConfigLastestGetOneReq  {
+        ProductID string `json:"productID"` //产品id
+    }
+
+    ProductRemoteConfigLastestGetOneResp  {
+        ProductRemoteConfig
+    }
+)

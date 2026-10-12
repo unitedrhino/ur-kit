@@ -1,0 +1,265 @@
+syntax = "proto3";
+
+package ai;
+option go_package="/ai";
+
+import "aiShare.proto";
+
+message KnowledgeEmpty {}
+
+message KnowledgeWithID {
+  int64 ID = 1;
+}
+
+message KnowledgeBaseInfo {
+  int64 ID = 1;
+  string tenantCode = 2;
+  string name = 3;
+  string desc = 4;
+  string status = 5;
+  int64 documentCount = 6;
+  int64 compiledDocumentCount = 7;
+  int64 failedDocumentCount = 8;
+  int64 lastCompileTime = 9;
+  int64 createdTime = 10;
+  int64 updatedTime = 11;
+  // 与现有业务输入对齐的新增字段。
+  string scope = 12;
+  // advancedParserEnabled/advancedParserOptions 已随外挂 docling-serve 解析路径下线删除，编号保留不复用。
+  reserved 13, 14;
+  reserved "advancedParserEnabled", "advancedParserOptions";
+  // questionsEnabled 是否启用问题生成（Doc2QA）阶段，默认关闭。
+  bool questionsEnabled = 15;
+}
+
+message KnowledgeGetOneReq {
+  int64 ID = 1;
+}
+
+message KnowledgeGetListReq {
+  PageInfo page = 1;
+  string tenantCode = 2;
+  string name = 3;
+  string status = 4;
+  // 与现有业务输入对齐的新增字段。
+  string scope = 5;
+}
+
+message KnowledgeGetListResp {
+  repeated KnowledgeBaseInfo list = 1;
+  int64 total = 2;
+}
+
+message KnowledgeDocumentNode {
+  int64 ID = 1;
+  int64 knowledgeID = 2;
+  int64 parentID = 3;
+  string nodeType = 4;
+  string name = 5;
+  string path = 6;
+  string uri = 7;
+  string parseStatus = 8;
+  string compileStatus = 9;
+  string lastError = 10;
+  repeated KnowledgeDocumentNode children = 11;
+  // searchStatus 沿用 HTTP 业务字段含义。
+  string searchStatus = 12;
+  // searchMessage 沿用 HTTP 业务字段含义。
+  string searchMessage = 13;
+}
+
+message KnowledgeDocumentTreeReq {
+  int64 knowledgeID = 1;
+}
+
+message KnowledgeDocumentTreeResp {
+  int64 knowledgeID = 1;
+  repeated KnowledgeDocumentNode nodes = 2;
+}
+
+message KnowledgeArtifactInfo {
+  int64 ID = 1;
+  int64 knowledgeID = 2;
+  int64 documentID = 3;
+  string artifactType = 4;
+  string title = 5;
+  string content = 6;
+  repeated int64 sourceDocumentIDs = 7;
+  int64 createdTime = 8;
+  int64 updatedTime = 9;
+  // description 沿用 HTTP 业务字段含义。
+  string description = 10;
+  // descriptionStatus 沿用 HTTP 业务字段含义。
+  string descriptionStatus = 11;
+  // generationMethod 沿用 HTTP 业务字段含义。
+  string generationMethod = 12;
+  // sourceVersion 沿用 HTTP 业务字段含义。
+  string sourceVersion = 13;
+  // sources 沿用 HTTP 业务字段含义。
+  repeated KnowledgeSourceReferenceInfo sources = 14;
+  // chunkIndex 沿用 HTTP 业务字段含义。
+  int64 chunkIndex = 15;
+  // charStart 沿用 HTTP 业务字段含义。
+  int64 charStart = 16;
+  // charEnd 沿用 HTTP 业务字段含义。
+  int64 charEnd = 17;
+  // tokenEstimate 沿用 HTTP 业务字段含义。
+  int64 tokenEstimate = 18;
+  // headingPath 沿用 HTTP 业务字段含义。
+  string headingPath = 19;
+  // relatedCount 沿用 HTTP 业务字段含义。
+  int64 relatedCount = 20;
+  // mediaURI 沿用 HTTP 业务字段含义。
+  string mediaURI = 21;
+  // mimeType 沿用 HTTP 业务字段含义。
+  string mimeType = 22;
+  // pageIdx 沿用 HTTP 业务字段含义。
+  int64 pageIdx = 23;
+  // bboxJSON 沿用 HTTP 业务字段含义。
+  string bboxJSON = 24;
+  // caption 沿用 HTTP 业务字段含义。
+  string caption = 25;
+  // extraJSON 沿用 HTTP 业务字段含义。
+  string extraJSON = 26;
+}
+
+message KnowledgeCompileTaskInfo {
+  int64 ID = 1;
+  int64 knowledgeID = 2;
+  string triggerType = 3;
+  string status = 4;
+  string errorMessage = 5;
+  int64 startedTime = 6;
+  int64 finishedTime = 7;
+  int64 createdTime = 8;
+  int64 updatedTime = 9;
+  // relationStatus 沿用 HTTP 业务字段含义。
+  string relationStatus = 10;
+  // relationMessage 沿用 HTTP 业务字段含义。
+  string relationMessage = 11;
+}
+
+message KnowledgeDocumentDetailReq {
+  int64 documentID = 1;
+}
+
+message KnowledgeDocumentDetailResp {
+  KnowledgeDocumentNode document = 1;
+  string rawContent = 2;
+  KnowledgeArtifactInfo summary = 3;
+  repeated KnowledgeArtifactInfo concepts = 4;
+  repeated KnowledgeArtifactInfo articles = 5;
+  string compileStatus = 6;
+  string lastError = 7;
+  KnowledgeCompileTaskInfo lastCompileTask = 8;
+  // processingStages 沿用 HTTP 业务字段含义。
+  repeated KnowledgeProcessingStageInfo processingStages = 9;
+  // sourceVersion 沿用 HTTP 业务字段含义。
+  string sourceVersion = 10;
+  // previewText 沿用 HTTP 业务字段含义。
+  string previewText = 11;
+  // sourceDownloadURL 沿用 HTTP 业务字段含义。
+  string sourceDownloadURL = 12;
+  // sourcePreviewURL 沿用 HTTP 业务字段含义。
+  string sourcePreviewURL = 13;
+  // chunks 沿用 HTTP 业务字段含义。
+  repeated KnowledgeArtifactInfo chunks = 14;
+  // multimodalArtifacts 沿用 HTTP 业务字段含义。
+  repeated KnowledgeArtifactInfo multimodalArtifacts = 15;
+}
+
+message KnowledgeCompileStatusReq {
+  int64 knowledgeID = 1;
+}
+
+message KnowledgeCompileStatusResp {
+  int64 knowledgeID = 1;
+  KnowledgeCompileTaskInfo currentTask = 2;
+  int64 documentCount = 3;
+  int64 compiledDocumentCount = 4;
+  int64 failedDocumentCount = 5;
+  // searchReadyDocumentCount 沿用 HTTP 业务字段含义。
+  int64 searchReadyDocumentCount = 6;
+  // searchFailedDocumentCount 沿用 HTTP 业务字段含义。
+  int64 searchFailedDocumentCount = 7;
+  // searchStatus 沿用 HTTP 业务字段含义。
+  string searchStatus = 8;
+  // searchMessage 沿用 HTTP 业务字段含义。
+  string searchMessage = 9;
+  // relationStatus 沿用 HTTP 业务字段含义。
+  string relationStatus = 10;
+  // relationMessage 沿用 HTTP 业务字段含义。
+  string relationMessage = 11;
+}
+
+message KnowledgeCompileRetryReq {
+  int64 knowledgeID = 1;
+  // 与现有业务输入对齐的新增字段。
+  repeated string stages = 2;
+  int64 documentID = 3;
+  string mode = 4;
+}
+
+message KnowledgeExportReq {
+  int64 knowledgeID = 1;
+}
+
+message KnowledgeExportStatusReq {
+  int64 taskID = 1;
+}
+
+message KnowledgeExportStatusResp {
+  int64 taskID = 1;
+  string status = 2;
+  string downloadURL = 3;
+  // errorMessage 沿用 HTTP 业务字段含义。
+  string errorMessage = 4;
+}
+
+service Knowledge {
+  rpc KnowledgeInfoCreate(KnowledgeBaseInfo) returns (KnowledgeWithID);
+  rpc KnowledgeInfoGetOne(KnowledgeGetOneReq) returns (KnowledgeBaseInfo);
+  rpc KnowledgeInfoGetList(KnowledgeGetListReq) returns (KnowledgeGetListResp);
+  rpc KnowledgeInfoDelete(KnowledgeGetOneReq) returns (KnowledgeEmpty);
+
+  rpc KnowledgeDocumentGetTree(KnowledgeDocumentTreeReq) returns (KnowledgeDocumentTreeResp);
+  rpc KnowledgeDocumentGetDetail(KnowledgeDocumentDetailReq) returns (KnowledgeDocumentDetailResp);
+
+  rpc KnowledgeCompileGetStatus(KnowledgeCompileStatusReq) returns (KnowledgeCompileStatusResp);
+  rpc KnowledgeCompileRetry(KnowledgeCompileRetryReq) returns (KnowledgeWithID);
+
+  rpc KnowledgeExport(KnowledgeExportReq) returns (KnowledgeWithID);
+  rpc KnowledgeExportGetStatus(KnowledgeExportStatusReq) returns (KnowledgeExportStatusResp);
+}
+
+// KnowledgeSourceReferenceInfo 对齐知识业务的结构化响应。
+message KnowledgeSourceReferenceInfo {
+  // documentID 沿用 HTTP 业务字段含义。
+  int64 documentID = 1;
+  // sourceVersion 沿用 HTTP 业务字段含义。
+  string sourceVersion = 2;
+  // artifactID 沿用 HTTP 业务字段含义。
+  int64 artifactID = 3;
+  // pageIdx 沿用 HTTP 业务字段含义。
+  int64 pageIdx = 4;
+  // headingPath 沿用 HTTP 业务字段含义。
+  string headingPath = 5;
+  // charStart 沿用 HTTP 业务字段含义。
+  int64 charStart = 6;
+  // charEnd 沿用 HTTP 业务字段含义。
+  int64 charEnd = 7;
+}
+
+// KnowledgeProcessingStageInfo 对齐知识业务的结构化响应。
+message KnowledgeProcessingStageInfo {
+  // stage 沿用 HTTP 业务字段含义。
+  string stage = 1;
+  // status 沿用 HTTP 业务字段含义。
+  string status = 2;
+  // message 沿用 HTTP 业务字段含义。
+  string message = 3;
+  // sourceVersion 沿用 HTTP 业务字段含义。
+  string sourceVersion = 4;
+  // updatedAt 沿用 HTTP 业务字段含义。
+  int64 updatedAt = 5;
+}

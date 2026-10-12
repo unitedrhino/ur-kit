@@ -1,0 +1,341 @@
+info(
+    title: "用户数据权限管理模块"
+    desc: "用户数据权限管理接口"
+    author: "大绵羊"
+    email: "robotyang123@163.com"
+    version: "v1"
+)
+
+
+@server(
+    group: things/data/project
+    prefix: /api/v1/things/data/project
+    accessCodePrefix: "thingsDataManage"
+    accessNamePrefix: "项目权限"
+    accessGroup: "数据权限"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+
+service api {
+    @doc(
+        summary: "删除授权项目权限"
+        description: "删除用户或角色对指定项目的访问权限。权限删除后用户将无法访问该项目及其下的区域、设备等资源。支持按用户ID或角色批量删除。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (DataProjectDeleteReq) returns ()
+
+    @doc(
+        summary: "批量删除授权项目权限"
+        description: "批量删除多个用户或角色对指定项目的访问权限。一次操作可删除多个目标（用户/角色）的项目权限，用于批量权限清理。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler batchDelete
+    post /batch-delete (DataProjectBatchDeleteReq) returns ()
+
+    @doc(
+        summary: "批量创建授权项目权限"
+        description: "批量给多个用户或角色授予项目访问权限，设置权限类型（管理权限/读写权限/读权限）。用于批量权限分配，如项目初始化时分配团队成员权限。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler projectBatchCreate
+    post /batch-create (DataProjectMultiSaveReq) returns ()
+
+    @doc(
+        summary: "创建授权项目权限"
+        description: "给单个用户或角色授予项目访问权限。权限类型：1=管理权限（可修改他人权限）、2=读写权限、3=读权限。授权后用户可按权限级别访问项目资源。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "create"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (DataProjectSaveReq) returns (DataProject)
+
+    @doc(
+        summary: "更新家庭成员称呼"
+        description: "由家庭创建者或管理员修改用户成员在当前家庭中的称呼；传空字符串可清空称呼。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (DataProjectUpdateReq) returns ()
+
+    @doc(
+        summary: "获取项目权限列表"
+        description: "查询项目的权限分配列表，返回已授权的用户/角色及其权限类型。支持按项目ID、用户ID、角色类型过滤。用于权限审计和查看项目成员。"
+        authType: "admin"
+        group: "things/data/project"
+        resource: "things/data/project"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler projectGetList
+    post /get-list (DataProjectGetListReq) returns (DataProjectGetListResp)
+}
+
+@server(
+    group: things/data/area
+    prefix: /api/v1/things/data/area
+    accessCodePrefix: "thingsDataManage"
+    accessNamePrefix: "区域权限"
+    accessGroup: "数据权限"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+
+service api {
+    @doc(
+        summary: "更新授权区域权限"
+        description: "批量更新用户或角色的区域访问权限，设置各区域的权限类型（读权限/管理权限）。支持同时授权子区域（isAuthChildren）。用于精细化的区域权限配置。"
+        authType: "admin"
+        group: "things/data/area"
+        resource: "things/data/area"
+        action: "update"
+        recordLogMode: "1"
+    )
+    @handler batchUpdate
+    post /batch-update (DataAreaBatchUpdateReq) returns ()
+
+    @doc(
+        summary: "删除授权区域权限"
+        description: "批量删除用户或角色对多个区域的访问权限。删除后用户将无法访问这些区域的设备数据，但项目级权限不受影响。"
+        authType: "admin"
+        group: "things/data/area"
+        resource: "things/data/area"
+        action: "delete"
+        recordLogMode: "1"
+    )
+    @handler batchDelete
+    post /batch-delete (DataAreaBatchDeleteReq) returns ()
+
+    @doc(
+        summary: "获取区域权限列表"
+        description: "查询项目的区域权限分配列表，返回各区域的授权用户/角色及其权限类型。结合区域树形结构可用于可视化展示权限分布。"
+        authType: "admin"
+        group: "things/data/area"
+        resource: "things/data/area"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (DataAreaGetListReq) returns (DataAreaGetListResp)
+}
+
+@server(
+    group: things/data/area/user/apply
+    prefix: /api/v1/things/data/area/user/apply
+    accessCodePrefix: "thingsDataManage"
+    accessNamePrefix: "区域授权"
+    accessGroup: "数据权限"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+
+service api {
+    @doc(
+        summary: "授权区域权限"
+        description: "审批用户的区域权限申请请求，同意或拒绝。同意后用户获得申请的区域访问权限，拒绝后申请记录被清除。支持批量审批多个申请。"
+        authType: "admin"
+        group: "things/data/area/user/apply"
+        resource: "things/data/area/user/apply"
+        action: "deal"
+        recordLogMode: "1"
+    )
+    @handler deal
+    post /deal (UserAreaApplyDealReq) returns ()
+
+    @doc(
+        summary: "获取区域权限列表"
+        description: "查询待审批或已审批的区域权限申请列表，返回申请ID、用户信息、区域信息、权限类型、申请时间等。用于权限申请管理界面展示。"
+        authType: "admin"
+        group: "things/data/area/user/apply"
+        resource: "things/data/area/user/apply"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (UserAreaApplyGetListReq) returns (UserAreaApplyGetListResp)
+}
+
+
+//用户级权限控制
+type (
+    DataProject  {
+        ProjectID   int64 `json:"projectID,string"`     //权限数据ID
+        AuthType  int64 `json:"authType"`// 1:管理权限,可以修改别人的权限,及读写权限 2:读写权限,可以读写该权限 3:读权限,只能读,不能修改
+        TargetID   int64 `json:"targetID,string,optional"`    //用户ID
+        UpdatedTime int64 `json:"updatedTime,optional"` //更新时间
+        User *UserCore `json:"user,optional"`//获取用户类型返回
+        MemberRemark string `json:"memberRemark,optional"` //家庭创建者为成员设置的称呼
+    }
+
+    DataProjectDeleteReq{
+        TargetID   int64 `json:"targetID,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        ProjectID   int64 `json:"projectID,string,optional"`     //权限数据ID
+    }
+    DataProjectBatchDeleteReq{
+        TargetIDs  []int64 `json:"targetIDs,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        ProjectID   int64 `json:"projectID,string,optional"`     //权限数据ID
+    }
+    DataProjectSaveReq{
+        TargetID   int64 `json:"targetID,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        ProjectID   int64 `json:"projectID,string"`     //权限数据ID
+        AuthType  int64 `json:"authType"`// 1:管理权限,可以修改别人的权限,及读写权限 2:读写权限,可以读写该权限 3:读权限,只能读,不能修改
+        MemberRemark string `json:"memberRemark,optional"` //家庭创建者为成员设置的称呼
+    }
+
+    DataProjectUpdateReq{
+        TargetID   int64 `json:"targetID,string"` //用户ID
+        TargetType string `json:"targetType"` //仅支持 user
+        ProjectID  int64 `json:"projectID,string"` //权限数据ID
+        MemberRemark *string `json:"memberRemark,optional"` //成员称呼；空字符串表示清空，不传表示不修改
+    }
+
+    DataProjectMultiSaveReq{
+        TargetIDs   []int64 `json:"targetIDs,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        ProjectID   int64 `json:"projectID,string"`     //权限数据ID
+        AuthType  int64 `json:"authType"`// 1:管理权限,可以修改别人的权限,及读写权限 2:读写权限,可以读写该权限 3:读权限,只能读,不能修改
+    }
+
+    DataProjectGetListReq  {
+        Page *PageInfo `json:"page,optional"`        //进行数据分页（不传默认2000相当于全部）
+        ProjectID   int64 `json:"projectID,string,optional"`     //权限数据ID
+        TargetID   int64 `json:"targetID,string,optional"`    //用户ID
+        TargetType string `json:"targetType"`
+    }
+    DataProjectGetListResp  {
+        PageResp
+        List  []*DataProject `json:"list"`    //用户数据权限列表
+    }
+
+    DataAreaBatchDeleteReq{
+        ProjectID int64           `json:"projectID,string,optional"` //项目id
+        TargetID   int64 `json:"targetID,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        AreaIDs []int64         `json:"areaIDs,string"`
+    }
+    DataAreaBatchUpdateReq  {
+        TargetID   int64 `json:"targetID,string"`    //用户ID
+        TargetType string `json:"targetType"`
+        ProjectID int64           `json:"projectID,string,optional"` //项目id
+        Areas     []*DataArea `json:"areas"`          //权限数据IDs
+    }
+    DataArea  {
+        AreaID int64 `json:"areaID,string"` //项目id
+        AuthType  int64 `json:"authType"`// 1:读权限,只能读,不能写 4:管理权限,可以修改别人的权限
+        IsAuthChildren int64 `json:"isAuthChildren,optional"`//是否同时授权子节点,默认为2
+    }
+
+    DataAreaGetListReq  {
+        Page *PageInfo `json:"page,optional"`        //进行数据分页（不传默认2000相当于全部）
+        TargetID   int64 `json:"targetID,string,optional"`    //用户ID
+        TargetType string `json:"targetType,optional"`
+        ProjectID int64           `json:"projectID,string,optional"` //项目id
+    }
+
+    DataAreaDetail  {
+        *AreaInfo
+        AuthType  int64 `json:"authType"`// 1:读权限,只能读,不能写 4:管理权限,可以修改别人的权限
+        IsAuthChildren int64 `json:"isAuthChildren,optional"`//是否同时授权子节点,默认为2
+        TargetID   int64 `json:"targetID,string,optional"`    //用户ID
+        TargetType string `json:"targetType,optional"`
+        UpdatedTime int64 `json:"updatedTime,optional"` //更新时间
+        User *UserCore `json:"user,optional"`//获取用户类型返回
+    }
+    DataAreaGetListResp  {
+        PageResp
+        List  []*DataAreaDetail `json:"list"`    //用户数据权限列表
+    }
+)
+
+
+//用户级权限控制
+type (
+    UserAreaApplyGetListReq {
+        Page *PageInfo `json:"page,optional"`        //进行数据分页（不传默认2000相当于全部）
+        AuthTypes []int64 `json:"authTypes,optional"` //权限类型 1:读权限,只能读,不能写 4:管理权限,可以修改别人的权限
+        AreaID  int64 `json:"areaID,string,optional"` //项目id
+        WithAreaInfo bool `json:"withAreaInfo,optional"`//把区域信息附带上
+        WithUserInfo bool  `json:"withUserInfo,optional"`//把用户信息带上
+    }
+    UserAreaApplyGetListResp{
+        List []*UserAreaApplyInfo `json:"list"`
+        PageResp
+    }
+    UserAreaApplyInfo{
+        ID  int64 `json:"id,string"` //项目id
+        UserID   int64 `json:"userID,string"`    //用户ID
+        AreaID  int64 `json:"areaID,string"` //项目id
+        AuthType  int64 `json:"authType"`// 1:读权限,只能读,不能写 4:管理权限,可以修改别人的权限
+        CreatedTime  int64 `json:"createdTime,string"`
+        AreaInfo *AreaInfo `json:"areaInfo"`
+        UserInfo *UserInfo `json:"userInfo"`
+    }
+    UserAreaApplyDealReq{
+        IsApprove bool `json:"isApprove"` //是否同意
+        IDs     []int64 `json:"ids,string"`          //权限数据IDs
+    }
+
+)
+
+@server(
+    group: things/data/user
+    prefix: /api/v1/things/data/user
+    accessCodePrefix: "thingsDataManage"
+    accessNamePrefix: "数据用户"
+    accessGroup: "数据权限"
+    middleware:  CheckTokenWare,InitCtxsWare
+	defaultAuthType: "admin"
+	defaultNeedAuth: "true"
+)
+
+service api {
+    @doc(
+        summary: "获取有区域权限的用户列表"
+        description: "查询指定区域下已授权的用户列表，支持传入多个区域ID。仅项目管理员或租户管理员可调用。"
+        authType: "admin"
+        group: "things/data/user"
+        resource: "things/data/user"
+        action: "view"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (DataUserGetListReq) returns (DataUserGetListResp)
+}
+
+type (
+    DataUserGetListReq {
+        Page      *PageInfo `json:"page,optional"`            // 分页信息
+        AreaIDs   []int64   `json:"areaIDs,string"`           // 区域ID列表（必填）
+        ProjectID int64     `json:"projectID,string,optional"` // 项目ID（可选，不传则用上下文）
+    }
+    DataUserGetListResp {
+        List []*UserInfo `json:"list"` // 有权限的用户列表
+        PageResp
+    }
+)

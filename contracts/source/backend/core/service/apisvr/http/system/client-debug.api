@@ -1,0 +1,73 @@
+info(
+    title: "客户端实时调试"
+    desc: "AI 与客户端之间的短期调试桥"
+    version: "v1"
+)
+
+@server (
+    group: system/clientdebug
+    prefix: /api/v1/system/client-debug
+    defaultAuthType: "all"
+    defaultNeedAuth: "true"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "订阅客户端调试流"
+        description: "业务说明：Agent 为指定客户端实例建立短期调试会话并接收SSE日志和诊断结果。调用者仅可调试本人或以平台管理员身份调试其他用户。"
+        authType: "all"
+        group: "system/client-debug"
+        resource: "system/client-debug"
+        action: "view"
+        recordLogMode: "3"
+    )
+    @handler clientDebugStream
+    post /stream (ClientDebugStreamReq) returns ()
+
+    @doc(
+        summary: "交换客户端调试消息"
+        description: "业务说明：Agent提交操控请求和诊断命令；目标客户端提交确认、日志、诊断结果和停止通知。会话有效期内按身份和实例校验。"
+        authType: "all"
+        group: "system/client-debug"
+        resource: "system/client-debug"
+        action: "operate"
+        recordLogMode: "3"
+    )
+    @handler clientDebugMessage
+    post /message (ClientDebugMessageReq) returns (ClientDebugMessageResp)
+}
+
+type (
+    ClientDebugFilter {
+        Levels []string `json:"levels,optional"`
+        Names []string `json:"names,optional"`
+    }
+    ClientDebugStreamReq {
+        UserID int64 `json:"userID,string"`
+        ClientInstanceID string `json:"clientInstanceID"`
+        Filter ClientDebugFilter `json:"filter,optional"`
+        ControlRequested bool `json:"controlRequested,optional"`
+    }
+    ClientDebugLogEvent {
+        Seq int64 `json:"seq"`
+        Time string `json:"time"`
+        Name string `json:"name"`
+        Level string `json:"level"`
+        Message string `json:"message"`
+        Data map[string]interface{} `json:"data,optional"`
+    }
+    ClientDebugMessageReq {
+        SessionID string `json:"sessionID"`
+        Kind string `json:"kind"`
+        BatchID string `json:"batchID,optional"`
+        Events []ClientDebugLogEvent `json:"events,optional"`
+        CommandID string `json:"commandID,optional"`
+        Action string `json:"action,optional"`
+        Args map[string]interface{} `json:"args,optional"`
+        Status string `json:"status,optional"`
+        Data map[string]interface{} `json:"data,optional"`
+    }
+    ClientDebugMessageResp {
+        Accepted bool `json:"accepted"`
+    }
+)

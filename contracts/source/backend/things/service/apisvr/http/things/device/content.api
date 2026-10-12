@@ -1,0 +1,46 @@
+// 设备会话附件只交换metadata；原件按签名地址直传私有存储。
+@server(
+    group: things/device/content
+    prefix: /api/v1/things/device/edge/content
+    middleware: InitCtxsWare
+)
+service api {
+    @doc(summary: "准备设备会话附件" description: "设备Basic认证后由当前DMS主人和连接代次申请本人AI会话附件；只返回短期私有PUT地址与加密收据，不转运原件。" authType: "device" group: "things/device/content" resource: "things/device/content" action: "create" recordLogMode: "3")
+    @handler prepare
+    post /prepare (DeviceContentPrepareReq) returns (DeviceContentPrepareResp)
+    @doc(summary: "完成设备会话附件" description: "私有存储直传后提交原租约收据；重新核验设备主人、连接代次、会话及模型授权，再由AISVR核验真实文件内容。" authType: "device" group: "things/device/content" resource: "things/device/content" action: "update" recordLogMode: "3")
+    @handler complete
+    post /complete (DeviceContentCompleteReq) returns (DeviceContentCompleteResp)
+}
+type (
+    DeviceContentPrepareReq {
+        Authorization string `header:"authorization"` // 仅接收Basic设备凭据，不是会话权限。
+        SessionId string `json:"sessionId"` // 当前本人设备AI会话。
+        RequestId string `json:"requestId"` // 幂等请求标识。
+        Name string `json:"name"` // 展示文件名。
+        MimeType string `json:"mimeType"` // 声明内容类型。
+        Size int64 `json:"size"` // 原件字节数，须为安全整数。
+        Sha256 string `json:"sha256"` // 原件SHA256。
+    }
+    DeviceContentPrepareResp {
+        ContentRef string `json:"contentRef"` // 本会话私有引用。
+        Type string `json:"type"` // image或file。
+        MimeType string `json:"mimeType"` // 实际类型。
+        Status string `json:"status"` // uploading或ready。
+        UploadUrl string `json:"uploadUrl"` // 短期私有PUT地址；ready重放为空。
+        UploadReceipt string `json:"uploadReceipt"` // 加密完成收据；不是模型nonce。
+        ExpiresAt int64 `json:"expiresAt"` // 签名实际截止毫秒；ready重放为0。
+    }
+    DeviceContentCompleteReq {
+        Authorization string `header:"authorization"` // 设备Basic凭据。
+        SessionId string `json:"sessionId"` // 原始会话。
+        ContentRef string `json:"contentRef"` // 原始私有引用。
+        UploadReceipt string `json:"uploadReceipt"` // 原租约opaque收据。
+    }
+    DeviceContentCompleteResp {
+        ContentRef string `json:"contentRef"` // 就绪引用。
+        Type string `json:"type"` // image或file。
+        MimeType string `json:"mimeType"` // 核验后的内容类型。
+        Status string `json:"status"` // ready不代表模型已消费。
+    }
+)

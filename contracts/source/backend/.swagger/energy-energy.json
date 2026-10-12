@@ -1,0 +1,3990 @@
+{
+  "components": {
+    "schemas": {
+      "AdminRechargeReq": {
+        "properties": {
+          "accountType": {
+            "description": " 账户类型 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "amount": {
+            "description": " 充值金额（元），最小1元",
+            "format": "double",
+            "type": "number"
+          },
+          "areaID": {
+            "description": " 目标房间区域ID",
+            "type": "string"
+          },
+          "remark": {
+            "description": " 备注",
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaID",
+          "accountType",
+          "amount"
+        ],
+        "title": "AdminRechargeReq",
+        "type": "object"
+      },
+      "AdminRechargeResp": {
+        "properties": {
+          "balanceAfter": {
+            "description": " 充值后余额",
+            "format": "double",
+            "type": "number"
+          },
+          "balanceBefore": {
+            "description": " 充值前余额",
+            "format": "double",
+            "type": "number"
+          },
+          "id": {
+            "description": " 充值记录ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "balanceBefore",
+          "balanceAfter"
+        ],
+        "title": "AdminRechargeResp",
+        "type": "object"
+      },
+      "CConsumptionBrief": {
+        "properties": {
+          "accountType": {
+            "description": " 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "cost": {
+            "description": " 金额",
+            "format": "double",
+            "type": "number"
+          },
+          "createdTime": {
+            "description": " 时间（毫秒时间戳）",
+            "type": "string"
+          },
+          "usageAmount": {
+            "description": " 用量",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "accountType",
+          "usageAmount",
+          "cost",
+          "createdTime"
+        ],
+        "title": "CConsumptionBrief",
+        "type": "object"
+      },
+      "CConsumptionListResp": {
+        "properties": {
+          "list": {
+            "items": {
+              "$ref": "#/components/schemas/CConsumptionRecordInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "CConsumptionListResp",
+        "type": "object"
+      },
+      "CConsumptionRecordInfo": {
+        "properties": {
+          "accountType": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "balanceAfter": {
+            "format": "double",
+            "type": "number"
+          },
+          "balanceBefore": {
+            "format": "double",
+            "type": "number"
+          },
+          "cost": {
+            "format": "double",
+            "type": "number"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "readingAfter": {
+            "format": "double",
+            "type": "number"
+          },
+          "readingBefore": {
+            "format": "double",
+            "type": "number"
+          },
+          "unitPrice": {
+            "format": "double",
+            "type": "number"
+          },
+          "usageAmount": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "areaName",
+          "accountType",
+          "readingBefore",
+          "readingAfter",
+          "usageAmount",
+          "unitPrice",
+          "cost",
+          "balanceBefore",
+          "balanceAfter",
+          "createdTime"
+        ],
+        "title": "CConsumptionRecordInfo",
+        "type": "object"
+      },
+      "CHomeDataReq": {
+        "properties": {
+          "areaID": {
+            "description": " 房间ID，为空取第一个绑定房间",
+            "type": "string"
+          }
+        },
+        "title": "CHomeDataReq",
+        "type": "object"
+      },
+      "CHomeDataResp": {
+        "properties": {
+          "areaID": {
+            "description": " 当前房间ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "areaPath": {
+            "description": " 区域路径",
+            "type": "string"
+          },
+          "bindRooms": {
+            "description": " 绑定的所有房间（用于切换）",
+            "items": {
+              "$ref": "#/components/schemas/CRoomBrief"
+            },
+            "type": "array"
+          },
+          "elecBalance": {
+            "description": " 电费余额",
+            "format": "double",
+            "type": "number"
+          },
+          "elecReading": {
+            "description": " 电表读数",
+            "format": "double",
+            "type": "number"
+          },
+          "monthElecCost": {
+            "description": " 本月电费消费合计",
+            "format": "double",
+            "type": "number"
+          },
+          "monthWaterCost": {
+            "description": " 本月水费消费合计",
+            "format": "double",
+            "type": "number"
+          },
+          "waterBalance": {
+            "description": " 水费余额",
+            "format": "double",
+            "type": "number"
+          },
+          "waterReading": {
+            "description": " 水表读数",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "areaID",
+          "areaName",
+          "areaPath",
+          "elecBalance",
+          "waterBalance",
+          "elecReading",
+          "waterReading",
+          "monthElecCost",
+          "monthWaterCost",
+          "bindRooms"
+        ],
+        "title": "CHomeDataResp",
+        "type": "object"
+      },
+      "COrderStatusReq": {
+        "properties": {
+          "orderID": {
+            "description": " 充值订单ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderID"
+        ],
+        "title": "COrderStatusReq",
+        "type": "object"
+      },
+      "COrderStatusResp": {
+        "properties": {
+          "balanceAfter": {
+            "description": " 充值后余额（已支付时返回）",
+            "format": "double",
+            "type": "number"
+          },
+          "status": {
+            "description": " 1:待支付 2:已支付 3:已关闭",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "status",
+          "balanceAfter"
+        ],
+        "title": "COrderStatusResp",
+        "type": "object"
+      },
+      "CRechargeCreateReq": {
+        "properties": {
+          "accountType": {
+            "description": " 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "amount": {
+            "description": " 充值金额（元），最小1元，最大9999元",
+            "format": "double",
+            "type": "number"
+          },
+          "areaID": {
+            "description": " 房间ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaID",
+          "accountType",
+          "amount"
+        ],
+        "title": "CRechargeCreateReq",
+        "type": "object"
+      },
+      "CRechargeCreateResp": {
+        "properties": {
+          "appId": {
+            "description": " 微信AppID",
+            "type": "string"
+          },
+          "nonceStr": {
+            "description": " 随机字符串",
+            "type": "string"
+          },
+          "orderID": {
+            "description": " 充值订单ID",
+            "type": "string"
+          },
+          "package": {
+            "description": " 订单详情扩展字符串",
+            "type": "string"
+          },
+          "paySign": {
+            "description": " 签名",
+            "type": "string"
+          },
+          "signType": {
+            "description": " 签名方式",
+            "type": "string"
+          },
+          "timeStamp": {
+            "description": " 时间戳",
+            "type": "string"
+          }
+        },
+        "required": [
+          "orderID",
+          "appId",
+          "timeStamp",
+          "nonceStr",
+          "package",
+          "signType",
+          "paySign"
+        ],
+        "title": "CRechargeCreateResp",
+        "type": "object"
+      },
+      "CRechargeListResp": {
+        "properties": {
+          "list": {
+            "items": {
+              "$ref": "#/components/schemas/CRechargeRecordInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "CRechargeListResp",
+        "type": "object"
+      },
+      "CRechargeRecordInfo": {
+        "properties": {
+          "accountType": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "amount": {
+            "format": "double",
+            "type": "number"
+          },
+          "areaName": {
+            "type": "string"
+          },
+          "createdTime": {
+            "type": "string"
+          },
+          "id": {
+            "type": "string"
+          },
+          "rechargeMethod": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "areaName",
+          "accountType",
+          "amount",
+          "rechargeMethod",
+          "createdTime"
+        ],
+        "title": "CRechargeRecordInfo",
+        "type": "object"
+      },
+      "CRecordGetListReq": {
+        "properties": {
+          "accountType": {
+            "description": " 0:全部 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaID": {
+            "description": " 房间ID，为空查所有绑定房间",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "CRecordGetListReq",
+        "type": "object"
+      },
+      "CRoomBrief": {
+        "properties": {
+          "areaID": {
+            "description": " 房间ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaID",
+          "areaName"
+        ],
+        "title": "CRoomBrief",
+        "type": "object"
+      },
+      "CRoomCardInfo": {
+        "properties": {
+          "areaID": {
+            "description": " 房间ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "areaPath": {
+            "description": " 上级路径",
+            "type": "string"
+          },
+          "elecBalance": {
+            "description": " 电费余额",
+            "format": "double",
+            "type": "number"
+          },
+          "status": {
+            "description": " 状态 1:正常 2:欠费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "waterBalance": {
+            "description": " 水费余额",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "areaID",
+          "areaName",
+          "areaPath",
+          "elecBalance",
+          "waterBalance",
+          "status"
+        ],
+        "title": "CRoomCardInfo",
+        "type": "object"
+      },
+      "CRoomDetailResp": {
+        "properties": {
+          "areaID": {
+            "description": " 房间ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "areaPath": {
+            "description": " 区域路径",
+            "type": "string"
+          },
+          "elecBalance": {
+            "description": " 电费余额",
+            "format": "double",
+            "type": "number"
+          },
+          "elecPrice": {
+            "description": " 电费单价",
+            "format": "double",
+            "type": "number"
+          },
+          "elecReading": {
+            "description": " 电表读数",
+            "format": "double",
+            "type": "number"
+          },
+          "monthElecUsage": {
+            "description": " 本月用电量",
+            "format": "double",
+            "type": "number"
+          },
+          "monthWaterUsage": {
+            "description": " 本月用水量",
+            "format": "double",
+            "type": "number"
+          },
+          "recentRecords": {
+            "description": " 近10条消费",
+            "items": {
+              "$ref": "#/components/schemas/CConsumptionBrief"
+            },
+            "type": "array"
+          },
+          "waterBalance": {
+            "description": " 水费余额",
+            "format": "double",
+            "type": "number"
+          },
+          "waterPrice": {
+            "description": " 水费单价",
+            "format": "double",
+            "type": "number"
+          },
+          "waterReading": {
+            "description": " 水表读数",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "areaID",
+          "areaName",
+          "areaPath",
+          "elecBalance",
+          "waterBalance",
+          "elecReading",
+          "waterReading",
+          "elecPrice",
+          "waterPrice",
+          "monthElecUsage",
+          "monthWaterUsage",
+          "recentRecords"
+        ],
+        "title": "CRoomDetailResp",
+        "type": "object"
+      },
+      "CRoomGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 房间卡片列表",
+            "items": {
+              "$ref": "#/components/schemas/CRoomCardInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "CRoomGetListResp",
+        "type": "object"
+      },
+      "CRoomGetOneReq": {
+        "properties": {
+          "areaID": {
+            "description": " 房间ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaID"
+        ],
+        "title": "CRoomGetOneReq",
+        "type": "object"
+      },
+      "ConsumptionGetListReq": {
+        "properties": {
+          "accountType": {
+            "description": " 账户类型 0:全部 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaID": {
+            "description": " 区域ID精确过滤",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称模糊搜索",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "ConsumptionGetListReq",
+        "type": "object"
+      },
+      "ConsumptionGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 消费记录列表",
+            "items": {
+              "$ref": "#/components/schemas/ConsumptionRecordInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ConsumptionGetListResp",
+        "type": "object"
+      },
+      "ConsumptionRecordInfo": {
+        "properties": {
+          "accountType": {
+            "description": " 账户类型 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaID": {
+            "description": " 区域ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "balanceAfter": {
+            "description": " 扣费后余额",
+            "format": "double",
+            "type": "number"
+          },
+          "balanceBefore": {
+            "description": " 扣费前余额",
+            "format": "double",
+            "type": "number"
+          },
+          "cost": {
+            "description": " 消费金额（元）",
+            "format": "double",
+            "type": "number"
+          },
+          "createdTime": {
+            "description": " 消费时间（毫秒时间戳）",
+            "type": "string"
+          },
+          "deviceName": {
+            "description": " 设备标识",
+            "type": "string"
+          },
+          "id": {
+            "description": " 记录ID",
+            "type": "string"
+          },
+          "readingAfter": {
+            "description": " 本次读数",
+            "format": "double",
+            "type": "number"
+          },
+          "readingBefore": {
+            "description": " 上次读数",
+            "format": "double",
+            "type": "number"
+          },
+          "unitPrice": {
+            "description": " 单价",
+            "format": "double",
+            "type": "number"
+          },
+          "usageAmount": {
+            "description": " 用量",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "areaID",
+          "areaName",
+          "accountType",
+          "readingBefore",
+          "readingAfter",
+          "usageAmount",
+          "unitPrice",
+          "cost",
+          "balanceBefore",
+          "balanceAfter",
+          "deviceName",
+          "createdTime"
+        ],
+        "title": "ConsumptionRecordInfo",
+        "type": "object"
+      },
+      "Duty": {
+        "properties": {
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "dutyDate": {
+            "description": " 值班日期 yyyy-MM-dd",
+            "type": "string"
+          },
+          "dutyPeriod": {
+            "description": " 值班时间段",
+            "type": "string"
+          },
+          "id": {
+            "description": " 记录ID",
+            "type": "string"
+          },
+          "onDuty": {
+            "description": " 值班人员姓名",
+            "type": "string"
+          },
+          "onDutyID": {
+            "description": " 值班人员用户ID",
+            "type": "string"
+          },
+          "relief": {
+            "description": " 替班人员姓名",
+            "type": "string"
+          },
+          "reliefID": {
+            "description": " 替班人员用户ID",
+            "type": "string"
+          },
+          "remark": {
+            "description": " 值班备注",
+            "type": "string"
+          },
+          "status": {
+            "description": " 值班状态 1:正常 2:已替班",
+            "format": "int64",
+            "type": "integer"
+          },
+          "type": {
+            "description": " 值班类型 1:安全值班 2:设备维护值班",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "Duty",
+        "type": "object"
+      },
+      "DutyGetListReq": {
+        "properties": {
+          "dutyDate": {
+            "description": " 值班日期",
+            "type": "string"
+          },
+          "onDuty": {
+            "description": " 值班人员",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "type": {
+            "description": " 值班类型",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "DutyGetListReq",
+        "type": "object"
+      },
+      "DutyGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 值班记录列表",
+            "items": {
+              "$ref": "#/components/schemas/Duty"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "DutyGetListResp",
+        "type": "object"
+      },
+      "EnergyConfigInfo": {
+        "properties": {
+          "autoCutoffElectricity": {
+            "description": " 自动断电 1:开启 2:关闭",
+            "format": "int64",
+            "type": "integer"
+          },
+          "autoCutoffWater": {
+            "description": " 自动断水 1:开启 2:关闭",
+            "format": "int64",
+            "type": "integer"
+          },
+          "contactPhone": {
+            "description": " 物业联系电话",
+            "type": "string"
+          },
+          "cutoffDelayHours": {
+            "description": " 断供延迟（小时）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "electricityPrice": {
+            "description": " 电费单价（元/kWh）",
+            "format": "double",
+            "type": "number"
+          },
+          "electricityWarnThreshold": {
+            "description": " 电费预警值（元）",
+            "format": "double",
+            "type": "number"
+          },
+          "priceType": {
+            "description": " 电价类型 1:固定 2:峰谷",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timePrices": {
+            "description": " 峰谷时段电价",
+            "items": {
+              "$ref": "#/components/schemas/TimePriceInfo"
+            },
+            "type": "array"
+          },
+          "waterPrice": {
+            "description": " 水费单价（元/m³）",
+            "format": "double",
+            "type": "number"
+          },
+          "waterWarnThreshold": {
+            "description": " 水费预警值（元）",
+            "format": "double",
+            "type": "number"
+          },
+          "wxApiKeySet": {
+            "description": " API密钥是否已配置",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "wxAppID": {
+            "description": " 微信AppID",
+            "type": "string"
+          },
+          "wxAppSecretSet": {
+            "description": " AppSecret是否已配置",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "wxMchID": {
+            "description": " 商户号",
+            "type": "string"
+          },
+          "wxNotifyUrl": {
+            "description": " 回调地址",
+            "type": "string"
+          }
+        },
+        "required": [
+          "electricityPrice",
+          "waterPrice",
+          "priceType",
+          "timePrices",
+          "electricityWarnThreshold",
+          "waterWarnThreshold",
+          "autoCutoffElectricity",
+          "autoCutoffWater",
+          "cutoffDelayHours",
+          "wxAppSecretSet",
+          "wxApiKeySet"
+        ],
+        "title": "EnergyConfigInfo",
+        "type": "object"
+      },
+      "EnergyConfigUpdateReq": {
+        "properties": {
+          "autoCutoffElectricity": {
+            "description": " 自动断电",
+            "format": "int64",
+            "type": "integer"
+          },
+          "autoCutoffWater": {
+            "description": " 自动断水",
+            "format": "int64",
+            "type": "integer"
+          },
+          "contactPhone": {
+            "description": " 联系电话",
+            "type": "string"
+          },
+          "cutoffDelayHours": {
+            "description": " 断供延迟",
+            "format": "int64",
+            "type": "integer"
+          },
+          "electricityPrice": {
+            "description": " 电费单价",
+            "format": "double",
+            "type": "number"
+          },
+          "electricityWarnThreshold": {
+            "description": " 电费预警值",
+            "format": "double",
+            "type": "number"
+          },
+          "priceType": {
+            "description": " 电价类型",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timePrices": {
+            "description": " 峰谷时段电价",
+            "items": {
+              "$ref": "#/components/schemas/TimePriceInfo"
+            },
+            "type": "array"
+          },
+          "waterPrice": {
+            "description": " 水费单价",
+            "format": "double",
+            "type": "number"
+          },
+          "waterWarnThreshold": {
+            "description": " 水费预警值",
+            "format": "double",
+            "type": "number"
+          },
+          "wxApiKey": {
+            "description": " API密钥",
+            "type": "string"
+          },
+          "wxAppID": {
+            "description": " 微信AppID",
+            "type": "string"
+          },
+          "wxAppSecret": {
+            "description": " AppSecret",
+            "type": "string"
+          },
+          "wxMchID": {
+            "description": " 商户号",
+            "type": "string"
+          },
+          "wxNotifyUrl": {
+            "description": " 回调地址",
+            "type": "string"
+          }
+        },
+        "title": "EnergyConfigUpdateReq",
+        "type": "object"
+      },
+      "OpLogGetListReq": {
+        "properties": {
+          "areaID": {
+            "description": " 区域ID",
+            "type": "string"
+          },
+          "opType": {
+            "description": " 操作类型",
+            "format": "int64",
+            "type": "integer"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "OpLogGetListReq",
+        "type": "object"
+      },
+      "OpLogGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 日志列表",
+            "items": {
+              "$ref": "#/components/schemas/OpLogInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "OpLogGetListResp",
+        "type": "object"
+      },
+      "OpLogInfo": {
+        "properties": {
+          "areaID": {
+            "description": " 区域ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 操作时间（毫秒时间戳）",
+            "type": "string"
+          },
+          "id": {
+            "description": " 日志ID",
+            "type": "string"
+          },
+          "opDetail": {
+            "description": " 操作详情（JSON）",
+            "type": "string"
+          },
+          "opType": {
+            "description": " 操作类型 1:通断控制 2:费率变更 3:入住 4:退房 5:退款 6:充值 7:抄表扣费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "operatorName": {
+            "description": " 操作人",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "areaID",
+          "areaName",
+          "opType",
+          "opDetail",
+          "operatorName",
+          "createdTime"
+        ],
+        "title": "OpLogInfo",
+        "type": "object"
+      },
+      "OrderBy": {
+        "properties": {
+          "field": {
+            "description": " 排序字段名",
+            "type": "string"
+          },
+          "sort": {
+            "description": " 排序方式 1:升序 2:降序",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "OrderBy",
+        "type": "object"
+      },
+      "PageInfo": {
+        "properties": {
+          "orders": {
+            "description": " 排序",
+            "items": {
+              "$ref": "#/components/schemas/OrderBy"
+            },
+            "type": "array"
+          },
+          "page": {
+            "description": " 页码",
+            "format": "int64",
+            "type": "integer"
+          },
+          "size": {
+            "description": " 每页大小",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PageInfo",
+        "type": "object"
+      },
+      "PageResp": {
+        "properties": {
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "total"
+        ],
+        "title": "PageResp",
+        "type": "object"
+      },
+      "PatrolPlan": {
+        "properties": {
+          "areaID": {
+            "description": " 项目区域ID",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "endDate": {
+            "description": " 结束日期 yyyy-MM-dd",
+            "type": "string"
+          },
+          "id": {
+            "description": " 计划ID",
+            "type": "string"
+          },
+          "inspectionCycle": {
+            "description": " 巡检周期：day=日 week=周 month=月",
+            "enum": [
+              "[day",
+              "week",
+              "month]"
+            ],
+            "type": "string"
+          },
+          "inspectionPerson": {
+            "description": " 巡检人姓名（逗号分隔）",
+            "type": "string"
+          },
+          "planContent": {
+            "description": " 计划内容",
+            "type": "string"
+          },
+          "planName": {
+            "description": " 计划名称",
+            "type": "string"
+          },
+          "setDates": {
+            "description": " 周期日期：周=星期几(1-7 逗号分隔)，月=几号(1-31 逗号分隔)",
+            "type": "string"
+          },
+          "setTime": {
+            "description": " 巡检时刻 HH:mm",
+            "type": "string"
+          },
+          "startDate": {
+            "description": " 开始日期 yyyy-MM-dd",
+            "type": "string"
+          },
+          "status": {
+            "description": " 启停状态 1:启用 2:停用",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userIDs": {
+            "description": " 巡检人用户ID（逗号分隔）",
+            "type": "string"
+          }
+        },
+        "title": "PatrolPlan",
+        "type": "object"
+      },
+      "PatrolPlanGetListReq": {
+        "properties": {
+          "areaID": {
+            "description": " 区域ID过滤",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "planName": {
+            "description": " 计划名称模糊",
+            "type": "string"
+          },
+          "status": {
+            "description": " 启停状态过滤",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PatrolPlanGetListReq",
+        "type": "object"
+      },
+      "PatrolPlanGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 计划列表",
+            "items": {
+              "$ref": "#/components/schemas/PatrolPlan"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "PatrolPlanGetListResp",
+        "type": "object"
+      },
+      "PatrolRecord": {
+        "properties": {
+          "areaID": {
+            "description": " 项目区域ID",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "cycle": {
+            "description": " 生成日期快照 yyyy-MM-dd（防重）",
+            "type": "string"
+          },
+          "id": {
+            "description": " 记录ID",
+            "type": "string"
+          },
+          "inspectionCycle": {
+            "description": " 巡检周期（快照）",
+            "type": "string"
+          },
+          "inspectionPerson": {
+            "description": " 巡检人姓名（逗号分隔）",
+            "type": "string"
+          },
+          "inspectionRemark": {
+            "description": " 巡检备注/结果",
+            "type": "string"
+          },
+          "inspectionStatus": {
+            "description": " 巡检状态 1:待巡检 2:已完成",
+            "format": "int64",
+            "type": "integer"
+          },
+          "inspectionTime": {
+            "description": " 实际巡检时间",
+            "type": "string"
+          },
+          "planContent": {
+            "description": " 计划内容（快照）",
+            "type": "string"
+          },
+          "planID": {
+            "description": " 关联计划ID",
+            "type": "string"
+          },
+          "planName": {
+            "description": " 计划名称（快照）",
+            "type": "string"
+          },
+          "planTime": {
+            "description": " 计划巡检时间",
+            "type": "string"
+          },
+          "userIDs": {
+            "description": " 巡检人用户ID（逗号分隔）",
+            "type": "string"
+          }
+        },
+        "title": "PatrolRecord",
+        "type": "object"
+      },
+      "PatrolRecordGetListReq": {
+        "properties": {
+          "areaID": {
+            "description": " 区域ID过滤",
+            "type": "string"
+          },
+          "inspectorID": {
+            "description": " 按巡检人过滤",
+            "type": "string"
+          },
+          "onlyMine": {
+            "description": " 仅查看当前用户的巡检任务",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "planName": {
+            "description": " 计划名称模糊",
+            "type": "string"
+          },
+          "status": {
+            "description": " 巡检状态过滤",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "PatrolRecordGetListReq",
+        "type": "object"
+      },
+      "PatrolRecordGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 记录列表",
+            "items": {
+              "$ref": "#/components/schemas/PatrolRecord"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "PatrolRecordGetListResp",
+        "type": "object"
+      },
+      "RechargeGetListReq": {
+        "properties": {
+          "accountType": {
+            "description": " 账户类型 0:全部 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "areaID": {
+            "description": " 区域ID精确过滤",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称模糊搜索",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "rechargeMethod": {
+            "description": " 充值方式 0:全部 1:微信 2:代充",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " 状态过滤",
+            "format": "int64",
+            "type": "integer"
+          },
+          "timeRange": {
+            "$ref": "#/components/schemas/TimeRange"
+          }
+        },
+        "title": "RechargeGetListReq",
+        "type": "object"
+      },
+      "RechargeGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 充值记录列表",
+            "items": {
+              "$ref": "#/components/schemas/RechargeRecordInfo"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "RechargeGetListResp",
+        "type": "object"
+      },
+      "RechargeRecordInfo": {
+        "properties": {
+          "accountType": {
+            "description": " 账户类型 1:电费 2:水费",
+            "format": "int64",
+            "type": "integer"
+          },
+          "amount": {
+            "description": " 充值金额（元）",
+            "format": "double",
+            "type": "number"
+          },
+          "areaID": {
+            "description": " 区域ID",
+            "type": "string"
+          },
+          "areaName": {
+            "description": " 房间名称",
+            "type": "string"
+          },
+          "balanceAfter": {
+            "description": " 充值后余额",
+            "format": "double",
+            "type": "number"
+          },
+          "balanceBefore": {
+            "description": " 充值前余额",
+            "format": "double",
+            "type": "number"
+          },
+          "createdTime": {
+            "description": " 充值时间（毫秒时间戳）",
+            "type": "string"
+          },
+          "id": {
+            "description": " 记录ID",
+            "type": "string"
+          },
+          "operatorName": {
+            "description": " 操作人姓名",
+            "type": "string"
+          },
+          "payOrderNo": {
+            "description": " 支付订单号",
+            "type": "string"
+          },
+          "rechargeMethod": {
+            "description": " 充值方式 1:微信支付 2:管理员代充",
+            "format": "int64",
+            "type": "integer"
+          },
+          "remark": {
+            "description": " 备注",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1:待支付 2:已支付 3:已关闭 4:已退款",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "id",
+          "areaID",
+          "areaName",
+          "accountType",
+          "amount",
+          "balanceBefore",
+          "balanceAfter",
+          "rechargeMethod",
+          "payOrderNo",
+          "operatorName",
+          "remark",
+          "status",
+          "createdTime"
+        ],
+        "title": "RechargeRecordInfo",
+        "type": "object"
+      },
+      "Report": {
+        "properties": {
+          "content": {
+            "description": " 例报内容（富文本，文本存储）",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "cycle": {
+            "description": " 例报周期 日/周/月",
+            "type": "string"
+          },
+          "endDate": {
+            "description": " 结束日期 yyyy-MM-dd",
+            "type": "string"
+          },
+          "id": {
+            "description": " 配置ID",
+            "type": "string"
+          },
+          "pushMethod": {
+            "description": " 推送方式 1:邮件 2:站内信",
+            "format": "int64",
+            "type": "integer"
+          },
+          "receiver": {
+            "description": " 接收人姓名",
+            "type": "string"
+          },
+          "receiverID": {
+            "description": " 接收人用户ID",
+            "type": "string"
+          },
+          "startDate": {
+            "description": " 开始日期 yyyy-MM-dd",
+            "type": "string"
+          },
+          "type": {
+            "description": " 例报类型 1:能耗报告",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "Report",
+        "type": "object"
+      },
+      "ReportGetListReq": {
+        "properties": {
+          "cycle": {
+            "description": " 例报周期",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "receiver": {
+            "description": " 接收人",
+            "type": "string"
+          },
+          "type": {
+            "description": " 例报类型",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "ReportGetListReq",
+        "type": "object"
+      },
+      "ReportGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 例报配置列表",
+            "items": {
+              "$ref": "#/components/schemas/Report"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ReportGetListResp",
+        "type": "object"
+      },
+      "RoomAccountSummaryReq": {
+        "title": "RoomAccountSummaryReq",
+        "type": "object"
+      },
+      "RoomAccountSummaryResp": {
+        "properties": {
+          "debtRooms": {
+            "description": " 欠费房间数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "emptyRooms": {
+            "description": " 空闲房间数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "occupiedRooms": {
+            "description": " 已入住房间数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalElecBalance": {
+            "description": " 电费余额合计",
+            "format": "double",
+            "type": "number"
+          },
+          "totalRooms": {
+            "description": " 总房间数",
+            "format": "int64",
+            "type": "integer"
+          },
+          "totalWaterBalance": {
+            "description": " 水费余额合计",
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "required": [
+          "totalRooms",
+          "occupiedRooms",
+          "emptyRooms",
+          "debtRooms",
+          "totalElecBalance",
+          "totalWaterBalance"
+        ],
+        "title": "RoomAccountSummaryResp",
+        "type": "object"
+      },
+      "RoomCheckOutReq": {
+        "properties": {
+          "areaID": {
+            "description": " 房间区域ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "areaID"
+        ],
+        "title": "RoomCheckOutReq",
+        "type": "object"
+      },
+      "RoomCheckOutResp": {
+        "title": "RoomCheckOutResp",
+        "type": "object"
+      },
+      "Schedule": {
+        "properties": {
+          "commencementTime": {
+            "description": " 开工时间",
+            "type": "string"
+          },
+          "content": {
+            "description": " 计划内容（富文本，文本存储）",
+            "type": "string"
+          },
+          "createdTime": {
+            "description": " 创建时间",
+            "type": "string"
+          },
+          "cycle": {
+            "description": " 计划周期",
+            "type": "string"
+          },
+          "endTime": {
+            "description": " 结束时间",
+            "type": "string"
+          },
+          "firstReminder": {
+            "description": " 一级提醒（分钟）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "head": {
+            "description": " 负责人",
+            "type": "string"
+          },
+          "headID": {
+            "description": " 负责人用户ID",
+            "type": "string"
+          },
+          "id": {
+            "description": " 计划ID",
+            "type": "string"
+          },
+          "isTimeout": {
+            "description": " 是否超时 1:是 2:否",
+            "format": "int64",
+            "type": "integer"
+          },
+          "name": {
+            "description": " 计划名称",
+            "type": "string"
+          },
+          "number": {
+            "description": " 计划编号",
+            "type": "string"
+          },
+          "operator": {
+            "description": " 开工执行人姓名",
+            "type": "string"
+          },
+          "operatorID": {
+            "description": " 开工执行人用户ID",
+            "type": "string"
+          },
+          "preparedBy": {
+            "description": " 编制人",
+            "type": "string"
+          },
+          "remark": {
+            "description": " 注意事项",
+            "type": "string"
+          },
+          "resolutionContent": {
+            "description": " 归结内容",
+            "type": "string"
+          },
+          "resolutionTime": {
+            "description": " 归结时间",
+            "type": "string"
+          },
+          "secondReminder": {
+            "description": " 二级提醒（分钟）",
+            "format": "int64",
+            "type": "integer"
+          },
+          "source": {
+            "description": " 计划来源",
+            "type": "string"
+          },
+          "startTime": {
+            "description": " 开始时间",
+            "type": "string"
+          },
+          "station": {
+            "description": " 站所",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态 1:进行中 2:已完成 3:已取消",
+            "format": "int64",
+            "type": "integer"
+          },
+          "terminator": {
+            "description": " 归结执行人姓名",
+            "type": "string"
+          },
+          "terminatorID": {
+            "description": " 归结执行人用户ID",
+            "type": "string"
+          },
+          "type": {
+            "description": " 计划类型",
+            "type": "string"
+          }
+        },
+        "title": "Schedule",
+        "type": "object"
+      },
+      "ScheduleGetListReq": {
+        "properties": {
+          "head": {
+            "description": " 负责人",
+            "type": "string"
+          },
+          "name": {
+            "description": " 计划名称模糊",
+            "type": "string"
+          },
+          "page": {
+            "$ref": "#/components/schemas/PageInfo"
+          },
+          "station": {
+            "description": " 站所",
+            "type": "string"
+          },
+          "status": {
+            "description": " 状态过滤",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "title": "ScheduleGetListReq",
+        "type": "object"
+      },
+      "ScheduleGetListResp": {
+        "properties": {
+          "list": {
+            "description": " 调度计划列表",
+            "items": {
+              "$ref": "#/components/schemas/Schedule"
+            },
+            "type": "array"
+          },
+          "total": {
+            "description": " 总数",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list"
+        ],
+        "title": "ScheduleGetListResp",
+        "type": "object"
+      },
+      "TimePriceInfo": {
+        "properties": {
+          "endHour": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "endMinute": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "price": {
+            "format": "double",
+            "type": "number"
+          },
+          "priceName": {
+            "type": "string"
+          },
+          "sort": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startHour": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "startMinute": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "startHour",
+          "startMinute",
+          "endHour",
+          "endMinute",
+          "price",
+          "priceName",
+          "sort"
+        ],
+        "title": "TimePriceInfo",
+        "type": "object"
+      },
+      "TimeRange": {
+        "properties": {
+          "end": {
+            "description": " 结束时间 RFC3339",
+            "type": "string"
+          },
+          "start": {
+            "description": " 开始时间 RFC3339",
+            "type": "string"
+          }
+        },
+        "title": "TimeRange",
+        "type": "object"
+      },
+      "WithID": {
+        "properties": {
+          "id": {
+            "description": " ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id"
+        ],
+        "title": "WithID",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "apiKey": {
+        "description": "Enter JWT Bearer token **_only_**",
+        "in": "header",
+        "name": "Authorization",
+        "type": "apiKey"
+      }
+    }
+  },
+  "info": {
+    "title": "energy-api",
+    "version": "1.0.0"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/api/v1/energy/c/home/get-data": {
+      "post": {
+        "description": "业务说明：查询租客首页所需的当前房间余额、读数、本月消费摘要以及绑定房间列表，用于租客端首页展示。",
+        "operationId": "postApiV1EnergyCHomeGet-data",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CHomeDataReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CHomeDataResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "租客首页数据（当前房间余额+本月消费摘要）",
+        "tags": [
+          "c/home",
+          "cHome"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantHome"
+      }
+    },
+    "/api/v1/energy/c/recharge/create-order": {
+      "post": {
+        "description": "业务说明：为租客端指定房间创建一笔待支付充值订单，并返回微信支付所需参数。用于租客发起电费或水费在线充值。",
+        "operationId": "postApiV1EnergyCRechargeCreate-order",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CRechargeCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CRechargeCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建充值订单（调起微信支付前）",
+        "tags": [
+          "c/recharge",
+          "cRecharge"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "tenantRecharge"
+      }
+    },
+    "/api/v1/energy/c/recharge/get-order-status": {
+      "post": {
+        "description": "业务说明：查询租客端充值订单的支付状态和充值后余额，用于前端轮询确认支付结果。",
+        "operationId": "postApiV1EnergyCRechargeGet-order-status",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/COrderStatusReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/COrderStatusResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "查询充值订单状态（前端轮询）",
+        "tags": [
+          "c/recharge",
+          "cRecharge"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantRecharge"
+      }
+    },
+    "/api/v1/energy/c/record/consumption-list": {
+      "post": {
+        "description": "业务说明：查询租客端当前绑定房间的消费明细列表，返回电费或水费的扣费记录。用于租客查看近期用量和扣费情况。",
+        "operationId": "postApiV1EnergyCRecordConsumption-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CRecordGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CConsumptionListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "租客消费明细列表",
+        "tags": [
+          "c/record",
+          "cRecord"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantRecord"
+      }
+    },
+    "/api/v1/energy/c/record/recharge-list": {
+      "post": {
+        "description": "业务说明：查询租客端当前绑定房间的充值记录列表，支持按房间、账户类型和时间范围过滤。用于租客查看历史充值流水。",
+        "operationId": "postApiV1EnergyCRecordRecharge-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CRecordGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CRechargeListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "租客充值记录列表",
+        "tags": [
+          "c/record",
+          "cRecord"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantRecord"
+      }
+    },
+    "/api/v1/energy/c/room/get-list": {
+      "post": {
+        "description": "业务说明：查询当前租客绑定的房间列表，返回房间名称、路径和余额概况。用于租客切换房间。",
+        "operationId": "postApiV1EnergyCRoomGet-list",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CRoomGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "租客绑定的房间列表",
+        "tags": [
+          "c/room",
+          "cRoom"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantRoom"
+      }
+    },
+    "/api/v1/energy/c/room/get-one": {
+      "post": {
+        "description": "业务说明：查询租客端单个房间的余额、读数、本月用量和近期消费记录。用于租客查看房间账户详情。",
+        "operationId": "postApiV1EnergyCRoomGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CRoomGetOneReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/CRoomDetailResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "房间详情（余额+读数+本月用量+近期消费）",
+        "tags": [
+          "c/room",
+          "cRoom"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "预付费-C端",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "tenantRoom"
+      }
+    },
+    "/api/v1/energy/config/get-one": {
+      "post": {
+        "description": "业务说明：查询预付费系统配置，包括水电单价、预警阈值、自动断供和微信支付参数的已配置状态。用于后台配置页面回显。",
+        "operationId": "postApiV1EnergyConfigGet-one",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/EnergyConfigInfo"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取系统配置",
+        "tags": [
+          "config"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "energyConfig"
+      }
+    },
+    "/api/v1/energy/config/update": {
+      "post": {
+        "description": "业务说明：更新预付费系统配置，包括水电单价、预警阈值、自动断供参数和微信支付配置。用于管理员维护收费和支付规则。",
+        "operationId": "postApiV1EnergyConfigUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EnergyConfigUpdateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新系统配置",
+        "tags": [
+          "config"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "2",
+        "x-oper-type": "update",
+        "x-resource": "energyConfig"
+      }
+    },
+    "/api/v1/energy/consumption/get-list": {
+      "post": {
+        "description": "业务说明：分页查询房间的消费扣费记录，支持按房间、账户类型和时间范围过滤。用于管理员核对水电扣费明细。",
+        "operationId": "postApiV1EnergyConsumptionGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumptionGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ConsumptionGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取消费记录列表",
+        "tags": [
+          "consumption"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "consumptionRecord"
+      }
+    },
+    "/api/v1/energy/duty/create": {
+      "post": {
+        "description": "业务说明：创建值班排班记录，登记值班日期、值班人员、值班时间段、值班类型与替班人员。",
+        "operationId": "postApiV1EnergyDutyCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Duty"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建值班记录",
+        "tags": [
+          "duty"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "duty"
+      }
+    },
+    "/api/v1/energy/duty/delete": {
+      "post": {
+        "description": "业务说明：软删除指定值班记录。",
+        "operationId": "postApiV1EnergyDutyDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除值班记录",
+        "tags": [
+          "duty"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "duty"
+      }
+    },
+    "/api/v1/energy/duty/get-list": {
+      "post": {
+        "description": "业务说明：分页查询值班记录，支持按值班日期、值班人员、值班类型筛选。",
+        "operationId": "postApiV1EnergyDutyGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DutyGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/DutyGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取值班记录列表",
+        "tags": [
+          "duty"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "duty"
+      }
+    },
+    "/api/v1/energy/duty/get-one": {
+      "post": {
+        "description": "业务说明：根据记录 ID 查询单个值班记录。",
+        "operationId": "postApiV1EnergyDutyGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Duty"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取值班记录详情",
+        "tags": [
+          "duty"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "duty"
+      }
+    },
+    "/api/v1/energy/duty/update": {
+      "post": {
+        "description": "业务说明：更新值班排班记录，支持部分更新。",
+        "operationId": "postApiV1EnergyDutyUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Duty"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新值班记录",
+        "tags": [
+          "duty"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "duty"
+      }
+    },
+    "/api/v1/energy/oplog/get-list": {
+      "post": {
+        "description": "业务说明：分页查询预付费业务的操作日志，支持按房间、操作类型和时间范围过滤。用于管理员审计充值、退款、入住退房和控制操作。",
+        "operationId": "postApiV1EnergyOplogGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OpLogGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/OpLogGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取操作日志列表",
+        "tags": [
+          "oplog"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "operationLog"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-plan/create": {
+      "post": {
+        "description": "业务说明：创建巡检计划，配置计划名称、内容、周期（日/周/月）、巡检人、生效日期与巡检时间。计划启用后由定时任务按周期自动生成巡检记录。",
+        "operationId": "postApiV1EnergyPatrolPatrol-planCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolPlan"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建巡检计划",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "patrolPlan"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-plan/delete": {
+      "post": {
+        "description": "业务说明：软删除指定巡检计划。",
+        "operationId": "postApiV1EnergyPatrolPatrol-planDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除巡检计划",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "patrolPlan"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-plan/get-list": {
+      "post": {
+        "description": "业务说明：分页查询巡检计划列表，支持按计划名称、项目区域、启停状态筛选。",
+        "operationId": "postApiV1EnergyPatrolPatrol-planGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolPlanGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PatrolPlanGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取巡检计划列表",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "patrolPlan"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-plan/get-one": {
+      "post": {
+        "description": "业务说明：根据计划 ID 查询单个巡检计划。",
+        "operationId": "postApiV1EnergyPatrolPatrol-planGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PatrolPlan"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取巡检计划详情",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "patrolPlan"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-plan/update": {
+      "post": {
+        "description": "业务说明：更新巡检计划信息，支持部分更新。修改启停状态、巡检人、周期等配置。",
+        "operationId": "postApiV1EnergyPatrolPatrol-planUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolPlan"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新巡检计划",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "patrolPlan"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-record/create": {
+      "post": {
+        "description": "业务说明：创建巡检记录，记录计划巡检时间与实际巡检时间、巡检结果与备注。也可由巡检人员在个人巡检页面提交巡检结果。",
+        "operationId": "postApiV1EnergyPatrolPatrol-recordCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolRecord"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建巡检记录",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "patrolRecord"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-record/delete": {
+      "post": {
+        "description": "业务说明：软删除指定巡检记录。",
+        "operationId": "postApiV1EnergyPatrolPatrol-recordDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除巡检记录",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "patrolRecord"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-record/get-list": {
+      "post": {
+        "description": "业务说明：分页查询巡检记录，支持按计划名称、项目区域、巡检状态、巡检人筛选。普通用户通过 onlyMine 查看自己的巡检任务。",
+        "operationId": "postApiV1EnergyPatrolPatrol-recordGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolRecordGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PatrolRecordGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取巡检记录列表",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "patrolRecord"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-record/get-one": {
+      "post": {
+        "description": "业务说明：根据记录 ID 查询单个巡检记录。",
+        "operationId": "postApiV1EnergyPatrolPatrol-recordGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/PatrolRecord"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取巡检记录详情",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "view",
+        "x-auth-type": "all",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "patrolRecord"
+      }
+    },
+    "/api/v1/energy/patrol/patrol-record/update": {
+      "post": {
+        "description": "业务说明：更新巡检记录，巡检人员处理巡检任务时记录实际巡检时间与巡检结果、巡检状态。",
+        "operationId": "postApiV1EnergyPatrolPatrol-recordUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatrolRecord"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新巡检记录",
+        "tags": [
+          "patrol"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "patrolRecord"
+      }
+    },
+    "/api/v1/energy/recharge/admin-recharge": {
+      "post": {
+        "description": "业务说明：由管理员为指定房间账户执行人工代充值，直接增加余额并生成充值记录。用于线下收费或人工补录场景。",
+        "operationId": "postApiV1EnergyRechargeAdmin-recharge",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminRechargeReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/AdminRechargeResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "管理员代充值",
+        "tags": [
+          "recharge"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "2",
+        "x-oper-type": "create",
+        "x-resource": "rechargeRecord"
+      }
+    },
+    "/api/v1/energy/recharge/get-list": {
+      "post": {
+        "description": "业务说明：分页查询房间充值记录，支持按房间、充值方式、状态和时间范围过滤。用于管理员核对充值流水和支付状态。",
+        "operationId": "postApiV1EnergyRechargeGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RechargeGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RechargeGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取充值记录列表",
+        "tags": [
+          "recharge"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "rechargeRecord"
+      }
+    },
+    "/api/v1/energy/report/create": {
+      "post": {
+        "description": "业务说明：创建例报配置，登记例报类型、周期、内容、推送方式与接收人。用于周期性能耗报告推送。",
+        "operationId": "postApiV1EnergyReportCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Report"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建例报配置",
+        "tags": [
+          "report"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "report"
+      }
+    },
+    "/api/v1/energy/report/delete": {
+      "post": {
+        "description": "业务说明：软删除指定例报配置。",
+        "operationId": "postApiV1EnergyReportDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除例报配置",
+        "tags": [
+          "report"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "report"
+      }
+    },
+    "/api/v1/energy/report/get-list": {
+      "post": {
+        "description": "业务说明：分页查询例报配置，支持按例报类型、周期、接收人筛选。",
+        "operationId": "postApiV1EnergyReportGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReportGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ReportGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取例报配置列表",
+        "tags": [
+          "report"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "report"
+      }
+    },
+    "/api/v1/energy/report/get-one": {
+      "post": {
+        "description": "业务说明：根据配置 ID 查询单个例报配置。",
+        "operationId": "postApiV1EnergyReportGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Report"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取例报配置详情",
+        "tags": [
+          "report"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "report"
+      }
+    },
+    "/api/v1/energy/report/update": {
+      "post": {
+        "description": "业务说明：更新例报配置，支持部分更新。",
+        "operationId": "postApiV1EnergyReportUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Report"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新例报配置",
+        "tags": [
+          "report"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "report"
+      }
+    },
+    "/api/v1/energy/room/check-out": {
+      "post": {
+        "description": "业务说明：执行房间退房，删除该房间绑定用户、软删除水电历史记录并清空预付费状态。",
+        "operationId": "postApiV1EnergyRoomCheck-out",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomCheckOutReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RoomCheckOutResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "房间退房",
+        "tags": [
+          "room"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "roomAccount"
+      }
+    },
+    "/api/v1/energy/room/get-summary": {
+      "post": {
+        "description": "业务说明：统计当前租户下房间账户的余额和入住概况，返回总房间数、欠费房间数以及水电余额汇总。用于预付费管理首页概览。",
+        "operationId": "postApiV1EnergyRoomGet-summary",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RoomAccountSummaryReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/RoomAccountSummaryResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "房间余额汇总统计",
+        "tags": [
+          "room"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "1",
+        "x-oper-type": "view",
+        "x-resource": "roomAccount"
+      }
+    },
+    "/api/v1/energy/schedule/create": {
+      "post": {
+        "description": "业务说明：创建调度计划，登记计划名称、类型、周期、站所、负责人、开工/归结执行人与时间、提醒与注意事项等。",
+        "operationId": "postApiV1EnergyScheduleCreate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Schedule"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "创建调度计划",
+        "tags": [
+          "schedule"
+        ],
+        "x-action": "create",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "create",
+        "x-resource": "schedule"
+      }
+    },
+    "/api/v1/energy/schedule/delete": {
+      "post": {
+        "description": "业务说明：软删除指定调度计划。",
+        "operationId": "postApiV1EnergyScheduleDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除调度计划",
+        "tags": [
+          "schedule"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "delete",
+        "x-resource": "schedule"
+      }
+    },
+    "/api/v1/energy/schedule/get-list": {
+      "post": {
+        "description": "业务说明：分页查询调度计划，支持按计划名称、站所、负责人、状态筛选。",
+        "operationId": "postApiV1EnergyScheduleGet-list",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ScheduleGetListReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ScheduleGetListResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取调度计划列表",
+        "tags": [
+          "schedule"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "schedule"
+      }
+    },
+    "/api/v1/energy/schedule/get-one": {
+      "post": {
+        "description": "业务说明：根据计划 ID 查询单个调度计划。",
+        "operationId": "postApiV1EnergyScheduleGet-one",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WithID"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Schedule"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "获取调度计划详情",
+        "tags": [
+          "schedule"
+        ],
+        "x-action": "view",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "3",
+        "x-oper-type": "view",
+        "x-resource": "schedule"
+      }
+    },
+    "/api/v1/energy/schedule/update": {
+      "post": {
+        "description": "业务说明：更新调度计划，支持部分更新。",
+        "operationId": "postApiV1EnergyScheduleUpdate",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Schedule"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "更新调度计划",
+        "tags": [
+          "schedule"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "运维管理",
+        "x-log-mode": "1",
+        "x-oper-type": "update",
+        "x-resource": "schedule"
+      }
+    },
+    "/api/v1/energy/wxpay/notify": {
+      "post": {
+        "description": "业务说明：接收微信支付结果通知并驱动预付费充值订单入账。该接口无需用户鉴权，依赖微信签名校验保证安全。",
+        "operationId": "postApiV1EnergyWxpayNotify",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "微信支付异步通知回调",
+        "tags": [
+          "wxpay"
+        ],
+        "x-action": "update",
+        "x-auth-type": "admin",
+        "x-group": "能源中心",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "energyWxPay"
+      }
+    }
+  }
+}

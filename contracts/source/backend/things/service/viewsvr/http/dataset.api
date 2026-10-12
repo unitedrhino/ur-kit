@@ -1,0 +1,169 @@
+import "common.api"
+
+@server(
+	group: view/dataset
+	prefix: /api/v1/view/dataset
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service view {
+	@doc(
+	    summary: "新增数据集"
+	    authType: "admin"
+	    description: "业务说明：创建新的可视化数据集，配置数据类型、数据源、脚本和输出字段。用于图表和项目的数据准备。"
+	    resource: "viewDataset"
+	    action: "create"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler create
+	post /create (DatasetCreateReq) returns ()
+	@doc(
+	    summary: "更新数据集"
+	    authType: "admin"
+	    description: "业务说明：更新数据集的配置、动态参数、缓存和字段定义，用于维护数据处理逻辑。"
+	    resource: "viewDataset"
+	    action: "update"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler update
+	post /update (DatasetUpdateReq) returns ()
+	@doc(
+	    summary: "删除数据集"
+	    authType: "admin"
+	    description: "业务说明：删除可视化数据集记录。用于清理不再使用的数据集。"
+	    resource: "viewDataset"
+	    action: "delete"
+	    group: "可视化管理"
+	    recordLogMode: "2"
+	)
+	@handler delete
+	post /delete (DatasetDeleteReq) returns ()
+	@doc(
+	    summary: "获取数据集列表"
+	    authType: "admin"
+	    description: "业务说明：分页查询数据集列表，支持按名称、数据源、类型、分组和标签筛选。用于数据集管理页展示。"
+	    resource: "viewDataset"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getList
+	post /get-list (DatasetGetListReq) returns (DatasetGetListResp)
+	@doc(
+	    summary: "获取数据集详情"
+	    authType: "admin"
+	    description: "业务说明：查询单个数据集的完整配置，用于编辑回显和详情查看。"
+	    resource: "viewDataset"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler getOne
+	post /get-one (DatasetGetOneReq) returns (DatasetView)
+	@doc(
+	    summary: "预览数据集"
+	    authType: "admin"
+	    description: "业务说明：执行数据集预览，返回行数据、字段定义和 ECharts dataset 结构。用于设计器调试数据效果。"
+	    resource: "viewDataset"
+	    action: "view"
+	    group: "可视化管理"
+	    recordLogMode: "1"
+	)
+	@handler preview
+	post /preview (DatasetPreviewReq) returns (DatasetPreviewResp)
+}
+
+type (
+	DatasetCreateReq {
+		Name           string `json:"name"`                            //数据集名称
+		Type           string `json:"type,optional"`                   //类型: raw/sql/procedure/json/js/http/script/iot
+		GroupId        int64  `json:"groupId,string,optional"`         //分组id
+		SourceId       int64  `json:"sourceId,string,optional"`        //数据源id
+		Config         string `json:"config,optional"`                 //类型专属配置JSON
+		RequestScript  string `json:"requestScript,optional"`          //请求前JS脚本
+		ResponseScript string `json:"responseScript,optional"`         //响应后JS脚本
+		DynamicParams  string `json:"dynamicParams,optional"`          //动态参数JSON
+		OutputFields   string `json:"outputFields,optional"`           //输出字段JSON
+		Tags           string `json:"tags,optional"`                   //标签,逗号分隔
+		CacheEnabled   bool   `json:"cacheEnabled,optional"`           //是否启用缓存
+		CacheTTL       int64  `json:"cacheTTL,optional"`               //缓存TTL(秒)
+		Schema         string `json:"schema,optional"`                 //字段定义JSON(兼容)
+		Desc           string `json:"desc,optional"`                   //描述
+	}
+
+	DatasetUpdateReq {
+		ID             int64  `json:"id,string"`                       //数据集id
+		Name           string `json:"name,optional"`                   //数据集名称
+		Type           string `json:"type,optional"`                   //类型
+		GroupId        int64  `json:"groupId,string,optional"`         //分组id
+		SourceId       int64  `json:"sourceId,string,optional"`        //数据源id
+		Config         string `json:"config,optional"`                 //类型专属配置JSON
+		RequestScript  string `json:"requestScript,optional"`          //请求前JS脚本
+		ResponseScript string `json:"responseScript,optional"`         //响应后JS脚本
+		DynamicParams  string `json:"dynamicParams,optional"`          //动态参数JSON
+		OutputFields   string `json:"outputFields,optional"`           //输出字段JSON
+		Tags           string `json:"tags,optional"`                   //标签
+		CacheEnabled   bool   `json:"cacheEnabled,optional"`           //是否启用缓存
+		CacheTTL       int64  `json:"cacheTTL,optional"`               //缓存TTL(秒)
+		Schema         string `json:"schema,optional"`                 //字段定义JSON(兼容)
+		Desc           string `json:"desc,optional"`                   //描述
+	}
+
+	DatasetDeleteReq {
+		ID int64 `json:"id,string"`                  //数据集id
+	}
+
+	DatasetPreviewReq {
+		ID int64 `json:"id,string"`                  //数据集id
+	}
+
+	DatasetGetOneReq {
+		ID int64 `json:"id,string"`                  //数据集id
+	}
+
+	DatasetGetListReq {
+		Page     *PageInfo `json:"page,optional"`            //分页信息
+		Name     string    `json:"name,optional"`            //名称模糊查询
+		SourceId int64     `json:"sourceId,string,optional"` //数据源筛选
+		Type     string    `json:"type,optional"`            //类型筛选
+		GroupId  int64     `json:"groupId,string,optional"`  //分组筛选
+		Tags     string    `json:"tags,optional"`            //标签筛选
+		Scene    string    `json:"scene,optional"`           //场景: manage/editor
+	}
+
+	DatasetView {
+		ID             int64  `json:"id,string,optional"`          //数据集id
+		TenantCode     string `json:"tenantCode,optional"`         //租户编码
+		Name           string `json:"name,optional"`               //数据集名称
+		DisplayName    string `json:"displayName,optional"`        //编辑器展示名称
+		Type           string `json:"type,optional"`               //类型
+		GroupId        int64  `json:"groupId,string,optional"`     //分组id
+		SourceId       int64  `json:"sourceId,string,optional"`    //数据源id
+		SourceName     string `json:"sourceName,optional"`         //数据源名称
+		Config         string `json:"config,optional"`             //类型专属配置JSON
+		RequestScript  string `json:"requestScript,optional"`      //请求前JS脚本
+		ResponseScript string `json:"responseScript,optional"`     //响应后JS脚本
+		DynamicParams  string `json:"dynamicParams,optional"`      //动态参数JSON
+		OutputFields   string `json:"outputFields,optional"`       //输出字段JSON
+		Tags           string `json:"tags,optional"`               //标签
+		CacheEnabled   bool   `json:"cacheEnabled,optional"`       //是否启用缓存
+		CacheTTL       int64  `json:"cacheTTL,optional"`           //缓存TTL(秒)
+		Schema         string `json:"schema,optional"`             //字段定义JSON(兼容)
+		Desc           string `json:"desc,optional"`               //描述
+		CreatedTime    int64  `json:"createdTime,string,optional"` //创建时间
+		UpdatedTime    int64  `json:"updatedTime,string,optional"` //更新时间
+	}
+
+	DatasetGetListResp {
+		List  []*DatasetView `json:"list"`           //数据集列表
+		Total int64          `json:"total,optional"` //总数
+		Num   int64          `json:"num,optional"`   //返回数量
+	}
+
+	DatasetPreviewResp {
+		Rows    string `json:"rows,optional"`    //预览数据JSON（字符串化数组）
+		Fields  string `json:"fields,optional"`  //字段列表JSON（字符串化数组）
+		Dataset string `json:"dataset,optional"` //ECharts dataset格式JSON: {"dimensions":[...],"source":[...]}
+	}
+)

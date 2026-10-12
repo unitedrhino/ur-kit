@@ -1,0 +1,135 @@
+type (
+	// 租户核心信息相关
+	TenantCoreGetListReq {
+		Page  *PageInfo `json:"page,optional"` // 分页信息
+		AppID int64     `json:"appID,string,optional"` //过滤绑定了指定app的租户
+		Code  string    `json:"code,optional"` // 编号
+		Name  string    `json:"name,optional"` // 租户名称
+	}
+	TenantCoreGetListResp {
+		List []*TenantCore `json:"list"` // 列表数据
+		PageResp
+	}
+)
+
+type (
+	// 租户协议相关
+	TenantAgreement {
+		ID      int64  `json:"id,string,optional"` // 编号
+		Code    string `json:"code,optional"` // 编号
+		Name    string `json:"name,optional"` // 协议名称
+		Title   string `json:"title,optional"` //协议标题
+		Content string `json:"content,optional"` //协议内容(只有详情会返回)
+	}
+	TenantAgreementGetListReq {
+		Page *PageInfo `json:"page,optional"` // 分页信息
+	}
+	TenantAgreementGetListResp {
+		List []*TenantAgreement `json:"list"` // 列表数据
+		PageResp
+	}
+)
+
+type (
+	// 租户用户邀请相关
+	TenantUserInviteReq {
+		UserIDs  []int64  `json:"userIDs,string,optional"` // 用户ID列表
+		Accounts []string `json:"accounts,optional"` // 账号列表(userIDs没有取这个)
+		RoleID   int64    `json:"roleID,string,optional"` // 角色ID,默认取这个
+		RoleCode string   `json:"roleCode,optional"` // 角色code,如果有重复的,则只授权第一个角色
+	}
+	TenantUserBatchCreateReq {
+		Users []*UserTenantCore `json:"users"` // 用户列表
+	}
+	UserTenantCore {
+		UserID  int64             `json:"userID,string"` // 用户ID,新增必填
+		Status  int64             `json:"status,optional"` // 租户状态（1:启用(默认)，2:禁用）
+		DeptIDs []int64           `json:"deptIDs,string,optional"` // 部门ID列表,默认展示第一个(可选)
+		RoleIDs []int64           `json:"roleIDs,string,optional"` // 角色ID(新增必填)
+		Tags    map[string]string `json:"tags,optional"` // 私有标签,只有管理员可以修改(可选)
+		PubTags map[string]string `json:"pubTags,optional"` // 公共的标签,用户自己可以修改(可选)
+	}
+	TenantUserGetListReq {
+		Page           *PageInfo `json:"page,optional"` // 分页信息
+		Status         int64     `json:"status,optional"` // 租户状态（1:启用，2:禁用）
+		UserName       string    `json:"userName,optional"` // 用户名
+		Phone          string    `json:"phone,optional"` // 手机号
+		Email          string    `json:"email,optional"` // 邮箱
+		UserIDs        []int64   `json:"userIDs,string,optional"` // 用户ID列表
+		Account        string    `json:"account,optional"` // 账号
+		HasAccessAreas []int64   `json:"hasAccessAreas,optional"` // 拥有访问权限的区域
+		RoleCode       string    `json:"roleCode,optional"` // 角色编码
+		DeptID         int64     `json:"deptID,string,optional"` // 部门ID
+		NickName       string    `json:"nickName,optional"` // 昵称
+		TenantCode     string    `json:"tenantCode,optional"` // 租户代码,(平台管理员查看其他租户下的用户时使用,普通租户只能查看自己的用户)
+		WithRole       bool      `json:"withRole,optional"` //同时返回角色信息
+	}
+	TenantUserGetListResp {
+		List []*UserTenant `json:"list"` // 用户列表
+		PageResp
+	}
+	WithTenantUserID {
+		UserID     int64  `json:"userID,string"` // 用户ID
+		TenantCode string `json:"tenantCode,optional"` // 租户代码,(平台管理员查看其他租户下的用户时使用,普通租户只能查看自己的用户)
+	}
+)
+
+type (
+	// 租户信息相关
+	TenantInfoTransferReq {
+		NewOwnerUserID int64  `json:"newOwnerUserID,string"` // 新的租户所有者用户ID
+		TenantCode     string `json:"tenantCode,optional"`   // 目标租户编码;平台管理员强制转让时必填(需超管权限),企业主自助转让不传(默认当前登录者所在租户)
+	}
+	TenantInfoGetListReq {
+		Page          *PageInfo `json:"page,optional"` // 分页信息,只获取一个则不填
+		Name          string    `json:"name,optional"` // 租户名称
+		Code          string    `json:"code,optional"` // 租户编号
+		TenantCodes   []string  `json:"tenantCodes,optional"` // 指定租户编码列表，非空时按编码精确返回
+		Status        int64     `json:"status,optional"` //租户状态
+		WithOwnerUser bool      `json:"withOwnerUser,optional"` //同时获取管理员核心信息
+		IsGetAll      bool      `json:"isGetAll,optional"` //是否返回所有,只有平台管理员有权限
+		OwnerUserID   int64     `json:"ownerUserID,string,optional"` // 超级管理员id,只有平台管理员有权限
+	}
+	TenantInfoGetListResp {
+		List []*TenantInfo `json:"list"` // 租户列表数据
+		PageResp
+	}
+)
+
+type (
+	// 租户用户邀请码相关
+	TenantUserInviteCodeGenReq {
+		TenantCode string `json:"tenantCode,optional"` // 租户编码（可选，不填取header）
+		RoleID     int64  `json:"roleID,string"` // 分配的角色ID（必填）
+	}
+	TenantUserInviteCodeGenResp {
+		Code           string `json:"code"` // 邀请码
+		ValidUntilTime int64  `json:"validUntilTime,string"` // 有效期截止时间（毫秒时间戳）
+		RoleID         int64  `json:"roleID,string"` // 角色ID
+	}
+	TenantUserInviteSendReq {
+		TenantCode     string   `json:"tenantCode,optional"` // 租户编码（可选，不填取header）
+		RoleID         int64    `json:"roleID,string"` // 分配的角色ID（必填）
+		Addresses      []string `json:"addresses"` // 邀请地址列表（邮箱或手机号，自动识别类型）
+		ValidUntilTime int64    `json:"validUntilTime,string,optional"` // 有效期到（毫秒时间戳，不填使用默认值）
+	}
+	TenantUserInvite {
+		InviteType     string `json:"inviteType"` // 邀请类型：email（邮件）、phone（手机号）
+		Address        string `json:"address"` // 邮箱地址或手机号
+		RoleID         int64  `json:"roleID,string"` // 角色ID
+		ValidUntilTime int64  `json:"validUntilTime,string"` // 有效期到（毫秒时间戳）
+		CreatedTime    int64  `json:"createdTime,string"` // 创建时间（毫秒时间戳）
+	}
+	TenantUserInvitePendingGetListReq {
+		TenantCode string `json:"tenantCode,optional"` // 租户编码（可选，不填取header）
+		InviteType string `json:"inviteType,optional"` // 邀请类型筛选（可选：email/phone，不填返回全部）
+	}
+	TenantUserInvitePendingGetListResp {
+		List []*TenantUserInvite `json:"list"` // 待处理邀请列表
+	}
+	TenantUserInvitePendingDeleteReq {
+		TenantCode string `json:"tenantCode,optional"` // 租户编码（可选，不填取header）
+		InviteType string `json:"inviteType"` // 邀请类型：email/phone
+		Address    string `json:"address"` // 邮箱地址或手机号
+	}
+)

@@ -1,0 +1,26 @@
+info(
+	title: "用户管理模块"
+	desc: "用户管理相关接口，包括创建账号，登录，获取验证码，获取用户列表，获取单个用户信息，更新用户信息，删除用户"
+	author: "L"
+	email: "174805676@qq.com"
+	version: "v0.1.0"
+)
+//import "common.api"  //公共结构体定义
+//import "system.api"
+
+
+import "user/info.api" //用户相关功能
+import "user/self/resource/action.api" //用户资源动作权限相关接口
+import "user/self/app.api" //用户应用相关接口
+import "user/self/auth.api" //用户认证相关接口（登录、注册、验证码）
+import "user/self/message.api" //用户消息相关接口
+import "user/self/menu.api" //用户菜单相关接口
+import "user/self/profile.api" //用户配置相关接口
+import "user/self/tenant.api" //用户操作租户相关功能
+import "user/self/types.api" //用户自相关公共类型
+import "user/self/user.api" //用户信息相关接口
+import "user/self/accessToken.api" //用户访问令牌相关接口
+import "user/self/thirdparty.api" //第三方客户端绑定相关接口
+import "user/tenant.api" //用户操作租户相关功能
+import "user/dept.api" //用户相关功能
+import "user/data.api" //用户数据权限相关功能

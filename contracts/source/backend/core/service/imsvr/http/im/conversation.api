@@ -1,0 +1,173 @@
+info(
+	title: "IM 会话管理"
+	desc: "即时通讯会话的创建、成员管理、设置与查询"
+	author: "yl"
+	email: "603785348@qq.com"
+	version: "v1"
+)
+
+@server(
+	group: im/conversation
+	prefix: /api/v1/im
+	accessCodePrefix: "imConversation"
+	accessNamePrefix: "IM会话"
+	accessGroup: "IM即时通讯"
+	middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+	@doc(
+		summary: "创建会话"
+		description: "业务说明：创建单聊或群聊会话，指定参与者列表。单聊会话按参与者去重，群聊可设置会话名称。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler create
+	post /conversation/create (ImConversationCreateReq) returns (ImConversationCreateResp)
+
+	@doc(
+		summary: "创建 AI 会话"
+		description: "业务说明：创建当前用户与指定 AI 分身（Clone）的单聊会话，已存在时复用原会话。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "create"
+		recordLogMode: "1"
+	)
+	@handler createAI
+	post /conversation/create-ai (ImConversationCreateAIReq) returns (ImConversationCreateResp)
+
+	@doc(
+		summary: "群聊邀请成员"
+		description: "业务说明：向已有群聊会话中邀请新成员，支持一次邀请多个参与者。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler addMembers
+	post /conversation/add-members (ImConversationAddMembersReq) returns (ImConversationAddMembersResp)
+
+	@doc(
+		summary: "群聊移除/退出成员"
+		description: "业务说明：将指定成员移出群聊，或成员主动退出群聊。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler removeMember
+	post /conversation/remove-member (ImConversationRemoveMemberReq)
+
+	@doc(
+		summary: "群聊转让群主"
+		description: "业务说明：群主将会话所有权转让给其他成员。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler transferOwner
+	post /conversation/transfer-owner (ImConversationTransferOwnerReq)
+
+	@doc(
+		summary: "群聊禁言/取消禁言成员"
+		description: "业务说明：群主或管理员对群成员执行禁言或取消禁言。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler muteMember
+	post /conversation/mute-member (ImConversationMuteMemberReq)
+
+	@doc(
+		summary: "群聊解散"
+		description: "业务说明：群主解散群聊会话，解散后所有成员不可再发送消息。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "delete"
+		recordLogMode: "1"
+	)
+	@handler disband
+	post /conversation/disband (ImConversationDisbandReq)
+
+	@doc(
+		summary: "群聊设置/取消管理员"
+		description: "业务说明：群主设置或取消群成员的管理员身份。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler setAdmin
+	post /conversation/set-admin (ImConversationSetAdminReq)
+
+	@doc(
+		summary: "获取会话成员列表"
+		description: "业务说明：查询会话全部成员及其角色、禁言状态，用户基础信息（昵称、头像）由 apisvr 富化返回。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getMembers
+	post /conversation/get-members (ImConversationGetMembersReq) returns (ImConversationGetMembersResp)
+
+	@doc(
+		summary: "更新会话设置"
+		description: "业务说明：更新当前用户在会话中的个人设置，包括置顶、免打扰、从会话列表删除。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "update"
+		recordLogMode: "1"
+	)
+	@handler updateSetting
+	post /conversation/update-setting (ImConversationUpdateSettingReq)
+
+	@doc(
+		summary: "获取会话列表"
+		description: "业务说明：分页查询当前用户的会话列表，含最后一条消息摘要、未读数、置顶/免打扰状态。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getList
+	post /conversation/get-list (ImConversationGetListReq) returns (ImConversationGetListResp)
+
+	@doc(
+		summary: "按参与者查询单聊会话"
+		description: "业务说明：按两个用户 ID 查询其单聊会话，用于发起单聊前定位已有会话。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler getByParticipants
+	post /conversation/get-by-participants (ImConversationGetByParticipantsReq) returns (ImConversationInfo)
+
+	@doc(
+		summary: "获取会话详情"
+		description: "业务说明：按会话 ID 查询会话详情，含未读数与个人设置状态。"
+		authType: "all"
+		group: "im/conversation"
+		resource: "im/conversation"
+		action: "view"
+		recordLogMode: "3"
+	)
+	@handler get
+	post /conversation/get (ImConversationGetReq) returns (ImConversationGetResp)
+}

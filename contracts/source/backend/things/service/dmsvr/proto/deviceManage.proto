@@ -1,0 +1,721 @@
+//--------------------设备管理服务--------------------
+syntax = "proto3";
+option go_package = "/dm";
+package dm;
+
+import "google/protobuf/wrappers.proto";
+import "dmShare.proto";
+import "otaManage.proto";
+
+// DeviceManageEmpty 空消息
+// 定义一个空消息类型，用于不需要参数或返回值的 RPC 方法
+message DeviceManageEmpty {
+}
+
+// DeviceManageWithID 带ID的消息
+// 定义只包含ID的消息类型
+message DeviceManageWithID{
+  int64 id = 1; // ID值
+}
+
+// DeviceManageWithIDCode 带ID和Code的消息
+// 定义包含ID和编码的消息类型
+message DeviceManageWithIDCode{
+  int64  id   = 1; // ID值
+  string code = 2; // Code值
+}
+
+//设备管理
+service DeviceManage {
+  //鉴定是否是root账号(提供给mqtt broker)
+  rpc rootCheck(RootCheckReq)           returns (DeviceManageEmpty);
+  //设备登录认证
+  rpc loginAuth(LoginAuthReq)           returns (DeviceManageEmpty);
+  //设备操作认证
+  rpc accessAuth(AccessAuthReq)         returns (DeviceManageEmpty);
+  //设备动态注册
+  rpc deviceRegister(DeviceRegisterReq) returns (DeviceRegisterResp);
+  //新增设备
+  rpc deviceInfoCreate(DeviceInfo)     returns (DeviceManageEmpty);
+  //更新设备
+  rpc deviceInfoUpdate(DeviceInfo)     returns (DeviceManageEmpty);
+  rpc deviceOnlineBatchFix(deviceOnlineBatchFixReq)returns (DeviceManageEmpty);
+  //删除设备
+  rpc deviceInfoDelete(DeviceInfoDeleteReq)     returns (DeviceManageEmpty);
+  //获取设备信息列表
+  rpc deviceInfoGetList(DeviceInfoGetListReq)     returns (DeviceInfoGetListResp);
+  //批量更新设备状态
+  rpc DeviceInfoBatchUpdate(DeviceInfoBatchUpdateReq)     returns (DeviceManageEmpty);
+  //获取设备信息详情
+  rpc deviceInfoGetOne(DeviceInfoGetOneReq)     returns (DeviceInfo);
+  rpc deviceInfoBind(DeviceInfoBindReq)returns(DeviceManageEmpty);
+  rpc deviceBindTokenGetOne(DeviceBindTokenGetOneReq)returns(DeviceBindTokenInfo);
+  rpc deviceBindTokenCreate(DeviceManageEmpty)returns(DeviceBindTokenInfo);
+  rpc deviceInfoBatchBind(DeviceInfoBatchBindReq)returns(DeviceInfoBatchBindResp);//批量绑定
+  rpc deviceInfoCanBind(DeviceInfoCanBindReq)returns(DeviceInfoCanBindResp);
+  rpc deviceInfoUnbind(DeviceInfoUnbindReq)returns(DeviceManageEmpty);
+  rpc deviceTransfer(DeviceTransferReq)returns(DeviceManageEmpty);
+  rpc deviceReset(DeviceResetReq)returns(DeviceManageEmpty);//设备重置
+  rpc deviceMove(DeviceMoveReq)returns(DeviceManageEmpty);//将设备信息迁移到新的设备中
+  //设备智能体分身创建：clone_id=0 时创建或复用分身并绑定（动态注册等未走绑定流程的设备）
+  rpc deviceCloneCreate(DeviceInfoGetOneReq) returns (DeviceCloneCreateResp);
+
+  rpc deviceModuleVersionGetOne(DeviceModuleVersionGetOneReq)returns (DeviceModuleVersion);
+  rpc deviceModuleVersionGetList(DeviceModuleVersionGetListReq)returns (DeviceModuleVersionGetListResp);
+
+  //绑定网关下子设备设备
+  rpc deviceGatewayBatchCreate(DeviceGatewayBatchCreateReq)     returns (DeviceManageEmpty);
+  //绑定网关下子设备设备
+  rpc deviceGatewayBatchUpdate(DeviceGatewayBatchSaveReq)     returns (DeviceManageEmpty);
+  //获取绑定信息的设备信息列表
+  rpc deviceGatewayGetList(DeviceGatewayGetListReq)     returns (DeviceGatewayGetListResp);
+  //删除网关下子设备
+  rpc deviceGatewayBatchDelete(DeviceGatewayBatchSaveReq)     returns (DeviceManageEmpty);
+  //设备计数
+  rpc deviceInfoCount(DeviceInfoCountReq) returns (DeviceInfoCount);
+  //设备类型
+  rpc deviceTypeCount(DeviceTypeCountReq) returns (DeviceTypeCountResp);
+
+  rpc deviceCount(DeviceCountReq) returns (DeviceCountResp);
+
+  rpc deviceProfileGetOne(DeviceProfileGetOneReq)returns(DeviceProfile);
+  rpc deviceProfileDelete(DeviceProfileGetOneReq)returns(DeviceManageEmpty);
+  rpc deviceProfileUpdate(DeviceProfile)returns(DeviceManageEmpty);
+  rpc deviceProfileGetList(DeviceProfileGetListReq)returns(DeviceProfileGetListResp);
+
+  //更新设备物模型
+  rpc deviceSchemaUpdate(DeviceSchema)returns (DeviceManageEmpty);
+  //新增设备
+  rpc deviceSchemaCreate(DeviceSchema)     returns (DeviceManageEmpty);
+  //批量新增物模型,只新增没有的,已有的不处理
+  rpc deviceSchemaBatchCreate(DeviceSchemaBatchCreateReq)     returns (DeviceManageEmpty);
+  //删除设备物模型
+  rpc deviceSchemaBatchDelete(DeviceSchemaBatchDeleteReq)     returns (DeviceManageEmpty);
+  //获取设备物模型列表
+  rpc deviceSchemaGetList(DeviceSchemaGetListReq)     returns (DeviceSchemaGetListResp);
+  rpc deviceSchemaTslGetOne(DeviceSchemaTslGetOneReq)     returns (DeviceSchemaTslGetOneResp);
+
+  //将设备加到多个分组中
+  rpc deviceGroupBatchCreate(DeviceGroupBatchSaveReq)     returns (DeviceManageEmpty);
+  //更新设备所在分组
+  rpc deviceGroupBatchUpdate(DeviceGroupBatchSaveReq)     returns (DeviceManageEmpty);
+  //删除设备所在分组
+  rpc deviceGroupBatchDelete(DeviceGroupBatchSaveReq)     returns (DeviceManageEmpty);
+  //设备升级,获取升级包手动升级
+  rpc deviceOtaUpgrade(DeviceOtaUpgradeReq) returns(DeviceOtaUpgradeResp);
+}
+
+// DeviceError 设备错误信息
+message DeviceError{
+  string productID  = 1; //产品id
+  string deviceName = 2; //设备名称
+  int64  code       = 3; //错误码
+  string msg        = 4; //错误信息
+}
+
+// deviceOnlineBatchFix 设备在线状态修正
+message deviceOnlineBatchFix{
+  DeviceCore device    = 1; //设备信息
+  int64      isOnline  = 2; //在线状态
+  int64      connectAt = 3; //连接时间
+}
+
+// RootCheckReq Root账号验证请求
+message RootCheckReq{
+  string username    = 1; //用户名
+  string password    = 2; //密码
+  string clientID    = 3; //clientID
+  string ip          = 4; //访问的ip地址
+  bytes  certificate = 5; //客户端证书
+}
+
+message LoginAuthReq {
+  string protocolType = 1; //协议类型: iThings,iThings-thingsboard
+  string username = 2;     //用户名
+  string password = 3;     //密码
+  string clientID = 4;     //clientID
+  string ip = 5;           //访问的ip地址
+  bytes certificate = 6;   //客户端证书
+}
+
+message AccessAuthReq {
+  string protocolType = 1; //协议类型: iThings,iThings-thingsboard
+  string username = 2;     //用户名
+  string topic = 3;        //主题
+  string clientID = 4;     //clientID
+  string access = 5;       //操作
+  string ip = 6;           //访问的ip地址
+}
+
+message DeviceRegisterReq{
+  string productID = 1;   //产品id
+  string deviceName = 2;  //设备名称
+  int64 nonce = 3;        //随机数
+  int64 timestamp = 4;    //秒级时间戳
+  string signature = 5;   //签名信息
+  string retEnc = 6;      //返回使用的加密方式: aes128cbc(默认) aes128ecb
+  string tenantCode = 7;  //租户号（可选）：产品为common租户或租户号与产品一致时生效
+  string deviceAlias = 8;       //设备别名（可选）：注册成功后写入设备别名，仅新注册及未激活设备生效
+  string remoteAddr = 9;        //远程访问地址（可选）：注册成功后写入设备远程访问地址，仅新注册及未激活设备生效
+  map<string,string> tags = 10; //设备标签（可选）：注册成功后写入设备标签，仅新注册及未激活设备生效
+}
+
+message DeviceRegisterResp{
+  int64 len = 1;       //payload加密前信息的长度
+  /*
+  加密过程将原始 JSON 格式的 payload 转为字符串后进行 AES 加密，再进行 base64 加密。AES 加密算法为 CBC 模式，密钥长度128，取 productSecret 前16位，偏移量为长度16的字符“0”。
+  原始 payload 内容说明：
+  key                value               描述
+  encryptionType     1              加密类型，1表示证书认证，2表示签名认证。
+  psk                1239           设备密钥，当产品认证类型为签名认证时有此参数
+  clientCert         -              设备证书文件字符串格式，当产品认证类型为证书认证时有此参数。
+  clientKey          -              设备私钥文件字符串格式，当产品认证类型为证书认证时有此参数。
+  */
+  string payload = 2;
+}
+
+// DeviceInfo 设备信息
+// 定义设备的详细信息
+message DeviceInfo {
+  int64                       id                 = 34; // 设备ID
+  string                      tenantCode         = 26; //租户号,只有default租户能查到这个字段
+  string                      productID          = 1; //产品id 只读
+  int64                       projectID          = 2; //项目id 只读
+  int64                       areaID             = 3; //项目区域id
+  string                      areaIDPath         = 42; //区域id 路径
+  string                      productName        = 4; //产品名称 只读
+  string                      deviceName         = 5; //设备名称 读写
+  int64                       createdTime        = 6; //创建时间 只读
+  string                      secret             = 7; //设备秘钥 只读
+  string                      cert               = 8; // 设备证书  只读
+  string                      imei               = 9; //IMEI号信息 只读
+  string                      mac                = 10; //MAC号信息 只读
+  google.protobuf.StringValue version            = 11; // 固件版本  读写
+  string                      hardInfo           = 12; //模组硬件型号 只读
+  string                      softInfo           = 13; //模组软件版本 只读
+  Point                       Position           = 14; //设备定位,默认百度坐标系
+  google.protobuf.StringValue address            = 15; // 所在地址 读写
+  google.protobuf.StringValue adcode             = 45; // 地区编码 读写
+  map<string, string>         tags               = 16; //设备标签
+  int64                       isOnline           = 17; //在线状态 1在线 2离线，只读
+  int64                       firstLogin         = 18; //激活时间 只读
+  int64                       firstBind          = 37; //第一次绑定的时间
+  int64                       lastBind           = 50; //最后一次绑定时间
+  int64                       lastLogin          = 19; //最后上线时间 只读
+  int64                       lastOffline        = 62; //最后离线时间 只读
+  int64                       logLevel           = 20; // 日志级别:1)关闭 2)错误 3)告警 4)信息 5)调试  读写
+  google.protobuf.StringValue deviceAlias        = 21; //设备别名 读写
+  int64                       mobileOperator     = 22; //移动运营商:1)无 2)移动 3)联通 4)电信 5:广电
+  google.protobuf.StringValue phone              = 23; //手机号
+  google.protobuf.StringValue iccid              = 24; //SIM卡卡号
+  map<string,string>          schemaAlias        = 25; //设备物模型别名,如果是结构体类型则key为xxx.xxx
+  google.protobuf.Int64Value  rssi               = 27; // 设备信号（信号极好[-55— 0]，信号好[-70— -55]，信号一般[-85— -70]，信号差[-100— -85]）
+  int64                       ratedPower         = 28; // 额定功率:单位w/h
+  map<string,string>          protocolConf       = 29; //协议配置
+  map<string,string>          subProtocolConf    = 51; //子协议配置
+  int64                       status             = 30 ; //设备状态 1-未激活，2-在线，3-离线 4-异常(频繁上下线,告警中) 5-设备到期
+  int64                       isEnable           = 31; //是否启用
+  int64                       deviceType         = 33; //设备类型:1:设备,2:网关,3:子设备
+  int64                       netType            = 35; //网络类型
+  IDPathWithUpdate            distributor        = 36; //过滤分销商的数据
+  google.protobuf.Int64Value  expTime            = 38; //到期时间,如果为0,则不限制
+  int64                       NeedConfirmJobID   = 39; //需要app确认升级的任务ID,为0是没有
+  string                      NeedConfirmVersion = 40; //待确认升级的版本
+  int64                       userID             = 41; //拥有者的用户ID
+  string                      productImg         = 43; //产品图片
+  int64                       categoryID         = 44; //产品品类
+  string                      lastIp             = 49; //最后登录的ip,只读
+  string                      lastLocalIp        = 63; //最后的局域网ip,只读
+  google.protobuf.StringValue desc               = 47; //描述
+  IDPathWithUpdate            dept               = 52; //过滤分销商的数据
+  DeviceInfo                  Gateway            = 46; //子设备绑定的网关
+  int64                       sort               = 53; //排序
+  string                      groupPurpose       = 58; //更新的时候使用,将设备该用途下的分组进行更新
+  repeated int64              groupIDs           = 59; //如果要更新分组,必须填写groupPurpose
+  map<string,IDsInfo>         BelongGroup        = 61; //key是group的purpose, value是里面包含的分组id
+
+  string deviceImg         = 54; //设备图片
+  bool   isUpdateDeviceImg = 55; //只有这个参数为true的时候才会更新设备图片,传参为图片的file path
+
+  string file         = 56; //设备文件
+  bool   isUpdateFile = 57; //只有这个参数为true的时候才会更新设备文件,传参为文件的file path
+  int64  clone_id     = 64; //绑定的 Clone ID，0 表示未绑定
+  string remoteAddr   = 65; //远程访问地址
+}
+
+// DeviceInfoDeleteReq 设备删除请求
+message DeviceInfoDeleteReq{
+  string productID  = 1; //产品id
+  string deviceName = 2; //设备名称
+}
+
+// DeviceInfoGetListReq 设备列表查询请求
+message DeviceInfoGetListReq{
+  PageInfo            page               = 1; //分页信息 只获取一个则不填
+  string              productID          = 2; //过滤条件: 产品id
+  repeated string     productIDs         = 23; //过滤条件: 产品id
+  string              deviceName         = 3; //过滤条件:模糊查询 设备名
+  repeated string     deviceNames        = 4; //过滤条件:精准查询 设备名
+  string              deviceNameOrAlias  = 58; //过滤条件:模糊查询 设备名或别名
+  map<string, string> tags               = 5; //key tag过滤查询,非模糊查询 为tag的名,value为tag对应的值
+  map<string, string> tagsLike           = 46; //key tag过滤查询,模糊查询 为tag的名,value为tag对应的值
+  int64               range              = 6; //过滤条件:取距离坐标点固定范围内的设备
+  Point               Position           = 7; //设备定位,默认百度坐标系
+  int64               areaID             = 36; //区域ID
+  repeated int64      areaIDs            = 8; //区域ids
+  string              areaIDPath         = 32; //区域路径过滤
+  repeated string     areaIDPaths        = 34; //区域路径过滤
+  string              deviceAlias        = 9; //过滤条件:模糊查询 设备别名
+  int64               isOnline           = 10; //在线状态过滤 1在线 2离线
+  int64               productCategoryID  = 11; //产品品类id
+  string              productCategoryCode = 59; //品类编码
+  repeated int64      productCategoryIDs = 33; //产品品类id
+  repeated DeviceCore devices            = 12; //设备列表
+  int64               withShared         = 13; //过滤分享的设备(这里只获取分享的设备) 1: 同时获取分享的设备 2:只获取分享的设备
+  int64               withCollect        = 24; //过滤收藏的设备(这里只获取收藏的设备) 1: 同时获取收藏的设备 2:只获取收藏的设备
+  int64               netType            = 25; //通讯方式:1:其他,2:wi-fi,3:2G/3G/4G,4:5G,5:BLE,6:LoRaWAN
+  repeated int64      netTypes           = 60; //通讯方式列表:支持按一个或多个网络类型过滤
+  string              tenantCode         = 14; //租户过滤
+  repeated string     versions           = 15; //版本列表
+  string              notVersion         = 39; //非版本
+  int64               deviceType         = 16; //过滤设备类型:0:全部,1:设备,2:网关,3:子设备
+  repeated int64      deviceTypes        = 21; //设备类型列表
+  DeviceCore          gateway            = 17; //获取网关下子设备列表
+  int64               groupID            = 18; //分组ID
+  repeated int64      groupIDs           = 55; //分组ID列表
+  string              groupIDPath        = 56; //分组路径
+  repeated string     groupIDPaths       = 57; //分组路径列表
+  int64               notGroupID         = 19; //非分组ID
+  int64               parentGroupID      = 42; //父分组ID
+  string              groupPurpose       = 45; //设备分组用途 不填默认为default
+  string              groupName          = 43; //模糊查询
+  int64               notAreaID          = 29; //非区域ID
+  IDPath              distributor        = 20; //过滤分销商的数据
+  int64               status             = 22; //设备状态
+  repeated int64      statuses           = 35; //设备状态列表
+  CompareInt64        ratedPower         = 28; // 额定功率:单位w/h
+  int64               hasOwner           = 30; //是否被人拥有
+  int64               userID             = 31; //用户id查询
+  CompareInt64        expTime            = 38; //到期时间
+  string              iccid              = 40; //SIM卡卡号
+  bool                withGateway        = 41; //同时返回子设备的网关
+  string              protocolCode       = 51; //协议查询
+  CompareInt64        rssi               = 52; //信号强度
+  IDPath              dept               = 53; //过滤分销商的数据
+  map<string,Compare> property           = 54; //设备最新属性过滤,key为属性的id,如果是结构体则key为 aaa.bbb 数组为aaa.1
+}
+
+// DeviceInfoGetListResp 设备列表查询响应
+message DeviceInfoGetListResp{
+  repeated DeviceInfo list  = 1; //设备信息
+  int64               total = 2; //总数(只有分页的时候会返回)
+}
+
+// DeviceInfoBatchUpdateReq 批量更新设备状态请求
+message DeviceInfoBatchUpdateReq {
+  repeated DeviceCore devices             = 1; //设备列表
+  CompareInt64        FilterDistributorID = 2; //分销商过滤
+
+  int64  areaID      = 4; //项目区域id
+  IDPath distributor = 20; //分销商的数据
+  int64  ratedPower  = 28; // 额定功率:单位w/h
+}
+
+// DeviceInfoGetOneReq 设备详情查询请求
+message DeviceInfoGetOneReq{
+  string productID   = 1; //产品id
+  string deviceName  = 2; //设备名称
+  bool   withGateway = 3; //同时返回子设备的网关
+}
+
+// DeviceCloneCreateResp 设备智能体分身创建响应
+message DeviceCloneCreateResp{
+  int64 cloneID = 1; //创建或复用的分身ID
+}
+
+
+// DeviceInfoBindReq 设备绑定请求
+message DeviceInfoBindReq{
+  DeviceCore         device          = 1; //设备信息
+  int64              areaID          = 2; //区域ID
+  string             token           = 3; //配网token
+  bool               isIgnoreOffline = 4; //是否忽略设备离线
+  bool               isIgnoreHook    = 5; //是否忽略Hook扩展调用
+  map<string,string> expand          = 7; //拓展字段
+}
+
+// DeviceBindTokenGetOneReq 绑定Token读取请求
+message DeviceBindTokenGetOneReq{
+  string token = 1; //配网token
+}
+
+// DeviceBindTokenInfo 绑定Token信息
+message DeviceBindTokenInfo{
+  string token  = 1; //配网token
+  int64  status = 2; //token状态 1:初始状态 2: 设备已上报
+}
+
+// DeviceInfoBatchBindReq 批量绑定设备请求
+message DeviceInfoBatchBindReq{
+  repeated DeviceCore devices = 1; //设备列表
+  int64               areaID  = 2; //区域ID
+}
+
+// DeviceInfoBatchBindResp 批量绑定设备响应
+message DeviceInfoBatchBindResp{
+  repeated DeviceError errs = 1; //错误列表
+}
+
+// DeviceInfoCanBindReq 设备是否可绑定请求
+message DeviceInfoCanBindReq{
+  DeviceCore device = 1; //设备信息
+}
+
+// DeviceInfoCanBindResp 设备是否可绑定响应
+message DeviceInfoCanBindResp{
+  string status    = 1; //绑定状态：canBind-可绑定/selfBound-当前用户已绑定/shared-分享拥有访问关系/otherBound-被其他用户绑定
+  bool   canBind   = 2; //是否可继续绑定
+  int64  projectID = 3; //当前用户自己的设备所在项目（selfBound 时返回）
+  bool   isShare   = 4; //当前用户是否通过分享拥有设备访问关系（shared 时返回）
+}
+
+// DeviceInfoUnbindReq 设备解绑请求
+message DeviceInfoUnbindReq{
+  string productID  = 1; //产品id
+  string deviceName = 2; //设备名称
+  /*
+   中绑定,强制解绑参数
+   对参数（deviceName、nonce、productID、timestamp）按字典序升序排序。
+   将以上参数，按参数名称 = 参数值 & 参数名称 = 参数值拼接成字符串, 如："deviceName=xxx&nonce=2125656451&productID=xxx&timestamp=1687525491"。
+   使用 HMAC-sha1 算法对上一步中获得的字符串进行计算，密钥取secretType   取设备的物模型密码类型的属性。
+   将生成的结果使用 Base64 进行编码，即可获得最终的签名串放入 signature。
+   */
+  string secretType = 3; //采用秘钥的类型
+  string signature  = 4; //签名
+  int64  timestamp  = 5; //秒时间戳
+  string signType   = 6; //hmacsha256 hmacsha1 hmacmd5(默认)
+  int64  nonce      = 7; //随机数
+}
+
+// deviceOnlineBatchFixReq 批量修正设备在线状态请求
+message deviceOnlineBatchFixReq{
+  repeated deviceOnlineBatchFix devices = 1; //设备列表
+}
+
+// DeviceProfile 设备配置文件
+message DeviceProfile{
+  DeviceCore device = 1; //设备信息
+  string     code   = 2; //配置代码
+  string     params = 3; //配置参数
+}
+
+// DeviceProfileGetOneReq 设备配置文件读取请求
+message DeviceProfileGetOneReq{
+  DeviceCore device = 1; //设备信息
+  string     code   = 2; //配置代码
+}
+
+// DeviceProfileGetListReq 设备配置文件列表查询请求
+message DeviceProfileGetListReq{
+  DeviceCore      device = 1; //设备信息
+  repeated string codes  = 2; //配置代码列表
+}
+
+// DeviceProfileGetListResp 设备配置文件列表查询响应
+message DeviceProfileGetListResp{
+  repeated DeviceProfile profiles = 1; //配置文件列表
+}
+
+// DeviceSchema 设备物模型
+message DeviceSchema{
+  string                      productID         = 1; //产品id  必填
+  string                      deviceName        = 17; //设备ID 必填
+  int64                       tag               = 3; //物模型标签 1:自定义 2:可选 3:必选  必选不可删除
+  int64                       type              = 2; //物模型类型 1:property属性 2:event事件 3:action行为
+  string                      identifier        = 4; //标识符
+  google.protobuf.StringValue name              = 5; //功能名称
+  google.protobuf.StringValue desc              = 6; //描述
+  int64                       required          = 7; //是否必须 1:是 2:否
+  int64                       isCanSceneLinkage = 8; //是否支持场景联动控制
+  int64                       funcGroup         = 14; // 功能分类: 1:普通功能 2:系统功能
+  // int64 userPerm =15; //用户权限操作: 1:r(只读) 3:rw(可读可写)
+  // int64 controlMode = 16; //控制模式: 1: 可以群控,可以单控  2:只能单控
+  // int64 recordMode = 10; // 1(默认) 记录历史记录 2 只记录差异值 3 不记录历史记录
+  // int64 isPassword = 18; // 是否是密码类型,密码类型需要加掩码
+  /*
+   affordance 各功能类型的详细参数定义(JSON)。由字段 type 决定其结构:
+
+   1) type=1 PropertyAffordance (属性能力)
+   - isUseShadow: bool  是否使用设备影子。true: 设备离线时写入影子，在线直发
+   - isNoRecord:  bool  是否不存储历史记录。true: 不落库，仅保留最新
+   - define:      object 数据定义。描述该属性的数据类型、取值范围/枚举、单位、步进等
+   - mode:        int    读写类型。1: r(只读) 2: rw(可读可写)
+   - JSON 示例:
+   {"isUseShadow":true,"isNoRecord":false,"define":{"type":"int","min":0,"max":100,"unit":"%"},"mode":2}
+
+   2) type=2 EventAffordance (事件能力)
+   - type:   string  事件类型。取值: info(信息) / alert(告警) / fault(故障)
+   - params: object  事件参数。键为参数名，值为参数定义(同 Define)
+   - JSON 示例:
+   {"type":"alert","params":{"code":{"type":"string"},"level":{"type":"enum","enum":["L1","L2","L3"]}}}
+
+   3) type=3 ActionAffordance (行为能力)
+   - dir:    string  调用方向。如 up/down，表示触发/响应方向
+   - input:  object  调用入参。键为参数名，值为参数定义(同 Define)
+   - output: object  返回出参。键为参数名，值为参数定义(同 Define)
+   - JSON 示例:
+   {"dir":"down","input":{"switch":{"type":"bool"}},"output":{"result":{"type":"int","enum":[0,1]}}}
+
+   参考: things/share/domain/schema/affordance.go
+   */
+  string                      affordance = 19;
+  google.protobuf.StringValue unit       = 9; //单位
+}
+
+// DeviceSchemaUpdateReq 设备物模型更新请求（使用 DeviceSchema）
+
+// DeviceSchemaCreateReq 设备物模型创建请求（使用 DeviceSchema）
+
+// DeviceSchemaBatchCreateReq 批量创建设备物模型请求
+message DeviceSchemaBatchCreateReq{
+  string                productID   = 1; //产品ID
+  string                deviceName  = 3; //设备名称
+  repeated DeviceSchema list        = 2; //物模型信息
+  repeated string       identifiers = 4; //要导入的标识符列表
+}
+
+// DeviceSchemaBatchDeleteReq 批量删除设备物模型请求
+message DeviceSchemaBatchDeleteReq{
+  string          productID   = 1; //产品id  如果为空返回所有产品的信息
+  string          deviceName  = 3; //设备名称
+  repeated string identifiers = 2; //标识符
+}
+
+// DeviceSchemaGetListReq 设备物模型列表查询请求
+message DeviceSchemaGetListReq{
+  PageInfo        page              = 1; //分页信息 只获取一个则不填
+  string          productID         = 2; //产品id  必填
+  string          deviceName        = 19; //设备名称
+  int64           type              = 3; //物模型类型 1:property属性 2:event事件 3:action行为
+  repeated int64  types             = 17; //物模型类型列表
+  int64           tag               = 4; //过滤条件: 物模型标签 1:自定义 2:可选 3:必选
+  repeated string identifiers       = 5; //过滤标识符列表
+  string          name              = 6; //标识符名字过滤
+  int64           isCanSceneLinkage = 8; //是否支持场景联动控制
+  int64           funcGroup         = 14; // 功能分类: 1:普通功能 2:系统功能
+  int64           userPerm          = 15; //用户权限操作: 1:r(只读) 3:rw(可读可写)
+  string          propertyMode      = 16; //属性类型可用 读写类型: 1:r(只读) 2:rw(可读可写)
+  int64           controlMode       = 18; //控制模式: 1: 可以群控,可以单控  2:只能单控
+  bool            withProductSchema = 20; //同时获取产品物模型
+}
+
+// DeviceSchemaGetListResp 设备物模型列表查询响应
+message DeviceSchemaGetListResp{
+  repeated DeviceSchema list  = 1; //物模型列表
+  int64                 total = 2; //总数(只有分页的时候会返回)
+}
+
+// DeviceSchemaTslGetOneReq 设备物模型TSL读取请求
+message DeviceSchemaTslGetOneReq{
+  string productID         = 1; //产品id
+  string deviceName        = 17; //设备ID 必填
+  bool   withProductSchema = 20; //同时获取产品物模型
+}
+
+// DeviceSchemaTslGetOneResp 设备物模型TSL读取响应
+message DeviceSchemaTslGetOneResp{
+  string tsl = 1; //物模型tsl
+}
+
+// DeviceGroupBatchSaveReq 设备分组保存请求
+message DeviceGroupBatchSaveReq{
+  string         productID  = 1; //产品id
+  string         deviceName = 2; //设备ID 必填
+  repeated int64 groupIDs   = 3; //分组ID列表
+  string         purpose    = 4; //用途
+}
+
+// DeviceGatewaySign 网关签名
+message DeviceGatewaySign{
+  /*
+   子设备绑定签名串。 签名算法：
+   1. 签名原串，将产品 ID 设备名称，随机数，时间戳拼接：text=${product_id}${device_name};${random};${expiration_time}
+   2. 使用设备 Psk 密钥，或者证书的 Sha1 摘要，进行签名：hmac_sha1(device_secret, text)
+   */
+  string signature  = 3; //签名
+  int64  random     = 4; //随机数。
+  int64  timestamp  = 5; //时间戳，单位：秒。
+  string signMethod = 6; //签名算法。支持 hmacsha1、hmacsha256
+}
+
+// DeviceGatewayBindDevice 网关绑定子设备
+message DeviceGatewayBindDevice{
+  string            productID   = 1; //产品id
+  string            deviceName  = 2; //设备id
+  string            deviceAlias = 4; //设备名称,如果填写了则会更新设备的名称
+  DeviceGatewaySign sign        = 3; //签名
+}
+
+// DeviceGatewayBatchCreateReq 批量创建网关子设备绑定请求
+message DeviceGatewayBatchCreateReq{
+  DeviceCore                       gateway     = 1; //网关信息
+  bool                             isNotNotify = 2; //不通知网关设备状态做了调整
+  bool                             isAuthSign  = 3; //是否校验设备签名
+  repeated DeviceGatewayBindDevice list        = 4; //子设备列表
+}
+
+// DeviceGatewayGetListReq 网关子设备列表查询请求
+message DeviceGatewayGetListReq{
+  PageInfo   page      = 1; //分页信息
+  DeviceCore gateway   = 2; //获取网关下子设备列表
+  DeviceCore subDevice = 3; //获取子设备绑定的网关列表
+}
+
+// DeviceGatewayGetListResp 网关子设备列表查询响应
+message DeviceGatewayGetListResp{
+  repeated DeviceCore list  = 1; //设备列表
+  int64               total = 2; //总数
+}
+
+// DeviceGatewayBatchSaveReq 批量保存网关子设备绑定请求
+message DeviceGatewayBatchSaveReq{
+  DeviceCore          gateway     = 1; //网关信息
+  bool                isNotNotify = 2; //不通知网关设备状态做了调整
+  repeated DeviceCore list        = 3; //设备列表
+}
+
+// DeviceInfoCountReq 设备统计请求
+message DeviceInfoCountReq {
+  TimeRange      timeRange = 1; //时间范围
+  repeated int64 areaIDs   = 2; //区域ID列表
+  repeated int64 groupIDs  = 3; //分组ID列表
+}
+
+// DeviceInfoCount 设备统计响应
+message DeviceInfoCount{
+  int64 online   = 1; //在线数
+  int64 offline  = 2; //离线数
+  int64 inactive = 3; //未激活数
+  int64 unknown  = 4; //未知数
+  int64 total    = 5; //总数
+}
+
+// DeviceTypeCountReq 设备类型统计请求
+message DeviceTypeCountReq{
+  TimeRange      timeRange = 1; //时间范围
+  repeated int64 areaIDs   = 2; //区域ID列表
+  repeated int64 groupIDs  = 3; //分组ID列表
+}
+
+// DeviceTypeCountResp 设备类型统计响应
+message DeviceTypeCountResp{
+  int64 device  = 1; //设备数
+  int64 gateway = 2; //网关数
+  int64 subset  = 3; //子设备数
+  int64 unknown = 4; //未知数
+}
+
+// DeviceCountReq 设备统计请求
+message DeviceCountReq {
+  repeated string countTypes = 1; //在线设备数:status,设备类型: deviceType
+  int64           rangeType  = 2; //0:全部 1:area 2:group
+  repeated int64  rangeIDs   = 3; ////统计的id列表, areaID或者groupID
+}
+
+// DeviceCountResp 设备统计响应
+message DeviceCountResp{
+  repeated DeviceCountInfo list = 1; //统计信息列表
+}
+
+// DeviceCountInfo 设备统计信息
+message DeviceCountInfo{
+  int64             rangeID = 1; //范围ID
+  map<string,int64> count   = 2; //统计结果
+}
+
+// DeviceModuleVersion 设备模块版本
+message DeviceModuleVersion{
+  int64  id         = 1; //ID
+  string productID  = 2; //产品ID
+  string deviceName = 3; //设备名称
+  string moduleCode = 4; //模块代码
+  string version    = 5; //版本
+}
+
+// DeviceModuleVersionGetOneReq 设备模块版本读取请求
+message DeviceModuleVersionGetOneReq{
+  int64  id         = 1; //填id或者以下三个参数
+  string productID  = 2; //产品ID
+  string deviceName = 3; //设备名称
+  string moduleCode = 4; //模块代码
+}
+
+// DeviceModuleVersionGetListReq 设备模块版本列表查询请求
+message DeviceModuleVersionGetListReq{
+  PageInfo page       = 1; //分页信息
+  string   productID  = 2; //产品ID
+  string   deviceName = 3; //设备名称
+  string   moduleCode = 4; //模块代码
+}
+
+// DeviceModuleVersionGetListResp 设备模块版本列表查询响应
+message DeviceModuleVersionGetListResp{
+  int64                        total = 1; //总数
+  repeated DeviceModuleVersion list  = 2; //列表
+}
+
+// DeviceMoveReq 设备迁移请求
+message DeviceMoveReq{
+  DeviceCore      old        = 1; //需要转移的设备
+  DeviceCore      new        = 2; //转移的对象
+  repeated string withTarget = 3; //设备配置-profile,schemaAlias:profile
+}
+
+// DeviceResetReq 设备重置请求
+message DeviceResetReq{
+  DeviceCore device       = 1; //设备信息
+  bool       log          = 2; //日志清除
+  bool       deviceSchema = 3; //设备物模型定义清除
+  bool       bind         = 4; //绑定关系解绑
+  bool       info         = 5; //设备信息恢复出厂设置,包含过期时间,名称,设备配置等
+}
+
+// DeviceTransferReq 设备转让请求
+message DeviceTransferReq{
+  DeviceCore          device       = 1; //设备信息
+  repeated DeviceCore devices      = 2; //设备信息
+  int64               srcProjectID = 3; //指定原来的项目ID,不写使用头
+  int64               transferTo   = 4; //转让给: 1: 某个人 2: 自己的某个项目
+  int64               userID       = 5; //用户id
+  int64               projectID    = 6; //项目id
+  int64               areaID       = 7; //转移到项目时指定区域ID
+  int64               isCleanData  = 8; //是否清除数据:1是 2否
+}
+
+// DeviceOtaUpgradeData OTA升级数据
+message DeviceOtaUpgradeData{
+  string version = 1; //新固件的版本
+  string name    = 2; //固件升级包名称
+  string desc    = 3; //文件描述
+  int64  isDiff  = 4; //是否差分包
+  /**
+   OTA升级包签名方法。取值：
+   -MD5（默认）：MD5签名。
+   -SHA256：SHA256签名。
+   */
+  string           signMethod = 5; //签名方法
+  string           extra      = 6; //额外信息
+  repeated OtaFile files      = 7; //文件列表
+}
+
+// DeviceOtaUpgradeReq 设备OTA升级请求
+message DeviceOtaUpgradeReq{
+  string productID  = 1; //产品ID
+  string deviceName = 2; //设备名称
+  string version    = 3; //当前版本,如果和固件的版本一致,这个固件的升级进度会变成成功
+}
+
+// DeviceOtaUpgradeResp 设备OTA升级响应
+message DeviceOtaUpgradeResp{
+  DeviceOtaUpgradeData firmware = 1; //如果有新版本会返回
+}

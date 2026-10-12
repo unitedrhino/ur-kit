@@ -1,0 +1,49 @@
+syntax = "v1"
+
+// 音视频事件管理接口
+
+info(
+    title: "音视频事件管理"
+    desc: "查询设备上下线、流注册/注销等事件"
+    author: "unitedrhino"
+    version: "v1"
+)
+
+import "../common.api"
+
+type AvEvent {
+    EventID     string `json:"eventID"`             // 事件 ID
+    DeviceID    string `json:"deviceID,optional"`   // 设备 ID
+    ChannelID   string `json:"channelID,optional"`  // 通道 ID
+    EventType   string `json:"eventType"`           // 事件类型
+    EventData   string `json:"eventData,optional"`  // 事件数据 JSON
+    CreatedTime int64  `json:"createdTime"`         // 创建时间
+}
+
+type AvEventGetListReq {
+    PageInfo
+    DeviceID  string `json:"deviceID,optional"`   // 按设备过滤
+    ChannelID string `json:"channelID,optional"`  // 按通道过滤
+    EventType string `json:"eventType,optional"`  // 按事件类型过滤
+}
+
+type AvEventGetListResp {
+    PageResp
+}
+
+@server(
+    middleware: CheckTokenWare // 用户 JWT 鉴权（安全修复：全部业务接口强制登录）
+)
+service av-api {
+    @doc(
+        summary: "获取音视频事件列表"
+        description: "业务说明：按设备、通道、事件类型等条件分页查询音视频事件列表。"
+        authType: "admin"
+        resource: "av"
+        action: "view"
+        group: "things/av"
+        recordLogMode: "1"
+    )
+    @handler AvEventGetList
+    post /api/v1/av/event/get-list (AvEventGetListReq) returns (AvEventGetListResp)
+}

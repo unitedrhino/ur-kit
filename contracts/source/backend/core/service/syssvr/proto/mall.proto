@@ -1,0 +1,266 @@
+syntax = "proto3";
+option go_package = "/sys";
+import "share.proto";
+package sys;
+
+// 空返回体
+message MallEmpty {}
+
+// 通用ID入参
+message MallWithID {
+  int64 id = 1;
+}
+
+// 商城授权服务
+service Mall {
+  // ---- 商品管理 ----
+  // 创建商品
+  rpc mallProductCreate(MallProductCreateReq) returns(MallWithID);
+  // 商品列表
+  rpc mallProductGetList(MallProductGetListReq) returns(MallProductGetListResp);
+  // 商品详情
+  rpc mallProductGetOne(MallWithID) returns(MallProductInfo);
+  // 更新商品
+  rpc mallProductUpdate(MallProductUpdateReq) returns(MallEmpty);
+  // 删除商品
+  rpc mallProductDelete(MallWithID) returns(MallEmpty);
+
+  // ---- 套餐管理 ----
+  // 创建套餐
+  rpc mallPackageCreate(MallPackageCreateReq) returns(MallWithID);
+  // 套餐列表
+  rpc mallPackageGetList(MallPackageGetListReq) returns(MallPackageGetListResp);
+  // 套餐详情
+  rpc mallPackageGetOne(MallWithID) returns(MallPackageInfo);
+  // 更新套餐
+  rpc mallPackageUpdate(MallPackageUpdateReq) returns(MallEmpty);
+  // 删除套餐
+  rpc mallPackageDelete(MallWithID) returns(MallEmpty);
+
+  // ---- 发码管理 ----
+  // 创建授权码
+  rpc mallLicenseCreate(MallLicenseCreateReq) returns(MallWithLicenseCode);
+  // 批量创建授权码
+  rpc mallLicenseBatchCreate(MallLicenseBatchCreateReq) returns(MallLicenseBatchCreateResp);
+  // 授权码列表
+  rpc mallLicenseGetList(MallLicenseGetListReq) returns(MallLicenseGetListResp);
+  // 授权码详情
+  rpc mallLicenseGetOne(MallWithLicenseCode) returns(MallLicenseInfo);
+  // 撤销授权码
+  rpc mallLicenseRevoke(MallWithLicenseCode) returns(MallEmpty);
+  // 批量作废待使用授权码（仅 pending 状态生效，其余跳过）
+  rpc mallLicenseInvalidBatch(MallLicenseInvalidBatchReq) returns(MallLicenseInvalidBatchResp);
+  // 绑定授权码到机器（签发后置 active + 绑定机器码）
+  rpc mallLicenseBind(MallLicenseBindReq) returns(MallEmpty);
+}
+
+// ---- 商品 SKU 定义 ----
+message MallProductSku {
+  string skuCode = 1;       // SKU 编码（商品内唯一）
+  string skuName = 2;       // SKU 名称
+  string licenseMode = 3;   // 授权模式：time(限时)/permanent(永久)
+  int64 durationDays = 4;   // 有效期天数（time 模式必填）
+  string bindMode = 5;      // 绑定模式：select_on_issue(发放时选择)/bind_on_use(使用时绑定)
+  map<string, string> configValues = 6; // 参数配置值（key 来自 grantSchema）
+  int32 status = 7;         // 状态 1:启用 2:禁用
+}
+
+// ---- 商品信息 ----
+message MallProductInfo {
+  int64 id = 1;
+  string productCode = 2;   // 商品编码（唯一标识）
+  string productName = 3;   // 商品名称
+  string productType = 4;   // 商品类型：plan/subscription/quotaRecharge/balanceTopup
+  string grantSchema = 5;   // 授权参数结构定义（JSON）
+  string desc = 6;          // 描述
+  int32 status = 7;         // 状态 1:启用 2:禁用
+  repeated MallProductSku skus = 8; // SKU 列表
+  int64 createdTime = 9;    // 创建时间
+}
+
+// 创建商品入参
+message MallProductCreateReq {
+  string productCode = 1;
+  string productName = 2;
+  string productType = 3;
+  string grantSchema = 4;
+  string desc = 5;
+  int32 status = 6;
+  repeated MallProductSku skus = 7;
+}
+
+// 更新商品入参
+message MallProductUpdateReq {
+  int64 id = 1;
+  string productName = 2;
+  string productType = 3;
+  string grantSchema = 4;
+  string desc = 5;
+  int32 status = 6;
+  repeated MallProductSku skus = 7;
+}
+
+// 商品列表查询入参
+message MallProductGetListReq {
+  PageInfo page = 1;
+  string productCode = 2;
+  string productName = 3;
+  string productType = 4;
+  int32 status = 5;
+}
+
+// 商品列表返回
+message MallProductGetListResp {
+  repeated MallProductInfo list = 1;
+  int64 total = 2;
+}
+
+// ---- 套餐项定义 ----
+message MallPackageItem {
+  int64 productID = 1;      // 商品 ID
+  string skuCode = 2;       // 商品 SKU 编码
+  int64 sort = 3;           // 排序
+  int32 status = 4;         // 状态 1:启用 2:禁用
+}
+
+// ---- 套餐信息 ----
+message MallPackageInfo {
+  int64 id = 1;
+  string packageCode = 2;   // 套餐编码（唯一标识）
+  string packageName = 3;   // 套餐名称
+  string category = 4;      // 分类
+  string desc = 5;          // 描述
+  string verifyMethod = 6;  // 验证方式：api/license_file
+  int32 status = 7;         // 状态 1:启用 2:禁用
+  repeated MallPackageItem items = 8; // 套餐项列表（引用商品 SKU）
+  int64 createdTime = 9;    // 创建时间
+}
+
+// 创建套餐入参
+message MallPackageCreateReq {
+  string packageCode = 1;
+  string packageName = 2;
+  string category = 3;
+  string desc = 4;
+  string verifyMethod = 5;
+  int32 status = 6;
+  repeated MallPackageItem items = 7;
+}
+
+// 更新套餐入参
+message MallPackageUpdateReq {
+  int64 id = 1;
+  string packageName = 2;
+  string category = 3;
+  string desc = 4;
+  string verifyMethod = 5;
+  int32 status = 6;
+  repeated MallPackageItem items = 7;
+}
+
+// 套餐列表查询入参
+message MallPackageGetListReq {
+  PageInfo page = 1;
+  string packageCode = 2;
+  string packageName = 3;
+  string category = 4;
+  int32 status = 5;
+}
+
+// 套餐列表返回
+message MallPackageGetListResp {
+  repeated MallPackageInfo list = 1;
+  int64 total = 2;
+}
+
+// ---- 授权码 ----
+message MallWithLicenseCode {
+  string licenseCode = 1;
+  bool withSource = 2;      // 是否返回来源对象详情（商品或套餐）
+}
+
+// 授权码信息
+message MallLicenseInfo {
+  int64 id = 1;
+  string licenseCode = 2;
+  string sourceType = 3;    // 来源类型：product/package
+  int64 sourceID = 4;       // 来源对象 ID（productID 或 packageID）
+  string skuCode = 5;       // SKU 编码（sourceType=product 时必填）
+  string status = 6;        // 状态：pending/active/expired/revoked/suspended
+  int64 validFrom = 7;      // 生效开始时间
+  int64 validUntil = 8;     // 失效时间
+  string boundTargetID = 9; // 绑定对象 ID
+  int64 boundTime = 10;     // 绑定时间
+  map<string, string> boundMeta = 11; // 绑定元信息
+  string grantSnapshot = 12; // 授权快照（JSON）
+  string grantResult = 13;   // 核销结果（JSON）
+  string desc = 14;
+  string issuer = 15;        // 发放者
+  int64 createdTime = 16;
+  MallProductInfo sourceProduct = 17; // withSource=true 且 sourceType=product 时返回
+  MallPackageInfo sourcePackage = 18; // withSource=true 且 sourceType=package 时返回
+}
+
+// 创建授权码入参
+message MallLicenseCreateReq {
+  string sourceType = 1;    // product 或 package
+  int64 sourceID = 2;       // productID 或 packageID
+  string skuCode = 3;       // sourceType=product 时必填
+  string desc = 4;
+  string issuer = 5;
+}
+
+// 批量创建授权码入参
+message MallLicenseBatchCreateReq {
+  string sourceType = 1;
+  int64 sourceID = 2;
+  string skuCode = 3;
+  string desc = 4;
+  string issuer = 5;
+  int32 count = 6;
+}
+
+// 批量创建授权码返回
+message MallLicenseBatchCreateResp {
+  repeated string licenseCodes = 1;
+  int32 count = 2;
+}
+
+// 批量作废待使用授权码入参
+message MallLicenseInvalidBatchReq {
+  repeated string licenseCodes = 1;  // 待作废的授权码列表（仅 pending 状态生效）
+}
+
+// 批量作废待使用授权码返回
+message MallLicenseInvalidBatchResp {
+  int32 count = 1;                  // 成功作废数量
+  repeated string skippedCodes = 2; // 被跳过的授权码（非待使用状态或不存在）
+}
+
+// 授权码列表查询入参
+message MallLicenseGetListReq {
+  PageInfo page = 1;
+  string sourceType = 2;
+  int64 sourceID = 3;
+  string skuCode = 4;
+  string status = 5;
+  string licenseCode = 6;
+  string boundTargetID = 7;
+  bool withSource = 8;      // 是否返回来源对象详情（商品或套餐）
+  string desc = 9;          // 描述（备注）模糊搜索关键字
+}
+
+// 授权码列表返回
+message MallLicenseGetListResp {
+  repeated MallLicenseInfo list = 1;
+  int64 total = 2;
+}
+
+// 绑定授权码到机器（签发后调用）
+message MallLicenseBindReq {
+  string licenseCode = 1;   // 授权码
+  string boundTargetID = 2; // 绑定机器码（SHA256）
+  map<string, string> boundMeta = 3; // 绑定元信息
+  int64 validFrom = 4;      // 生效时间（毫秒）
+  int64 validUntil = 5;     // 失效时间（毫秒）
+}

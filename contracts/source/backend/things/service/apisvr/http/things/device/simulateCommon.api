@@ -1,0 +1,7 @@
+// 模拟上报仅作为 AI 任务可选的数据写入能力，不定义策略或调度实体。
+type SimulateReportReq {
+    ProjectID int64 `json:"projectID,string,optional"` // 项目 ID，缺省使用请求头
+    ProductID string `json:"productID"` // 目标产品 ID
+    DeviceName string `json:"deviceName"` // 目标设备名称
+    Data map[string]string `json:"data"` // 属性标识和值，整体校验后上报
+}

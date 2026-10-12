@@ -1,0 +1,1036 @@
+syntax = "proto3";
+
+package im;
+option go_package="/im";
+
+// Empty 通用空请求/响应
+message Empty {
+}
+
+// PingResp Ping 接口响应
+message PingResp {
+  // message 响应消息
+  string message = 1;
+}
+
+// PageInfo 分页参数
+message PageInfo {
+  // page 页码，从 1 开始
+  int64 page = 1;
+  // size 每页大小
+  int64 size = 2;
+}
+
+// Participant 会话参与者
+message Participant {
+  // type 参与者类型：user/ai/device/system/external
+  string type = 1;
+  // id 参与者 ID
+  string id = 2;
+}
+
+// ConversationInfo 会话信息
+message ConversationInfo {
+  // id 会话 ID
+  int64 id = 1;
+  // tenant_code 租户编码
+  string tenant_code = 2;
+  // type 会话类型：single-单聊 group-群聊
+  string type = 3;
+  // name 会话名称
+  string name = 4;
+  // avatar 会话头像
+  string avatar = 5;
+  // owner_id 群聊创建者
+  int64 owner_id = 6;
+  // last_msg_id 最后消息 ID
+  int64 last_msg_id = 7;
+  // last_msg_time 最后消息时间（Unix 秒）
+  int64 last_msg_time = 8;
+  // last_msg_content 最后消息内容摘要
+  string last_msg_content = 9;
+  // status 会话状态：1-正常 2-解散 3-禁用
+  int64 status = 10;
+  // last_read_msg_id 当前用户已读到的最后消息 ID（业务层填充，不持久化到 im_conversation 表）
+  int64 last_read_msg_id = 14;
+  // created_time 创建时间（Unix 秒）
+  int64 created_time = 11;
+  // updated_time 更新时间（Unix 秒）
+  int64 updated_time = 12;
+  // unread_count 当前用户未读数（业务层填充，不持久化到 im_conversation 表）
+  int64 unread_count = 13;
+  // is_pinned 当前用户是否置顶该会话：0-否 1-是（业务层填充）
+  int64 is_pinned = 15;
+  // is_muted 当前用户是否免打扰该会话：0-否 1-是（业务层填充）
+  int64 is_muted = 16;
+}
+
+// ConversationCreateReq 创建会话请求
+message ConversationCreateReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // type 会话类型：single/group
+  string type = 2;
+  // name 群聊名称，单聊可不传
+  string name = 3;
+  // participants 参与者列表
+  repeated Participant participants = 4;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 5;
+}
+
+// ConversationCreateResp 创建会话响应
+message ConversationCreateResp {
+  // id 会话 ID
+  int64 id = 1;
+}
+
+// ConversationAddMembersReq 群聊邀请成员请求
+message ConversationAddMembersReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+  // participants 待邀请的参与者列表
+  repeated Participant participants = 4;
+}
+
+// ConversationAddMembersResp 群聊邀请成员响应
+message ConversationAddMembersResp {
+  // id 会话 ID
+  int64 id = 1;
+}
+
+// ConversationRemoveMemberReq 群聊移除/退出成员请求
+message ConversationRemoveMemberReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+  // participant_type 被移除成员类型，阶段 1 只支持 user
+  string participant_type = 4;
+  // participant_id 被移除成员 ID
+  string participant_id = 5;
+}
+
+// ConversationRemoveMemberResp 群聊移除/退出成员响应
+message ConversationRemoveMemberResp {
+}
+
+// ConversationTransferOwnerReq 群聊转让群主请求
+message ConversationTransferOwnerReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 原群主用户 ID
+  int64 operator_id = 3;
+  // new_owner_id 新群主用户 ID
+  int64 new_owner_id = 4;
+}
+
+// ConversationTransferOwnerResp 群聊转让群主响应
+message ConversationTransferOwnerResp {
+}
+
+// ConversationMuteMemberReq 群聊禁言/取消禁言成员请求
+message ConversationMuteMemberReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+  // participant_type 被禁言成员类型，阶段 1 只支持 user
+  string participant_type = 4;
+  // participant_id 被禁言成员 ID
+  string participant_id = 5;
+  // is_muted 是否禁言：0-取消禁言 1-禁言
+  int64 is_muted = 6;
+}
+
+// ConversationMuteMemberResp 群聊禁言/取消禁言成员响应
+message ConversationMuteMemberResp {
+}
+
+// ConversationDisbandReq 群聊解散请求
+message ConversationDisbandReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+}
+
+// ConversationDisbandResp 群聊解散响应
+message ConversationDisbandResp {
+}
+
+// ConversationSetAdminReq 群聊设置/取消管理员请求
+message ConversationSetAdminReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+  // participant_type 被设置成员类型，阶段 1 只支持 user
+  string participant_type = 4;
+  // participant_id 被设置成员 ID
+  string participant_id = 5;
+  // is_admin 是否设为管理员：0-取消管理员 1-设为管理员
+  int64 is_admin = 6;
+}
+
+// ConversationSetAdminResp 群聊设置/取消管理员响应
+message ConversationSetAdminResp {
+}
+
+// ConversationGetMembersReq 获取会话成员列表请求
+message ConversationGetMembersReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+}
+
+// ConversationMemberInfo 会话成员信息
+message ConversationMemberInfo {
+  // participant_type 参与者类型
+  string participant_type = 1;
+  // participant_id 参与者 ID
+  string participant_id = 2;
+  // role 角色：owner/admin/member
+  string role = 3;
+  // group_nickname 群昵称
+  string group_nickname = 4;
+  // is_muted 是否被禁言：0-否 1-是
+  int64 is_muted = 5;
+  // joined_time 加入时间（Unix 秒）
+  int64 joined_time = 6;
+}
+
+// ConversationGetMembersResp 获取会话成员列表响应
+message ConversationGetMembersResp {
+  // list 成员列表
+  repeated ConversationMemberInfo list = 1;
+}
+
+// ConversationUpdateSettingReq 更新会话设置请求（置顶/免打扰/删除）
+message ConversationUpdateSettingReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // user_id 当前用户 ID
+  int64 user_id = 3;
+  // is_pinned 是否置顶：0-取消置顶 1-置顶，-1 表示不更新
+  int64 is_pinned = 4;
+  // is_muted 是否免打扰：0-取消免打扰 1-免打扰，-1 表示不更新
+  int64 is_muted = 5;
+  // is_deleted 是否删除会话：1-软删除，-1 表示不更新
+  int64 is_deleted = 6;
+}
+
+// ConversationUpdateSettingResp 更新会话设置响应
+message ConversationUpdateSettingResp {
+}
+
+// ConversationGetListReq 获取会话列表请求
+message ConversationGetListReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 当前用户 ID
+  int64 user_id = 2;
+  // page 分页
+  PageInfo page = 3;
+}
+
+// ConversationGetListResp 获取会话列表响应
+message ConversationGetListResp {
+  // list 会话列表
+  repeated ConversationInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// ConversationGetByParticipantsReq 根据参与者查询会话
+message ConversationGetByParticipantsReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // participants 参与者列表
+  repeated Participant participants = 2;
+}
+
+// ConversationGetReq 获取会话详情请求
+message ConversationGetReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 3;
+}
+
+// ChatLogInfo 聊天记录信息
+message ChatLogInfo {
+  // id 消息 ID
+  int64 id = 1;
+  // tenant_code 租户编码
+  string tenant_code = 2;
+  // conversation_id 会话 ID
+  int64 conversation_id = 3;
+  // client_msg_id 客户端消息 ID，用于去重
+  string client_msg_id = 4;
+  // sender_type 发送者类型
+  string sender_type = 5;
+  // sender_id 发送者 ID
+  string sender_id = 6;
+  // msg_type 消息类型：text/image/voice/video/file/system/location/card
+  string msg_type = 7;
+  // content 消息内容
+  string content = 8;
+  // extra 扩展字段 JSON
+  string extra = 9;
+  // seq 会话内消息序号
+  int64 seq = 10;
+  // send_time 发送时间（Unix 秒）
+  int64 send_time = 11;
+  // status 消息状态：1-正常 2-已撤回 3-删除
+  int64 status = 12;
+  // read_count 已读人数
+  int64 read_count = 13;
+  // is_at_all 是否 @全体成员：0-普通消息 1-@全体成员
+  int64 is_at_all = 14;
+  // mention_user_ids @用户ID列表
+  repeated int64 mention_user_ids = 15;
+}
+
+// SendMessageReq 发送消息请求
+message SendMessageReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // client_msg_id 客户端消息 ID
+  string client_msg_id = 3;
+  // sender_type 发送者类型，第一版只支持 user
+  string sender_type = 4;
+  // sender_id 发送者 ID
+  string sender_id = 5;
+  // msg_type 消息类型
+  string msg_type = 6;
+  // content 消息内容
+  string content = 7;
+  // extra 扩展字段 JSON
+  string extra = 8;
+  // is_at_all 是否 @全体成员：0-普通消息 1-@全体成员，仅群聊且群主/管理员可用
+  int64 is_at_all = 9;
+  // mention_user_ids @用户ID列表，用于单聊/群聊中 @指定人提醒
+  repeated int64 mention_user_ids = 10;
+}
+
+// SendMessageResp 发送消息响应
+message SendMessageResp {
+  // id 消息 ID
+  int64 id = 1;
+  // seq 会话内消息序号
+  int64 seq = 2;
+  // send_time 发送时间（Unix 秒）
+  int64 send_time = 3;
+}
+
+// MarkReadReq 已读回执请求
+message MarkReadReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // user_id 当前用户 ID
+  int64 user_id = 3;
+  // last_read_msg_id 已读到的最后消息 ID
+  int64 last_read_msg_id = 4;
+}
+
+// RecallReq 撤回消息请求
+message RecallReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // msg_id 消息 ID
+  int64 msg_id = 3;
+  // operator_id 操作者用户 ID
+  int64 operator_id = 4;
+}
+
+// MessageGetListReq 获取会话消息列表请求
+message MessageGetListReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // user_id 当前用户 ID
+  int64 user_id = 4;
+  // page 分页参数
+  PageInfo page = 3;
+}
+
+// MessageGetListResp 获取会话消息列表响应
+message MessageGetListResp {
+  // list 消息列表
+  repeated ChatLogInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// MessageSyncReq 增量同步消息请求
+// 客户端以本地已同步的最大 seq 为游标，拉取会话内其后的消息，用于断线重连补齐与后台对账
+message MessageSyncReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // user_id 当前用户 ID
+  int64 user_id = 3;
+  // last_seq 本地已同步的最大消息序号；返回 seq 大于该值的消息，0 表示全量
+  int64 last_seq = 4;
+  // limit 单次拉取上限；0 使用服务端默认值（100），服务端封顶 500
+  int64 limit = 5;
+}
+
+// MessageSyncResp 增量同步消息响应
+message MessageSyncResp {
+  // list 消息列表，按 seq 升序
+  repeated ChatLogInfo list = 1;
+  // latest_seq 会话当前最新序号，客户端拉完后应以此更新本地游标
+  int64 latest_seq = 2;
+  // has_more 是否还有更多消息待拉取（为 true 时客户端应用返回的最大 seq 继续拉取）
+  bool has_more = 3;
+}
+
+// RecalcUnreadReq 未读数对账请求
+// 按已读游标（last_read_msg_id）重算未读数并持久化，用于修复撤回不回扣等造成的未读漂移
+message RecalcUnreadReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID
+  int64 conversation_id = 2;
+  // user_id 当前用户 ID
+  int64 user_id = 3;
+}
+
+// RecalcUnreadResp 未读数对账响应
+message RecalcUnreadResp {
+  // unread_count 对账后的未读数（已读游标之后、状态正常的消息数）
+  int64 unread_count = 1;
+}
+
+// MessageSearchReq 搜索聊天记录请求
+message MessageSearchReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // conversation_id 会话 ID，0 表示搜索所有会话
+  int64 conversation_id = 2;
+  // keyword 搜索关键词，支持内容模糊匹配
+  string keyword = 3;
+  // page 分页参数
+  PageInfo page = 4;
+  // user_id 当前用户 ID，用于校验会话权限
+  int64 user_id = 5;
+}
+
+// MessageSearchResp 搜索聊天记录响应
+message MessageSearchResp {
+  // list 消息列表
+  repeated ChatLogInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// SyncUserProjectsReq 同步用户项目关系请求
+message SyncUserProjectsReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 用户 ID
+  int64 user_id = 2;
+  // project_ids 项目 ID 列表
+  repeated int64 project_ids = 3;
+}
+
+// MomentMedia 朋友圈媒体元数据
+message MomentMedia {
+  // type 媒体类型：image/video/voice/file
+  string type = 1;
+  // url 媒体访问地址
+  string url = 2;
+  // thumb 缩略图地址
+  string thumb = 3;
+  // size 文件大小（字节）
+  int64 size = 4;
+  // duration 音视频时长（秒）
+  int64 duration = 5;
+  // name 文件名称
+  string name = 6;
+}
+
+// MomentInfo 朋友圈动态信息
+message MomentInfo {
+  // id 动态 ID
+  int64 id = 1;
+  // tenant_code 租户编码
+  string tenant_code = 2;
+  // user_id 发布人 ID
+  int64 user_id = 3;
+  // content 文本内容
+  string content = 4;
+  // media_list 媒体列表
+  repeated MomentMedia media_list = 5;
+  // visibility 可见范围：0 公开 / 1 项目 / 2 指定人
+  int64 visibility = 6;
+  // project_ids 可见项目列表
+  repeated int64 project_ids = 7;
+  // visible_user_ids 指定可见用户列表
+  repeated int64 visible_user_ids = 8;
+  // mention_user_ids @ 用户列表
+  repeated int64 mention_user_ids = 9;
+  // status 状态：0 正常 / 1 删除
+  int64 status = 10;
+  // like_count 点赞数
+  int64 like_count = 11;
+  // comment_count 评论数
+  int64 comment_count = 12;
+  // is_liked 当前用户是否已点赞
+  bool is_liked = 13;
+  // created_time 创建时间（Unix 秒）
+  int64 created_time = 14;
+  // updated_time 更新时间（Unix 秒）
+  int64 updated_time = 15;
+}
+
+// MomentCommentInfo 朋友圈评论信息
+message MomentCommentInfo {
+  // id 评论 ID
+  int64 id = 1;
+  // moment_id 动态 ID
+  int64 moment_id = 2;
+  // user_id 评论人 ID
+  int64 user_id = 3;
+  // content 评论内容
+  string content = 4;
+  // mention_user_ids @ 用户列表
+  repeated int64 mention_user_ids = 5;
+  // status 状态：0 正常 / 1 删除
+  int64 status = 6;
+  // created_time 创建时间（Unix 秒）
+  int64 created_time = 7;
+  // updated_time 更新时间（Unix 秒）
+  int64 updated_time = 8;
+}
+
+// CreateMomentReq 发布动态请求
+message CreateMomentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 发布人 ID
+  int64 user_id = 2;
+  // content 文本内容
+  string content = 3;
+  // media_list 媒体列表
+  repeated MomentMedia media_list = 4;
+  // visibility 可见范围：0 公开 / 1 项目 / 2 指定人
+  int64 visibility = 5;
+  // project_ids 可见项目列表
+  repeated int64 project_ids = 6;
+  // visible_user_ids 指定可见用户列表
+  repeated int64 visible_user_ids = 7;
+  // mention_user_ids @ 用户列表
+  repeated int64 mention_user_ids = 8;
+}
+
+// CreateMomentResp 发布动态响应
+message CreateMomentResp {
+  // id 动态 ID
+  int64 id = 1;
+}
+
+// ListMomentReq 查询动态列表请求
+message ListMomentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 当前用户 ID
+  int64 user_id = 2;
+  // page 分页
+  PageInfo page = 3;
+  // filter_user_id 按发布人筛选，0 表示不筛选
+  int64 filter_user_id = 4;
+  // filter_project_id 按项目筛选，0 表示不筛选
+  int64 filter_project_id = 5;
+}
+
+// ListMomentResp 查询动态列表响应
+message ListMomentResp {
+  // list 动态列表
+  repeated MomentInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// GetMomentReq 获取动态详情请求
+message GetMomentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 当前用户 ID
+  int64 user_id = 2;
+  // moment_id 动态 ID
+  int64 moment_id = 3;
+}
+
+// GetMomentResp 获取动态详情响应
+message GetMomentResp {
+  // info 动态详情
+  MomentInfo info = 1;
+  // comments 评论列表
+  repeated MomentCommentInfo comments = 2;
+}
+
+// DeleteMomentReq 删除动态请求
+message DeleteMomentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 操作者用户 ID
+  int64 user_id = 2;
+  // moment_id 动态 ID
+  int64 moment_id = 3;
+}
+
+// DeleteMomentResp 删除动态响应
+message DeleteMomentResp {
+}
+
+// ToggleLikeReq 点赞/取消点赞请求
+message ToggleLikeReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 操作者用户 ID
+  int64 user_id = 2;
+  // moment_id 动态 ID
+  int64 moment_id = 3;
+  // liked true-点赞 false-取消点赞
+  bool liked = 4;
+}
+
+// ToggleLikeResp 点赞/取消点赞响应
+message ToggleLikeResp {
+  // like_count 当前点赞数
+  int64 like_count = 1;
+}
+
+// CreateCommentReq 发表评论请求
+message CreateCommentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 评论人 ID
+  int64 user_id = 2;
+  // moment_id 动态 ID
+  int64 moment_id = 3;
+  // content 评论内容
+  string content = 4;
+  // mention_user_ids @ 用户列表
+  repeated int64 mention_user_ids = 5;
+}
+
+// CreateCommentResp 发表评论响应
+message CreateCommentResp {
+  // id 评论 ID
+  int64 id = 1;
+}
+
+// DeleteCommentReq 删除评论请求
+message DeleteCommentReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 操作者用户 ID
+  int64 user_id = 2;
+  // moment_id 动态 ID
+  int64 moment_id = 3;
+  // comment_id 评论 ID
+  int64 comment_id = 4;
+}
+
+// DeleteCommentResp 删除评论响应
+message DeleteCommentResp {
+}
+
+// FriendRequestInfo 好友申请信息
+message FriendRequestInfo {
+  // id 申请记录 ID
+  int64 id = 1;
+  // req_user_id 申请人用户 ID
+  int64 req_user_id = 2;
+  // recv_user_id 被申请人用户 ID
+  int64 recv_user_id = 3;
+  // req_msg 申请留言
+  string req_msg = 4;
+  // handle_result 处理结果：0-待处理 1-同意 2-拒绝 3-忽略
+  int64 handle_result = 5;
+  // handle_msg 处理附言
+  string handle_msg = 6;
+  // created_time 创建时间（Unix 秒）
+  int64 created_time = 7;
+  // updated_time 更新时间（Unix 秒）
+  int64 updated_time = 8;
+}
+
+// FriendInfo 好友信息
+message FriendInfo {
+  // id 关系记录 ID
+  int64 id = 1;
+  // user_id 用户 ID
+  int64 user_id = 2;
+  // friend_user_id 好友用户 ID
+  int64 friend_user_id = 3;
+  // remark 备注名
+  string remark = 4;
+  // created_time 建立时间（Unix 秒）
+  int64 created_time = 5;
+}
+
+// FriendApplyReq 发起好友申请请求
+message FriendApplyReq {
+  // req_user_id 申请人用户 ID
+  int64 req_user_id = 1;
+  // recv_user_id 被申请人用户 ID
+  int64 recv_user_id = 2;
+  // req_msg 申请留言
+  string req_msg = 3;
+}
+
+// FriendApplyResp 发起好友申请响应
+message FriendApplyResp {
+  // id 申请记录 ID
+  int64 id = 1;
+}
+
+// FriendHandleReq 处理好友申请请求
+message FriendHandleReq {
+  // operator_id 当前操作用户 ID（必须为接收方）
+  int64 operator_id = 1;
+  // request_id 申请记录 ID
+  int64 request_id = 2;
+  // handle_result 处理结果：1-同意 2-拒绝 3-忽略
+  int64 handle_result = 3;
+  // handle_msg 处理附言
+  string handle_msg = 4;
+}
+
+// FriendHandleResp 处理好友申请响应
+message FriendHandleResp {
+}
+
+// FriendDeleteReq 删除好友请求
+message FriendDeleteReq {
+  // operator_id 当前操作用户 ID
+  int64 operator_id = 1;
+  // friend_user_id 要删除的好友用户 ID
+  int64 friend_user_id = 2;
+}
+
+// FriendDeleteResp 删除好友响应
+message FriendDeleteResp {
+}
+
+// FriendGetListReq 获取好友列表请求
+message FriendGetListReq {
+  // user_id 当前用户 ID
+  int64 user_id = 1;
+  // page 分页
+  PageInfo page = 2;
+}
+
+// FriendGetListResp 获取好友列表响应
+message FriendGetListResp {
+  // list 好友列表
+  repeated FriendInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// FriendRequestGetListReq 获取好友申请列表请求
+message FriendRequestGetListReq {
+  // user_id 当前用户 ID
+  int64 user_id = 1;
+  // direction 查询方向：0-我收到的 1-我发起的
+  int64 direction = 2;
+  // handle_result 处理结果筛选：-1-全部 0-待处理 1-同意 2-拒绝 3-忽略
+  int64 handle_result = 3;
+  // page 分页
+  PageInfo page = 4;
+}
+
+// FriendRequestGetListResp 获取好友申请列表响应
+message FriendRequestGetListResp {
+  // list 申请列表
+  repeated FriendRequestInfo list = 1;
+  // total 总数
+  int64 total = 2;
+}
+
+// CallSignalReq 通话信令请求，type 决定语义（参考 streaming SignalingMessage）
+message CallSignalReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 发送者用户 ID（apisvr 鉴权后覆盖客户端自报值）
+  int64 user_id = 2;
+  // type 信令类型：call_invite/call_accept/call_reject/call_cancel/call_end/call_heartbeat/group_invite/group_join/group_leave/media_state
+  string type = 3;
+  // call_id 通话 ID（invite 类信令为空，由服务端生成）
+  string call_id = 4;
+  // call_type 通话媒体类型：voice/video
+  string call_type = 5;
+  // conversation_id 关联的 IM 会话 ID
+  int64 conversation_id = 6;
+  // callee_id 1:1 被叫用户 ID
+  string callee_id = 7;
+  // members 群通话邀请成员用户 ID 列表
+  repeated string members = 8;
+  // to media_state 定向目标用户 ID（空=1:1 对端/群通话全员）
+  string to = 9;
+  // payload 扩展 JSON（media_state 的 mute/video 状态等）
+  string payload = 10;
+}
+
+// CallSignalResp 通话信令响应
+message CallSignalResp {
+  // call_id 通话 ID
+  string call_id = 1;
+  // state 通话状态：inviting/connected/ended
+  string state = 2;
+  // event 对应下行事件名（created/busy/group_roster 等）
+  string event = 3;
+  // payload 下行 payload JSON（含 members、duration 等）
+  string payload = 4;
+  // notify_user_ids 本次信令已通知的用户 ID 列表（经 FastEvent 扇出）
+  repeated int64 notify_user_ids = 5;
+  // zlm_push_url 当前用户推流地址（invite/accept/group_invite/group_join 时返回）
+  string zlm_push_url = 6;
+  // zlm_server ZLM SDP 交换地址（前端 play 用）
+  string zlm_server = 7;
+}
+
+// CallActiveReq 查询群通话进行状态请求
+message CallActiveReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 当前用户 ID
+  int64 user_id = 2;
+  // conversation_id 群聊会话 ID
+  int64 conversation_id = 3;
+}
+
+// CallActiveResp 查询群通话进行状态响应
+message CallActiveResp {
+  // active 是否有进行中的通话
+  bool active = 1;
+  // call_id 通话 ID
+  string call_id = 2;
+  // call_type 通话媒体类型：voice/video
+  string call_type = 3;
+  // participant_ids 当前参与者用户 ID 列表
+  repeated string participant_ids = 4;
+}
+
+
+// ==================== 渠道绑定（阶段 3） ====================
+
+// ChannelBindInfo 渠道端点绑定信息
+message ChannelBindInfo {
+  // id 绑定记录 ID
+  int64 id = 1;
+  // user_id 绑定用户 ID
+  int64 user_id = 2;
+  // channel_type 渠道类型（device / ...）
+  string channel_type = 3;
+  // channel_id 渠道标识（device 为 {productID}:{deviceName}）
+  string channel_id = 4;
+  // channel_name 渠道展示名（设备名称）
+  string channel_name = 5;
+  // is_muted 端点级免打扰：0-下发 1-不下发
+  int64 is_muted = 6;
+  // created_time 绑定时间（Unix 秒）
+  int64 created_time = 7;
+}
+
+// ChannelBindReq 绑定渠道端点（重复绑定幂等更新名称）
+message ChannelBindReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 绑定用户 ID（操作者本人）
+  int64 user_id = 2;
+  // channel_type 渠道类型
+  string channel_type = 3;
+  // channel_id 渠道标识
+  string channel_id = 4;
+  // channel_name 渠道展示名
+  string channel_name = 5;
+}
+
+// ChannelUnbindReq 解绑渠道端点
+message ChannelUnbindReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 操作用户 ID
+  int64 user_id = 2;
+  // id 绑定记录 ID
+  int64 id = 3;
+}
+
+// ChannelBindGetListReq 查询用户渠道绑定列表
+message ChannelBindGetListReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 用户 ID
+  int64 user_id = 2;
+}
+
+// ChannelBindGetListResp 渠道绑定列表
+message ChannelBindGetListResp {
+  // list 绑定列表
+  repeated ChannelBindInfo list = 1;
+}
+
+// ChannelBindSetMuteReq 设置端点级免打扰
+message ChannelBindSetMuteReq {
+  // tenant_code 租户编码
+  string tenant_code = 1;
+  // user_id 操作用户 ID
+  int64 user_id = 2;
+  // id 绑定记录 ID
+  int64 id = 3;
+  // is_muted 0-下发 1-免打扰
+  int64 is_muted = 4;
+}
+
+// DeviceAiWebRTCOfferReq 设备 AI WebRTC 完整 offer；设备身份已由 dmsvr 根据 Broker 上下文校验。
+message DeviceAiWebRTCOfferReq {
+  string session_id = 1;
+  string tenant_code = 2;
+  string product_id = 3;
+  string device_name = 4;
+  string device_display_name = 5;
+  int64 clone_id = 6;
+  int64 agent_id = 7;
+  string offer_sdp = 8;
+  int32 sample_rate = 9;
+  int32 channels = 10;
+  int32 frame_duration = 11;
+}
+
+// DeviceAiWebRTCOfferResp 服务端 WebRTC 完整 answer。
+message DeviceAiWebRTCOfferResp {
+  string answer_sdp = 1;
+  string transport = 2;
+  repeated string stun_urls = 3;
+}
+
+// DeviceAiWebRTCCloseReq 关闭设备 AI WebRTC 会话。
+message DeviceAiWebRTCCloseReq {
+  string session_id = 1;
+}
+
+// Im 即时通讯服务
+service Im {
+  // Ping 健康检查
+  rpc Ping(Empty) returns(PingResp);
+  // SendMessage 发送消息
+  rpc SendMessage(SendMessageReq) returns(SendMessageResp);
+  // CreateConversation 创建会话
+  rpc CreateConversation(ConversationCreateReq) returns(ConversationCreateResp);
+  // AddConversationMembers 群聊邀请成员
+  rpc AddConversationMembers(ConversationAddMembersReq) returns(ConversationAddMembersResp);
+  // RemoveConversationMember 群聊移除/退出成员
+  rpc RemoveConversationMember(ConversationRemoveMemberReq) returns(ConversationRemoveMemberResp);
+  // TransferConversationOwner 群聊转让群主
+  rpc TransferConversationOwner(ConversationTransferOwnerReq) returns(ConversationTransferOwnerResp);
+  // MuteConversationMember 群聊禁言/取消禁言成员
+  rpc MuteConversationMember(ConversationMuteMemberReq) returns(ConversationMuteMemberResp);
+  // DisbandConversation 群聊解散
+  rpc DisbandConversation(ConversationDisbandReq) returns(ConversationDisbandResp);
+  // SetConversationAdmin 群聊设置/取消管理员
+  rpc SetConversationAdmin(ConversationSetAdminReq) returns(ConversationSetAdminResp);
+  // GetConversationMembers 获取会话成员列表
+  rpc GetConversationMembers(ConversationGetMembersReq) returns(ConversationGetMembersResp);
+  // UpdateConversationSetting 更新会话设置（置顶/免打扰/删除）
+  rpc UpdateConversationSetting(ConversationUpdateSettingReq) returns(ConversationUpdateSettingResp);
+  // GetConversationList 获取用户会话列表
+  rpc GetConversationList(ConversationGetListReq) returns(ConversationGetListResp);
+  // GetConversationByParticipants 根据参与者查询会话
+  rpc GetConversationByParticipants(ConversationGetByParticipantsReq) returns(ConversationInfo);
+  // GetConversation 获取会话详情
+  rpc GetConversation(ConversationGetReq) returns(ConversationInfo);
+  // MarkRead 已读回执
+  rpc MarkRead(MarkReadReq) returns(Empty);
+  // RecallMessage 撤回消息
+  rpc RecallMessage(RecallReq) returns(Empty);
+  // GetMessageList 获取会话消息列表
+  rpc GetMessageList(MessageGetListReq) returns(MessageGetListResp);
+  // SyncMessages 增量同步消息（按 seq 游标，断线重连补齐用）
+  rpc SyncMessages(MessageSyncReq) returns(MessageSyncResp);
+  // RecalcUnread 未读数对账（按已读游标重算并持久化）
+  rpc RecalcUnread(RecalcUnreadReq) returns(RecalcUnreadResp);
+  // SearchMessages 搜索聊天记录
+  rpc SearchMessages(MessageSearchReq) returns(MessageSearchResp);
+  // SyncUserProjects 同步用户项目关系
+  rpc SyncUserProjects(SyncUserProjectsReq) returns(Empty);
+  // FriendApply 发起好友申请
+  rpc FriendApply(FriendApplyReq) returns(FriendApplyResp);
+  // FriendHandle 处理好友申请
+  rpc FriendHandle(FriendHandleReq) returns(FriendHandleResp);
+  // FriendDelete 删除好友
+  rpc FriendDelete(FriendDeleteReq) returns(FriendDeleteResp);
+  // FriendGetList 获取好友列表
+  rpc FriendGetList(FriendGetListReq) returns(FriendGetListResp);
+  // FriendRequestGetList 获取好友申请列表
+  rpc FriendRequestGetList(FriendRequestGetListReq) returns(FriendRequestGetListResp);
+  // CallSignal 通话信令（音视频通话）
+  rpc CallSignal(CallSignalReq) returns(CallSignalResp);
+  // GetActiveCall 查询群聊进行中的通话
+  rpc GetActiveCall(CallActiveReq) returns(CallActiveResp);
+  // ChannelBind 绑定渠道端点（设备等）
+  rpc ChannelBind(ChannelBindReq) returns(Empty);
+  // ChannelUnbind 解绑渠道端点
+  rpc ChannelUnbind(ChannelUnbindReq) returns(Empty);
+  // ChannelBindGetList 查询用户渠道绑定列表
+  rpc ChannelBindGetList(ChannelBindGetListReq) returns(ChannelBindGetListResp);
+  // ChannelBindSetMute 设置端点级免打扰
+  rpc ChannelBindSetMute(ChannelBindSetMuteReq) returns(Empty);
+  // DeviceAiWebRTCAnswer 建立设备↔AI 音频 WebRTC 桥接。
+  rpc DeviceAiWebRTCAnswer(DeviceAiWebRTCOfferReq) returns(DeviceAiWebRTCOfferResp);
+  // DeviceAiWebRTCClose 释放设备↔AI WebRTC 桥接资源。
+  rpc DeviceAiWebRTCClose(DeviceAiWebRTCCloseReq) returns(Empty);
+}
+
+// ImMoment 朋友圈动态服务
+service ImMoment {
+  // CreateMoment 发布动态
+  rpc CreateMoment(CreateMomentReq) returns (CreateMomentResp);
+  // ListMoment 查询动态列表
+  rpc ListMoment(ListMomentReq) returns (ListMomentResp);
+  // GetMoment 获取动态详情
+  rpc GetMoment(GetMomentReq) returns (GetMomentResp);
+  // DeleteMoment 删除动态
+  rpc DeleteMoment(DeleteMomentReq) returns (DeleteMomentResp);
+  // ToggleLike 点赞/取消点赞
+  rpc ToggleLike(ToggleLikeReq) returns (ToggleLikeResp);
+  // CreateComment 发表评论
+  rpc CreateComment(CreateCommentReq) returns (CreateCommentResp);
+  // DeleteComment 删除评论
+  rpc DeleteComment(DeleteCommentReq) returns (DeleteCommentResp);
+}

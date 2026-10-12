@@ -1,0 +1,180 @@
+syntax = "v1"
+
+
+info(
+    title: "物联卡资费计划"
+    desc: "物联卡资费计划（流量包模板）CRUD"
+    version: "v1"
+)
+
+type (
+    CardPacket {
+        ID              int64   `json:"id,string"`
+        PackageID       string  `json:"packageId"`
+        PacketID        string  `json:"packetId"`
+        Name            string  `json:"name,optional"`
+        Price           float64 `json:"price,optional"`
+        Flow            float64 `json:"flow,optional"`
+        BasePacketType  int64   `json:"basePacketType,optional"`
+        PacketType      int64   `json:"packetType,optional"`
+        CreateTime      string  `json:"createTime,optional"`
+        ErrorFlow       float64 `json:"errorFlow,optional"`
+        ErrorSo         float64 `json:"errorSo,optional"`
+        ValidTime       int64   `json:"validTime,optional"`
+        Cost            float64 `json:"cost,optional"`
+        IsMonth         int64   `json:"isMonth,optional"`
+        DateLimit       string  `json:"dateLimit,optional"`
+        InStock         int64   `json:"inStock,optional"`
+        ValidType       int64   `json:"validType,optional"`
+        ValidName       string  `json:"validName,optional"`
+        CardCount       int64   `json:"cardCount,optional"`
+        IsDd            int64   `json:"isDd,optional"`
+        ReferenceCount  int64   `json:"referenceCount"`
+        Removable       bool    `json:"removable"`
+        Reason          string  `json:"reason,optional"`
+    }
+
+    CardPacketCreateReq {
+        PackageID       string  `json:"packageId"`
+        PacketID        string  `json:"packetId"`
+        Name            string  `json:"name,optional"`
+        Price           float64 `json:"price,optional"`
+        Flow            float64 `json:"flow,optional"`
+        BasePacketType  int64   `json:"basePacketType,optional"`
+        PacketType      int64   `json:"packetType,optional"`
+        ErrorFlow       float64 `json:"errorFlow,optional"`
+        ErrorSo         float64 `json:"errorSo,optional"`
+        ValidTime       int64   `json:"validTime,optional"`
+        Cost            float64 `json:"cost,optional"`
+        IsMonth         int64   `json:"isMonth,optional"`
+        DateLimit       string  `json:"dateLimit,optional"`
+        InStock         int64   `json:"inStock,optional"`
+        ValidType       int64   `json:"validType,optional"`
+        ValidName       string  `json:"validName,optional"`
+        IsDd            int64   `json:"isDd,optional"`
+    }
+
+    CardPacketUpdateReq {
+        ID              int64   `json:"id,string"`
+        // BasePacketTypeSet 表示本次更新显式携带叠加属性，使零值“基础计划”也可被可靠更新。
+        BasePacketTypeSet bool  `json:"basePacketTypeSet,optional"`
+        PackageID       string  `json:"packageId,optional"`
+        PacketID        string  `json:"packetId,optional"`
+        Name            string  `json:"name,optional"`
+        Price           float64 `json:"price,optional"`
+        Flow            float64 `json:"flow,optional"`
+        BasePacketType  int64   `json:"basePacketType,optional"`
+        PacketType      int64   `json:"packetType,optional"`
+        ErrorFlow       float64 `json:"errorFlow,optional"`
+        ErrorSo         float64 `json:"errorSo,optional"`
+        ValidTime       int64   `json:"validTime,optional"`
+        Cost            float64 `json:"cost,optional"`
+        IsMonth         int64   `json:"isMonth,optional"`
+        DateLimit       string  `json:"dateLimit,optional"`
+        InStock         int64   `json:"inStock,optional"`
+        ValidType       int64   `json:"validType,optional"`
+        ValidName       string  `json:"validName,optional"`
+        IsDd            int64   `json:"isDd,optional"`
+    }
+
+    CardPacketGetListReq {
+        PageInfo
+        PackageID  string `json:"packageId,optional"`
+        PacketID   string `json:"packetId,optional"`
+        Name       string `json:"name,optional"`
+        PacketType int64  `json:"packetType,optional"`
+    }
+
+    CardPacketGetListResp {
+        PageResp
+        List []*CardPacket `json:"list"`
+    }
+
+    CardPacketGetOptionResp {
+        List []*CardPacketOption `json:"list"`
+    }
+
+    CardPacketOption {
+        PacketID string `json:"packetId"`
+        Name     string `json:"name"`
+    }
+)
+
+@server(
+    group: card/packet
+    prefix: /api/v1/things/card/packet
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service card {
+    @doc(
+        summary: "新增资费计划"
+        description: "业务说明：新增资费计划"
+        authType: "admin"
+        resource: "card"
+        action: "create"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler create
+    post /create (CardPacketCreateReq) returns (WithID)
+
+    @doc(
+        summary: "更新资费计划"
+        description: "业务说明：更新资费计划"
+        authType: "admin"
+        resource: "card"
+        action: "update"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler update
+    post /update (CardPacketUpdateReq) returns ()
+
+    @doc(
+        summary: "删除资费计划"
+        description: "业务说明：删除资费计划"
+        authType: "admin"
+        resource: "card"
+        action: "delete"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler delete
+    post /delete (WithID) returns ()
+
+    @doc(
+        summary: "获取资费计划详情"
+        description: "业务说明：获取资费计划详情"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOne
+    post /get-one (WithID) returns (CardPacket)
+
+    @doc(
+        summary: "获取资费计划列表"
+        description: "业务说明：获取资费计划列表"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getList
+    post /get-list (CardPacketGetListReq) returns (CardPacketGetListResp)
+
+    @doc(
+        summary: "获取资费计划下拉选项"
+        description: "业务说明：获取资费计划下拉选项"
+        authType: "admin"
+        resource: "card"
+        action: "view"
+        group: "things/card"
+        recordLogMode: "1"
+    )
+    @handler getOption
+    post /get-option (CardPacketGetListReq) returns (CardPacketGetOptionResp)
+}
