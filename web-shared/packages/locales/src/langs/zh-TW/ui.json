@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "請輸入{0}",
+    "selectRequired": "請選擇{0}",
+    "minLength": "{0}至少{1}個字元",
+    "maxLength": "{0}最多{1}個字元",
+    "length": "{0}長度必須為{1}個字元",
+    "alreadyExists": "{0} `{1}` 已存在",
+    "startWith": "{0}必須以 {1} 開頭",
+    "invalidURL": "請輸入有效的連結"
+  },
+  "actionTitle": {
+    "edit": "修改{0}",
+    "create": "新增{0}",
+    "delete": "刪除{0}",
+    "view": "檢視{0}",
+    "import": "匯入{0}",
+    "export": "匯出{0}",
+    "exportSelected": "匯出選中{0}",
+    "refresh": "重新整理{0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "確定刪除 {0} 嗎？",
+    "deleting": "正在刪除 {0} ...",
+    "deleteSuccess": "{0} 刪除成功",
+    "operationSuccess": "操作成功",
+    "operationFailed": "操作失敗",
+    "loadFailed": "載入失敗，請重試",
+    "executeFailed": "執行失敗",
+    "createFailed": "建立失敗",
+    "publishFailedManual": "發佈工具失敗，請到工具頁手動發佈",
+    "sendFailed": "傳送失敗",
+    "previewFailed": "影響預覽失敗",
+    "undoFailed": "撤銷失敗",
+    "rejectFailed": "駁回失敗",
+    "generateFailed": "產生失敗",
+    "approveFailed": "審批失敗",
+    "validateFailed": "驗證失敗",
+    "queryFailed": "查詢失敗",
+    "markReadFailed": "標記已讀失敗，請稍後重試",
+    "clearFailed": "清空失敗，請稍後重試",
+    "setCurrentFailed": "設為目前版本失敗"
+  },
+  "placeholder": {
+    "input": "請輸入",
+    "select": "請選擇"
+  },
+  "upload": {
+    "image": "上傳圖片",
+    "selectFile": "選擇檔案"
+  },
+  "dataTable": {
+    "columns": "欄",
+    "toggleColumns": "切換欄位顯示",
+    "selectedRows": "已選 {selected} / {rows} 列",
+    "totalRows": "共 {total} 筆",
+    "rowsPerPage": "每頁筆數",
+    "pageDetail": "第 {page} / {totalPages} 頁",
+    "firstPage": "首頁",
+    "previousPage": "上一頁",
+    "nextPage": "下一頁",
+    "lastPage": "末頁",
+    "loading": "載入中...",
+    "empty": "暫無資料",
+    "resizeColumn": "拖曳調整欄寬",
+    "sortAscending": "升冪",
+    "sortDescending": "降冪",
+    "hideColumn": "隱藏欄"
+  },
+  "captcha": {
+    "title": "請完成安全驗證",
+    "sliderSuccessText": "驗證透過",
+    "sliderDefaultText": "請按住滑塊拖動",
+    "sliderRotateDefaultTip": "點選圖片可重新整理",
+    "sliderTranslateDefaultTip": "點選圖片可重新整理",
+    "sliderRotateFailTip": "驗證失敗",
+    "sliderRotateSuccessTip": "驗證成功，耗時{0}秒",
+    "sliderTranslateFailTip": "驗證失敗",
+    "sliderTranslateSuccessTip": "驗證成功，耗時{0}秒",
+    "alt": "支援img標籤src屬性值",
+    "refreshAriaLabel": "重新整理驗證碼",
+    "confirmAriaLabel": "確認選擇",
+    "confirm": "確認",
+    "pointAriaLabel": "點選點",
+    "clickInOrder": "請依次點選"
+  },
+  "iconPicker": {
+    "placeholder": "選擇一個圖示",
+    "search": "搜尋圖示..."
+  },
+  "jsonViewer": {
+    "copy": "複製",
+    "copied": "已複製"
+  },
+  "fallback": {
+    "pageNotFound": "哎呀！未找到頁面",
+    "pageNotFoundDesc": "抱歉，我們無法找到您要找的頁面。",
+    "forbidden": "哎呀！訪問被拒絕",
+    "forbiddenDesc": "抱歉，您沒有許可權訪問此頁面。",
+    "internalError": "哎呀！出錯了",
+    "internalErrorDesc": "抱歉，伺服器遇到錯誤。",
+    "offline": "離線頁面",
+    "offlineError": "哎呀！網路錯誤",
+    "offlineErrorDesc": "抱歉，無法連線到網際網路，請檢查您的網路連線並重試。",
+    "comingSoon": "即將推出",
+    "http": {
+      "requestTimeout": "請求超時，請稍後再試。",
+      "networkError": "網路異常，請檢查您的網路連線後重試。",
+      "badRequest": "請求錯誤。請檢查您的輸入並重試。",
+      "unauthorized": "登入認證過期，請重新登入後繼續。",
+      "forbidden": "禁止訪問，您沒有許可權訪問此資源。",
+      "notFound": "未找到，請求的資源不存在。",
+      "internalServerError": "內部伺服器錯誤，請稍後再試。",
+      "licenseRestricted": "license 未啟用或已過期，請聯絡供應商啟用/續期"
+    }
+  },
+  "widgets": {
+    "document": "檔案",
+    "qa": "問題 & 幫助",
+    "setting": "設定",
+    "logoutTip": "是否登出？",
+    "viewAll": "檢視所有訊息",
+    "notifications": "通知",
+    "markAllAsRead": "全部標記為已讀",
+    "markAsRead": "標記為已讀",
+    "clearNotifications": "清空",
+    "checkUpdatesTitle": "新版本可用",
+    "checkUpdatesDescription": "點選重新整理以獲取最新版本",
+    "search": {
+      "title": "搜尋",
+      "searchNavigate": "搜尋導航選單",
+      "select": "選擇",
+      "navigate": "導航",
+      "close": "關閉",
+      "noResults": "未找到搜尋結果",
+      "noRecent": "沒有搜尋歷史",
+      "recent": "搜尋歷史"
+    },
+    "lockScreen": {
+      "title": "鎖定螢幕",
+      "screenButton": "鎖定",
+      "password": "密碼",
+      "placeholder": "請輸入鎖屏密碼",
+      "unlock": "點選解鎖",
+      "errorPasswordTip": "密碼錯誤，請重新輸入",
+      "backToLogin": "返回登入",
+      "entry": "進入系統"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "大廳",
+      "desc": "應用大廳，提供各應用統一入口與導航"
+    },
+    "100": {
+      "name": "平臺管理",
+      "desc": "平臺運營管理後臺，涵蓋套餐、訂單、客戶及系統配置"
+    },
+    "200": {
+      "name": "物聯網",
+      "desc": "物聯網裝置全生命週期管理平臺，支援裝置接入、專案管理、區域管理、OTA升級及資料流轉"
+    },
+    "300": {
+      "name": "系統管理",
+      "desc": "企業系統管理後臺，提供企業資訊維護、使用者與角色管理、服務續期及AI智慧體配置"
+    },
+    "600": {
+      "name": "物聯網客戶端",
+      "desc": "Web 物聯網客戶端，提供裝置空間、裝置地圖、場景聯動和基礎系統配置"
+    },
+    "700": {
+      "name": "物聯網客戶端",
+      "desc": "物聯網C端微信小程式，支援裝置繫結與遠端控制"
+    },
+    "800": {
+      "name": "物聯網客戶端",
+      "desc": "物聯網安卓客戶端，支援裝置管理與即時監控"
+    },
+    "900": {
+      "name": "物聯網客戶端",
+      "desc": "物聯網iOS客戶端，支援裝置管理與即時監控"
+    },
+    "1000": {
+      "name": "能耗中心",
+      "desc": "能源能耗管理中心，提供能耗監測、統計分析與節能最佳化"
+    },
+    "1200": {
+      "name": "電子合同",
+      "desc": "電子合同管理端，合同、模板、印章、供應商、審批管理"
+    },
+    "1201": {
+      "name": "電子合同客戶端",
+      "desc": "電子合同客戶端，合同簽署、檢視、工作區"
+    },
+    "1202": {
+      "name": "電子合同客戶端",
+      "desc": "電子合同客戶端管理"
+    },
+    "1500": {
+      "name": "停車場管理",
+      "desc": "停車場管理平臺，提供停車場、通道、裝置、停車記錄、車輛型別及計費規則管理"
+    },
+    "1600": {
+      "name": "智慧樓宇",
+      "desc": "智慧樓宇綜合管理平臺，提供消防、照明、門禁、道閘、能耗、安防、協議接入及第三方系統對接等一體化管理"
+    },
+    "1700": {
+      "name": "雲邊管理",
+      "desc": "雲邊協同（雲端），管理邊緣節點授權、license 簽發與線上狀態"
+    },
+    "500": {
+      "name": "運營中心",
+      "desc": "運營中心商城，提供產品套餐購買、訂單管理及充值服務"
+    }
+  }
+}

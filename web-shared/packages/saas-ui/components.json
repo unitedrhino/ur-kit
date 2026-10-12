@@ -1,0 +1,19 @@
+{
+  "$schema": "https://shadcn-vue.com/schema.json",
+  "style": "new-york",
+  "typescript": true,
+  "tailwind": {
+    "config": "tailwind.config.mjs",
+    "css": "src/styles.css",
+    "baseColor": "slate",
+    "cssVariables": true,
+    "prefix": ""
+  },
+  "aliases": {
+    "components": "@unitedrhino/saas-ui/components",
+    "composables": "@unitedrhino/saas-ui/composables",
+    "lib": "@unitedrhino/saas-ui/lib",
+    "ui": "@unitedrhino/saas-ui/ui",
+    "utils": "@unitedrhino/saas-ui/lib/utils"
+  }
+}

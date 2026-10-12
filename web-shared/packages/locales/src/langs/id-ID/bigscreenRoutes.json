@@ -1,0 +1,13 @@
+{
+  "preview": "Pratinjau layar besar",
+  "manage": "Manajemen layar besar",
+  "projects": "Proyek layar besar",
+  "components": "Manajemen komponen",
+  "templates": "Manajemen templat",
+  "dataSources": "Manajemen sumber data",
+  "datasets": "Manajemen kumpulan data",
+  "assets": "Perpustakaan sumber daya",
+  "editDataset": "Edit kumpulan data",
+  "editScreen": "Pengeditan layar besar",
+  "editComponent": "Pengeditan komponen"
+}

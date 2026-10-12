@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "请输入{0}",
+    "selectRequired": "请选择{0}",
+    "minLength": "{0}至少{1}个字符",
+    "maxLength": "{0}最多{1}个字符",
+    "length": "{0}长度必须为{1}个字符",
+    "alreadyExists": "{0} `{1}` 已存在",
+    "startWith": "{0}必须以 {1} 开头",
+    "invalidURL": "请输入有效的链接"
+  },
+  "actionTitle": {
+    "edit": "修改{0}",
+    "create": "新增{0}",
+    "delete": "删除{0}",
+    "view": "查看{0}",
+    "import": "导入{0}",
+    "export": "导出{0}",
+    "exportSelected": "导出选中{0}",
+    "refresh": "刷新{0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "确定删除 {0} 吗？",
+    "deleting": "正在删除 {0} ...",
+    "deleteSuccess": "{0} 删除成功",
+    "operationSuccess": "操作成功",
+    "operationFailed": "操作失败",
+    "loadFailed": "加载失败，请重试",
+    "executeFailed": "执行失败",
+    "createFailed": "创建失败",
+    "publishFailedManual": "发布工具失败，请到工具页手动发布",
+    "sendFailed": "发送失败",
+    "previewFailed": "影响预览失败",
+    "undoFailed": "撤销失败",
+    "rejectFailed": "驳回失败",
+    "generateFailed": "生成失败",
+    "approveFailed": "审批失败",
+    "validateFailed": "校验失败",
+    "queryFailed": "查询失败",
+    "markReadFailed": "标记已读失败，请稍后重试",
+    "clearFailed": "清空失败，请稍后重试",
+    "setCurrentFailed": "设为当前失败"
+  },
+  "placeholder": {
+    "input": "请输入",
+    "select": "请选择"
+  },
+  "upload": {
+    "image": "上传图片",
+    "selectFile": "选择文件"
+  },
+  "dataTable": {
+    "columns": "列",
+    "toggleColumns": "切换列显示",
+    "selectedRows": "已选 {selected} / {rows} 行",
+    "totalRows": "共 {total} 条",
+    "rowsPerPage": "每页条数",
+    "pageDetail": "第 {page} / {totalPages} 页",
+    "firstPage": "首页",
+    "previousPage": "上一页",
+    "nextPage": "下一页",
+    "lastPage": "末页",
+    "loading": "加载中...",
+    "empty": "暂无数据",
+    "resizeColumn": "拖动调整列宽",
+    "sortAscending": "升序",
+    "sortDescending": "降序",
+    "hideColumn": "隐藏列"
+  },
+  "captcha": {
+    "title": "请完成安全验证",
+    "sliderSuccessText": "验证通过",
+    "sliderDefaultText": "请按住滑块拖动",
+    "sliderRotateDefaultTip": "点击图片可刷新",
+    "sliderTranslateDefaultTip": "点击图片可刷新",
+    "sliderRotateFailTip": "验证失败",
+    "sliderRotateSuccessTip": "验证成功，耗时{0}秒",
+    "sliderTranslateFailTip": "验证失败",
+    "sliderTranslateSuccessTip": "验证成功，耗时{0}秒",
+    "alt": "支持img标签src属性值",
+    "refreshAriaLabel": "刷新验证码",
+    "confirmAriaLabel": "确认选择",
+    "confirm": "确认",
+    "pointAriaLabel": "点击点",
+    "clickInOrder": "请依次点击"
+  },
+  "iconPicker": {
+    "placeholder": "选择一个图标",
+    "search": "搜索图标..."
+  },
+  "jsonViewer": {
+    "copy": "复制",
+    "copied": "已复制"
+  },
+  "fallback": {
+    "pageNotFound": "哎呀！未找到页面",
+    "pageNotFoundDesc": "抱歉，我们无法找到您要找的页面。",
+    "forbidden": "哎呀！访问被拒绝",
+    "forbiddenDesc": "抱歉，您没有权限访问此页面。",
+    "internalError": "哎呀！出错了",
+    "internalErrorDesc": "抱歉，服务器遇到错误。",
+    "offline": "离线页面",
+    "offlineError": "哎呀！网络错误",
+    "offlineErrorDesc": "抱歉，无法连接到互联网，请检查您的网络连接并重试。",
+    "comingSoon": "即将推出",
+    "http": {
+      "requestTimeout": "请求超时，请稍后再试。",
+      "networkError": "网络异常，请检查您的网络连接后重试。",
+      "badRequest": "请求错误。请检查您的输入并重试。",
+      "unauthorized": "登录认证过期，请重新登录后继续。",
+      "forbidden": "禁止访问, 您没有权限访问此资源。",
+      "notFound": "未找到, 请求的资源不存在。",
+      "internalServerError": "内部服务器错误，请稍后再试。",
+      "licenseRestricted": "license 未激活或已过期，请联系供应商激活/续期"
+    }
+  },
+  "widgets": {
+    "document": "文档",
+    "qa": "问题 & 帮助",
+    "setting": "设置",
+    "logoutTip": "是否退出登录？",
+    "viewAll": "查看所有消息",
+    "notifications": "通知",
+    "markAllAsRead": "全部标记为已读",
+    "markAsRead": "标记为已读",
+    "clearNotifications": "清空",
+    "checkUpdatesTitle": "新版本可用",
+    "checkUpdatesDescription": "点击刷新以获取最新版本",
+    "search": {
+      "title": "搜索",
+      "searchNavigate": "搜索导航菜单",
+      "select": "选择",
+      "navigate": "导航",
+      "close": "关闭",
+      "noResults": "未找到搜索结果",
+      "noRecent": "没有搜索历史",
+      "recent": "搜索历史"
+    },
+    "lockScreen": {
+      "title": "锁定屏幕",
+      "screenButton": "锁定",
+      "password": "密码",
+      "placeholder": "请输入锁屏密码",
+      "unlock": "点击解锁",
+      "errorPasswordTip": "密码错误，请重新输入",
+      "backToLogin": "返回登录",
+      "entry": "进入系统"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "大厅",
+      "desc": "应用大厅，提供各应用统一入口与导航"
+    },
+    "100": {
+      "name": "平台管理",
+      "desc": "平台运营管理后台，涵盖套餐、订单、客户及系统配置"
+    },
+    "200": {
+      "name": "物联网",
+      "desc": "物联网设备全生命周期管理平台，支持设备接入、项目管理、区域管理、OTA升级及数据流转"
+    },
+    "300": {
+      "name": "系统管理",
+      "desc": "企业系统管理后台，提供企业信息维护、用户与角色管理、服务续期及AI智能体配置"
+    },
+    "600": {
+      "name": "物联网客户端",
+      "desc": "Web 物联网客户端，提供设备空间、设备地图、场景联动和基础系统配置"
+    },
+    "700": {
+      "name": "物联网客户端",
+      "desc": "物联网C端微信小程序，支持设备绑定与远程控制"
+    },
+    "800": {
+      "name": "物联网客户端",
+      "desc": "物联网安卓客户端，支持设备管理与实时监控"
+    },
+    "900": {
+      "name": "物联网客户端",
+      "desc": "物联网iOS客户端，支持设备管理与实时监控"
+    },
+    "1000": {
+      "name": "能耗中心",
+      "desc": "能源能耗管理中心，提供能耗监测、统计分析与节能优化"
+    },
+    "1200": {
+      "name": "电子合同",
+      "desc": "电子合同管理端，合同、模板、印章、供应商、审批管理"
+    },
+    "1201": {
+      "name": "电子合同用户端",
+      "desc": "电子合同用户端，合同签署、查看、工作区"
+    },
+    "1202": {
+      "name": "电子合同客户端",
+      "desc": "电子合同客户端管理"
+    },
+    "1500": {
+      "name": "停车场管理",
+      "desc": "停车场管理平台，提供停车场、通道、设备、停车记录、车辆类型及计费规则管理"
+    },
+    "1600": {
+      "name": "智慧楼宇",
+      "desc": "智慧楼宇综合管理平台，提供消防、照明、门禁、道闸、能耗、安防、协议接入及第三方系统对接等一体化管理"
+    },
+    "1700": {
+      "name": "云边管理",
+      "desc": "云边协同（云端），管理边缘节点授权、license 签发与在线状态"
+    },
+    "500": {
+      "name": "运营中心",
+      "desc": "运营中心商城，提供产品套餐购买、订单管理及充值服务"
+    }
+  }
+}

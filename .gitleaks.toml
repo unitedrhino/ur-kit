@@ -1,3 +1,5 @@
 # 合同清单仅含文件 SHA-256，排除高熵哈希误报；其他源码仍需扫描。
 [allowlist]
 paths = ['^contracts/manifest\.json$']
+# GoView 装饰组件 ID 与菜单翻译键属于公开的静态标识符，不是认证密钥。
+regexes = ['^Decorates0[1-6]$', '^orgPark\.ui\.carParkDetails2$']

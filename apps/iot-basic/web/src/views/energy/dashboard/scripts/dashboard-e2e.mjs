@@ -13,20 +13,23 @@
  *   - Playwright (使用仓库 e2e 目录下已安装的版本)
  *   - Chrome for Testing (ms-playwright 安装的 chromium)
  *
- * 环境变量（可选）：
+ * 环境变量：
  *   DASHBOARD_PORT   - dev server 端口，默认 3006
- *   DASHBOARD_USER   - 登录用户名，默认 administrator
- *   DASHBOARD_PASS   - 登录密码，默认 iThings666
- *   DASHBOARD_TENANT - 租户名，默认 豪廷中心
- *   DASHBOARD_PROJECT- 项目名，默认 豪庭测试项目
+ *   DASHBOARD_USER   - 登录用户名，必填
+ *   DASHBOARD_PASS   - 登录密码，必填
+ *   DASHBOARD_TENANT - 企业名，必填
+ *   DASHBOARD_PROJECT- 项目名，必填
  */
 
 // ---- 配置 ----
 const PORT = process.env.DASHBOARD_PORT || '3006';
-const USER = process.env.DASHBOARD_USER || 'administrator';
-const PASS = process.env.DASHBOARD_PASS || 'iThings666';
-const TENANT = process.env.DASHBOARD_TENANT || '豪廷中心';
-const PROJECT = process.env.DASHBOARD_PROJECT || '豪庭测试项目';
+const USER = process.env.DASHBOARD_USER;
+const PASS = process.env.DASHBOARD_PASS;
+const TENANT = process.env.DASHBOARD_TENANT;
+const PROJECT = process.env.DASHBOARD_PROJECT;
+if (!USER || !PASS || !TENANT || !PROJECT) {
+  throw new Error('DASHBOARD_USER、DASHBOARD_PASS、DASHBOARD_TENANT、DASHBOARD_PROJECT 均为必填');
+}
 const BASE = `http://localhost:${PORT}`;
 const HEADED = process.argv.includes('--headed');
 const FORCE_DEFAULT_DASHBOARD = process.env.DASHBOARD_FORCE_DEFAULT !== '0';

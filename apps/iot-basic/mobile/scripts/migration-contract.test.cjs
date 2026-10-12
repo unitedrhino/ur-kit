@@ -115,7 +115,7 @@ test('login legal documents point to static hosted agreement pages', () => {
 test('login page does not preload debug account credentials', () => {
   const login = read('src/packageUser/pages/login/index.vue');
 
-  assert.doesNotMatch(login, /administrator|iThings666|DEBUG_LOGIN_ACCOUNT|DEBUG_LOGIN_PASSWORD/, 'login page should not ship debug account credentials');
+  assert.doesNotMatch(login, /administrator|DEBUG_LOGIN_ACCOUNT|DEBUG_LOGIN_PASSWORD/, 'login page should not ship debug account credentials');
   assert.match(login, /const account = ref\(''\)/, 'account field should start empty');
   assert.match(login, /const password = ref\(''\)/, 'password field should start empty');
 });

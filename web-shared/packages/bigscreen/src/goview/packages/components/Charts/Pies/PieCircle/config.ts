@@ -1,0 +1,81 @@
+import cloneDeep from 'lodash/cloneDeep';
+
+import type { CreateComponentType } from '@/packages/index.type';
+import { echartOptionProfixHandle, PublicConfigClass } from '@/packages/public';
+
+import { PieCircleConfig } from './index';
+
+export const includes = [];
+
+const option = {
+  tooltip: {
+    show: true,
+    trigger: 'item',
+  },
+  legend: {
+    show: true,
+  },
+  dataset: 0.25,
+  percentMode: true,
+  maxValue: 100,
+  unit: '',
+  autoUnit: '',
+  unitAutoApplied: false,
+  displayDecimals: 2,
+  conditionalStyles: {
+    enabled: false,
+    rules: [] as Array<{
+      id: string;
+      operator: 'gt' | 'lt' | 'gte' | 'lte' | 'eq';
+      value: number;
+      color: string;
+    }>,
+  },
+  title: {
+    text: '25%',
+    x: 'center',
+    y: 'center',
+    textStyle: {
+      color: '#56B9F8',
+      fontSize: 30,
+    },
+  },
+  series: [
+    {
+      type: 'pie',
+      radius: ['75%', '80%'],
+      center: ['50%', '50%'],
+      hoverAnimation: true,
+      color: ['#00bcd44a', 'transparent'],
+      label: {
+        show: false,
+      },
+      data: [
+        {
+          value: [25],
+          itemStyle: {
+            color: '#03a9f4',
+            shadowBlur: 10,
+            shadowColor: '#97e2f5',
+          },
+        },
+        {
+          value: [75],
+          itemStyle: {
+            color: '#00bcd44a',
+            shadowBlur: 0,
+            shadowColor: '#00bcd44a',
+          },
+        },
+      ],
+    },
+  ],
+};
+
+export default class Config extends PublicConfigClass implements CreateComponentType {
+  public key: string = PieCircleConfig.key;
+
+  public chartConfig = cloneDeep(PieCircleConfig);
+
+  public option = echartOptionProfixHandle(option, includes);
+}

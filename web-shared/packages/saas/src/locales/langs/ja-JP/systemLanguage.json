@@ -1,0 +1,11 @@
+{
+  "platformTab": "言語",
+  "platformDefault": "プラットフォームの既定言語",
+  "platformHint": "個人言語が未設定でブラウザ言語が未対応の場合に使用されます。",
+  "personal": "言語",
+  "automatic": "既定",
+  "saved": "言語設定を保存しました",
+  "saveFailed": "言語設定の保存に失敗しました",
+  "menuIotProduct": "商品管理",
+  "backToConsole": "コンソールに戻る"
+}

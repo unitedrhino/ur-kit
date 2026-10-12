@@ -1,0 +1,8 @@
+{
+  "title": "Module access unavailable",
+  "message": "This account has no available module permissions. Ask an administrator to grant access and try again.",
+  "details": "Details",
+  "moduleName": "Module name",
+  "modulePath": "Module path",
+  "logout": "Sign out"
+}

@@ -1,0 +1,14 @@
+{
+  "title": "デモ",
+  "naive": "Naive UI",
+  "table": "テーブル",
+  "form": "フォーム",
+  "vben": {
+    "title": "プロジェクト",
+    "about": "概要",
+    "document": "ドキュメント",
+    "antdv": "Ant Design Vue 版",
+    "naive-ui": "Naive UI 版",
+    "element-plus": "Element Plus 版"
+  }
+}

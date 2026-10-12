@@ -1,0 +1,38 @@
+{
+  "apifox": {
+    "apiVersion": "2024-03-28",
+    "oasVersion": "3.0"
+  },
+  "projects": [
+    { "id": "4364111", "title": "联犀-core", "modelName": "core" },
+    { "id": "7194886", "title": "联犀-core-SaaS", "modelName": "core-SaaS" },
+    { "id": "5462970", "title": "联犀-things", "modelName": "things" },
+    { "id": "7755480", "title": "联犀-things-saas", "modelName": "things-saas" },
+    { "id": "6022582", "title": "联犀-企业版", "modelName": "things-ee" },
+    { "id": "7755481", "title": "联犀-企业版-saas", "modelName": "things-ee-saas" },
+    { "id": "4553042", "title": "应用模块", "modelName": "sale" }
+  ],
+  "openapiGenerator": {
+    "templateDir": "./typescript-axios",
+    "additionalProperties": {
+      "supportsES6": true,
+      "typescriptThreePlus": true,
+      "stringEnums": true,
+      "enumPropertyNaming": "UPPERCASE",
+      "withSeparateModelsAndApi": true,
+      "modelPropertyNaming": "camelCase",
+      "apiPackage": "apis",
+      "modelPackage": "models",
+      "generateSourceCodeOnly": true,
+      "removeOperationIdPrefix": true,
+      "useSingleRequestParameter": false,
+      "legacyDiscriminatorBehavior": false,
+      "disallowAdditionalPropertiesIfNotPresent": false
+    }
+  },
+  "output": {
+    "srcDir": "./src",
+    "modelsDir": "./src/models",
+    "apisDir": "./src/apis"
+  }
+}

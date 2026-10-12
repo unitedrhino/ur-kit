@@ -1,0 +1,11 @@
+{
+  "platformTab": "Sprache",
+  "platformDefault": "Standardplattformsprache",
+  "platformHint": "Wird verwendet, wenn keine persönliche Sprache festgelegt ist und die Browsersprache nicht unterstützt wird.",
+  "personal": "Sprache",
+  "automatic": "Standard",
+  "saved": "Spracheinstellungen gespeichert",
+  "saveFailed": "Spracheinstellungen konnten nicht gespeichert werden",
+  "menuIotProduct": "Produktverwaltung",
+  "backToConsole": "Zurück zur Konsole"
+}

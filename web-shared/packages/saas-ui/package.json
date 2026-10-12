@@ -1,0 +1,76 @@
+{
+  "name": "@unitedrhino/saas-ui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": [
+    "**/*.css"
+  ],
+  "scripts": {
+    "build": "pnpm unbuild"
+  },
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    },
+    "./components": {
+      "types": "./src/components/index.ts",
+      "default": "./src/components/index.ts"
+    },
+    "./components/*": {
+      "types": "./src/components/*/index.ts",
+      "default": "./src/components/*/index.ts"
+    },
+    "./lib/resize-click-guard": {
+      "types": "./src/lib/resize-click-guard.ts",
+      "default": "./src/lib/resize-click-guard.ts"
+    },
+    "./lib/utils": {
+      "types": "./src/lib/utils.ts",
+      "default": "./src/lib/utils.ts"
+    },
+    "./styles": {
+      "default": "./src/styles.css"
+    },
+    "./ui": {
+      "types": "./src/ui/index.ts",
+      "default": "./src/ui/index.ts"
+    },
+    "./ui/*": {
+      "types": "./src/ui/*/index.ts",
+      "default": "./src/ui/*/index.ts"
+    }
+  },
+  "imports": {
+    "#components/*": "./src/components/*",
+    "#composables/*": "./src/composables/*",
+    "#lib/*": "./src/lib/*",
+    "#ui/*": "./src/ui/*"
+  },
+  "dependencies": {
+    "@radix-icons/vue": "catalog:",
+    "@tanstack/vue-table": "catalog:",
+    "@vee-validate/zod": "catalog:",
+    "@vben/locales": "workspace:*",
+    "@vueuse/core": "catalog:",
+    "class-variance-authority": "catalog:",
+    "clsx": "catalog:",
+    "lucide-vue-next": "catalog:",
+    "reka-ui": "catalog:",
+    "tailwind-merge": "catalog:",
+    "vee-validate": "catalog:",
+    "vue": "catalog:",
+    "vue-sonner": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@vben/tailwind-config": "workspace:*",
+    "@vben/tsconfig": "workspace:*",
+    "shadcn-vue": "catalog:",
+    "unbuild": "catalog:",
+    "vitest": "catalog:"
+  }
+}

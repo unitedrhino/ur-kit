@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Selecione a organização ou equipe que deseja acessar.",
+  "notEnabledForOrg": "Esta organização não ativou este aplicativo; não é possível alternar para ela.",
+  "switchVerifyFailed": "Não foi possível verificar o acesso ao alternar de organização. Tente novamente mais tarde.",
+  "notEnabled": "Não ativado",
+  "noAvailableOrganizations": "Nenhuma organização disponível",
+  "backToLogin": "Voltar ao login",
+  "unauthorizedDescription": "Esta organização não ativou este aplicativo. Solicite acesso a um administrador.",
+  "unauthorizedGuide": "Para usar este aplicativo, peça a um administrador que ative o acesso no painel de administração."
+}

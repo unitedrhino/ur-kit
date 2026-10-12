@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "参加する組織またはチームを選択してください。",
+  "notEnabledForOrg": "この組織ではこのアプリが有効になっていないため、切り替えられません。",
+  "switchVerifyFailed": "組織の切り替え時にアクセス権を確認できませんでした。後でもう一度お試しください。",
+  "notEnabled": "未有効",
+  "noAvailableOrganizations": "選択できる組織がありません",
+  "backToLogin": "ログインに戻る",
+  "unauthorizedDescription": "この組織ではこのアプリが有効になっていません。管理者にアクセス権を依頼してください。",
+  "unauthorizedGuide": "このアプリを使用するには、組織の管理者に管理画面でアクセス権を有効にしてもらってください。"
+}

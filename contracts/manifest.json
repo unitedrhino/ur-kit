@@ -413,6 +413,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "3b15922c1dd7fd0449802c0c22287c5fabb56921",
+  "saas_commit": "6705c608946881825f08b174edbc2f91c95849a3",
   "schema": 1
 }

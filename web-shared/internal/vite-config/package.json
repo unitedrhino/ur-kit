@@ -1,0 +1,61 @@
+{
+  "name": "@vben/vite-config",
+  "version": "5.5.9",
+  "private": true,
+  "homepage": "https://github.com/vbenjs/vue-vben-admin",
+  "bugs": "https://github.com/vbenjs/vue-vben-admin/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vbenjs/vue-vben-admin.git",
+    "directory": "internal/vite-config"
+  },
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "stub": "pnpm unbuild --stub"
+  },
+  "files": [
+    "dist",
+    "runtime"
+  ],
+  "main": "./runtime/index.mjs",
+  "module": "./runtime/index.mjs",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./runtime/index.mjs"
+    }
+  },
+  "dependencies": {
+    "@intlify/unplugin-vue-i18n": "catalog:",
+    "@jspm/generator": "catalog:",
+    "@vitejs/plugin-vue": "catalog:",
+    "@vitejs/plugin-vue-jsx": "catalog:",
+    "archiver": "catalog:",
+    "cheerio": "catalog:",
+    "dotenv": "catalog:",
+    "get-port": "catalog:",
+    "html-minifier-terser": "catalog:",
+    "jiti": "^2.5.1",
+    "nitropack": "catalog:",
+    "resolve.exports": "catalog:",
+    "rollup-plugin-visualizer": "catalog:",
+    "sass": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-compression": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vite-plugin-html": "catalog:",
+    "vite-plugin-lazy-import": "catalog:",
+    "vite-plugin-pwa": "catalog:",
+    "vite-plugin-vue-devtools": "catalog:"
+  },
+  "devDependencies": {
+    "@pnpm/workspace.read-manifest": "catalog:",
+    "@types/archiver": "catalog:",
+    "@types/html-minifier-terser": "catalog:",
+    "@vben/node-utils": "workspace:*",
+    "dayjs": "catalog:",
+    "rollup": "catalog:"
+  }
+}

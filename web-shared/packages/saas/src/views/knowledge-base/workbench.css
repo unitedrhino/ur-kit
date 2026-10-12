@@ -1,0 +1,111 @@
+/* 文件说明：知识库模块的紧凑规格；仅约束本模块标记，避免影响全局组件和第三方预览内容。 */
+.kb-ui .kb-control {
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  transition-duration: 200ms;
+}
+
+/* 默认 Tabs 的浅灰底与辅助文字不足 4.5:1，模块内使用正文语义色保持可读。 */
+.kb-ui [role='tab'] {
+  color: hsl(var(--foreground));
+}
+
+/* 沿用当前语义色相，局部加深实心按钮，保证常规及悬停状态的白色文字对比度。 */
+.kb-ui .kb-control.bg-primary {
+  background-color: color-mix(in srgb, hsl(var(--primary)) 80%, black);
+}
+.kb-ui .kb-control.bg-primary:hover {
+  background-color: color-mix(in srgb, hsl(var(--primary)) 72%, black);
+}
+.kb-ui .kb-control.bg-destructive {
+  background-color: color-mix(in srgb, hsl(var(--destructive)) 80%, black);
+}
+.kb-ui .kb-control.bg-destructive:hover {
+  background-color: color-mix(in srgb, hsl(var(--destructive)) 72%, black);
+}
+.kb-ui .text-destructive {
+  color: color-mix(in srgb, hsl(var(--destructive)) 80%, black);
+}
+.dark .kb-ui .text-destructive {
+  color: hsl(var(--destructive));
+}
+
+/* 树节点必须允许名称收缩，否则重型 Tree 的默认内容宽度会撑出横向滚动条。 */
+.kb-directory .n-spin-content {
+  height: 100%;
+  min-height: 0;
+}
+.kb-directory .n-tree-node {
+  min-height: 36px;
+  align-items: center;
+  border-radius: calc(var(--radius) - 2px);
+}
+.kb-directory .n-tree-node-content {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+}
+.kb-directory .n-tree-node-content__text {
+  min-width: 0;
+  overflow: hidden;
+}
+.kb-tree-label {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  outline-offset: -2px;
+}
+.kb-tree-label:focus-visible {
+  outline: 2px solid hsl(var(--ring));
+  border-radius: calc(var(--radius) - 2px);
+}
+.kb-ui .kb-node-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+}
+
+/* 拖拽调宽期间锁定全局光标与文本选择，避免指针滑出手柄后选中页面文字。 */
+body.kb-dialog-resizing {
+  cursor: col-resize;
+  user-select: none;
+}
+
+/* 触屏保持足够点击面积；桌面继续使用紧凑工具栏。 */
+@media (pointer: coarse) {
+  .kb-ui .kb-control,
+  .kb-ui [role='tab'],
+  .kb-ui .kb-node-more {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  .kb-ui [role='tablist'] {
+    height: auto;
+  }
+  .kb-directory .n-tree-node {
+    min-height: 44px;
+  }
+  .kb-ui[role='dialog'] > button.absolute {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    top: 8px;
+    right: 8px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .kb-ui .kb-control,
+  .kb-ui [role='tab'],
+  .kb-ui .kb-panel,
+  .kb-ui .kb-node-more {
+    transition: none;
+  }
+  .kb-ui[role='dialog'] {
+    animation: none;
+  }
+}

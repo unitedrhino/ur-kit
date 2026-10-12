@@ -1,0 +1,14 @@
+{
+  "title": "Demo",
+  "naive": "Naive UI",
+  "table": "Tabel",
+  "form": "Formulir",
+  "vben": {
+    "title": "Proyek",
+    "about": "Tentang",
+    "document": "Dokumentasi",
+    "antdv": "Versi Ant Design Vue",
+    "naive-ui": "Versi Naive UI",
+    "element-plus": "Versi Element Plus"
+  }
+}

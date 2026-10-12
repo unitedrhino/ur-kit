@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Seleccione la organización o el equipo al que desea entrar.",
+  "notEnabledForOrg": "Esta organización no ha habilitado la aplicación; no puede cambiar a ella.",
+  "switchVerifyFailed": "No se pudo verificar el acceso al cambiar de organización. Inténtelo más tarde.",
+  "notEnabled": "No habilitada",
+  "noAvailableOrganizations": "No hay organizaciones disponibles",
+  "backToLogin": "Volver al inicio de sesión",
+  "unauthorizedDescription": "Esta organización no ha habilitado la aplicación. Solicite acceso a un administrador.",
+  "unauthorizedGuide": "Para usar esta aplicación, pida a un administrador que habilite el acceso en el panel de administración."
+}

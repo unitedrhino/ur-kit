@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@vben/tsconfig/library.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["@vben-core/typings/vue-router"],
+    "noUnusedLocals": false,        // 关掉 TS6133 未使用变量
+    "noUnusedParameters": false,    // 关掉未使用参数
+    "noImplicitAny": false,         // 关掉 TS7006 隐式 any
+    "paths": {
+      "#/*": ["./src/*"],
+      "@/*": ["./src/goview/*"], 
+      "@app/shared/*": ["./src/shared/*"],
+      "@app/views/bigscreen/*": ["./src/views/bigscreen/*"]    // goview 内部的 @/ 别名
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"],
+  "exclude": ["node_modules"]
+}

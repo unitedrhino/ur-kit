@@ -1,0 +1,15 @@
+{
+  "tutorial": "教程",
+  "thisPageGuide": "本页教程 · {title}",
+  "keyPoints": "操作要点",
+  "keyParameters": "关键参数",
+  "copied": "已复制",
+  "copy": "复制",
+  "viewFullGuide": "查看完整教程",
+  "helpAndTutorials": "帮助与教程",
+  "onboarding": "新手引导",
+  "onboardingDescription": "按照步骤了解并开始使用",
+  "openDocument": "打开文档",
+  "officialDocs": "官网文档",
+  "feedback": "问题反馈"
+}

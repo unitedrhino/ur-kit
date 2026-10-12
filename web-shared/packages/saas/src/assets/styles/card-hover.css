@@ -1,0 +1,33 @@
+/* 全局增强 Card 组件的 hover 效果 */
+/* 针对 Naive UI 的 NCard 组件，当设置了 hoverable 属性时生效 */
+
+/* 确保所有 hoverable 的 Card 都有平滑过渡 */
+.n-card.n-card--hoverable {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+/* 增强 hover 时的视觉效果 */
+.n-card.n-card--hoverable:hover {
+  /* 提升阴影效果，使 hover 更明显 */
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+  
+  /* 轻微上移，增强交互感 */
+  transform: translateY(-1px);
+  
+  /* 增强边框颜色，使用主题色 */
+  border-color: hsl(var(--primary) / 0.4) !important;
+}
+
+/* 亮色主题下的 hover 效果 */
+:not(.dark) .n-card.n-card--hoverable:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15), 0 6px 16px rgba(0, 0, 0, 0.1) !important;
+  border-color: hsl(var(--primary) / 0.4) !important;
+}
+
+/* 暗色主题下的 hover 效果 */
+.dark .n-card.n-card--hoverable:hover {
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5), 0 6px 16px rgba(0, 0, 0, 0.35) !important;
+  border-color: hsl(var(--primary) / 0.6) !important;
+}
+

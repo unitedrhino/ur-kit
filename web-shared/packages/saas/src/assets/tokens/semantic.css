@@ -1,0 +1,245 @@
+/**
+ * Layer 2 — Semantic Tokens（语义令牌 / 角色令牌）
+ *
+ * 将 Primitive Tokens 赋予语义角色（primary、destructive、success 等）。
+ * 本文件 override @core/base/design 中的硬编码 HSL 值，
+ * 改为通过 var(--primitive) 引用，实现"换主题 = 换色板"。
+ *
+ * 覆盖规则：
+ * - 亮色语义令牌写在 :root 选择器（CASCADE 覆盖 @core 的 :root）
+ * - 暗色语义令牌写在 .dark 选择器
+ * - 主题变体写在 [data-theme='xxx'] （相同特异度，依加载顺序覆盖）
+ *
+ * 注意：不覆盖 @core 的布局型令牌（--radius、--sidebar、--header 等），
+ * 只覆盖颜色令牌。
+ */
+
+/* ============================================================
+   亮色模式 — 默认主题（Blue）
+   ============================================================ */
+:root {
+  /* 主题色：指向 primitive blue */
+  --primary: var(--blue-500);
+  --primary-foreground: var(--gray-0);
+
+  /* 语义色 */
+  --destructive: var(--red-600);
+  --destructive-foreground: var(--gray-0);
+
+  --success: var(--success-green-500);
+  --success-foreground: var(--gray-0);
+
+  --warning: var(--warning-yellow-500);
+  --warning-foreground: var(--gray-0);
+
+  /* 中性色 */
+  --background: var(--gray-0);
+  --background-deep: 216 20% 95%;
+  --foreground: 210 6% 21%;
+
+  --card: var(--gray-0);
+  --card-foreground: 222 84% 5%;
+
+  --popover: var(--gray-0);
+  --popover-foreground: 222 84% 5%;
+
+  --muted: var(--gray-100);
+  --muted-foreground: var(--gray-600);
+
+  --secondary: var(--gray-100);
+  --secondary-foreground: 240 6% 10%;
+
+  --accent: var(--gray-100);
+  --accent-foreground: 240 6% 10%;
+
+  --border: var(--gray-200);
+  --input: var(--gray-200);
+}
+
+/* ============================================================
+   暗色模式 — 默认主题
+   ============================================================ */
+.dark,
+.dark[data-theme='custom'],
+.dark[data-theme='default'] {
+  /* 主题色：暗色下 primary 保持同一色阶 */
+  --primary: var(--blue-500);
+  --primary-foreground: var(--gray-0);
+
+  /* 语义色 */
+  --destructive: var(--red-500);
+  --destructive-foreground: var(--gray-0);
+
+  --success: var(--success-green-500);
+  --success-foreground: var(--gray-0);
+
+  --warning: var(--warning-yellow-500);
+  --warning-foreground: var(--gray-0);
+
+  /* 中性色 */
+  --muted: var(--gray-850);
+  --muted-foreground: var(--gray-500);
+
+  --secondary: var(--gray-800);
+  --secondary-foreground: var(--gray-0);
+
+  --accent: var(--gray-800);
+  --accent-foreground: var(--gray-0);
+
+  --border: var(--gray-800);
+}
+
+/* ============================================================
+   主题变体（亮色）— Violet
+   ============================================================ */
+[data-theme='violet'] {
+  --primary: var(--violet-500);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--violet-500);
+}
+
+/* 暗色 Violet */
+.dark[data-theme='violet'],
+[data-theme='violet'] .dark {
+  --primary: var(--violet-500);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--violet-500);
+}
+
+/* ============================================================
+   主题变体（亮色）— Pink
+   ============================================================ */
+[data-theme='pink'] {
+  --primary: var(--pink-500);
+  --primary-foreground: 356 100% 97%;
+  --ring: var(--pink-500);
+}
+
+.dark[data-theme='pink'],
+[data-theme='pink'] .dark {
+  --primary: var(--pink-500);
+  --primary-foreground: 356 100% 97%;
+  --ring: var(--pink-500);
+}
+
+/* ============================================================
+   主题变体（亮色）— Rose
+   ============================================================ */
+[data-theme='rose'] {
+  --primary: var(--rose-500);
+  --primary-foreground: 0 86% 97%;
+  --ring: var(--rose-500);
+}
+
+.dark[data-theme='rose'],
+[data-theme='rose'] .dark {
+  --primary: var(--rose-500);
+  --primary-foreground: 0 86% 97%;
+  --ring: var(--rose-500);
+}
+
+/* ============================================================
+   主题变体（亮色）— Sky Blue
+   ============================================================ */
+[data-theme='sky-blue'] {
+  --primary: var(--sky-500);
+  --primary-foreground: 210 40% 98%;
+  --ring: var(--sky-500);
+}
+
+.dark[data-theme='sky-blue'],
+[data-theme='sky-blue'] .dark {
+  --primary: var(--sky-500);
+  --primary-foreground: 210 40% 98%;
+  --ring: var(--sky-500);
+}
+
+/* ============================================================
+   主题变体 — Deep Blue（与 sky-blue 共用色板）
+   ============================================================ */
+[data-theme='deep-blue'] {
+  --primary: 224 76% 48%;
+  --primary-foreground: 210 40% 98%;
+  --ring: 224 76% 48%;
+}
+
+.dark[data-theme='deep-blue'],
+[data-theme='deep-blue'] .dark {
+  --primary: 224 76% 48%;
+  --primary-foreground: 210 40% 98%;
+  --ring: 224 76% 48%;
+}
+
+/* ============================================================
+   主题变体 — Green
+   ============================================================ */
+[data-theme='green'] {
+  --primary: var(--green-500);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--green-500);
+}
+
+.dark[data-theme='green'],
+[data-theme='green'] .dark {
+  --primary: var(--green-500);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--green-500);
+}
+
+/* ============================================================
+   主题变体 — Deep Green
+   ============================================================ */
+[data-theme='deep-green'] {
+  --primary: var(--green-700);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--green-700);
+}
+
+.dark[data-theme='deep-green'],
+[data-theme='deep-green'] .dark {
+  --primary: var(--green-600);
+  --primary-foreground: 210 20% 98%;
+  --ring: var(--green-600);
+}
+
+/* ============================================================
+   主题变体 — Orange
+   ============================================================ */
+[data-theme='orange'] {
+  --primary: var(--orange-500);
+  --primary-foreground: 60 9% 98%;
+  --ring: var(--orange-600);
+}
+
+.dark[data-theme='orange'],
+[data-theme='orange'] .dark {
+  --primary: var(--orange-500);
+  --primary-foreground: 60 9% 98%;
+  --ring: var(--orange-600);
+}
+
+/* ============================================================
+   主题变体 — Yellow
+   ============================================================ */
+[data-theme='yellow'] {
+  --primary: var(--yellow-500);
+  --primary-foreground: 26 83% 14%;
+  --ring: var(--yellow-700);
+}
+
+.dark[data-theme='yellow'],
+[data-theme='yellow'] .dark {
+  --primary: var(--yellow-500);
+  --primary-foreground: 26 83% 14%;
+  --ring: var(--yellow-700);
+}
+
+/* ============================================================
+   主题变体 — Zinc / Neutral / Slate / Gray（中性主题：主色由框架控制）
+   ============================================================ */
+[data-theme='zinc'],
+[data-theme='neutral'],
+[data-theme='slate'],
+[data-theme='gray'] {
+  /* 这几个主题的 primary 由 @core 中用户设置决定，semantic 层不干涉 */
+}

@@ -1,0 +1,13 @@
+{
+  "preview": "Vorschau auf großem Bildschirm",
+  "manage": "Verwaltung großer Bildschirme",
+  "projects": "Großbildprojekt",
+  "components": "Komponentenverwaltung",
+  "templates": "Vorlagenverwaltung",
+  "dataSources": "Datenquellenverwaltung",
+  "datasets": "Datensatzverwaltung",
+  "assets": "Ressourcenbibliothek",
+  "editDataset": "Datensatz bearbeiten",
+  "editScreen": "Bearbeitung auf großen Bildschirmen",
+  "editComponent": "Komponentenbearbeitung"
+}

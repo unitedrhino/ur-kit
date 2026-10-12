@@ -1,0 +1,14 @@
+{
+  "title": "ڈیموز",
+  "naive": "Naive UI",
+  "table": "ٹیبل",
+  "form": "فارم",
+  "vben": {
+    "title": "پروجیکٹ",
+    "about": "تعارف",
+    "document": "دستاویز",
+    "antdv": "Ant Design Vue ورژن",
+    "naive-ui": "Naive UI ورژن",
+    "element-plus": "Element Plus ورژن"
+  }
+}

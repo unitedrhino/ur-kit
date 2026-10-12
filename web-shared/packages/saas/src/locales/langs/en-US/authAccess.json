@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Select the organization or team you want to enter.",
+  "notEnabledForOrg": "This organization has not enabled this app, so you cannot switch to it.",
+  "switchVerifyFailed": "Could not verify app access while switching organizations. Try again later.",
+  "notEnabled": "Not enabled",
+  "noAvailableOrganizations": "No organizations available",
+  "backToLogin": "Back to login",
+  "unauthorizedDescription": "This organization has not enabled this app. Contact an administrator to request access.",
+  "unauthorizedGuide": "To use this app, ask an organization administrator to enable access in the admin console."
+}

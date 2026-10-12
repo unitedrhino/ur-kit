@@ -1,0 +1,13 @@
+{
+  "preview": "Screen Preview",
+  "manage": "Screen Management",
+  "projects": "Screen Projects",
+  "components": "Component Management",
+  "templates": "Template Management",
+  "dataSources": "Data Source Management",
+  "datasets": "Dataset Management",
+  "assets": "Asset Library",
+  "editDataset": "Edit Dataset",
+  "editScreen": "Edit Screen",
+  "editComponent": "Edit Component"
+}

@@ -1,0 +1,13 @@
+{
+  "preview": "大画面プレビュー",
+  "manage": "大画面の管理",
+  "projects": "大画面プロジェクト",
+  "components": "コンポーネント管理",
+  "templates": "テンプレート管理",
+  "dataSources": "データソース管理",
+  "datasets": "データセット管理",
+  "assets": "リソースライブラリ",
+  "editDataset": "データセットの編集",
+  "editScreen": "大画面編集",
+  "editComponent": "コンポーネントの編集"
+}

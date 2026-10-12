@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": "লগইন",
+    "register": "রেজিস্ট্রেশন",
+    "codeLogin": "কোড লগইন",
+    "qrcodeLogin": "QR কোড লগইন",
+    "forgetPassword": "পাসওয়ার্ড ভুলে গেছেন"
+  },
+  "dashboard": {
+    "title": "ড্যাশবোর্ড",
+    "analytics": "বিশ্লেষণ",
+    "workspace": "ওয়ার্কস্পেস"
+  }
+}

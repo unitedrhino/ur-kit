@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "extends": "@vben/tsconfig/web.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@unitedrhino/saas-ui": ["./src"],
+      "@unitedrhino/saas-ui/components": ["./src/components"],
+      "@unitedrhino/saas-ui/components/*": ["./src/components/*"],
+      "@unitedrhino/saas-ui/composables": ["./src/composables"],
+      "@unitedrhino/saas-ui/composables/*": ["./src/composables/*"],
+      "@unitedrhino/saas-ui/lib/*": ["./src/lib/*"],
+      "@unitedrhino/saas-ui/ui": ["./src/ui"],
+      "@unitedrhino/saas-ui/ui/*": ["./src/ui/*"]
+    }
+  },
+  "include": ["src", "*.test.ts"],
+  "exclude": ["dist", "node_modules"]
+}

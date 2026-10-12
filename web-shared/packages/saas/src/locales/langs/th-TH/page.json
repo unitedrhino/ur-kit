@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": "เข้าสู่ระบบ",
+    "register": "ลงทะเบียน",
+    "codeLogin": "รหัสยืนยันเข้าสู่ระบบ",
+    "qrcodeLogin": "เข้าสู่ระบบรหัส QR",
+    "forgetPassword": "ลืมรหัสผ่าน"
+  },
+  "dashboard": {
+    "title": "ภาพรวม",
+    "analytics": "หน้าการวิเคราะห์",
+    "workspace": "โต๊ะทำงาน"
+  }
+}

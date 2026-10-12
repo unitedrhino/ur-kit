@@ -1,0 +1,8 @@
+{
+  "title": "Kein Zugriff auf das Modul",
+  "message": "Dieses Konto hat keine Modulberechtigung. Bitten Sie einen Administrator um Zugriff und versuchen Sie es erneut.",
+  "details": "Details",
+  "moduleName": "Modulname",
+  "modulePath": "Modulpfad",
+  "logout": "Abmelden"
+}

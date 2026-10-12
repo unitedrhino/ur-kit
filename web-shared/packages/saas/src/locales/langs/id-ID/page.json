@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": "Masuk",
+    "register": "Daftar",
+    "codeLogin": "Masuk dengan Kode",
+    "qrcodeLogin": "Masuk dengan Kode QR",
+    "forgetPassword": "Lupa Kata Sandi"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "analytics": "Analitik",
+    "workspace": "Ruang Kerja"
+  }
+}

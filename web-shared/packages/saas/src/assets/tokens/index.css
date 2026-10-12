@@ -1,0 +1,20 @@
+/**
+ * SaaS Design System — Token Index
+ *
+ * 3 层令牌架构导入入口，加载顺序：
+ *   1. primitives.css  — 原子色板和基础值（无语义）
+ *   2. semantic.css    — 语义令牌（override @core 的硬编码 HSL 值）
+ *   3. components.css  — 组件令牌（具体组件的设计决策）
+ *
+ * 使用方式（在应用的 main.ts 或全局 CSS 中）：
+ *   import '@vben/saas/tokens';
+ *   or
+ *   @import '@vben/saas/src/assets/tokens/index.css';
+ *
+ * 层级关系：
+ *   Primitive ← Semantic ← Component ← 组件代码
+ */
+
+@import './primitives.css';
+@import './semantic.css';
+@import './components.css';

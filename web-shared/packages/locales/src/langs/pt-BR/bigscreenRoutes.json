@@ -1,0 +1,13 @@
+{
+  "preview": "Visualização em tela grande",
+  "manage": "Gerenciamento de tela grande",
+  "projects": "Projeto de tela grande",
+  "components": "Gerenciamento de componentes",
+  "templates": "Gerenciamento de modelos",
+  "dataSources": "Gerenciamento de fonte de dados",
+  "datasets": "Gerenciamento de conjunto de dados",
+  "assets": "Biblioteca de recursos",
+  "editDataset": "Editar conjunto de dados",
+  "editScreen": "Edição em tela grande",
+  "editComponent": "Edição de componentes"
+}

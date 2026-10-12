@@ -1,0 +1,8 @@
+{
+  "title": "Akses modul tidak tersedia",
+  "message": "Akun ini tidak memiliki izin modul. Minta akses kepada administrator lalu coba lagi.",
+  "details": "Detail",
+  "moduleName": "Nama modul",
+  "modulePath": "Jalur modul",
+  "logout": "Keluar"
+}

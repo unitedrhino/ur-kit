@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Pilih organisasi atau tim yang ingin Anda masuki.",
+  "notEnabledForOrg": "Organisasi ini belum mengaktifkan aplikasi ini, sehingga Anda tidak dapat beralih ke sana.",
+  "switchVerifyFailed": "Akses aplikasi tidak dapat diverifikasi saat berpindah organisasi. Coba lagi nanti.",
+  "notEnabled": "Belum diaktifkan",
+  "noAvailableOrganizations": "Tidak ada organisasi yang tersedia",
+  "backToLogin": "Kembali ke login",
+  "unauthorizedDescription": "Organisasi ini belum mengaktifkan aplikasi ini. Hubungi administrator untuk meminta akses.",
+  "unauthorizedGuide": "Untuk menggunakan aplikasi ini, minta administrator organisasi mengaktifkan akses di konsol admin."
+}

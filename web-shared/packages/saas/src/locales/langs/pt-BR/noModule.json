@@ -1,0 +1,8 @@
+{
+  "title": "Acesso ao módulo indisponível",
+  "message": "Esta conta não tem permissão para nenhum módulo. Solicite acesso a um administrador e tente novamente.",
+  "details": "Detalhes",
+  "moduleName": "Nome do módulo",
+  "modulePath": "Caminho do módulo",
+  "logout": "Sair"
+}

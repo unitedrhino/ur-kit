@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "Bitte {0} eingeben",
+    "selectRequired": "Bitte {0} auswählen",
+    "minLength": "{0} muss mindestens {1} Zeichen lang sein",
+    "maxLength": "{0} darf höchstens {1} Zeichen lang sein",
+    "length": "{0} muss genau {1} Zeichen lang sein",
+    "alreadyExists": "{0} `{1}` ist bereits vorhanden",
+    "startWith": "{0} muss mit `{1}` beginnen",
+    "invalidURL": "Bitte eine gültige URL eingeben"
+  },
+  "actionTitle": {
+    "edit": "{0} bearbeiten",
+    "create": "{0} erstellen",
+    "delete": "{0} löschen",
+    "view": "{0} anzeigen",
+    "import": "{0} importieren",
+    "export": "{0} exportieren",
+    "exportSelected": "Ausgewählte {0} exportieren",
+    "refresh": "{0} aktualisieren"
+  },
+  "actionMessage": {
+    "deleteConfirm": "Möchten Sie {0} wirklich löschen?",
+    "deleting": "{0} wird gelöscht ...",
+    "deleteSuccess": "{0} erfolgreich gelöscht",
+    "operationSuccess": "Vorgang erfolgreich",
+    "operationFailed": "Vorgang fehlgeschlagen",
+    "loadFailed": "Laden fehlgeschlagen. Bitte erneut versuchen.",
+    "executeFailed": "Ausführung fehlgeschlagen",
+    "createFailed": "Erstellung fehlgeschlagen",
+    "publishFailedManual": "Veröffentlichung fehlgeschlagen. Veröffentlichen Sie das Tool manuell auf der Toolseite.",
+    "sendFailed": "Senden fehlgeschlagen",
+    "previewFailed": "Auswirkungsvorschau fehlgeschlagen",
+    "undoFailed": "Rückgängig machen fehlgeschlagen",
+    "rejectFailed": "Ablehnung fehlgeschlagen",
+    "generateFailed": "Erstellung fehlgeschlagen",
+    "approveFailed": "Genehmigung fehlgeschlagen",
+    "validateFailed": "Validierung fehlgeschlagen",
+    "queryFailed": "Abfrage fehlgeschlagen",
+    "markReadFailed": "Als gelesen markieren fehlgeschlagen. Bitte erneut versuchen.",
+    "clearFailed": "Leeren fehlgeschlagen. Bitte erneut versuchen.",
+    "setCurrentFailed": "Als aktuell festlegen fehlgeschlagen"
+  },
+  "placeholder": {
+    "input": "Bitte eingeben",
+    "select": "Bitte auswählen"
+  },
+  "upload": {
+    "image": "Bild hochladen",
+    "selectFile": "Datei auswählen"
+  },
+  "dataTable": {
+    "columns": "Spalten",
+    "toggleColumns": "Spaltenanzeige ändern",
+    "selectedRows": "{selected} von {rows} Zeilen ausgewählt",
+    "totalRows": "Insgesamt {total} Zeilen",
+    "rowsPerPage": "Zeilen pro Seite",
+    "pageDetail": "Seite {page} von {totalPages}",
+    "firstPage": "Erste Seite",
+    "previousPage": "Vorherige Seite",
+    "nextPage": "Nächste Seite",
+    "lastPage": "Letzte Seite",
+    "loading": "Wird geladen...",
+    "empty": "Keine Daten",
+    "resizeColumn": "Spaltenbreite ändern",
+    "sortAscending": "Aufsteigend",
+    "sortDescending": "Absteigend",
+    "hideColumn": "Spalte ausblenden"
+  },
+  "captcha": {
+    "title": "Bitte schließen Sie die Sicherheitsüberprüfung ab",
+    "sliderSuccessText": "Bestanden",
+    "sliderDefaultText": "Schieberegler ziehen",
+    "alt": "Unterstützt den src-Attributwert des img-Tags",
+    "sliderRotateDefaultTip": "Zum Aktualisieren auf das Bild klicken",
+    "sliderTranslateDefaultTip": "Zum Aktualisieren auf das Bild klicken",
+    "sliderRotateFailTip": "Überprüfung fehlgeschlagen",
+    "sliderRotateSuccessTip": "Überprüfung erfolgreich, Zeit {0} Sekunden",
+    "sliderTranslateFailTip": "Überprüfung fehlgeschlagen",
+    "sliderTranslateSuccessTip": "Überprüfung erfolgreich, Zeit {0} Sekunden",
+    "refreshAriaLabel": "Captcha aktualisieren",
+    "confirmAriaLabel": "Auswahl bestätigen",
+    "confirm": "Bestätigen",
+    "pointAriaLabel": "Punkt anklicken",
+    "clickInOrder": "Bitte der Reihe nach anklicken"
+  },
+  "iconPicker": {
+    "placeholder": "Symbol auswählen",
+    "search": "Symbol suchen ..."
+  },
+  "jsonViewer": {
+    "copy": "Kopieren",
+    "copied": "Kopiert"
+  },
+  "fallback": {
+    "pageNotFound": "Ups! Seite nicht gefunden",
+    "pageNotFoundDesc": "Entschuldigung, die gesuchte Seite konnte nicht gefunden werden.",
+    "forbidden": "Ups! Zugriff verweigert",
+    "forbiddenDesc": "Entschuldigung, Sie haben keine Berechtigung zum Zugriff auf diese Seite.",
+    "internalError": "Ups! Etwas ist schiefgelaufen",
+    "internalErrorDesc": "Entschuldigung, auf dem Server ist ein Fehler aufgetreten.",
+    "offline": "Offline-Seite",
+    "offlineError": "Ups! Netzwerkfehler",
+    "offlineErrorDesc": "Entschuldigung, keine Internetverbindung. Bitte Verbindung prüfen.",
+    "comingSoon": "Demnächst verfügbar",
+    "http": {
+      "requestTimeout": "Die Anfrage hat das Zeitlimit überschritten. Bitte später erneut versuchen.",
+      "networkError": "Es ist ein Netzwerkfehler aufgetreten. Bitte Internetverbindung prüfen und erneut versuchen.",
+      "badRequest": "Ungültige Anfrage. Bitte Eingabe prüfen und erneut versuchen.",
+      "unauthorized": "Nicht autorisiert. Bitte melden Sie sich an, um fortzufahren.",
+      "forbidden": "Verweigert. Sie haben keine Berechtigung zum Zugriff auf diese Ressource.",
+      "notFound": "Nicht gefunden. Die angeforderte Ressource konnte nicht gefunden werden.",
+      "internalServerError": "Interner Serverfehler. Auf unserer Seite ist etwas schiefgelaufen. Bitte später erneut versuchen.",
+      "licenseRestricted": "Lizenz nicht aktiviert oder abgelaufen, bitte wenden Sie sich zur Aktivierung/Verlängerung an den Anbieter"
+    }
+  },
+  "widgets": {
+    "document": "Dokument",
+    "qa": "Fragen & Hilfe",
+    "setting": "Einstellungen",
+    "logoutTip": "Möchten Sie sich abmelden?",
+    "viewAll": "Alle Nachrichten anzeigen",
+    "notifications": "Benachrichtigungen",
+    "markAllAsRead": "Alle als gelesen markieren",
+    "markAsRead": "Als gelesen markieren",
+    "clearNotifications": "Leeren",
+    "checkUpdatesTitle": "Neue Version verfügbar",
+    "checkUpdatesDescription": "Zum Aktualisieren klicken und die neueste Version abrufen",
+    "search": {
+      "title": "Suchen",
+      "searchNavigate": "Suchnavigation",
+      "select": "Auswählen",
+      "navigate": "Navigieren",
+      "close": "Schließen",
+      "noResults": "Keine Suchergebnisse",
+      "noRecent": "Kein Suchverlauf",
+      "recent": "Suchverlauf"
+    },
+    "lockScreen": {
+      "title": "Sperrbildschirm",
+      "screenButton": "Sperren",
+      "password": "Passwort",
+      "placeholder": "Bitte Passwort eingeben",
+      "unlock": "Zum Entsperren klicken",
+      "errorPasswordTip": "Falsches Passwort, bitte erneut eingeben",
+      "backToLogin": "Zurück zur Anmeldung",
+      "entry": "System öffnen"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "Lobby",
+      "desc": "App-Lobby mit einheitlichem Einstieg und Navigation für alle Anwendungen"
+    },
+    "100": {
+      "name": "Plattformverwaltung",
+      "desc": "Plattformbetrieb-Backend mit Paketen, Bestellungen, Kunden und Systemkonfiguration"
+    },
+    "200": {
+      "name": "IoT",
+      "desc": "IoT-Plattform für den gesamten Gerätelebenszyklus mit Gerätezugang, Projekten, Bereichsverwaltung, OTA-Updates und Datenfluss"
+    },
+    "300": {
+      "name": "Systemverwaltung",
+      "desc": "Unternehmens-Backend mit Unternehmensinformationen, Benutzern & Rollen, Dienstverlängerung und KI-Agent-Konfiguration"
+    },
+    "600": {
+      "name": "IoT-Client",
+      "desc": "Web-IoT-Client mit Gerätebereich, Gerätekarte, Szenenverknüpfung und grundlegenden Systemeinstellungen"
+    },
+    "700": {
+      "name": "IoT-Client",
+      "desc": "IoT-WeChat-Miniprogramm mit Gerätebindung und Fernsteuerung"
+    },
+    "800": {
+      "name": "IoT-Client",
+      "desc": "IoT-Android-Client mit Geräteverwaltung und Echtzeitüberwachung"
+    },
+    "900": {
+      "name": "IoT-Client",
+      "desc": "IoT-iOS-Client mit Geräteverwaltung und Echtzeitüberwachung"
+    },
+    "1000": {
+      "name": "Energiezentrum",
+      "desc": "Energiemanagement-Zentrum mit Energieüberwachung, Statistikanalysen und Effizienzoptimierung"
+    },
+    "1200": {
+      "name": "E-Contract",
+      "desc": "E-Contract-Verwaltung für Verträge, Vorlagen, Siegel, Lieferanten und Genehmigungen"
+    },
+    "1201": {
+      "name": "E-Contract-Client",
+      "desc": "E-Contract-Client zum Signieren, Ansehen und für Arbeitsbereiche"
+    },
+    "1202": {
+      "name": "E-Contract-Kundenbereich",
+      "desc": "E-Contract-Kundenverwaltung"
+    },
+    "1500": {
+      "name": "Parkplatzverwaltung",
+      "desc": "Parkplatz-Plattform mit Parkplätzen, Fahrspuren, Geräten, Parkdaten, Fahrzeugtypen und Abrechnungsregeln"
+    },
+    "1600": {
+      "name": "Smartes Gebäude",
+      "desc": "Smart-Building-Plattform mit Brandschutz, Beleuchtung, Zugangskontrolle, Schranken, Energie, Sicherheit, Protokollzugang und Drittsystemen"
+    },
+    "1700": {
+      "name": "Cloud-Edge-Verwaltung",
+      "desc": "Cloud-Edge-Kollaboration (Cloud) mit Edge-Knoten-Lizenzen, Lizenzausstellung und Online-Status"
+    },
+    "500": {
+      "name": "Operationszentrum",
+      "desc": "Marktplatz im Operations Center für Produktpaketkäufe, Auftragsverwaltung und Kontoaufladungen"
+    }
+  }
+}

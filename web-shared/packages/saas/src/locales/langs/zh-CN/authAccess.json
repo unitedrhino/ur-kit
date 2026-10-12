@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "请选择您要进入的企业/团队",
+  "notEnabledForOrg": "该企业未开通此应用，无法切换",
+  "switchVerifyFailed": "企业切换校验失败，请稍后重试",
+  "notEnabled": "未开通",
+  "noAvailableOrganizations": "暂无可选企业",
+  "backToLogin": "返回登录",
+  "unauthorizedDescription": "当前企业尚未开通此应用，请联系管理员进行授权",
+  "unauthorizedGuide": "如需使用此应用，请联系企业管理员在管理后台开通应用权限"
+}

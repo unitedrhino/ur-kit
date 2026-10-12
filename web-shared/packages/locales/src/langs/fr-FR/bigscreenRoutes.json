@@ -1,0 +1,13 @@
+{
+  "preview": "Aperçu sur grand écran",
+  "manage": "Gestion grand écran",
+  "projects": "Projet grand écran",
+  "components": "Gestion des composants",
+  "templates": "Gestion des modèles",
+  "dataSources": "Gestion des sources de données",
+  "datasets": "Gestion des jeux de données",
+  "assets": "Bibliothèque de ressources",
+  "editDataset": "Modifier l'ensemble de données",
+  "editScreen": "Édition sur grand écran",
+  "editComponent": "Modification des composants"
+}

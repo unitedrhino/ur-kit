@@ -1,0 +1,72 @@
+/* 大屏管理页主题：对齐平台 CRUD 页（rounded-md / bg-card / border-border） */
+.bigscreen-manage-page {
+  --bigscreen-radius: var(--radius, 0.5rem);
+  --bigscreen-content-padding-x: 1rem;
+  --bigscreen-content-padding-y: 1rem;
+  --bigscreen-section-gap: 1rem;
+
+  --bigscreen-panel-bg: hsl(var(--card));
+  --bigscreen-section-bg: hsl(var(--card));
+  --bigscreen-panel-border: hsl(var(--border) / 70%);
+  --bigscreen-section-border: hsl(var(--border) / 70%);
+  --bigscreen-card-border: hsl(var(--border));
+
+  --bigscreen-panel-shadow: none;
+  --bigscreen-section-shadow: none;
+  --bigscreen-card-hover-shadow: 0 4px 12px hsl(var(--foreground) / 8%);
+
+  --bigscreen-cover-bg: hsl(var(--muted));
+  --bigscreen-placeholder-text: hsl(var(--muted-foreground) / 88%);
+  --bigscreen-overlay-bg: hsl(var(--background) / 76%);
+  --bigscreen-overlay-text: hsl(var(--foreground) / 82%);
+  --bigscreen-footer-bg: hsl(var(--card));
+  --bigscreen-muted-text: hsl(var(--muted-foreground));
+  --bigscreen-pending-bg: hsl(var(--muted) / 50%);
+  --bigscreen-pending-border: hsl(var(--border) / 70%);
+  --bigscreen-pending-text: hsl(var(--muted-foreground));
+}
+
+:root.dark .bigscreen-manage-page {
+  --bigscreen-card-hover-shadow: 0 4px 12px rgb(0 0 0 / 20%);
+}
+
+/* 管理页工具栏：操作按钮统一靠右 */
+.bigscreen-manage-page .toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-bottom: 2px;
+}
+
+.bigscreen-manage-page .toolbar-left,
+.bigscreen-manage-page .toolbar-right {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+/* 筛选区 + 内容区上下分栏：仅内容区裁剪滚动，避免筛选下拉被父级 overflow 裁切错位 */
+.bigscreen-manage-page:has(> .page-filter-panel) {
+  display: flex;
+  flex-direction: column;
+  gap: var(--bigscreen-section-gap);
+  height: 100%;
+  min-height: 0;
+}
+
+.bigscreen-manage-page:has(> .page-filter-panel) > .page-filter-panel {
+  flex: 0 0 auto;
+  overflow: visible;
+}
+
+.bigscreen-manage-page:has(> .page-filter-panel) > :not(.page-filter-panel) {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bigscreen-editor-shell {
+  --bigscreen-editor-shell-bg: hsl(var(--background));
+}

@@ -1,0 +1,11 @@
+{
+  "platformTab": "Language",
+  "platformDefault": "Platform default language",
+  "platformHint": "Used when no personal language is set and the browser language is unsupported.",
+  "personal": "Language",
+  "automatic": "Default",
+  "saved": "Language settings saved",
+  "saveFailed": "Failed to save language settings",
+  "menuIotProduct": "Product management",
+  "backToConsole": "Back to console"
+}

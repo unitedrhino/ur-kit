@@ -1,0 +1,11 @@
+{
+  "platformTab": "Bahasa",
+  "platformDefault": "Bahasa default platform",
+  "platformHint": "Digunakan saat tidak ada bahasa pribadi dan bahasa browser tidak didukung.",
+  "personal": "Bahasa",
+  "automatic": "Default",
+  "saved": "Pengaturan bahasa disimpan",
+  "saveFailed": "Gagal menyimpan pengaturan bahasa",
+  "menuIotProduct": "Manajemen produk",
+  "backToConsole": "Kembali ke konsol"
+}

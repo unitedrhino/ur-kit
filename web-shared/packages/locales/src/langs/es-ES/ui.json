@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "Introduzca {0}",
+    "selectRequired": "Seleccione {0}",
+    "minLength": "{0} debe tener al menos {1} caracteres",
+    "maxLength": "{0} puede tener como máximo {1} caracteres",
+    "length": "{0} debe tener exactamente {1} caracteres",
+    "alreadyExists": "{0} `{1}` ya existe",
+    "startWith": "{0} debe empezar por `{1}`",
+    "invalidURL": "Introduzca una URL válida"
+  },
+  "actionTitle": {
+    "edit": "Modificar {0}",
+    "create": "Crear {0}",
+    "delete": "Eliminar {0}",
+    "view": "Ver {0}",
+    "import": "Importar {0}",
+    "export": "Exportar {0}",
+    "exportSelected": "Exportar {0} seleccionados",
+    "refresh": "Actualizar {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "¿Seguro que desea eliminar {0}?",
+    "deleting": "Eliminando {0}...",
+    "deleteSuccess": "{0} eliminado correctamente",
+    "operationSuccess": "Operación realizada correctamente",
+    "operationFailed": "Error en la operación",
+    "loadFailed": "Error al cargar. Inténtalo de nuevo.",
+    "executeFailed": "Error de ejecución",
+    "createFailed": "Error al crear",
+    "publishFailedManual": "Error al publicar la herramienta. Publícala manualmente desde su página.",
+    "sendFailed": "Error al enviar",
+    "previewFailed": "Error al previsualizar el impacto",
+    "undoFailed": "Error al deshacer",
+    "rejectFailed": "Error al rechazar",
+    "generateFailed": "Error al generar",
+    "approveFailed": "Error al aprobar",
+    "validateFailed": "Error de validación",
+    "queryFailed": "Error de consulta",
+    "markReadFailed": "Error al marcar como leído. Inténtalo de nuevo.",
+    "clearFailed": "Error al vaciar. Inténtalo de nuevo.",
+    "setCurrentFailed": "Error al establecer como actual"
+  },
+  "placeholder": {
+    "input": "Introduzca",
+    "select": "Seleccione"
+  },
+  "upload": {
+    "image": "Subir imagen",
+    "selectFile": "Seleccionar archivo"
+  },
+  "dataTable": {
+    "columns": "Columnas",
+    "toggleColumns": "Mostrar u ocultar columnas",
+    "selectedRows": "{selected} de {rows} filas seleccionadas",
+    "totalRows": "{total} filas en total",
+    "rowsPerPage": "Filas por página",
+    "pageDetail": "Página {page} de {totalPages}",
+    "firstPage": "Primera página",
+    "previousPage": "Página anterior",
+    "nextPage": "Página siguiente",
+    "lastPage": "Última página",
+    "loading": "Cargando...",
+    "empty": "Sin datos",
+    "resizeColumn": "Cambiar ancho de columna",
+    "sortAscending": "Ascendente",
+    "sortDescending": "Descendente",
+    "hideColumn": "Ocultar columna"
+  },
+  "captcha": {
+    "title": "Complete la verificación de seguridad",
+    "sliderSuccessText": "Superado",
+    "sliderDefaultText": "Deslizar y arrastrar",
+    "alt": "Admite el valor del atributo src de la etiqueta img",
+    "sliderRotateDefaultTip": "Haga clic en la imagen para actualizar",
+    "sliderTranslateDefaultTip": "Haga clic en la imagen para actualizar",
+    "sliderRotateFailTip": "Error de validación",
+    "sliderRotateSuccessTip": "Validación correcta, tiempo: {0} segundos",
+    "sliderTranslateFailTip": "Error de validación",
+    "sliderTranslateSuccessTip": "Validación correcta, tiempo: {0} segundos",
+    "refreshAriaLabel": "Actualizar captcha",
+    "confirmAriaLabel": "Confirmar selección",
+    "confirm": "Confirmar",
+    "pointAriaLabel": "Pulsar punto",
+    "clickInOrder": "Haga clic en orden"
+  },
+  "iconPicker": {
+    "placeholder": "Seleccione un icono",
+    "search": "Buscar icono..."
+  },
+  "jsonViewer": {
+    "copy": "Copiar",
+    "copied": "Copiado"
+  },
+  "fallback": {
+    "pageNotFound": "¡Ups! Página no encontrada",
+    "pageNotFoundDesc": "Lo sentimos, no hemos podido encontrar la página que buscaba.",
+    "forbidden": "¡Ups! Acceso denegado",
+    "forbiddenDesc": "Lo sentimos, no tiene permiso para acceder a esta página.",
+    "internalError": "¡Ups! Algo ha ido mal",
+    "internalErrorDesc": "Lo sentimos, el servidor ha encontrado un error.",
+    "offline": "Página sin conexión",
+    "offlineError": "¡Ups! Error de red",
+    "offlineErrorDesc": "Lo sentimos, no se puede conectar a Internet. Compruebe su conexión.",
+    "comingSoon": "Próximamente",
+    "http": {
+      "requestTimeout": "La solicitud ha expirado. Inténtelo de nuevo más tarde.",
+      "networkError": "Se ha producido un error de red. Compruebe su conexión a Internet e inténtelo de nuevo.",
+      "badRequest": "Solicitud incorrecta. Compruebe los datos introducidos e inténtelo de nuevo.",
+      "unauthorized": "No autorizado. Inicie sesión para continuar.",
+      "forbidden": "Prohibido. No tiene permiso para acceder a este recurso.",
+      "notFound": "No encontrado. No se ha podido encontrar el recurso solicitado.",
+      "internalServerError": "Error interno del servidor. Se ha producido un problema por nuestra parte. Inténtelo de nuevo más tarde.",
+      "licenseRestricted": "Licencia no activada o caducada; contacte con el proveedor para activarla o renovarla"
+    }
+  },
+  "widgets": {
+    "document": "Documentación",
+    "qa": "Preguntas y respuestas",
+    "setting": "Configuración",
+    "logoutTip": "¿Desea cerrar la sesión?",
+    "viewAll": "Ver todos los mensajes",
+    "notifications": "Notificaciones",
+    "markAllAsRead": "Marcar todo como leído",
+    "markAsRead": "Marcar como leído",
+    "clearNotifications": "Limpiar",
+    "checkUpdatesTitle": "Nueva versión disponible",
+    "checkUpdatesDescription": "Haga clic para actualizar y obtener la última versión",
+    "search": {
+      "title": "Buscar",
+      "searchNavigate": "Navegación de búsqueda",
+      "select": "Seleccionar",
+      "navigate": "Navegar",
+      "close": "Cerrar",
+      "noResults": "Sin resultados de búsqueda",
+      "noRecent": "Sin historial de búsqueda",
+      "recent": "Historial de búsqueda"
+    },
+    "lockScreen": {
+      "title": "Bloquear pantalla",
+      "screenButton": "Bloqueando",
+      "password": "Contraseña",
+      "placeholder": "Introduzca la contraseña",
+      "unlock": "Haga clic para desbloquear",
+      "errorPasswordTip": "Contraseña incorrecta, introdúzcala de nuevo",
+      "backToLogin": "Volver al inicio de sesión",
+      "entry": "Entrar al sistema"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "Consola",
+      "desc": "Vestíbulo de aplicaciones que proporciona una entrada y navegación unificadas para todas las aplicaciones"
+    },
+    "100": {
+      "name": "Gestión de la plataforma",
+      "desc": "Panel de administración de operaciones de la plataforma que abarca planes, pedidos, clientes y configuración del sistema"
+    },
+    "200": {
+      "name": "IoT",
+      "desc": "Plataforma de gestión del ciclo de vida de dispositivos IoT con acceso de dispositivos, proyectos, áreas, actualizaciones OTA y flujo de datos"
+    },
+    "300": {
+      "name": "Gestión del sistema",
+      "desc": "Administración de organizaciones para información, usuarios y roles, renovación de servicios y configuración de agentes de IA"
+    },
+    "600": {
+      "name": "Cliente IoT",
+      "desc": "Cliente web IoT con espacio de dispositivos, mapa de dispositivos, vinculación de escenas y configuración básica del sistema"
+    },
+    "700": {
+      "name": "Cliente IoT (WeChat)",
+      "desc": "Miniprograma de WeChat para IoT con vinculación de dispositivos y control remoto"
+    },
+    "800": {
+      "name": "Cliente IoT (Android)",
+      "desc": "Cliente Android para IoT con gestión de dispositivos y monitorización en tiempo real"
+    },
+    "900": {
+      "name": "Cliente IoT (iOS)",
+      "desc": "Cliente iOS para IoT con gestión de dispositivos y monitorización en tiempo real"
+    },
+    "1000": {
+      "name": "Centro de energía",
+      "desc": "Centro de gestión energética para monitorización, análisis y optimización de la eficiencia"
+    },
+    "1200": {
+      "name": "Contratos electrónicos",
+      "desc": "Administración de contratos electrónicos: contratos, plantillas, sellos, proveedores y aprobaciones"
+    },
+    "1201": {
+      "name": "Cliente de contratos electrónicos",
+      "desc": "Cliente de contratos electrónicos para firma, consulta y espacios de trabajo"
+    },
+    "1202": {
+      "name": "Clientes de contratos electrónicos",
+      "desc": "Gestión de clientes de contratos electrónicos"
+    },
+    "1500": {
+      "name": "Gestión de aparcamientos",
+      "desc": "Plataforma de aparcamiento que cubre aparcamientos, carriles, dispositivos, registros, tipos de vehículo y reglas de facturación"
+    },
+    "1600": {
+      "name": "Edificio inteligente",
+      "desc": "Plataforma de edificios inteligentes que integra protección contra incendios, iluminación, control de accesos, barreras, energía, seguridad, acceso por protocolos y sistemas de terceros"
+    },
+    "1700": {
+      "name": "Gestión perimetral",
+      "desc": "Consola de colaboración nube-periferia para licencias de nodos perimetrales, emisión y estado en línea"
+    },
+    "500": {
+      "name": "Centro de Operaciones",
+      "desc": "Mercado del Centro de operaciones para compras de paquetes de productos, gestión de pedidos y recargas de cuentas"
+    }
+  }
+}

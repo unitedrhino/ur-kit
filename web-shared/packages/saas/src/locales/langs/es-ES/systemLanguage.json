@@ -1,0 +1,11 @@
+{
+  "platformTab": "Idioma",
+  "platformDefault": "Idioma predeterminado de la plataforma",
+  "platformHint": "Se usa cuando no hay idioma personal y el del navegador no está soportado.",
+  "personal": "Idioma",
+  "automatic": "Predeterminado",
+  "saved": "Configuración de idioma guardada",
+  "saveFailed": "Error al guardar la configuración de idioma",
+  "menuIotProduct": "Gestión de productos",
+  "backToConsole": "Volver a la consola"
+}

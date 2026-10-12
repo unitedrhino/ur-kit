@@ -1,0 +1,11 @@
+{
+  "platformTab": "語言",
+  "platformDefault": "平台預設語言",
+  "platformHint": "未設定個人語言且瀏覽器語言不支援時使用。",
+  "personal": "語言",
+  "automatic": "預設",
+  "saved": "語言設定已儲存",
+  "saveFailed": "語言設定儲存失敗",
+  "menuIotProduct": "產品管理",
+  "backToConsole": "返回工作臺"
+}

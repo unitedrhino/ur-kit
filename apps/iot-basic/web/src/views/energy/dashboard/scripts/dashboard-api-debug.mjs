@@ -11,10 +11,13 @@
  */
 
 const PORT = process.env.DASHBOARD_PORT || '3006';
-const USER = process.env.DASHBOARD_USER || 'administrator';
-const PASS = process.env.DASHBOARD_PASS || 'iThings666';
-const TENANT = process.env.DASHBOARD_TENANT || '豪廷中心';
-const PROJECT = process.env.DASHBOARD_PROJECT || '豪庭测试项目';
+const USER = process.env.DASHBOARD_USER;
+const PASS = process.env.DASHBOARD_PASS;
+const TENANT = process.env.DASHBOARD_TENANT;
+const PROJECT = process.env.DASHBOARD_PROJECT;
+if (!USER || !PASS || !TENANT || !PROJECT) {
+  throw new Error('DASHBOARD_USER、DASHBOARD_PASS、DASHBOARD_TENANT、DASHBOARD_PROJECT 均为必填');
+}
 const BASE = `http://localhost:${PORT}`;
 const FORCE_DEFAULT_DASHBOARD = process.env.DASHBOARD_FORCE_DEFAULT !== '0';
 

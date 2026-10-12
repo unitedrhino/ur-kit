@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Sélectionnez l’organisation ou l’équipe à laquelle vous souhaitez accéder.",
+  "notEnabledForOrg": "Cette organisation n’a pas activé cette application. Le changement est impossible.",
+  "switchVerifyFailed": "Impossible de vérifier l’accès lors du changement d’organisation. Réessayez plus tard.",
+  "notEnabled": "Non activée",
+  "noAvailableOrganizations": "Aucune organisation disponible",
+  "backToLogin": "Retour à la connexion",
+  "unauthorizedDescription": "Cette organisation n’a pas activé cette application. Demandez l’accès à un administrateur.",
+  "unauthorizedGuide": "Pour utiliser cette application, demandez à un administrateur d’activer l’accès dans la console de gestion."
+}

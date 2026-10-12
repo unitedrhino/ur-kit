@@ -1,0 +1,27 @@
+{
+  "name": "@vben/api",
+  "version": "0.0.1",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "generate-exports": "node generate-exports.js ./src/models",
+    "generate-exports:preview": "node generate-exports.js ./src/models --preview",
+    "codegen": "node codegen.js",
+    "codegen:help": "node codegen.js --help",
+    "test:extract": "node test-extract.js",
+    "cleanup": "node cleanup.js"
+  },
+  "dependencies": {
+    "@vben/request": "workspace:*",
+    "axios": "catalog:",
+    "qs": "catalog:"
+  },
+  "devDependencies": {
+    "@openapitools/openapi-generator-cli": "^2.7.0"
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "title": "النماذج التجريبية",
+  "naive": "Naive UI",
+  "table": "جدول",
+  "form": "نموذج",
+  "vben": {
+    "title": "المشروع",
+    "about": "حول",
+    "document": "المستندات",
+    "antdv": "إصدار Ant Design Vue",
+    "naive-ui": "إصدار Naive UI",
+    "element-plus": "إصدار Element Plus"
+  }
+}

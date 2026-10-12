@@ -1,0 +1,8 @@
+{
+  "list": {
+    "productName": "Nombre del producto",
+    "createTime": "Fecha de creación"
+  },
+  "create": "Crear producto",
+  "name": "Producto"
+}

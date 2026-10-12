@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": "لاگ ان",
+    "register": "رجسٹر",
+    "codeLogin": "کوڈ لاگ ان",
+    "qrcodeLogin": "QR کوڈ لاگ ان",
+    "forgetPassword": "پاس ورڈ بھولے"
+  },
+  "dashboard": {
+    "title": "ڈیش بورڈ",
+    "analytics": "تجزیات",
+    "workspace": "ورک اسپیس"
+  }
+}

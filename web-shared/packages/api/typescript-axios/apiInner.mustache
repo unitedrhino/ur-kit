@@ -1,0 +1,318 @@
+{{#withSeparateModelsAndApi}}
+{{#withNodeImports}}
+{{/withNodeImports}}
+{{#imports}}
+import type { {{classname}} } from '{{apiRelativeToRoot}}{{tsModelPackage}}{{importFileExtension}}';
+{{/imports}}
+
+import { requestClient, mergeApiConfig, COLLECTION_FORMATS } from "../../base";
+import type { RequestClientConfig } from "@vben/request";
+
+// 辅助类型：从响应类型中提取data字段的类型，如果没有data字段则返回原类型
+type ExtractDataType<T> = T extends { data?: infer D } ? (D extends undefined ? T : D) : T;
+
+{{/withSeparateModelsAndApi}}
+{{^withSeparateModelsAndApi}}
+{{/withSeparateModelsAndApi}}
+{{#operations}}
+/**
+ * {{classname}} - axios parameter creator{{#description}}
+ * {{&description}}{{/description}}
+ */
+ 
+{{#operation}}
+/**
+* {{&notes}}
+{{#summary}}
+* @summary {{&summary}}
+{{/summary}}
+{{#bodyParam}}
+{{#allParams}}
+* @param {{=<% %>=}}{<%#isEnum%><%&datatypeWithEnum%><%/isEnum%><%^isEnum%><%&dataType%><%#isNullable%> | null<%/isNullable%><%/isEnum%>}<%={{ }}=%> {{paramName}} {{description}}
+{{/allParams}}
+{{/bodyParam}}
+{{^bodyParam}}
+{{#allParams.0}}
+{{#allParams}}
+* @param {{=<% %>=}}{<%#isEnum%><%&datatypeWithEnum%><%/isEnum%><%^isEnum%><%&dataType%><%#isNullable%> | null<%/isNullable%><%/isEnum%>}<%={{ }}=%> [bodyParam.{{baseName}}] {{description}}
+{{/allParams}}
+{{/allParams.0}}
+{{^allParams.0}}
+* @param {Record<string, any>} [bodyParam] 请求体
+{{/allParams.0}}
+{{/bodyParam}}
+* @param {RequestClientConfig} [config] Override http request option.
+*/
+export async function  {{nickname}} ({{#bodyParam}}{{#allParams}}
+{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}},{{/allParams}}
+{{/bodyParam}}{{^bodyParam}}{{#allParams.0}}bodyParam: { {{#allParams}}{{baseName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}; {{/allParams}}[key: string]: unknown },{{/allParams.0}}{{^allParams.0}}bodyParam?: Record<string, any>,{{/allParams.0}}{{/bodyParam}} config?: RequestClientConfig) {
+    const localVarQueryParameter: Record<string, unknown> = {};
+    const localVarHeaderParameter: Record<string, string> = {};
+{{#bodyParam}}
+    const localVarPath = `{{{path}}}`{{#pathParams}}
+    .replace(`{${"{{baseName}}"}}`, encodeURIComponent(String({{paramName}}))){{/pathParams}};
+{{#queryParams}}
+        {{#isArray}}
+        if ({{paramName}}) {
+        {{#isCollectionFormatMulti}}
+            {{#uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = Array.from({{paramName}});
+            {{/uniqueItems}}
+            {{^uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}};
+            {{/uniqueItems}}
+        {{/isCollectionFormatMulti}}
+        {{^isCollectionFormatMulti}}
+            {{#uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = Array.from({{paramName}}).join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            {{/uniqueItems}}
+            {{^uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}}.join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            {{/uniqueItems}}
+        {{/isCollectionFormatMulti}}
+        }
+        {{/isArray}}
+        {{^isArray}}
+        if ({{paramName}} !== undefined) {
+            {{#isDateTime}}
+            localVarQueryParameter['{{baseName}}'] = ({{paramName}} as any instanceof Date) ?
+                ({{paramName}} as any).toISOString() :
+                {{paramName}};
+            {{/isDateTime}}
+            {{^isDateTime}}
+            {{#isDate}}
+            localVarQueryParameter['{{baseName}}'] = ({{paramName}} as any instanceof Date) ?
+                ({{paramName}} as any).toISOString().substring(0,10) :
+                {{paramName}};
+            {{/isDate}}
+            {{^isDate}}
+            {{#isExplode}}
+            {{#isPrimitiveType}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}};
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+            {{^isEnumRef}}
+            {{^isEnum}}
+            for (const [key, value] of Object.entries({{paramName}})) {
+                localVarQueryParameter[key] = value;
+            }
+            {{/isEnum}}
+            {{/isEnumRef}}
+            {{#isEnum}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}};
+            {{/isEnum}}
+            {{#isEnumRef}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}};
+            {{/isEnumRef}}
+            {{/isPrimitiveType}}
+            {{/isExplode}}
+            {{^isExplode}}
+            localVarQueryParameter['{{baseName}}'] = {{paramName}};
+            {{/isExplode}}
+            {{/isDate}}
+            {{/isDateTime}}
+        }
+        {{/isArray}}
+    {{/queryParams}}
+    {{#headerParams}}
+            {{#isArray}}
+            if ({{paramName}}) {
+                {{#uniqueItems}}
+                let mapped = Array.from({{paramName}}).map(value => (<any>"{{{dataType}}}" !== "Set<string>") ? JSON.stringify(value) : (value || ""));
+                {{/uniqueItems}}
+                {{^uniqueItems}}
+                let mapped = {{paramName}}.map(value => (<any>"{{{dataType}}}" !== "Array<string>") ? JSON.stringify(value) : (value || ""));
+                {{/uniqueItems}}
+                localVarHeaderParameter['{{baseName}}'] = mapped.join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            }
+            {{/isArray}}
+            {{^isArray}}
+            if ({{paramName}} !== undefined) {
+                localVarHeaderParameter['{{baseName}}'] = String({{paramName}});
+            }
+            {{/isArray}}
+    {{/headerParams}}
+{{#allParams}}
+{{#isBodyParam}}
+    return requestClient.post<ExtractDataType<{{{returnType}}}>>(localVarPath, {{paramName}}, mergeApiConfig(config, localVarQueryParameter, localVarHeaderParameter));
+{{/isBodyParam}}
+{{/allParams}}
+{{/bodyParam}}
+{{^bodyParam}}
+    const localVarPath = `{{{path}}}`{{#pathParams}}
+    .replace(`{${"{{baseName}}"}}`, encodeURIComponent(String((bodyParam as Record<string, unknown>)['{{paramName}}'] ?? ''))){{/pathParams}};
+{{#queryParams}}
+        {{#isArray}}
+        if ((bodyParam as Record<string, unknown>)['{{paramName}}']) {
+        {{#isCollectionFormatMulti}}
+            {{#uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = Array.from((bodyParam as Record<string, unknown>)['{{paramName}}'] as Iterable<unknown>);
+            {{/uniqueItems}}
+            {{^uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/uniqueItems}}
+        {{/isCollectionFormatMulti}}
+        {{^isCollectionFormatMulti}}
+            {{#uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = Array.from((bodyParam as Record<string, unknown>)['{{paramName}}'] as Iterable<unknown>).join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            {{/uniqueItems}}
+            {{^uniqueItems}}
+            localVarQueryParameter['{{baseName}}'] = ((bodyParam as Record<string, unknown>)['{{paramName}}'] as unknown[]).join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            {{/uniqueItems}}
+        {{/isCollectionFormatMulti}}
+        }
+        {{/isArray}}
+        {{^isArray}}
+        if ((bodyParam as Record<string, unknown>)['{{paramName}}'] !== undefined) {
+            {{#isDateTime}}
+            localVarQueryParameter['{{baseName}}'] = ((bodyParam as Record<string, unknown>)['{{paramName}}'] as any instanceof Date) ?
+                ((bodyParam as Record<string, unknown>)['{{paramName}}'] as any).toISOString() :
+                (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isDateTime}}
+            {{^isDateTime}}
+            {{#isDate}}
+            localVarQueryParameter['{{baseName}}'] = ((bodyParam as Record<string, unknown>)['{{paramName}}'] as any instanceof Date) ?
+                ((bodyParam as Record<string, unknown>)['{{paramName}}'] as any).toISOString().substring(0,10) :
+                (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isDate}}
+            {{^isDate}}
+            {{#isExplode}}
+            {{#isPrimitiveType}}
+            localVarQueryParameter['{{baseName}}'] = (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isPrimitiveType}}
+            {{^isPrimitiveType}}
+            {{^isEnumRef}}
+            {{^isEnum}}
+            for (const [key, value] of Object.entries((bodyParam as Record<string, unknown>)['{{paramName}}'] as object)) {
+                localVarQueryParameter[key] = value;
+            }
+            {{/isEnum}}
+            {{/isEnumRef}}
+            {{#isEnum}}
+            localVarQueryParameter['{{baseName}}'] = (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isEnum}}
+            {{#isEnumRef}}
+            localVarQueryParameter['{{baseName}}'] = (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isEnumRef}}
+            {{/isPrimitiveType}}
+            {{/isExplode}}
+            {{^isExplode}}
+            localVarQueryParameter['{{baseName}}'] = (bodyParam as Record<string, unknown>)['{{paramName}}'];
+            {{/isExplode}}
+            {{/isDate}}
+            {{/isDateTime}}
+        }
+        {{/isArray}}
+    {{/queryParams}}
+    {{#headerParams}}
+            {{#isArray}}
+            if ((bodyParam as Record<string, unknown>)['{{paramName}}']) {
+                {{#uniqueItems}}
+                let mapped = Array.from((bodyParam as Record<string, unknown>)['{{paramName}}'] as Iterable<unknown>).map(value => (<any>"{{{dataType}}}" !== "Set<string>") ? JSON.stringify(value) : (value || ""));
+                {{/uniqueItems}}
+                {{^uniqueItems}}
+                let mapped = ((bodyParam as Record<string, unknown>)['{{paramName}}'] as unknown[]).map(value => (<any>"{{{dataType}}}" !== "Array<string>") ? JSON.stringify(value) : (value || ""));
+                {{/uniqueItems}}
+                localVarHeaderParameter['{{baseName}}'] = mapped.join(COLLECTION_FORMATS['{{collectionFormat}}'] ?? ',');
+            }
+            {{/isArray}}
+            {{^isArray}}
+            if ((bodyParam as Record<string, unknown>)['{{paramName}}'] !== undefined) {
+                localVarHeaderParameter['{{baseName}}'] = String((bodyParam as Record<string, unknown>)['{{paramName}}']);
+            }
+            {{/isArray}}
+    {{/headerParams}}
+    return requestClient.post<ExtractDataType<{{{returnType}}}>>(localVarPath, bodyParam, mergeApiConfig(config, localVarQueryParameter, localVarHeaderParameter));
+{{/bodyParam}}
+}
+    {{/operation}}
+{{#withInterfaces}}
+/**
+ * {{classname}} - interface{{#description}}
+ * {{&description}}{{/description}}
+ */
+export interface {{classname}}Interface {
+{{#operation}}
+    /**
+     * {{&notes}}
+     {{#summary}}
+     * @summary {{&summary}}
+     {{/summary}}
+     {{#useSingleRequestParameter}}
+     {{#allParams.0}}
+     * @param {{=<% %>=}}{<%& classname %><%& operationIdCamelCase %>Request}<%={{ }}=%> requestParameters Request parameters.
+     {{/allParams.0}}
+     {{/useSingleRequestParameter}}
+     {{^useSingleRequestParameter}}
+     {{#allParams}}
+     * @param {{=<% %>=}}{<%#isEnum%><%&datatypeWithEnum%><%/isEnum%><%^isEnum%><%&dataType%><%#isNullable%> | null<%/isNullable%><%/isEnum%>}<%={{ }}=%> {{^required}}[{{/required}}{{paramName}}{{^required}}]{{/required}} {{description}}
+     {{/allParams}}
+     {{/useSingleRequestParameter}}
+     * @param {*} [options] Override http request option.{{#isDeprecated}}
+     * @deprecated{{/isDeprecated}}
+     * @throws {RequiredError}
+     */
+    {{#useSingleRequestParameter}}
+    {{nickname}}({{#allParams.0}}requestParameters{{^hasRequiredParams}}?{{/hasRequiredParams}}: {{classname}}{{operationIdCamelCase}}Request, {{/allParams.0}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    {{/useSingleRequestParameter}}
+    {{^useSingleRequestParameter}}
+    {{nickname}}({{#allParams}}{{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}, {{/allParams}}options?: RawAxiosRequestConfig): AxiosPromise<{{{returnType}}}{{^returnType}}void{{/returnType}}>;
+    {{/useSingleRequestParameter}}
+
+{{/operation}}
+}
+
+{{/withInterfaces}}
+{{#useSingleRequestParameter}}
+{{#operation}}
+{{#allParams.0}}
+/**
+ * Request parameters for {{nickname}} operation in {{classname}}.
+ */
+export interface {{classname}}{{operationIdCamelCase}}Request {
+    {{#allParams}}
+    {{#description}}
+    /**
+     * {{description}}
+     */
+    {{/description}}
+    readonly {{paramName}}{{^required}}?{{/required}}: {{#isEnum}}{{{datatypeWithEnum}}}{{/isEnum}}{{^isEnum}}{{{dataType}}}{{#isNullable}} | null{{/isNullable}}{{/isEnum}}
+    {{^-last}}
+
+    {{/-last}}
+    {{/allParams}}
+}
+
+{{/allParams.0}}
+{{/operation}}
+{{/useSingleRequestParameter}}
+
+{{/operations}}
+
+{{#operations}}
+{{#operation}}
+{{#allParams}}
+{{#isEnum}}
+{{#stringEnums}}
+export enum {{operationIdCamelCase}}{{enumName}} {
+{{#allowableValues}}
+    {{#enumVars}}
+    {{{name}}} = {{{value}}}{{^-last}},{{/-last}}
+    {{/enumVars}}
+{{/allowableValues}}
+}
+{{/stringEnums}}
+{{^stringEnums}}
+export const {{operationIdCamelCase}}{{enumName}} = {
+{{#allowableValues}}
+    {{#enumVars}}
+    {{{name}}}: {{{value}}}{{^-last}},{{/-last}}
+    {{/enumVars}}
+{{/allowableValues}}
+} as const;
+export type {{operationIdCamelCase}}{{enumName}} = typeof {{operationIdCamelCase}}{{enumName}}[keyof typeof {{operationIdCamelCase}}{{enumName}}];
+{{/stringEnums}}
+{{/isEnum}}
+{{/allParams}}
+{{/operation}}
+{{/operations}}

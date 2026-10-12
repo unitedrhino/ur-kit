@@ -1,0 +1,13 @@
+{
+  "preview": "大屏预览",
+  "manage": "大屏管理",
+  "projects": "大屏项目",
+  "components": "元件管理",
+  "templates": "範本管理",
+  "dataSources": "資料來源管理",
+  "datasets": "数据集管理",
+  "assets": "資源庫",
+  "editDataset": "编辑数据集",
+  "editScreen": "大屏编辑",
+  "editComponent": "组件编辑"
+}

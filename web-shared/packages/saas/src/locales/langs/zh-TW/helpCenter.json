@@ -1,0 +1,15 @@
+{
+  "tutorial": "教學",
+  "thisPageGuide": "本頁教學 · {title}",
+  "keyPoints": "操作要點",
+  "keyParameters": "關鍵參數",
+  "copied": "已複製",
+  "copy": "複製",
+  "viewFullGuide": "查看完整教學",
+  "helpAndTutorials": "說明與教學",
+  "onboarding": "新手引導",
+  "onboardingDescription": "依照步驟了解並開始使用",
+  "openDocument": "開啟文件",
+  "officialDocs": "官方文件",
+  "feedback": "問題回饋"
+}

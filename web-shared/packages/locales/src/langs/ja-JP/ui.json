@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "{0}を入力してください",
+    "selectRequired": "{0}を選択してください",
+    "minLength": "{0}は{1}文字以上で入力してください",
+    "maxLength": "{0}は{1}文字以内で入力してください",
+    "length": "{0}の長さは{1}文字である必要があります",
+    "alreadyExists": "{0} `{1}` は既に存在します",
+    "startWith": "{0}は `{1}` で始まる必要があります",
+    "invalidURL": "有効なURLを入力してください"
+  },
+  "actionTitle": {
+    "edit": "{0}を編集",
+    "create": "{0}を新規作成",
+    "delete": "{0}を削除",
+    "view": "{0}を表示",
+    "import": "{0}をインポート",
+    "export": "{0}をエクスポート",
+    "exportSelected": "選択中の{0}をエクスポート",
+    "refresh": "{0}を更新"
+  },
+  "actionMessage": {
+    "deleteConfirm": "{0}を削除してもよろしいですか？",
+    "deleting": "{0}を削除中...",
+    "deleteSuccess": "{0}を削除しました",
+    "operationSuccess": "操作に成功しました",
+    "operationFailed": "操作に失敗しました",
+    "loadFailed": "読み込みに失敗しました。再試行してください。",
+    "executeFailed": "実行に失敗しました",
+    "createFailed": "作成に失敗しました",
+    "publishFailedManual": "ツールの公開に失敗しました。ツールページから手動で公開してください。",
+    "sendFailed": "送信に失敗しました",
+    "previewFailed": "影響のプレビューに失敗しました",
+    "undoFailed": "取り消しに失敗しました",
+    "rejectFailed": "却下に失敗しました",
+    "generateFailed": "生成に失敗しました",
+    "approveFailed": "承認に失敗しました",
+    "validateFailed": "検証に失敗しました",
+    "queryFailed": "照会に失敗しました",
+    "markReadFailed": "既読への変更に失敗しました。再試行してください。",
+    "clearFailed": "クリアに失敗しました。再試行してください。",
+    "setCurrentFailed": "現在のバージョンへの設定に失敗しました"
+  },
+  "placeholder": {
+    "input": "入力してください",
+    "select": "選択してください"
+  },
+  "upload": {
+    "image": "画像をアップロード",
+    "selectFile": "ファイルを選択"
+  },
+  "dataTable": {
+    "columns": "列",
+    "toggleColumns": "列の表示を切り替え",
+    "selectedRows": "{rows}行中{selected}行を選択",
+    "totalRows": "全{total}行",
+    "rowsPerPage": "1ページあたりの行数",
+    "pageDetail": "{page} / {totalPages}ページ",
+    "firstPage": "最初のページ",
+    "previousPage": "前のページ",
+    "nextPage": "次のページ",
+    "lastPage": "最後のページ",
+    "loading": "読み込み中...",
+    "empty": "データがありません",
+    "resizeColumn": "列幅を変更",
+    "sortAscending": "昇順",
+    "sortDescending": "降順",
+    "hideColumn": "列を非表示"
+  },
+  "captcha": {
+    "title": "セキュリティ認証を完了してください",
+    "sliderSuccessText": "認証成功",
+    "sliderDefaultText": "スライダーをドラッグしてください",
+    "sliderRotateDefaultTip": "画像をクリックすると更新されます",
+    "sliderTranslateDefaultTip": "画像をクリックすると更新されます",
+    "sliderRotateFailTip": "認証に失敗しました",
+    "sliderRotateSuccessTip": "認証に成功しました。所要時間{0}秒",
+    "sliderTranslateFailTip": "認証に失敗しました",
+    "sliderTranslateSuccessTip": "認証に成功しました。所要時間{0}秒",
+    "alt": "imgタグのsrc属性値に対応",
+    "refreshAriaLabel": "認証コードを更新",
+    "confirmAriaLabel": "選択を確認",
+    "confirm": "確認",
+    "pointAriaLabel": "点をクリック",
+    "clickInOrder": "順番にクリックしてください"
+  },
+  "iconPicker": {
+    "placeholder": "アイコンを選択",
+    "search": "アイコンを検索..."
+  },
+  "jsonViewer": {
+    "copy": "コピー",
+    "copied": "コピーしました"
+  },
+  "fallback": {
+    "pageNotFound": "おっと！ページが見つかりません",
+    "pageNotFoundDesc": "申し訳ありません。お探しのページが見つかりませんでした。",
+    "forbidden": "おっと！アクセスが拒否されました",
+    "forbiddenDesc": "申し訳ありません。このページにアクセスする権限がありません。",
+    "internalError": "おっと！エラーが発生しました",
+    "internalErrorDesc": "申し訳ありません。サーバーでエラーが発生しました。",
+    "offline": "オフラインページ",
+    "offlineError": "おっと！ネットワークエラー",
+    "offlineErrorDesc": "申し訳ありません。インターネットに接続できません。接続を確認してください。",
+    "comingSoon": "近日公開",
+    "http": {
+      "requestTimeout": "リクエストがタイムアウトしました。しばらくしてからもう一度お試しください。",
+      "networkError": "ネットワークエラーが発生しました。接続を確認してもう一度お試しください。",
+      "badRequest": "不正なリクエストです。入力内容を確認してもう一度お試しください。",
+      "unauthorized": "ログイン認証の有効期限が切れました。再度ログインして続行してください。",
+      "forbidden": "アクセスが禁止されています。このリソースへのアクセス権限がありません。",
+      "notFound": "見つかりません。リクエストされたリソースは存在しません。",
+      "internalServerError": "内部サーバーエラーです。しばらくしてからもう一度お試しください。",
+      "licenseRestricted": "ライセンスが未アクティブまたは期限切れです。アクティブ化/更新についてはサプライヤーにお問い合わせください"
+    }
+  },
+  "widgets": {
+    "document": "ドキュメント",
+    "qa": "Q&A",
+    "setting": "設定",
+    "logoutTip": "ログアウトしますか？",
+    "viewAll": "すべてのメッセージを表示",
+    "notifications": "通知",
+    "markAllAsRead": "すべて既読にする",
+    "markAsRead": "既読にする",
+    "clearNotifications": "クリア",
+    "checkUpdatesTitle": "新バージョンが利用可能",
+    "checkUpdatesDescription": "クリックして更新し、最新バージョンを取得してください",
+    "search": {
+      "title": "検索",
+      "searchNavigate": "ナビゲーションメニューを検索",
+      "select": "選択",
+      "navigate": "移動",
+      "close": "閉じる",
+      "noResults": "検索結果が見つかりません",
+      "noRecent": "検索履歴はありません",
+      "recent": "検索履歴"
+    },
+    "lockScreen": {
+      "title": "画面ロック",
+      "screenButton": "ロック中",
+      "password": "パスワード",
+      "placeholder": "ロックパスワードを入力してください",
+      "unlock": "クリックしてロック解除",
+      "errorPasswordTip": "パスワードが正しくありません。再度入力してください",
+      "backToLogin": "ログインに戻る",
+      "entry": "システムに入る"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "コンソール",
+      "desc": "すべてのアプリへの統一入口とナビゲーションを提供するアプリロビー"
+    },
+    "100": {
+      "name": "プラットフォーム管理",
+      "desc": "プラン、注文、顧客およびシステム設定をカバーするプラットフォーム運営管理バックエンド"
+    },
+    "200": {
+      "name": "IoT",
+      "desc": "デバイス接続、プロジェクト、エリア、OTAアップグレード、データフローに対応したIoTデバイスのライフサイクル管理プラットフォーム"
+    },
+    "300": {
+      "name": "システム管理",
+      "desc": "組織情報の管理、ユーザーとロール、サービス更新、AIエージェント設定を提供する組織システム管理バックエンド"
+    },
+    "600": {
+      "name": "IoTクライアント",
+      "desc": "デバイススペース、デバイスマップ、シーン連動、基本システム設定を提供するWeb IoTクライアント"
+    },
+    "700": {
+      "name": "IoTクライアント",
+      "desc": "デバイスのバインドとリモートコントロールに対応したIoT WeChatミニプログラム"
+    },
+    "800": {
+      "name": "IoTクライアント",
+      "desc": "デバイス管理とリアルタイム監視に対応したIoT Androidクライアント"
+    },
+    "900": {
+      "name": "IoTクライアント",
+      "desc": "デバイス管理とリアルタイム監視に対応したIoT iOSクライアント"
+    },
+    "1000": {
+      "name": "エネルギーセンター",
+      "desc": "エネルギー消費の監視、統計分析、省エネ最適化を提供するエネルギー管理センター"
+    },
+    "1200": {
+      "name": "電子契約",
+      "desc": "契約、テンプレート、印鑑、サプライヤー、承認を管理する電子契約管理コンソール"
+    },
+    "1201": {
+      "name": "電子契約クライアント",
+      "desc": "契約の署名、閲覧、ワークスペースを提供する電子契約ユーザークライアント"
+    },
+    "1202": {
+      "name": "電子契約組織管理",
+      "desc": "電子契約の組織管理コンソール"
+    },
+    "1500": {
+      "name": "駐車場管理",
+      "desc": "駐車場、レーン、デバイス、駐車記録、車両タイプ、料金ルールの管理を提供する駐車場管理プラットフォーム"
+    },
+    "1600": {
+      "name": "スマートビル",
+      "desc": "消防、照明、入退室管理、バリアゲート、エネルギー、セキュリティ、プロトコル接続、サードパーティシステム連携を一体化したスマートビル総合管理プラットフォーム"
+    },
+    "1700": {
+      "name": "クラウドエッジ管理",
+      "desc": "エッジノードのライセンスキー、発行、オンライン状態を管理するクラウドエッジ協働（クラウド側）コンソール"
+    },
+    "500": {
+      "name": "オペレーションセンター",
+      "desc": "製品パッケージの購入、注文管理、アカウントの補充のためのオペレーション センター マーケットプレイス"
+    }
+  }
+}

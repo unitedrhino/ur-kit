@@ -1,0 +1,11 @@
+{
+  "platformTab": "Langue",
+  "platformDefault": "Langue par défaut de la plateforme",
+  "platformHint": "Utilisée quand aucune langue personnelle n'est définie et que la langue du navigateur n'est pas prise en charge.",
+  "personal": "Langue",
+  "automatic": "Par défaut",
+  "saved": "Paramètres de langue enregistrés",
+  "saveFailed": "Échec de l'enregistrement des paramètres de langue",
+  "menuIotProduct": "Gestion des produits",
+  "backToConsole": "Retour à la console"
+}

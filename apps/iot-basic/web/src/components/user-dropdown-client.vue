@@ -23,7 +23,7 @@ import {
 import { useMagicKeys, whenever } from '@vueuse/core';
 import { NButton, NInput, NModal, useMessage } from 'naive-ui';
 
-import SaasAvatar from '../../../../packages/saas/src/components/saas-avatar.vue';
+import SaasAvatar from '../../../../../web-shared/packages/saas/src/components/saas-avatar.vue';
 import { sha256Hex } from '../views/_core/authentication/crypto';
 
 interface Props {

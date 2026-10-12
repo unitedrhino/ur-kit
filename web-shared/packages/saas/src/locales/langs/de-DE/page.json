@@ -1,0 +1,14 @@
+{
+  "auth": {
+    "login": "Anmelden",
+    "register": "Registrieren",
+    "codeLogin": "Code-Anmeldung",
+    "qrcodeLogin": "QR-Code-Anmeldung",
+    "forgetPassword": "Passwort vergessen"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "analytics": "Analysen",
+    "workspace": "Arbeitsbereich"
+  }
+}

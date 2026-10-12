@@ -1,0 +1,15 @@
+{
+  "tutorial": "บทช่วยสอน",
+  "thisPageGuide": "บทช่วยสอนในหน้านี้ · {title}",
+  "keyPoints": "จุดปฏิบัติการ",
+  "keyParameters": "พารามิเตอร์หลัก",
+  "copied": "คัดลอกแล้ว",
+  "copy": "คัดลอก",
+  "viewFullGuide": "ดูบทช่วยสอนแบบเต็ม",
+  "helpAndTutorials": "ความช่วยเหลือและบทช่วยสอน",
+  "onboarding": "คู่มือมือใหม่",
+  "onboardingDescription": "ทำตามขั้นตอนเพื่อเรียนรู้และเริ่มใช้",
+  "openDocument": "เปิดเอกสาร",
+  "officialDocs": "เอกสารเว็บไซต์อย่างเป็นทางการ",
+  "feedback": "ข้อเสนอแนะเกี่ยวกับปัญหา"
+}

@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "Por favor, informe {0}",
+    "selectRequired": "Por favor, selecione {0}",
+    "minLength": "{0} deve ter pelo menos {1} caracteres",
+    "maxLength": "{0} pode ter no máximo {1} caracteres",
+    "length": "{0} deve ter {1} caracteres",
+    "alreadyExists": "{0} `{1}` já existe",
+    "startWith": "{0} deve começar com `{1}`",
+    "invalidURL": "Informe uma URL válida"
+  },
+  "actionTitle": {
+    "edit": "Modificar {0}",
+    "create": "Criar {0}",
+    "delete": "Excluir {0}",
+    "view": "Visualizar {0}",
+    "import": "Importar {0}",
+    "export": "Exportar {0}",
+    "exportSelected": "Exportar {0} selecionados",
+    "refresh": "Atualizar {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "Tem certeza de que deseja excluir {0}?",
+    "deleting": "Excluindo {0} ...",
+    "deleteSuccess": "{0} excluído com sucesso",
+    "operationSuccess": "Operação realizada com sucesso",
+    "operationFailed": "Falha na operação",
+    "loadFailed": "Falha ao carregar. Tente novamente.",
+    "executeFailed": "Falha na execução",
+    "createFailed": "Falha na criação",
+    "publishFailedManual": "Falha ao publicar a ferramenta. Publique-a manualmente na página da ferramenta.",
+    "sendFailed": "Falha no envio",
+    "previewFailed": "Falha na prévia do impacto",
+    "undoFailed": "Falha ao desfazer",
+    "rejectFailed": "Falha na rejeição",
+    "generateFailed": "Falha na geração",
+    "approveFailed": "Falha na aprovação",
+    "validateFailed": "Falha na validação",
+    "queryFailed": "Falha na consulta",
+    "markReadFailed": "Falha ao marcar como lido. Tente novamente.",
+    "clearFailed": "Falha ao limpar. Tente novamente.",
+    "setCurrentFailed": "Falha ao definir como atual"
+  },
+  "placeholder": {
+    "input": "Por favor, informe",
+    "select": "Por favor, selecione"
+  },
+  "upload": {
+    "image": "Enviar imagem",
+    "selectFile": "Selecionar arquivo"
+  },
+  "dataTable": {
+    "columns": "Colunas",
+    "toggleColumns": "Alternar exibição de colunas",
+    "selectedRows": "{selected} de {rows} linhas selecionadas",
+    "totalRows": "Total de {total} linhas",
+    "rowsPerPage": "Linhas por página",
+    "pageDetail": "Página {page} de {totalPages}",
+    "firstPage": "Primeira página",
+    "previousPage": "Página anterior",
+    "nextPage": "Próxima página",
+    "lastPage": "Última página",
+    "loading": "Carregando...",
+    "empty": "Sem dados",
+    "resizeColumn": "Redimensionar coluna",
+    "sortAscending": "Crescente",
+    "sortDescending": "Decrescente",
+    "hideColumn": "Ocultar coluna"
+  },
+  "captcha": {
+    "title": "Conclua a verificação de segurança",
+    "sliderSuccessText": "Aprovado",
+    "sliderDefaultText": "Deslize e arraste",
+    "alt": "Compatível com o valor do atributo src da tag img",
+    "sliderRotateDefaultTip": "Clique na imagem para atualizar",
+    "sliderTranslateDefaultTip": "Clique na imagem para atualizar",
+    "sliderRotateFailTip": "Falha na validação",
+    "sliderRotateSuccessTip": "Validação bem-sucedida, tempo de {0} segundos",
+    "sliderTranslateFailTip": "Falha na validação",
+    "sliderTranslateSuccessTip": "Validação bem-sucedida, tempo de {0} segundos",
+    "refreshAriaLabel": "Atualizar captcha",
+    "confirmAriaLabel": "Confirmar seleção",
+    "confirm": "Confirmar",
+    "pointAriaLabel": "Clicar no ponto",
+    "clickInOrder": "Por favor, clique na sequência"
+  },
+  "iconPicker": {
+    "placeholder": "Selecione um ícone",
+    "search": "Pesquisar ícone..."
+  },
+  "jsonViewer": {
+    "copy": "Copiar",
+    "copied": "Copiado"
+  },
+  "fallback": {
+    "pageNotFound": "Ops! Página não encontrada",
+    "pageNotFoundDesc": "Desculpe, não conseguimos encontrar a página que você procura.",
+    "forbidden": "Ops! Acesso negado",
+    "forbiddenDesc": "Desculpe, mas você não tem permissão para acessar esta página.",
+    "internalError": "Ops! Algo deu errado",
+    "internalErrorDesc": "Desculpe, mas o servidor encontrou um erro.",
+    "offline": "Página offline",
+    "offlineError": "Ops! Erro de rede",
+    "offlineErrorDesc": "Desculpe, não foi possível conectar à internet. Verifique sua conexão.",
+    "comingSoon": "Em breve",
+    "http": {
+      "requestTimeout": "A solicitação expirou o tempo limite. Tente novamente mais tarde.",
+      "networkError": "Ocorreu um erro de rede. Verifique sua conexão com a internet e tente novamente.",
+      "badRequest": "Solicitação inválida. Verifique os dados informados e tente novamente.",
+      "unauthorized": "Não autorizado. Faça login para continuar.",
+      "forbidden": "Acesso negado. Você não tem permissão para acessar este recurso.",
+      "notFound": "Não encontrado. O recurso solicitado não pôde ser localizado.",
+      "internalServerError": "Erro interno do servidor. Algo deu errado do nosso lado. Tente novamente mais tarde.",
+      "licenseRestricted": "Licença não ativada ou expirada; entre em contato com o fornecedor para ativar/renovar"
+    }
+  },
+  "widgets": {
+    "document": "Documento",
+    "qa": "Perguntas e respostas",
+    "setting": "Configurações",
+    "logoutTip": "Deseja sair?",
+    "viewAll": "Ver todas as mensagens",
+    "notifications": "Notificações",
+    "markAllAsRead": "Marcar tudo como lido",
+    "markAsRead": "Marcar como lido",
+    "clearNotifications": "Limpar",
+    "checkUpdatesTitle": "Nova versão disponível",
+    "checkUpdatesDescription": "Clique para atualizar e obter a versão mais recente",
+    "search": {
+      "title": "Pesquisar",
+      "searchNavigate": "Pesquisar navegação",
+      "select": "Selecionar",
+      "navigate": "Navegar",
+      "close": "Fechar",
+      "noResults": "Nenhum resultado de pesquisa encontrado",
+      "noRecent": "Sem histórico de pesquisa",
+      "recent": "Histórico de pesquisa"
+    },
+    "lockScreen": {
+      "title": "Bloquear tela",
+      "screenButton": "Bloqueando",
+      "password": "Senha",
+      "placeholder": "Por favor, informe a senha",
+      "unlock": "Clique para desbloquear",
+      "errorPasswordTip": "Senha incorreta, informe novamente",
+      "backToLogin": "Voltar ao login",
+      "entry": "Entrar no sistema"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "Console",
+      "desc": "Lobby de aplicativos que oferece entrada e navegação unificadas para todos os apps"
+    },
+    "100": {
+      "name": "Gestão de Plataforma",
+      "desc": "Administração de operações da plataforma cobrindo pacotes, pedidos, clientes e configuração do sistema"
+    },
+    "200": {
+      "name": "IoT",
+      "desc": "Plataforma de gerenciamento do ciclo de vida de dispositivos IoT com acesso de dispositivos, projetos, áreas, atualizações OTA e fluxo de dados"
+    },
+    "300": {
+      "name": "Gestão do Sistema",
+      "desc": "Administração da organização cobrindo informações, usuários e funções, renovação de serviços e configuração do agente de IA"
+    },
+    "600": {
+      "name": "Cliente IoT",
+      "desc": "Cliente IoT web com espaço de dispositivos, mapa de dispositivos, vinculação de cenários e configurações básicas do sistema"
+    },
+    "700": {
+      "name": "Cliente IoT (WeChat)",
+      "desc": "Mini programa WeChat de IoT com vinculação de dispositivos e controle remoto"
+    },
+    "800": {
+      "name": "Cliente IoT (Android)",
+      "desc": "Cliente Android de IoT com gerenciamento de dispositivos e monitoramento em tempo real"
+    },
+    "900": {
+      "name": "Cliente IoT (iOS)",
+      "desc": "Cliente iOS de IoT com gerenciamento de dispositivos e monitoramento em tempo real"
+    },
+    "1000": {
+      "name": "Centro de Energia",
+      "desc": "Centro de gerenciamento de energia para monitoramento, análise e otimização de eficiência"
+    },
+    "1200": {
+      "name": "Contrato Eletrônico",
+      "desc": "Administração de contratos eletrônicos cobrindo contratos, modelos, selos, fornecedores e aprovações"
+    },
+    "1201": {
+      "name": "Cliente do Contrato Eletrônico",
+      "desc": "Cliente de contratos eletrônicos para assinatura, visualização e espaços de trabalho"
+    },
+    "1202": {
+      "name": "Cliente do Contrato Eletrônico",
+      "desc": "Gerenciamento de clientes de contratos eletrônicos"
+    },
+    "1500": {
+      "name": "Gestão de Estacionamento",
+      "desc": "Plataforma de estacionamento cobrindo estacionamentos, pistas, dispositivos, registros, tipos de veículos e regras de cobrança"
+    },
+    "1600": {
+      "name": "Edifício Inteligente",
+      "desc": "Plataforma de edifício inteligente integrando incêndio, iluminação, controle de acesso, cancelas, energia, segurança, acesso por protocolo e sistemas de terceiros"
+    },
+    "1700": {
+      "name": "Gestão de Borda",
+      "desc": "Console de colaboração nuvem-borda para licenças de nós de borda, emissão e status online"
+    },
+    "500": {
+      "name": "Centro de Operações",
+      "desc": "Mercado do Operations Center para compras de pacotes de produtos, gerenciamento de pedidos e recargas de contas"
+    }
+  }
+}

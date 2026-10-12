@@ -1,0 +1,11 @@
+.git
+**/node_modules
+**/dist
+.temp
+contracts
+cache
+things
+sdks
+middleware
+protocols
+apps

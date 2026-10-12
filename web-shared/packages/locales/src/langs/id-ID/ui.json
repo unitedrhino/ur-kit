@@ -1,0 +1,216 @@
+{
+  "formRules": {
+    "required": "Mohon masukkan {0}",
+    "selectRequired": "Mohon pilih {0}",
+    "minLength": "{0} harus minimal {1} karakter",
+    "maxLength": "{0} maksimal {1} karakter",
+    "length": "{0} harus tepat {1} karakter",
+    "alreadyExists": "{0} `{1}` sudah ada",
+    "startWith": "{0} harus diawali `{1}`",
+    "invalidURL": "Masukkan URL yang valid"
+  },
+  "actionTitle": {
+    "edit": "Ubah {0}",
+    "create": "Buat {0}",
+    "delete": "Hapus {0}",
+    "view": "Lihat {0}",
+    "import": "Impor {0}",
+    "export": "Ekspor {0}",
+    "exportSelected": "Ekspor {0} yang Dipilih",
+    "refresh": "Segarkan {0}"
+  },
+  "actionMessage": {
+    "deleteConfirm": "Apakah Anda yakin ingin menghapus {0}?",
+    "deleting": "Menghapus {0} ...",
+    "deleteSuccess": "{0} berhasil dihapus",
+    "operationSuccess": "Operasi berhasil",
+    "operationFailed": "Operasi gagal",
+    "loadFailed": "Gagal memuat. Coba lagi.",
+    "executeFailed": "Eksekusi gagal",
+    "createFailed": "Gagal membuat",
+    "publishFailedManual": "Gagal menerbitkan alat. Terbitkan secara manual dari halaman alat.",
+    "sendFailed": "Gagal mengirim",
+    "previewFailed": "Pratinjau dampak gagal",
+    "undoFailed": "Pembatalan gagal",
+    "rejectFailed": "Penolakan gagal",
+    "generateFailed": "Pembuatan gagal",
+    "approveFailed": "Persetujuan gagal",
+    "validateFailed": "Validasi gagal",
+    "queryFailed": "Kueri gagal",
+    "markReadFailed": "Gagal menandai sebagai dibaca. Coba lagi.",
+    "clearFailed": "Gagal mengosongkan. Coba lagi.",
+    "setCurrentFailed": "Gagal menetapkan sebagai versi saat ini"
+  },
+  "placeholder": {
+    "input": "Mohon masukkan",
+    "select": "Mohon pilih"
+  },
+  "upload": {
+    "image": "Unggah gambar",
+    "selectFile": "Pilih berkas"
+  },
+  "dataTable": {
+    "columns": "Kolom",
+    "toggleColumns": "Ubah tampilan kolom",
+    "selectedRows": "{selected} dari {rows} baris dipilih",
+    "totalRows": "Total {total} baris",
+    "rowsPerPage": "Baris per halaman",
+    "pageDetail": "Halaman {page} dari {totalPages}",
+    "firstPage": "Halaman pertama",
+    "previousPage": "Halaman sebelumnya",
+    "nextPage": "Halaman berikutnya",
+    "lastPage": "Halaman terakhir",
+    "loading": "Memuat...",
+    "empty": "Tidak ada data",
+    "resizeColumn": "Ubah lebar kolom",
+    "sortAscending": "Menaik",
+    "sortDescending": "Menurun",
+    "hideColumn": "Sembunyikan kolom"
+  },
+  "captcha": {
+    "title": "Mohon lengkapi verifikasi keamanan",
+    "sliderSuccessText": "Verifikasi Lolos",
+    "sliderDefaultText": "Tekan dan geser peluncur",
+    "sliderRotateDefaultTip": "Klik gambar untuk memperbarui",
+    "sliderTranslateDefaultTip": "Klik gambar untuk memperbarui",
+    "sliderRotateFailTip": "Verifikasi gagal",
+    "sliderRotateSuccessTip": "Verifikasi berhasil, waktu {0} detik",
+    "sliderTranslateFailTip": "Verifikasi gagal",
+    "sliderTranslateSuccessTip": "Verifikasi berhasil, waktu {0} detik",
+    "alt": "Mendukung nilai atribut src tag img",
+    "refreshAriaLabel": "Segarkan captcha",
+    "confirmAriaLabel": "Konfirmasi pilihan",
+    "confirm": "Konfirmasi",
+    "pointAriaLabel": "Klik titik",
+    "clickInOrder": "Mohon klik sesuai urutan"
+  },
+  "iconPicker": {
+    "placeholder": "Pilih ikon",
+    "search": "Cari ikon..."
+  },
+  "jsonViewer": {
+    "copy": "Salin",
+    "copied": "Tersalin"
+  },
+  "fallback": {
+    "pageNotFound": "Ops! Halaman Tidak Ditemukan",
+    "pageNotFoundDesc": "Maaf, kami tidak dapat menemukan halaman yang Anda cari.",
+    "forbidden": "Ops! Akses Ditolak",
+    "forbiddenDesc": "Maaf, Anda tidak memiliki izin untuk mengakses halaman ini.",
+    "internalError": "Ops! Terjadi Kesalahan",
+    "internalErrorDesc": "Maaf, server mengalami kesalahan.",
+    "offline": "Halaman Offline",
+    "offlineError": "Ops! Kesalahan Jaringan",
+    "offlineErrorDesc": "Maaf, tidak dapat terhubung ke internet. Periksa koneksi Anda.",
+    "comingSoon": "Segera Hadir",
+    "http": {
+      "requestTimeout": "Waktu permintaan habis. Silakan coba lagi nanti.",
+      "networkError": "Terjadi kesalahan jaringan. Silakan periksa koneksi internet Anda dan coba lagi.",
+      "badRequest": "Permintaan tidak valid. Silakan periksa masukan Anda dan coba lagi.",
+      "unauthorized": "Tidak terautentikasi. Silakan masuk untuk melanjutkan.",
+      "forbidden": "Akses ditolak. Anda tidak memiliki izin untuk mengakses sumber daya ini.",
+      "notFound": "Tidak ditemukan. Sumber daya yang diminta tidak dapat ditemukan.",
+      "internalServerError": "Kesalahan server internal. Terjadi kesalahan di sisi kami. Silakan coba lagi nanti.",
+      "licenseRestricted": "Lisensi belum diaktifkan atau telah kedaluwarsa, silakan hubungi pemasok untuk mengaktifkan/memperpanjang"
+    }
+  },
+  "widgets": {
+    "document": "Dokumentasi",
+    "qa": "Pertanyaan & Bantuan",
+    "setting": "Pengaturan",
+    "logoutTip": "Apakah Anda ingin keluar?",
+    "viewAll": "Lihat Semua Pesan",
+    "notifications": "Notifikasi",
+    "markAllAsRead": "Tandai Semua Sudah Dibaca",
+    "markAsRead": "Tandai Sudah Dibaca",
+    "clearNotifications": "Bersihkan",
+    "checkUpdatesTitle": "Versi Baru Tersedia",
+    "checkUpdatesDescription": "Klik untuk menyegarkan dan mendapatkan versi terbaru",
+    "search": {
+      "title": "Cari",
+      "searchNavigate": "Navigasi Pencarian",
+      "select": "Pilih",
+      "navigate": "Navigasi",
+      "close": "Tutup",
+      "noResults": "Tidak Ada Hasil Pencarian",
+      "noRecent": "Tidak Ada Riwayat Pencarian",
+      "recent": "Riwayat Pencarian"
+    },
+    "lockScreen": {
+      "title": "Kunci Layar",
+      "screenButton": "Mengunci",
+      "password": "Kata Sandi",
+      "placeholder": "Masukkan kata sandi",
+      "unlock": "Klik untuk membuka kunci",
+      "errorPasswordTip": "Kata sandi salah, silakan masukkan ulang",
+      "backToLogin": "Kembali ke halaman masuk",
+      "entry": "Masuk ke sistem"
+    }
+  },
+  "appCatalog": {
+    "77": {
+      "name": "Konsol",
+      "desc": "Lobi aplikasi yang menyediakan pintu masuk dan navigasi terpadu untuk semua aplikasi"
+    },
+    "100": {
+      "name": "Manajemen Platform",
+      "desc": "Admin operasi platform yang mencakup paket, pesanan, klien, dan konfigurasi sistem"
+    },
+    "200": {
+      "name": "IoT",
+      "desc": "Platform manajemen siklus hidup perangkat IoT dengan akses perangkat, proyek, area, pembaruan OTA, dan aliran data"
+    },
+    "300": {
+      "name": "Manajemen Sistem",
+      "desc": "Admin organisasi yang mencakup informasi, pengguna & peran, perpanjangan layanan, dan konfigurasi agen AI"
+    },
+    "600": {
+      "name": "Klien IoT",
+      "desc": "Klien IoT web dengan ruang perangkat, peta perangkat, tautan skenario, dan pengaturan sistem dasar"
+    },
+    "700": {
+      "name": "Klien IoT (WeChat)",
+      "desc": "Program mini WeChat IoT dengan pengikatan perangkat dan kendali jarak jauh"
+    },
+    "800": {
+      "name": "Klien IoT (Android)",
+      "desc": "Klien Android IoT dengan manajemen perangkat dan pemantauan waktu nyata"
+    },
+    "900": {
+      "name": "Klien IoT (iOS)",
+      "desc": "Klien iOS IoT dengan manajemen perangkat dan pemantauan waktu nyata"
+    },
+    "1000": {
+      "name": "Pusat Energi",
+      "desc": "Pusat manajemen energi untuk pemantauan, analitik, dan optimalisasi efisiensi"
+    },
+    "1200": {
+      "name": "Kontrak Elektronik",
+      "desc": "Admin kontrak elektronik untuk kontrak, templat, stempel, pemasok, dan persetujuan"
+    },
+    "1201": {
+      "name": "Klien Kontrak Elektronik",
+      "desc": "Klien kontrak elektronik untuk penandatanganan, peninjauan, dan ruang kerja"
+    },
+    "1202": {
+      "name": "Klien Kontrak Elektronik",
+      "desc": "Manajemen klien kontrak elektronik"
+    },
+    "1500": {
+      "name": "Manajemen Parkir",
+      "desc": "Platform parkir yang mencakup lahan parkir, lajur, perangkat, catatan, jenis kendaraan, dan aturan penagihan"
+    },
+    "1600": {
+      "name": "Gedung Pintar",
+      "desc": "Platform gedung pintar yang mengintegrasikan pemadam kebakaran, pencahayaan, kontrol akses, palang, energi, keamanan, akses protokol, dan sistem pihak ketiga"
+    },
+    "1700": {
+      "name": "Manajemen Edge",
+      "desc": "Konsol kolaborasi cloud-edge untuk lisensi node edge, penerbitan, dan status online"
+    },
+    "500": {
+      "name": "Pusat Operasi",
+      "desc": "Pasar Pusat Operasi untuk pembelian paket produk, manajemen pesanan, dan isi ulang akun"
+    }
+  }
+}

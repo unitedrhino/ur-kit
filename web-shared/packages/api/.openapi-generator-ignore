@@ -1,0 +1,16 @@
+# 忽略不需要生成的文件和目录
+
+# 文档相关
+docs/
+*.md
+
+# 配置文件
+configuration.ts
+common.ts
+git_push.sh
+.npmignore
+.gitignore
+
+# 其他不需要的文件
+README.md
+git_push.sh

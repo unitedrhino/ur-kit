@@ -22,16 +22,16 @@ import { useSystemConfigStore } from '@vben/stores';
 import HeaderLogo from '../components/header-logo-client.vue';
 import UserDropdown from '../components/user-dropdown-client.vue';
 
-import NotifyBannerBar from '../../../../packages/saas/src/components/NotifyBannerBar.vue';
-import NotifyModal from '../../../../packages/saas/src/components/NotifyModal.vue';
-import ProjectSelectModal from '../../../../packages/saas/src/components/ProjectSelectModal.vue';
-import ServerErrorOverlay from '../../../../packages/saas/src/components/ServerErrorOverlay.vue';
-import SidebarProjectSelector from '../../../../packages/saas/src/components/SidebarProjectSelector.vue';
-import WsToaster from '../../../../packages/saas/src/components/WsToaster.vue';
-import { useNotifications } from '../../../../packages/saas/src/hooks/use-notifications';
-import LoginForm from '../../../../packages/saas/src/views/_core/authentication/login.vue';
-import SaasNotification from '../../../../packages/saas/src/widgets/notification/SaasNotification.vue';
-import SceneAiGlobalDrawer from '../../../../packages/saas/src/widgets/SceneAiGlobalDrawer.vue';
+import NotifyBannerBar from '../../../../../web-shared/packages/saas/src/components/NotifyBannerBar.vue';
+import NotifyModal from '../../../../../web-shared/packages/saas/src/components/NotifyModal.vue';
+import ProjectSelectModal from '../../../../../web-shared/packages/saas/src/components/ProjectSelectModal.vue';
+import ServerErrorOverlay from '../../../../../web-shared/packages/saas/src/components/ServerErrorOverlay.vue';
+import SidebarProjectSelector from '../../../../../web-shared/packages/saas/src/components/SidebarProjectSelector.vue';
+import WsToaster from '../../../../../web-shared/packages/saas/src/components/WsToaster.vue';
+import { useNotifications } from '../../../../../web-shared/packages/saas/src/hooks/use-notifications';
+import LoginForm from '../../../../../web-shared/packages/saas/src/views/_core/authentication/login.vue';
+import SaasNotification from '../../../../../web-shared/packages/saas/src/widgets/notification/SaasNotification.vue';
+import SceneAiGlobalDrawer from '../../../../../web-shared/packages/saas/src/widgets/SceneAiGlobalDrawer.vue';
 
 import { useCookies } from '@vueuse/integrations/useCookies';
 

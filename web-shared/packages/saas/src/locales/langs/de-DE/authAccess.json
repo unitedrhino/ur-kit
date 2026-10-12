@@ -1,0 +1,10 @@
+{
+  "chooseSubtitle": "Wählen Sie die Organisation oder das Team aus, das Sie öffnen möchten.",
+  "notEnabledForOrg": "Diese Organisation hat diese App nicht aktiviert. Ein Wechsel ist nicht möglich.",
+  "switchVerifyFailed": "Der App-Zugriff konnte beim Organisationswechsel nicht geprüft werden. Versuchen Sie es später erneut.",
+  "notEnabled": "Nicht aktiviert",
+  "noAvailableOrganizations": "Keine Organisationen verfügbar",
+  "backToLogin": "Zurück zur Anmeldung",
+  "unauthorizedDescription": "Diese Organisation hat diese App nicht aktiviert. Bitten Sie einen Administrator um Zugriff.",
+  "unauthorizedGuide": "Bitten Sie einen Organisationsadministrator, den Zugriff auf diese App in der Verwaltung zu aktivieren."
+}

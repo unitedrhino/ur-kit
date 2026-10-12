@@ -1,0 +1,204 @@
+/**
+ * Layer 3 — Component Tokens（组件令牌）
+ *
+ * 将 Primitive / Semantic Tokens 组合为具体组件的设计决策。
+ * 组件代码引用组件令牌（如 var(--btn-radius)），
+ * 而不直接引用 primitive 或 semantic 层，
+ * 这样修改"设计规格"时只需改此处。
+ *
+ * 命名规则：--{component}-{property}
+ */
+
+:root {
+  /* ============================================================
+     Button 组件
+     ============================================================ */
+  --btn-radius:          var(--radius-md);
+  --btn-font-size:       var(--text-sm);
+  --btn-font-weight:     var(--weight-medium);
+  --btn-transition:      var(--duration-normal) var(--ease-standard);
+
+  /* 尺寸 */
+  --btn-height-sm:       1.75rem;   /* 28px */
+  --btn-height-md:       2.25rem;   /* 36px */
+  --btn-height-lg:       2.5rem;    /* 40px */
+
+  --btn-px-sm:           var(--space-3);
+  --btn-px-md:           var(--space-4);
+  --btn-px-lg:           var(--space-6);
+
+  /* Primary variant */
+  --btn-primary-bg:      var(--primary);
+  --btn-primary-text:    var(--primary-foreground);
+  --btn-primary-hover-opacity: 0.9;
+
+  /* Destructive variant */
+  --btn-destructive-bg:  var(--destructive);
+  --btn-destructive-text: var(--destructive-foreground);
+
+  /* Ghost / Outline variant */
+  --btn-ghost-hover-bg:  var(--accent);
+  --btn-ghost-hover-text: var(--accent-foreground);
+
+  /* ============================================================
+     Input / Form 组件
+     ============================================================ */
+  --input-radius:        var(--radius-md);
+  --input-height:        var(--btn-height-md);
+  --input-font-size:     var(--text-sm);
+  --input-border:        var(--border);
+  --input-bg:            var(--input-background);
+  --input-focus-ring:    var(--primary);
+  --input-focus-ring-width: 2px;
+  --input-placeholder-color: var(--muted-foreground);
+
+  /* ============================================================
+     Card 组件
+     ============================================================ */
+  --card-radius:         var(--radius-lg);
+  --card-shadow:         var(--shadow-sm);
+  --card-shadow-hover:   var(--shadow-lg);
+  --card-border:         var(--border);
+  --card-bg:             var(--card);
+  --card-padding:        var(--space-4);
+  --card-transition:     var(--duration-slow) var(--ease-standard);
+
+  /* 可悬浮 Card（hoverable）*/
+  --card-hoverable-translate-y: -1px;
+  --card-hoverable-border-opacity: 0.4;
+
+  /* ============================================================
+     Badge / Tag 组件
+     ============================================================ */
+  --badge-radius:        var(--radius-full);
+  --badge-font-size:     var(--text-xs);
+  --badge-font-weight:   var(--weight-medium);
+  --badge-px:            var(--space-2);
+  --badge-py:            0.125rem;
+
+  /* ============================================================
+     Table / Grid 组件
+     ============================================================ */
+  --table-header-bg:     var(--muted);
+  --table-header-text:   var(--muted-foreground);
+  --table-row-hover-bg:  var(--accent);
+  --table-border:        var(--border);
+  --table-radius:        var(--radius-md);
+  --table-row-height:    3rem;   /* 48px */
+  --table-font-size:     var(--text-sm);
+
+  /* ============================================================
+     Modal / Dialog 组件
+     ============================================================ */
+  --modal-radius:        var(--radius-xl);
+  --modal-shadow:        var(--shadow-xl);
+  --modal-overlay-bg:    var(--overlay);
+  --modal-bg:            var(--card);
+  --modal-border:        var(--border);
+  --modal-padding:       var(--space-6);
+  --modal-title-size:    var(--text-lg);
+  --modal-title-weight:  var(--weight-semibold);
+
+  /* ============================================================
+     Dropdown / Popover / Select 组件
+     ============================================================ */
+  --dropdown-radius:     var(--radius-md);
+  --dropdown-shadow:     var(--shadow-lg);
+  --dropdown-bg:         var(--popover);
+  --dropdown-border:     var(--border);
+  --dropdown-item-px:    var(--space-3);
+  --dropdown-item-py:    var(--space-2);
+  --dropdown-item-radius: var(--radius-sm);
+  --dropdown-item-hover-bg: var(--accent);
+
+  /* ============================================================
+     Sidebar / Navigation 组件
+     ============================================================ */
+  --sidebar-width:         220px;
+  --sidebar-collapsed-width: 64px;
+  --sidebar-item-radius:   var(--radius-md);
+  --sidebar-item-px:       var(--space-3);
+  --sidebar-item-py:       var(--space-2);
+  --sidebar-item-font-size: var(--text-sm);
+  --sidebar-item-active-bg: hsl(var(--primary) / 0.12);
+  --sidebar-item-active-text: var(--primary);
+  --sidebar-item-hover-bg: var(--accent);
+  --sidebar-transition:    var(--duration-normal) var(--ease-standard);
+
+  /* ============================================================
+     Header / Topbar 组件
+     ============================================================ */
+  --header-height:       3.5rem;   /* 56px */
+  --header-border:       var(--border);
+  --header-bg:           var(--header);
+  --header-shadow:       var(--shadow-sm);
+
+  /* ============================================================
+     Avatar / 头像组件
+     ============================================================ */
+  --avatar-radius-sm:    var(--radius-sm);
+  --avatar-radius-md:    var(--radius-md);
+  --avatar-radius-circle: var(--radius-full);
+  --avatar-size-xs:      1.25rem;  /* 20px */
+  --avatar-size-sm:      1.5rem;   /* 24px */
+  --avatar-size-md:      2rem;     /* 32px */
+  --avatar-size-lg:      2.5rem;   /* 40px */
+  --avatar-size-xl:      3rem;     /* 48px */
+
+  /* ============================================================
+     Toast / Notification 组件
+     ============================================================ */
+  --toast-radius:        var(--radius-lg);
+  --toast-shadow:        var(--shadow-lg);
+  --toast-border:        var(--border);
+  --toast-bg:            var(--card);
+  --toast-font-size:     var(--text-sm);
+  --toast-max-width:     28rem;  /* 448px */
+
+  /* ============================================================
+     Status / Indicator 组件（IoT 场景）
+     ============================================================ */
+  --status-online:       var(--success);
+  --status-offline:      var(--gray-400);
+  --status-warning:      var(--warning);
+  --status-error:        var(--destructive);
+
+  --status-dot-size:     0.5rem;  /* 8px */
+  --status-badge-radius: var(--radius-full);
+
+  /* ============================================================
+     Chart / 数据可视化（基础配色）
+     ============================================================ */
+  --chart-color-1: var(--blue-500);
+  --chart-color-2: var(--green-500);
+  --chart-color-3: var(--orange-500);
+  --chart-color-4: var(--violet-500);
+  --chart-color-5: var(--pink-500);
+  --chart-color-6: var(--yellow-500);
+  --chart-color-7: var(--sky-500);
+  --chart-color-8: var(--rose-500);
+
+  --chart-grid-color:    var(--border);
+  --chart-axis-color:    var(--muted-foreground);
+  --chart-tooltip-bg:    var(--card);
+  --chart-tooltip-border: var(--border);
+  --chart-tooltip-shadow: var(--shadow-lg);
+}
+
+/* ============================================================
+   暗色模式下的组件令牌调整
+   ============================================================ */
+.dark {
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --card-shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --modal-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+
+  --dropdown-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+
+  --toast-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  --sidebar-item-active-bg: hsl(var(--primary) / 0.2);
+
+  --status-offline: var(--gray-600);
+}

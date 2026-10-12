@@ -4,10 +4,10 @@ import { NodePackageImporter } from 'sass';
 import { loadEnv } from 'vite';
 
 // ---- Bigscreen 源码根目录 (packages/bigscreen/src) ----
-const bigscreenPkgSrc = resolve(process.cwd(), '../../packages/bigscreen/src');
+const bigscreenPkgSrc = resolve(process.cwd(), '../../../web-shared/packages/bigscreen/src');
 const goviewSrc = resolve(bigscreenPkgSrc, 'goview');
 const goviewStylePath = resolve(goviewSrc, 'styles/common/style.scss').replaceAll('\\', '/');
-const stylesGlobal = resolve(process.cwd(), '../../packages/styles/src/global/index.scss').replaceAll('\\', '/');
+const stylesGlobal = resolve(process.cwd(), '../../../web-shared/packages/styles/src/global/index.scss').replaceAll('\\', '/');
 
 export default defineConfig(async (config) => {
   // 正确获取环境变量
@@ -64,7 +64,7 @@ export default defineConfig(async (config) => {
         alias: [
           {
             find: /^@vben-core\/shared\/(.+)$/,
-            replacement: resolve(process.cwd(), '../../packages/@core/base/shared/src') + '/$1',
+            replacement: resolve(process.cwd(), '../../../web-shared/packages/@core/base/shared/src') + '/$1',
           },
           // ---- Bigscreen (goview) 别名：支持在大屏 dashboard 嵌入 GoView 自定义大屏预览 ----
           // @/ → goview 内部别名 (goview 源码内使用 @/xxx 导入)

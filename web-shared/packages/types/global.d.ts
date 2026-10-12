@@ -1,0 +1,34 @@
+import type { RouteMeta as IRouteMeta } from '@vben-core/typings';
+
+import 'vue-router';
+
+declare module 'vue-router' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  interface RouteMeta extends IRouteMeta {}
+}
+
+export interface VbenAdminProAppConfigRaw {
+  /** 密码登录默认模式；缺省使用 SHA256，允许当前应用及 URL 覆盖。 */
+  VITE_GLOB_LOGIN_PASSWORD_MODE?: 'md5' | 'sha256';
+  VITE_GLOB_API_URL: string;
+  VITE_GLOB_AUTH_DINGDING_CLIENT_ID: string;
+  VITE_GLOB_AUTH_DINGDING_CORP_ID: string;
+}
+
+interface AuthConfig {
+  dingding?: {
+    clientId: string;
+    corpId: string;
+  };
+}
+
+export interface ApplicationConfig {
+  apiURL: string;
+  auth: AuthConfig;
+}
+
+declare global {
+  interface Window {
+    _VBEN_ADMIN_PRO_APP_CONF_: VbenAdminProAppConfigRaw;
+  }
+}
