@@ -15,8 +15,9 @@ FILES = (
     "affordance.go", "ai.go", "ai_test.go", "baseParam.go", "define.go",
     "inference.go", "inference_test.go", "init.go", "model.go",
     "modelParam.go", "modelSimple.go", "modifyCheck.go", "schema_test.go", "validate.go",
-    "validate_thingmodel_test.go",
+    "utils_normalize_test.go", "validate_thingmodel_test.go",
 )
+RAW_ONLY = ("utils.go",)
 IMPORTS = {
     "gitee.com/unitedrhino/share/def": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/def",
     "gitee.com/unitedrhino/share/errors": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/errors",
@@ -48,10 +49,12 @@ def main() -> None:
     if not Path(formatter).is_file():
         parser.error("找不到 gofmt，请安装 Go 工具链")
     checksums: dict[str, str] = {}
-    for name in FILES:
+    for name in FILES + RAW_ONLY:
         original = git(repo, "show", f"{sha}:{SOURCE}/{name}")
         (upstream / name).write_bytes(original)
         checksums[name] = hashlib.sha256(original).hexdigest()
+        if name in RAW_ONLY:
+            continue
         content = original.decode().replace("\r\n", "\n")
         for old, new in IMPORTS.items():
             content = content.replace(old, new)
@@ -62,7 +65,7 @@ def main() -> None:
         subprocess.run([formatter, "-w", str(generated)], check=True)
     manifest = {"saas_commit": sha, "files": checksums}
     (upstream / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n")
-    print(f"同步 {len(FILES)} 个物模型源码文件，来源 {sha}")
+    print(f"同步 {len(FILES)} 个物模型源码文件和 {len(RAW_ONLY)} 个数据库混合文件快照，来源 {sha}")
 
 
 if __name__ == "__main__":

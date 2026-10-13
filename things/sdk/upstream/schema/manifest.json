@@ -13,6 +13,8 @@
     "modelSimple.go": "13a39d939214f35640d27ad2fa245588a386cbbc132098e13dd102b67a14c02d",
     "modifyCheck.go": "14d8486ac9b24edc9bdbea83391fd86906b3d1fae4de31ada927a9a8563b4b87",
     "schema_test.go": "0c772428a6bf3db11e7ea97c9784add6bf0ceda10a48de88f5f03a1081036600",
+    "utils.go": "6efd2b835b61eb9e3716956e533d1480a46e1f04784156a3b82e2b4e0379363a",
+    "utils_normalize_test.go": "67681feb6661f834eea010ad465a4b30d18926acbfddf902f18be515cbaa7dd9",
     "validate.go": "7c6a08532c11161233b6ce61ee491c9f79012e4a1de6cea51c273597c525ba08",
     "validate_thingmodel_test.go": "6d1a940bc3a0f942211be7007b4b29c90bf84f6fffd4e6f97ab1be931c80e4aa"
   },
