@@ -16,6 +16,7 @@ export * from './apis/things-data-project-api';
 export * from './apis/things-data-user-api';
 export * from './apis/things-device-auth-api';
 export * from './apis/things-device-auth5-api';
+export * from './apis/things-device-content-api';
 export * from './apis/things-device-edge-api';
 export * from './apis/things-device-gateway-api';
 export * from './apis/things-device-group-api';

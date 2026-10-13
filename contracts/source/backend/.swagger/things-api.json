@@ -526,6 +526,11 @@
             "description": " 设备名",
             "type": "string"
           },
+          "deviceID": {
+            "description": "设备记录 ID",
+            "title": "DeviceID",
+            "type": "string"
+          },
           "falseAlarm": {
             "description": " 是否误报",
             "format": "boolean",
@@ -1246,6 +1251,18 @@
           "delaySeconds": {
             "description": " 延迟秒数",
             "format": "int64",
+            "type": "integer"
+          },
+          "repeatIntervalSeconds": {
+            "default": "0",
+            "description": "未处理重复提醒间隔秒数，0=不重复",
+            "title": "RepeatIntervalSeconds",
+            "type": "integer"
+          },
+          "repeatMaxCount": {
+            "default": "0",
+            "description": "重复提醒最大次数，0=不限",
+            "title": "RepeatMaxCount",
             "type": "integer"
           },
           "levels": {
@@ -4814,7 +4831,12 @@
           },
           "quality": {
             "description": " 属性质量，未上报时省略",
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "GOOD",
+              "UNCERTAIN",
+              "BAD"
+            ]
           },
           "receivedTime": {
             "description": " 平台接收时间，毫秒；历史未知为0",
@@ -4827,7 +4849,8 @@
           },
           "value": {
             "description": "获取到的值",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -5122,7 +5145,12 @@
           },
           "quality": {
             "additionalProperties": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "GOOD",
+                "UNCERTAIN",
+                "BAD"
+              ]
             },
             "description": " 本次回复每个属性的质量",
             "type": "object"
@@ -5209,7 +5237,12 @@
           },
           "quality": {
             "additionalProperties": {
-              "type": "string"
+              "type": "string",
+              "enum": [
+                "GOOD",
+                "UNCERTAIN",
+                "BAD"
+              ]
             },
             "description": " 本次回复每个属性的质量",
             "type": "object"
@@ -6272,7 +6305,8 @@
           },
           "values": {
             "additionalProperties": {
-              "type": "string"
+              "type": "string",
+              "nullable": true
             },
             "description": "key是聚合函数",
             "type": "object"
@@ -6478,7 +6512,8 @@
           },
           "value": {
             "description": "获取到的值",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         },
         "title": "DeviceMsgPropertyLogAggRespDataDetail",
@@ -6677,7 +6712,12 @@
           },
           "quality": {
             "description": " 属性质量，未上报时省略",
-            "type": "string"
+            "type": "string",
+            "enum": [
+              "GOOD",
+              "UNCERTAIN",
+              "BAD"
+            ]
           },
           "receivedTime": {
             "description": " 平台接收时间，毫秒；历史未知为0",
@@ -6694,7 +6734,8 @@
           },
           "value": {
             "description": "获取到的值",
-            "type": "string"
+            "type": "string",
+            "nullable": true
           }
         },
         "required": [
@@ -13549,7 +13590,7 @@
   },
   "info": {
     "title": "things-api",
-    "version": "1.0.0"
+    "version": "1.0.1"
   },
   "openapi": "3.0.3",
   "paths": {

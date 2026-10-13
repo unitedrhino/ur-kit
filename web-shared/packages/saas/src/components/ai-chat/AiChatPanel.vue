@@ -417,7 +417,7 @@ function decorateOssFileText(root: HTMLElement) {
     let match: null | RegExpExecArray;
     while ((match = OSS_FILE_TEXT_RE.exec(text)) !== null) {
       const list = hitsByNode.get(node) ?? [];
-      list.push({ start: match.index, end: match.index + match[0].length, fileUri: match[1] });
+      list.push({ start: match.index, end: match.index + match[0].length, fileUri: match[1] ?? '' });
       hitsByNode.set(node, list);
     }
   }

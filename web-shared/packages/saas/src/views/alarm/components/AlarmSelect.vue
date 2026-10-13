@@ -53,8 +53,9 @@ function onValueChange(value: unknown) {
  *  Reka SelectValue 的收起文本来自已注册选项的内部缓存，options 异步加载完成后不会自动刷新，
  *  会残留加载前的占位文案（如「xx（已失效）」），因此改为受控渲染。 */
 const selectedLabel = computed(() => {
-  if (props.modelValue === undefined) return '';
-  const hit = props.options.find((item) => toSelectValue(item.value) === toSelectValue(props.modelValue));
+  const selectedValue = props.modelValue;
+  if (selectedValue === undefined) return '';
+  const hit = props.options.find((item) => toSelectValue(item.value) === toSelectValue(selectedValue));
   return hit?.label ?? '';
 });
 </script>

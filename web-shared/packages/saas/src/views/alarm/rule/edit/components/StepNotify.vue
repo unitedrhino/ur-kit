@@ -472,6 +472,8 @@ function createLadder(preferredTiming?: NotifyLadder['timing']): NotifyLadder | 
     channels: [],
     channelTemplates: {},
     delaySeconds: 0,
+    repeatIntervalSeconds: 0,
+    repeatMaxCount: 0,
     targets: { userIDs: [] },
     callbacks: [],
   };

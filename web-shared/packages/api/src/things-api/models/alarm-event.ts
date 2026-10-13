@@ -36,6 +36,10 @@ export interface AlarmEvent {
      */
     'deviceName'?: string;
     /**
+     * 设备记录 ID
+     */
+    'deviceID'?: string;
+    /**
      *  是否误报
      */
     'falseAlarm'?: boolean;

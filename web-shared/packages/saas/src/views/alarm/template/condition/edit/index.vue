@@ -183,6 +183,8 @@ const conditionIssues = computed<AlarmRuleIssue[]>(() => {
           channels: ['email'],
           channelTemplates: { email: '1' },
           delaySeconds: 0,
+          repeatIntervalSeconds: 0,
+          repeatMaxCount: 0,
           targets: { userIDs: [1] },
           callbacks: [],
         },
