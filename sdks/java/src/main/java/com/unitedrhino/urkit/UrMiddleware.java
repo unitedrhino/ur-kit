@@ -22,6 +22,7 @@ public final class UrMiddleware {
     /** HTTP_IDENTITY_ATTRIBUTE 是 HTTP 业务处理器取得身份的属性名。 */
     public static final String HTTP_IDENTITY_ATTRIBUTE = "ur.identity";
     private static final Metadata.Key<String> TOKEN = Metadata.Key.of("ithings-token", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> TOKEN_ALIAS = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> AUTHORIZATION = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
     private static final Logger LOGGER = Logger.getLogger(UrMiddleware.class.getName());
 
@@ -63,6 +64,7 @@ public final class UrMiddleware {
             try {
                 if (authenticate == null) { error(exchange, 500, "auth_not_configured"); return; }
                 String token = token(exchange.getRequestHeaders().getFirst("ithings-token"),
+                                     exchange.getRequestHeaders().getFirst("token"),
                                      exchange.getRequestHeaders().getFirst("Authorization"));
                 if (token == null) { error(exchange, 401, "unauthorized"); return; }
                 Identity identity;
@@ -94,7 +96,7 @@ public final class UrMiddleware {
                 long started = System.nanoTime();
                 try {
                     if (authenticate == null) return reject(call, Status.INTERNAL.withDescription("auth_not_configured"));
-                    String provided = token(headers.get(TOKEN), headers.get(AUTHORIZATION));
+                    String provided = token(headers.get(TOKEN), headers.get(TOKEN_ALIAS), headers.get(AUTHORIZATION));
                     if (provided == null) return reject(call, Status.UNAUTHENTICATED.withDescription("unauthorized"));
                     Identity identity;
                     try { identity = authenticate.authenticate(provided); }
@@ -114,8 +116,9 @@ public final class UrMiddleware {
     }
 
     /** token 读取平台令牌或 Bearer 令牌，不接受自报用户头。 */
-    private static String token(String platformToken, String authorization) {
+    private static String token(String platformToken, String platformAlias, String authorization) {
         if (platformToken != null && !platformToken.isBlank()) return platformToken.trim();
+        if (platformAlias != null && !platformAlias.isBlank()) return platformAlias.trim();
         if (authorization != null && authorization.startsWith("Bearer ") && authorization.length() > 7) {
             return authorization.substring(7).trim();
         }

@@ -43,6 +43,9 @@ func UnaryServerInterceptor(options RPCOptions) grpc.UnaryServerInterceptor {
 		}
 		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
 		if token == "" {
+			token = strings.TrimSpace(first(incoming.Get("token")))
+		}
+		if token == "" {
 			token = strings.TrimPrefix(first(incoming.Get("authorization")), "Bearer ")
 		}
 		if token == "" {
@@ -64,12 +67,27 @@ func UnaryServerInterceptor(options RPCOptions) grpc.UnaryServerInterceptor {
 // StreamServerInterceptor 对流式 RPC 逐连接验证令牌，并将可信身份注入流上下文。
 func StreamServerInterceptor(options RPCOptions) grpc.StreamServerInterceptor {
 	return func(server any, stream grpc.ServerStream, info *grpc.StreamServerInfo, handler grpc.StreamHandler) error {
+		started := time.Now()
+		defer func() {
+			if options.Logger != nil {
+				options.Logger.Info("rpc request", "method", info.FullMethod, "duration_ms", time.Since(started).Milliseconds())
+			}
+		}()
+		if options.Authenticator == nil {
+			return status.Error(codes.Internal, "auth_not_configured")
+		}
 		ctx := stream.Context()
 		incoming, ok := metadata.FromIncomingContext(ctx)
-		if !ok || options.Authenticator == nil {
+		if !ok {
 			return status.Error(codes.Unauthenticated, "unauthorized")
 		}
 		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
+		if token == "" {
+			token = strings.TrimSpace(first(incoming.Get("token")))
+		}
+		if token == "" {
+			token = strings.TrimPrefix(first(incoming.Get("authorization")), "Bearer ")
+		}
 		if token == "" {
 			return status.Error(codes.Unauthenticated, "unauthorized")
 		}

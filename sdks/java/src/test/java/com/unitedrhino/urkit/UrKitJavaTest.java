@@ -17,6 +17,10 @@ import io.grpc.stub.ServerCalls;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import org.junit.jupiter.api.Test;
 
@@ -41,6 +45,10 @@ public class UrKitJavaTest {
             String origin = "http://127.0.0.1:" + server.getAddress().getPort();
             assertTrue(new UrHttpClient(origin, "good").postJson("/api/ping", "{}", "acme", "p1")
                     .contains("9007199254740993"));
+            HttpRequest webRequest = HttpRequest.newBuilder(URI.create(origin + "/api/ping"))
+                    .header("token", "good").POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+            assertEquals(200, HttpClient.newHttpClient().send(webRequest,
+                    HttpResponse.BodyHandlers.ofString()).statusCode());
             assertEquals(401, assertThrows(UrHttpClient.ApiException.class,
                     () -> new UrHttpClient(origin, "bad").postJson("/api/ping", "{}", null, null)).status());
             assertEquals(403, assertThrows(UrHttpClient.ApiException.class,

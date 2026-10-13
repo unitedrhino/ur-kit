@@ -32,14 +32,16 @@ func TestHTTP(t *testing.T) {
 		Resource: "demo", Action: "view",
 	})
 	for _, test := range []struct {
+		header string
 		token  string
 		status int
 	}{
-		{"", http.StatusUnauthorized}, {"bad", http.StatusUnauthorized}, {"good", http.StatusNoContent},
+		{"ithings-token", "", http.StatusUnauthorized}, {"ithings-token", "bad", http.StatusUnauthorized},
+		{"ithings-token", "good", http.StatusNoContent}, {"token", "good", http.StatusNoContent},
 	} {
 		called = false
 		request := httptest.NewRequest(http.MethodPost, "/sample", nil)
-		request.Header.Set("ithings-token", test.token)
+		request.Header.Set(test.header, test.token)
 		request.Header.Set("ithings-user", "forged")
 		response := httptest.NewRecorder()
 		wrapped.ServeHTTP(response, request)

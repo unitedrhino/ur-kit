@@ -24,4 +24,7 @@ test('令牌和权限验证后才进入处理器', async () => {
   await handler({ method: 'POST', url: '/demo', headers: { 'ithings-token': 'good', 'ithings-user': 'forged' } }, good);
   assert.equal(good.body, 'ok');
   assert.equal(good.headers['X-Content-Type-Options'], 'nosniff');
+  const webHeader = makeResponse();
+  await handler({ method: 'POST', url: '/demo', headers: { token: 'good', 'ithings-user': 'forged' } }, webHeader);
+  assert.equal(webHeader.body, 'ok');
 });

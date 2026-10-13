@@ -14,4 +14,7 @@ test('RPC 一元方法只接受验证后的身份', async () => {
   metadata.set('ithings-token', 'good');
   metadata.set('ithings-user', 'forged');
   await new Promise((resolve, reject) => handler({ metadata }, (error, response) => error ? reject(error) : (assert.deepEqual(response, { ok: true }), resolve())));
+  const webMetadata = new grpc.Metadata();
+  webMetadata.set('token', 'good');
+  await new Promise((resolve, reject) => handler({ metadata: webMetadata }, (error, response) => error ? reject(error) : (assert.deepEqual(response, { ok: true }), resolve())));
 });

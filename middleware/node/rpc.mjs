@@ -5,7 +5,7 @@ import grpc from '@grpc/grpc-js';
 export function protectUnaryRPC(handler, { authenticate, authorize, resource, action, logger } = {}) {
   return async (call, callback) => {
     const started = Date.now();
-    const token = call.metadata.get('ithings-token')[0];
+    const token = call.metadata.get('ithings-token')[0] || call.metadata.get('token')[0] || call.metadata.get('authorization')[0]?.replace(/^Bearer /, '');
     call.metadata.remove('ithings-user');
     try {
       if (typeof authenticate !== 'function') return callback(rpcError(grpc.status.INTERNAL, 'auth_not_configured'));

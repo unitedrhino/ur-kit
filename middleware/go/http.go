@@ -82,6 +82,9 @@ func HTTP(next http.Handler, options Options) http.Handler {
 		}
 		token := strings.TrimSpace(request.Header.Get("ithings-token"))
 		if token == "" {
+			token = strings.TrimSpace(request.Header.Get("token"))
+		}
+		if token == "" {
 			token = strings.TrimPrefix(request.Header.Get("Authorization"), "Bearer ")
 		}
 		if token == "" {
