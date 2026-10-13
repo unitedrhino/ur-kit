@@ -25,6 +25,10 @@ func TestMergeConfigJSON(t *testing.T) {
 	if base.MQTT.Port != 9007199254740993 || !base.MQTT.Enabled || len(base.Extra) != 1 {
 		t.Fatal("基础配置被覆写")
 	}
+	preserved, err := MergeConfigJSON(base, `{"mqtt":{"enabled":false}}`)
+	if err != nil || preserved.MQTT.Port != 9007199254740993 {
+		t.Fatalf("未覆写的大整数失真: %+v %v", preserved, err)
+	}
 	if _, err := MergeConfigJSON(base, `[]`); err == nil {
 		t.Fatal("非对象配置仍被接纳")
 	}
