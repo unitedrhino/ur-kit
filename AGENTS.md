@@ -4,7 +4,7 @@
 
 - `apps/iot-basic/web` 是公开 IoT 客户端；`mobile` 是 uni-app；`backend` 是可运行的最小后端。平台管理端不属于本仓。
 - `web-shared/` 是按 SaaS 固定提交导出的共享 Web 包闭包；只通过 `scripts/sync_web_shared.py` 更新，修改快照适配规则应落在该脚本，避免下次同步丢失。
-- `things/sdk`、`cache`、`middleware`、`protocols/modbus` 不得导入 SaaS 私有路径；服务特定对象经接口注入。
+- 可发布的 `things/sdk`、`cache`、`middleware`、`protocols/modbus` 不得导入 SaaS 私有路径；服务特定对象经接口注入。`things/sdk/upstream` 与 `cache/platform/upstream` 仅作原源码对照，含私有导入，不参与公开 SDK 构建。
 - HTTP 与 RPC 的身份、权限、错误码、日志、ID、空值与时间单位在 Go、Java、Node 间保持一致；外部请求携带的身份元数据必须先经认证。
 - 不提交环境地址、凭据、证书、密钥或测试生产配置。示例只用占位符和本地模拟服务。
 - 修改生成器后执行两次同步并检查第二次无差异；修改客户端或中间件后运行相应语言的测试和示例。
