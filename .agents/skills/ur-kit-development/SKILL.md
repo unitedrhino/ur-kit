@@ -6,7 +6,7 @@ description: 开发 ur-kit 合同、SDK、中间件、缓存、协议及 IoT 基
 # ur-kit 开发
 
 1. 先读仓库根目录 `AGENTS.md`，核对 `contracts/manifest.json` 的 SaaS 来源提交。
-2. 合同只通过 `python3 scripts/sync_contracts.py --saas <saas-path> --sha <full-sha>` 更新；先运行对应 SaaS 服务的 `build.sh` 并提交生成物，再以该提交导出。
+2. 合同只通过 `python3 scripts/sync_contracts.py --saas <saas-path> --sha <full-sha>` 更新；先运行对应 SaaS 服务的 `build.sh` 并提交生成物，再以该提交导出。即使 Swagger 已有字段，也要核对生成的 Go HTTP 请求类型和实际 HTTP→RPC 转换；仅看 `.api` 或 Swagger 无法证明服务会接收并透传字段。重复运行 `build.sh` 核对生成结果稳定。
 3. `web-shared/` 只通过 `scripts/sync_web_shared.py` 按固定 SaaS 提交更新。同步后运行 `scripts/configure_web_workspace.py`、`pnpm install --frozen-lockfile`、`pnpm -r run stub --if-present` 和 `pnpm --filter org-iot-client build`；快照适配逻辑写回同步脚本。
 4. 先运行 `python3 scripts/generate_java_pb.py` 两次核对消息与 gRPC 服务 Stub 哈希，再验证 Go/Java/Node 的 HTTP、RPC 示例、Java Maven 编译、`things/sdk/seed` 幂等性及重复生成无差异，最后才发布标签。Linux x86_64 的 gRPC Java 插件固定版本并校验 SHA-256；其他平台设置 `UR_KIT_GRPC_JAVA_PLUGIN`。检查旧客户端 `apilegacy` 受影响字段与鉴权。
    HTTP 输入、ID、空值、时间与错误响应以 `sdks/conformance/README.md` 和共同样本为准；三语言客户端改动后一起核对。
