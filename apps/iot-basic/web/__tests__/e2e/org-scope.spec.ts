@@ -234,7 +234,7 @@ test.describe('组织前缀路由 smoke', () => {
     await page.goto('/');
 
     await expect(page).toHaveURL(/\/app_not_found$/);
-    await expect(page.getByRole('heading', { name: '找不到应用' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /找不到应用|App Not Found/ })).toBeVisible();
   });
 
   test('合法 org 可以进入组织作用域登录页', async ({ page }) => {
@@ -250,7 +250,7 @@ test.describe('组织前缀路由 smoke', () => {
     await page.goto('/bad-org/auth/login');
 
     await expect(page).toHaveURL(/\/app_not_found$/);
-    await expect(page.getByRole('heading', { name: '找不到应用' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /找不到应用|App Not Found/ })).toBeVisible();
   });
 
   test('已登录冷启动直达组织业务页不会被动态菜单裁成 404', async ({ page }) => {

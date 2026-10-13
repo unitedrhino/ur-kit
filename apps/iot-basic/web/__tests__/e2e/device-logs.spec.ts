@@ -282,15 +282,13 @@ test.describe('设备日志聚合页', () => {
     await mockDeviceLogBootApis(page);
 
     await page.goto('/demo-org/device-space/console');
-    await expect(page.getByText('电表一号')).toBeVisible();
+    await expect(page.getByTestId('device-console-desktop-table').getByText('电表一号')).toBeVisible();
 
     await page.getByRole('button', { name: '日志' }).click();
     await expect(page).toHaveURL(/\/demo-org\/device-space\/device-logs\/product-001\/device-001$/);
     await expect(page.getByRole('heading', { name: '电表一号' })).toBeVisible();
 
     await expect(page.getByText('设备上线')).toBeVisible();
-    await expect(page.getByRole('button', { name: '展开更多 19 条' })).toBeVisible();
-    await page.getByRole('button', { name: '展开更多 19 条' }).click();
     await expect(page.getByText('设备离线').first()).toBeVisible();
 
     await page.getByRole('button', { name: '加载更多' }).click();

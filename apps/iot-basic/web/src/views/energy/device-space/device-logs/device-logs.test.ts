@@ -1,7 +1,7 @@
 // 部分 mock：保留 loadLocalesMapFromDir 等真实导出（组件 import 链依赖），
 // 仅将 $t 替换为直查 zh-CN 语言包 JSON 的实现（键缺失时返回键本身，不掩盖裸键）。
 vi.mock('@vben/locales', async (importOriginal) => {
-  const orgIotClient = (await import('../../../../../../../packages/saas/src/locales/langs/zh-CN/orgIotClient.json')).default;
+  const orgIotClient = (await import('../../../../../../../../web-shared/packages/saas/src/locales/langs/zh-CN/orgIotClient.json')).default;
   return {
     ...(await importOriginal<typeof import('@vben/locales')>()),
     $t: (key: string, args?: Record<string, unknown>) => {
@@ -26,6 +26,7 @@ vi.mock('@vben/locales', async (importOriginal) => {
 });
 
 import { describe, expect, it, vi } from 'vitest';
+import { ThingsApi } from '@vben/api';
 
 import {
   buildSchemaNameMap,
@@ -98,8 +99,8 @@ describe('org-iot-client device log aggregation', () => {
     ]);
 
     const merged = mergeAndSortTimelineItems([
-      normalizePropertyLog({ dataID: 'temperature', dataName: '温度', timestamp: '1779940800000', value: '26.5' }, schemaMap),
-      normalizeEventLog({ dataID: 'fault', params: '{"code":1}', timestamp: '1779940860000', type: 'alert' }, schemaMap),
+      normalizePropertyLog({ dataID: 'temperature', dataName: '温度', timestamp: '1779940800000', receivedTime: 1779940800000, value: '26.5' }, schemaMap),
+      normalizeEventLog({ dataID: 'fault', params: '{"code":1}', timestamp: '1779940860000', receivedTime: 1779940860000, type: 'alert' }, schemaMap),
       normalizeControlLog({ action: 'actionSend', content: '{}', dataID: 'restart', resultCode: 500, timestamp: '1779940740000' }, schemaMap, 'thingModel'),
     ]);
 
@@ -123,21 +124,21 @@ describe('org-iot-client device log aggregation', () => {
 });
 
 it('异常属性保留质量与接收时间，零值不会丢失', () => {
-  const bad = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: null, timestamp: '1789516800000', quality: 'BAD', receivedTime: 1789516800120 });
+  const bad = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: null, timestamp: '1789516800000', quality: ThingsApi.DeviceMsgPropertyLogInfoQualityEnum.BAD, receivedTime: 1789516800120 });
   expect(bad.badgeLabel).toBe('异常');
   expect(bad.resultTone).toBe('danger');
   expect(bad.subtitle).toContain('数据不可用');
   expect(bad.detailRows.find((row) => row.label === '接收时间')?.value).toMatch(/\.120$/);
-  const good = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: '0', timestamp: '1789516800000', quality: 'GOOD', receivedTime: 0 });
+  const good = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: '0', timestamp: '1789516800000', quality: ThingsApi.DeviceMsgPropertyLogInfoQualityEnum.GOOD, receivedTime: 0 });
   expect(good.subtitle).toContain('值：0');
   expect(good.detailRows.find((row) => row.label === '接收时间')?.value).toBe('—');
 });
 
 /** 验证新版毫秒数字合同与历史零值不会改变日志质量或显示纪元时间。 */
 it('数字接收时间保留毫秒，历史零值显示未知且不影响质量', () => {
-  const latest = normalizePropertyLog({ dataID: 'temperature', value: '26.5', timestamp: '1789516800000', quality: 'GOOD', receivedTime: 1789516800120 });
+  const latest = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: '26.5', timestamp: '1789516800000', quality: ThingsApi.DeviceMsgPropertyLogInfoQualityEnum.GOOD, receivedTime: 1789516800120 });
   expect(latest.detailRows.find((row) => row.label === '接收时间')?.value).toMatch(/\.120$/);
-  const historical = normalizePropertyLog({ dataID: 'temperature', value: '0', timestamp: '1789516800000', receivedTime: 0 });
+  const historical = normalizePropertyLog({ dataID: 'temperature', dataName: '温度', value: '0', timestamp: '1789516800000', receivedTime: 0 });
   expect(historical.detailRows.find((row) => row.label === '接收时间')?.value).toBe('—');
   expect(historical.badgeLabel).toBe('良好');
   expect(historical.subtitle).toContain('值：0');

@@ -4,15 +4,15 @@ import process from 'node:process';
 
 import { describe, expect, it } from 'vitest';
 
-const repoRoot = resolve(process.cwd(), '../..');
+const appRoot = process.cwd();
 
 function readRepoFile(path: string) {
-  return readFileSync(resolve(repoRoot, path), 'utf8');
+  return readFileSync(resolve(appRoot, path), 'utf8');
 }
 
 describe('org-iot-client console control surface', () => {
   it('replaces the permanent side control panel with a centered control dialog', () => {
-    const consoleFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/index.vue');
+    const consoleFile = readRepoFile('src/views/energy/device-space/console/index.vue');
 
     expect(consoleFile).toContain('DeviceControlDialog');
     expect(consoleFile).toContain('controlRows');
@@ -24,7 +24,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('keeps table control entries for single-device and selected-device control', () => {
-    const consoleFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/index.vue');
+    const consoleFile = readRepoFile('src/views/energy/device-space/console/index.vue');
 
     expect(consoleFile).toContain('@vben/saas');
     expect(consoleFile).toContain('useVueTable');
@@ -45,7 +45,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('adds mobile-first console controls without duplicating business state', () => {
-    const consoleFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/index.vue');
+    const consoleFile = readRepoFile('src/views/energy/device-space/console/index.vue');
 
     expect(consoleFile).toContain('mobileAreaDialogOpen');
     expect(consoleFile).toContain('data-testid="device-console-mobile-area-trigger"');
@@ -58,7 +58,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('builds custom visible columns from device properties', () => {
-    const consoleFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/index.vue');
+    const consoleFile = readRepoFile('src/views/energy/device-space/console/index.vue');
 
     expect(consoleFile).toContain('DropdownMenuCheckboxItem');
     expect(consoleFile).toContain("$t('orgIotClient.console.columnDisplay')");
@@ -87,7 +87,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('keeps the new dialog shadcn-first without direct naive imports', () => {
-    const dialogFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
+    const dialogFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
 
     expect(dialogFile).toContain('@unitedrhino/saas-ui');
     expect(dialogFile).not.toContain('@vben-core/shadcn-ui');
@@ -119,7 +119,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('keeps dialog actions in the header and uses a select-like multi device picker', () => {
-    const dialogFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
+    const dialogFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
 
     expect(dialogFile).toContain('class="grid shrink-0 grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:items-center sm:justify-end sm:pr-12"');
     expect(dialogFile).toContain('DropdownMenu v-if="canPickDevices"');
@@ -145,7 +145,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('hides the stale failed count while a single control item is retrying', () => {
-    const dialogFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
+    const dialogFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
 
     expect(dialogFile).toContain('const retryResults = failedControlMap.value[item.identifier]?.results');
     expect(dialogFile).toContain('setControlFailure(item.identifier, undefined)');
@@ -154,7 +154,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('keeps retry UX accessible and prevents conflicting footer actions', () => {
-    const dialogFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
+    const dialogFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceControlDialog.vue');
 
     expect(dialogFile).toContain('const anyRetrying = computed');
     expect(dialogFile).toContain(':disabled="sending || anyRetrying"');
@@ -165,7 +165,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('uses a controlled shadcn transfer dialog and shared tree selector', () => {
-    const transferFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceTransfer.vue');
+    const transferFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceTransfer.vue');
 
     expect(transferFile).toContain('@unitedrhino/saas-ui');
     expect(transferFile).toContain('EnergyTreeSelector');
@@ -178,8 +178,8 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('uses a split transfer button and passes backend scope fields for all-device transfer', () => {
-    const consoleFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/index.vue');
-    const transferFile = readRepoFile('apps/web/apps/org-iot-client/src/views/energy/device-space/console/modules/DeviceTransfer.vue');
+    const consoleFile = readRepoFile('src/views/energy/device-space/console/index.vue');
+    const transferFile = readRepoFile('src/views/energy/device-space/console/modules/DeviceTransfer.vue');
 
     expect(consoleFile).toContain('DropdownMenuItem');
     expect(consoleFile).toContain('icon-[lucide--more-horizontal]');
@@ -197,7 +197,7 @@ describe('org-iot-client console control surface', () => {
   });
 
   it('migrates the shared energy tree selector away from Naive UI', () => {
-    const treeFile = readRepoFile('apps/web/apps/org-iot-client/src/components/energy/EnergyTreeSelector.vue');
+    const treeFile = readRepoFile('src/components/energy/EnergyTreeSelector.vue');
 
     expect(treeFile).toContain('@unitedrhino/saas-ui');
     expect(treeFile).toContain('expandedKeys');

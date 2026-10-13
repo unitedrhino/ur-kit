@@ -2,7 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "extends": "@vben/tsconfig/web-app.json",
   "compilerOptions": {
-    "baseUrl": null,
+    "baseUrl": ".",
     // 与依赖的 bigscreen 包源码口径对齐（其 tsconfig 显式关闭以下三项）：
     // org-iot-client 通过 @/ 与 @app/ 直接编译 bigscreen 源码（dashboard 嵌入 goview 场景），
     // 若保持严格口径会对同一批依赖文件按更严规则重复报错

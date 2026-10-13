@@ -1,4 +1,23 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
+
+// 单元测试加载公开仓内的真实中文语言包，避免依赖浏览器引导流程。
+vi.mock('@vben/locales', async (importOriginal) => {
+  const messages = (await import('../../../../../../../../web-shared/packages/saas/src/locales/langs/zh-CN/orgIotClient.json')).default;
+  return {
+    ...(await importOriginal<typeof import('@vben/locales')>()),
+    $t: (key: string, args?: Record<string, unknown>) => {
+      const path = key.replace(/^orgIotClient\./, '').split('.');
+      let value: unknown = messages;
+      for (const part of path) value = (value as Record<string, unknown>)?.[part];
+      if (typeof value !== 'string') return key;
+      let translated = value;
+      for (const [name, replacement] of Object.entries(args ?? {})) {
+        translated = translated.replaceAll(`{${name}}`, String(replacement));
+      }
+      return translated;
+    },
+  };
+});
 
 import {
   filterByRequestedAreaIDs,
@@ -20,8 +39,8 @@ describe('getEnergyTimeParams', () => {
 
   it('hour 粒度窗口为 [今日 0 点, 明日 0 点) 半开区间', () => {
     const { timeStart, timeEnd } = getEnergyTimeParams('hour');
-    expect(timeEnd - timeStart).toBeLessThanOrEqual(2 * 24 * 3600 * 1000);
-    expect(timeEnd - timeStart).toBeGreaterThanOrEqual(23 * 3600 * 1000);
+    expect(Number(timeEnd) - Number(timeStart)).toBeLessThanOrEqual(2 * 24 * 3600 * 1000);
+    expect(Number(timeEnd) - Number(timeStart)).toBeGreaterThanOrEqual(23 * 3600 * 1000);
   });
 });
 

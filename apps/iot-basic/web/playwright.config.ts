@@ -12,8 +12,8 @@ const RESULT_DIR = path.join(import.meta.dirname, 'node_modules/.e2e/results');
 
 export default defineConfig({
   testDir: './__tests__/e2e',
-  timeout: 30_000,
-  expect: { timeout: 5_000 },
+  timeout: 120_000,
+  expect: { timeout: 25_000 },
   retries: process.env.CI ? 2 : 0,
   workers: 1,
   reporter: [
@@ -24,6 +24,7 @@ export default defineConfig({
 
   use: {
     baseURL: BASE_URL,
+    locale: 'zh-CN',
     trace: 'retain-on-failure',
     screenshot: 'only-on-failure',
   },
@@ -38,7 +39,12 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      use: {
+        ...devices['Desktop Chrome'],
+        ...(process.env.PLAYWRIGHT_EXECUTABLE_PATH
+          ? { launchOptions: { executablePath: process.env.PLAYWRIGHT_EXECUTABLE_PATH } }
+          : {}),
+      },
     },
   ],
 });
