@@ -59,9 +59,9 @@ export interface ProductInfo {
      */
     'customUi'?: { [key: string]: ProductCustomUi; };
     /**
-     * 默认绑定的 Agent ID，0 表示未绑定
+     * 默认绑定的 Agent ID，十进制字符串传输，0 表示未绑定
      */
-    'defaultAgentId'?: number;
+    'defaultAgentId'?: string;
     /**
      * 描述
      */

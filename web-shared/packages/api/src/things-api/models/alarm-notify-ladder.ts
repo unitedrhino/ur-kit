@@ -39,14 +39,6 @@ export interface AlarmNotifyLadder {
      */
     'delaySeconds'?: number;
     /**
-     * 未处理重复提醒间隔秒数，0=不重复
-     */
-    'repeatIntervalSeconds'?: number;
-    /**
-     * 重复提醒最大次数，0=不限
-     */
-    'repeatMaxCount'?: number;
-    /**
      *  告警级别列表
      */
     'levels'?: Array<string>;
@@ -54,6 +46,14 @@ export interface AlarmNotifyLadder {
      *  顺序
      */
     'order'?: number;
+    /**
+     *  未处理重复提醒间隔秒数，0=不重复
+     */
+    'repeatIntervalSeconds'?: number;
+    /**
+     *  重复提醒最大次数，0=不限
+     */
+    'repeatMaxCount'?: number;
     'targets'?: AlarmNotifyTargets;
     /**
      *  trigger / recovery / both

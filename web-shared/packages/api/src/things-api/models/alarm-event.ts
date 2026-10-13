@@ -32,13 +32,13 @@ export interface AlarmEvent {
      */
     'createdTime'?: string;
     /**
+     *  设备记录 ID（dm_device_info.id），列表展示「设备名称(设备ID)」
+     */
+    'deviceID'?: string;
+    /**
      *  设备名
      */
     'deviceName'?: string;
-    /**
-     * 设备记录 ID
-     */
-    'deviceID'?: string;
     /**
      *  是否误报
      */

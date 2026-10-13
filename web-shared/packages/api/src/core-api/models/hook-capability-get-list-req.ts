@@ -25,9 +25,9 @@ export interface HookCapabilityGetListReq {
     'code'?: string;
     'page'?: PageInfo;
     /**
-     *  服务ID筛选
+     *  服务ID筛选，字符串传输以避免大整数精度丢失
      */
-    'serverID'?: number;
+    'serverID'?: string;
     /**
      *  子编码筛选
      */

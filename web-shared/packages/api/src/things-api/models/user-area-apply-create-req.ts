@@ -17,9 +17,9 @@
 
 export interface UserAreaApplyCreateReq {
     /**
-     *  区域ID
+     *  区域ID，以字符串传输避免大整数精度丢失
      */
-    'areaID': number;
+    'areaID': string;
     /**
      *  权限类型 1:读权限 4:管理权限
      */
