@@ -37,7 +37,9 @@ func withMetadata(ctx context.Context, identity Context) context.Context {
 	if existing, ok := metadata.FromOutgoingContext(ctx); ok {
 		copy = existing.Copy()
 	}
-	copy.Delete("ithings-user")
+	for _, name := range []string{"ithings-user", "ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"} {
+		copy.Delete(name)
+	}
 	if token := strings.TrimSpace(identity.Token); token != "" {
 		copy.Set("ithings-token", token)
 	}

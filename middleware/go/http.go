@@ -70,7 +70,7 @@ func HTTP(next http.Handler, options Options) http.Handler {
 		writer.Header().Set("X-Frame-Options", "DENY")
 		writer.Header().Set("Referrer-Policy", "strict-origin-when-cross-origin")
 		// 内部身份只能由验证器产生，不能接受请求头伪造。
-		request.Header.Del("ithings-user")
+		StripUntrustedIdentityHeaders(request.Header)
 		defer func() {
 			if options.Logger != nil {
 				options.Logger.Info("http request", "method", request.Method, "path", request.URL.Path, "duration_ms", time.Since(started).Milliseconds())

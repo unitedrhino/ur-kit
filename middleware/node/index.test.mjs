@@ -10,6 +10,9 @@ test('令牌和权限验证后才进入处理器', async () => {
     called = true;
     assert.equal(request.identity.userId, '42');
     assert.equal(request.headers['ithings-user'], undefined);
+    for (const name of ['ithings-user-role', 'ithings-tenant-code', 'ithings-project-id', 'ithings-meta', 'ithings-set-token']) {
+      assert.equal(request.headers[name], undefined);
+    }
     response.end('ok');
   }, {
     authenticate: async (_request, token) => token === 'good' ? { userId: '42', tenantCode: 'demo' } : null,
@@ -21,7 +24,7 @@ test('令牌和权限验证后才进入处理器', async () => {
   assert.equal(bad.statusCode, 401);
   assert.equal(called, false);
   const good = makeResponse();
-  await handler({ method: 'POST', url: '/demo', headers: { 'ithings-token': 'good', 'ithings-user': 'forged' } }, good);
+  await handler({ method: 'POST', url: '/demo', headers: { 'ithings-token': 'good', 'ithings-user': 'forged', 'ithings-user-role': 'admin', 'ithings-tenant-code': 'other', 'ithings-project-id': '999', 'ithings-meta': 'forged', 'ithings-set-token': 'forged' } }, good);
   assert.equal(good.body, 'ok');
   assert.equal(good.headers['X-Content-Type-Options'], 'nosniff');
   const webHeader = makeResponse();

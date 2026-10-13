@@ -12,6 +12,7 @@ import io.grpc.ServerInterceptor;
 import io.grpc.Status;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 import java.util.Objects;
 import java.util.logging.Logger;
 
@@ -25,6 +26,10 @@ public final class UrMiddleware {
     /** TOKEN_ALIAS 对应平台 Web 客户端使用的 token 请求头。 */
     private static final Metadata.Key<String> TOKEN_ALIAS = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> AUTHORIZATION = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
+    /** INTERNAL_IDENTITY_HEADERS 是只有平台认证后才能写入的元数据字段。 */
+    private static final List<String> INTERNAL_IDENTITY_HEADERS = List.of(
+            "ithings-user", "ithings-user-role", "ithings-tenant-code",
+            "ithings-project-id", "ithings-meta", "ithings-set-token");
     private static final Logger LOGGER = Logger.getLogger(UrMiddleware.class.getName());
 
     /** Identity 保存验证器返回的平台身份，不接收客户端自报身份。 */
@@ -61,7 +66,6 @@ public final class UrMiddleware {
             exchange.getResponseHeaders().set("X-Content-Type-Options", "nosniff");
             exchange.getResponseHeaders().set("X-Frame-Options", "DENY");
             exchange.getResponseHeaders().set("Referrer-Policy", "strict-origin-when-cross-origin");
-            // HttpExchange 的请求头是只读的；业务只使用下方验证后的属性，不读取自报身份头。
             try {
                 if (authenticate == null) { error(exchange, 500, "auth_not_configured"); return; }
                 String token = token(exchange.getRequestHeaders().getFirst("ithings-token"),
@@ -77,7 +81,7 @@ public final class UrMiddleware {
                     error(exchange, 403, "forbidden"); return;
                 }
                 exchange.setAttribute(HTTP_IDENTITY_ATTRIBUTE, identity);
-                next.handle(exchange);
+                next.handle(new FilteredHttpExchange(exchange, INTERNAL_IDENTITY_HEADERS));
             } finally {
                 LOGGER.info(() -> "http request method=" + exchange.getRequestMethod()
                         + " path=" + exchange.getRequestURI().getPath()
@@ -107,6 +111,7 @@ public final class UrMiddleware {
                         (authorize == null || !authorize.allow(identity, resource, action))) {
                         return reject(call, Status.PERMISSION_DENIED.withDescription("forbidden"));
                     }
+                    stripRpcIdentity(headers);
                     return Contexts.interceptCall(Context.current().withValue(IDENTITY, identity), call, headers, next);
                 } finally {
                     LOGGER.info(() -> "rpc request method=" + call.getMethodDescriptor().getFullMethodName()
@@ -114,6 +119,13 @@ public final class UrMiddleware {
                 }
             }
         };
+    }
+
+    /** stripRpcIdentity 删除客户端或转发层携带的内部身份元数据。 */
+    static void stripRpcIdentity(Metadata headers) {
+        for (String name : INTERNAL_IDENTITY_HEADERS) {
+            headers.removeAll(Metadata.Key.of(name, Metadata.ASCII_STRING_MARSHALLER));
+        }
     }
 
     /** token 读取平台令牌或 Bearer 令牌，不接受自报用户头。 */

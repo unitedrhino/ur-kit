@@ -53,9 +53,7 @@ func newHandler(platform, webDir string) (http.Handler, error) {
 	for _, prefix := range []string{"/api/v1/system/", "/api/v1/things/", "/api/v1/data/"} {
 		mux.Handle(prefix, http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 			// 平台自行认证原始令牌；内部身份只允许平台产生。
-			for _, header := range []string{"ithings-user", "ithings-user-role", "ithings-tenant-code", "ithings-project-id"} {
-				request.Header.Del(header)
-			}
+			middleware.StripUntrustedIdentityHeaders(request.Header)
 			proxy.ServeHTTP(writer, request)
 		}))
 	}

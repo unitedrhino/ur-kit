@@ -11,6 +11,8 @@ import dm.DeviceManageGrpc;
 import dm.DeviceManageOuterClass;
 import io.grpc.MethodDescriptor;
 import io.grpc.Metadata;
+import io.grpc.ClientInterceptors;
+import io.grpc.CallOptions;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
@@ -21,6 +23,8 @@ import io.grpc.ServerServiceDefinition;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.ServerCalls;
+import io.grpc.stub.ClientCalls;
+import io.grpc.stub.MetadataUtils;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -77,6 +81,9 @@ public class UrKitJavaTest {
         });
         server.createContext("/api/ping", UrMiddleware.http(exchange -> {
             UrMiddleware.Identity identity = (UrMiddleware.Identity) exchange.getAttribute(UrMiddleware.HTTP_IDENTITY_ATTRIBUTE);
+            for (String name : new String[] {"ithings-user", "ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"}) {
+                assertEquals(null, exchange.getRequestHeaders().getFirst(name));
+            }
             byte[] body = ("{\"userId\":\"" + identity.userId() + "\",\"appId\":\""
                     + exchange.getRequestHeaders().getFirst("app-id") + "\"}").getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
@@ -108,7 +115,11 @@ public class UrKitJavaTest {
             assertThrows(IllegalArgumentException.class,
                     () -> new UrHttpClient(origin, "good").postJson("/api/fixture", null, null, null));
             HttpRequest webRequest = HttpRequest.newBuilder(URI.create(origin + "/api/ping"))
-                    .header("token", "good").POST(HttpRequest.BodyPublishers.ofString("{}")).build();
+                    .header("token", "good").header("ithings-user", "forged")
+                    .header("ithings-user-role", "admin").header("ithings-tenant-code", "other")
+                    .header("ithings-project-id", "999").header("ithings-meta", "forged")
+                    .header("ithings-set-token", "forged")
+                    .POST(HttpRequest.BodyPublishers.ofString("{}")).build();
             assertEquals(200, HttpClient.newHttpClient().send(webRequest,
                     HttpResponse.BodyHandlers.ofString()).statusCode());
             assertEquals(401, assertThrows(UrHttpClient.ApiException.class,
@@ -126,6 +137,9 @@ public class UrKitJavaTest {
             @Override public <Request, Response> ServerCall.Listener<Request> interceptCall(
                     ServerCall<Request, Response> call, Metadata headers, ServerCallHandler<Request, Response> next) {
                 seenAppId.set(headers.get(Metadata.Key.of("app-id", Metadata.ASCII_STRING_MARSHALLER)));
+                for (String name : new String[] {"ithings-user", "ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"}) {
+                    assertEquals(null, headers.get(Metadata.Key.of(name, Metadata.ASCII_STRING_MARSHALLER)));
+                }
                 return next.startCall(call, headers);
             }
         };
@@ -149,6 +163,13 @@ public class UrKitJavaTest {
             try (UrRpcClient client = new UrRpcClient(target, "good", "acme", "p1", "7", false)) {
                 assertEquals("9007199254740993:app", client.unary(method, "app"));
                 assertEquals("7", seenAppId.get());
+                Metadata forged = new Metadata();
+                for (String name : new String[] {"ithings-user", "ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"}) {
+                    forged.put(Metadata.Key.of(name, Metadata.ASCII_STRING_MARSHALLER), "forged");
+                }
+                assertEquals("9007199254740993:filtered", ClientCalls.blockingUnaryCall(
+                        ClientInterceptors.intercept(client.channel(), MetadataUtils.newAttachHeadersInterceptor(forged)),
+                        method, CallOptions.DEFAULT, "filtered"));
             }
             try (UrRpcClient client = new UrRpcClient(target, "bad", null, null, false)) {
                 assertEquals(Status.Code.UNAUTHENTICATED, assertThrows(StatusRuntimeException.class,

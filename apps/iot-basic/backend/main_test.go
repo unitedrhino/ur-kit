@@ -35,7 +35,7 @@ func TestVerifyPlatformToken(t *testing.T) {
 // TestBasicAppSingleContainerHandler 验证 Web 深层路径、样例 API 和平台代理可在同一服务工作。
 func TestBasicAppSingleContainerHandler(t *testing.T) {
 	platform := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
-		if request.Header.Get("ithings-user") != "" {
+		if request.Header.Get("ithings-user") != "" || request.Header.Get("ithings-user-role") != "" || request.Header.Get("ithings-tenant-code") != "" || request.Header.Get("ithings-project-id") != "" || request.Header.Get("ithings-meta") != "" || request.Header.Get("ithings-set-token") != "" {
 			t.Error("伪造身份头泄漏到平台")
 		}
 		if request.Header.Get("token") != "good" && request.Header.Get("ithings-token") != "good" {
@@ -65,6 +65,9 @@ func TestBasicAppSingleContainerHandler(t *testing.T) {
 		request.Header.Set("token", "good")
 		request.Header.Set("tenant-code", "demo")
 		request.Header.Set("ithings-user", "forged")
+		for _, name := range []string{"ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"} {
+			request.Header.Set(name, "forged")
+		}
 		response := httptest.NewRecorder()
 		handler.ServeHTTP(response, request)
 		return response

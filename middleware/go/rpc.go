@@ -41,6 +41,8 @@ func UnaryServerInterceptor(options RPCOptions) grpc.UnaryServerInterceptor {
 		if !ok {
 			return nil, status.Error(codes.Unauthenticated, "unauthorized")
 		}
+		ctx = stripUntrustedRPCIdentity(ctx, incoming)
+		incoming, _ = metadata.FromIncomingContext(ctx)
 		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
 		if token == "" {
 			token = strings.TrimSpace(first(incoming.Get("token")))
@@ -81,6 +83,8 @@ func StreamServerInterceptor(options RPCOptions) grpc.StreamServerInterceptor {
 		if !ok {
 			return status.Error(codes.Unauthenticated, "unauthorized")
 		}
+		ctx = stripUntrustedRPCIdentity(ctx, incoming)
+		incoming, _ = metadata.FromIncomingContext(ctx)
 		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
 		if token == "" {
 			token = strings.TrimSpace(first(incoming.Get("token")))

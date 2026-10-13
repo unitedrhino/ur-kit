@@ -35,10 +35,13 @@ func TestUnaryServerInterceptor(t *testing.T) {
 		{"ithings-token", "good", "/Demo/Read", codes.OK},
 		{"token", "good", "/Demo/Read", codes.OK},
 	} {
-		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(test.header, test.token, "ithings-user", "forged"))
+		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(test.header, test.token, "ithings-user", "forged", "ithings-user-role", "forged", "ithings-tenant-code", "forged", "ithings-project-id", "forged", "ithings-meta", "forged", "ithings-set-token", "forged"))
 		called := false
 		_, err := interceptor(ctx, nil, &grpc.UnaryServerInfo{FullMethod: test.method}, func(ctx context.Context, _ any) (any, error) {
 			called = true
+			if incoming, ok := metadata.FromIncomingContext(ctx); !ok || incoming.Get("ithings-user-role") != nil || incoming.Get("ithings-tenant-code") != nil || incoming.Get("ithings-project-id") != nil || incoming.Get("ithings-meta") != nil || incoming.Get("ithings-set-token") != nil {
+				t.Error("RPC 伪造内部身份仍在业务上下文")
+			}
 			identity, ok := FromContext(ctx)
 			if !ok || identity.UserID != "42" {
 				t.Error("RPC 未收到经验证的身份")
@@ -68,10 +71,13 @@ func TestStreamServerInterceptor(t *testing.T) {
 		}
 		return Identity{UserID: "42", TenantCode: "demo"}, nil
 	})})
-	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("token", "good", "ithings-user", "forged"))
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("token", "good", "ithings-user", "forged", "ithings-user-role", "forged", "ithings-tenant-code", "forged", "ithings-project-id", "forged"))
 	called := false
 	err := interceptor(nil, fakeServerStream{ctx: ctx}, &grpc.StreamServerInfo{FullMethod: "/Demo/Stream"}, func(_ any, stream grpc.ServerStream) error {
 		called = true
+		if incoming, ok := metadata.FromIncomingContext(stream.Context()); !ok || incoming.Get("ithings-user-role") != nil || incoming.Get("ithings-tenant-code") != nil || incoming.Get("ithings-project-id") != nil {
+			t.Error("流式 RPC 伪造内部身份仍在业务上下文")
+		}
 		identity, ok := FromContext(stream.Context())
 		if !ok || identity.UserID != "42" {
 			t.Error("流处理器没有获得可信身份")

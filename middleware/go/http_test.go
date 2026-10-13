@@ -15,7 +15,7 @@ func TestHTTP(t *testing.T) {
 	wrapped := HTTP(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		called = true
 		identity, ok := FromContext(request.Context())
-		if !ok || identity.UserID != "42" || request.Header.Get("ithings-user") != "" {
+		if !ok || identity.UserID != "42" || request.Header.Get("ithings-user") != "" || request.Header.Get("ithings-user-role") != "" || request.Header.Get("ithings-tenant-code") != "" || request.Header.Get("ithings-project-id") != "" || request.Header.Get("ithings-meta") != "" || request.Header.Get("ithings-set-token") != "" {
 			t.Error("业务处理器未获得可信身份或伪造身份未过滤")
 		}
 		writer.WriteHeader(http.StatusNoContent)
@@ -43,6 +43,9 @@ func TestHTTP(t *testing.T) {
 		request := httptest.NewRequest(http.MethodPost, "/sample", nil)
 		request.Header.Set(test.header, test.token)
 		request.Header.Set("ithings-user", "forged")
+		for _, name := range []string{"ithings-user-role", "ithings-tenant-code", "ithings-project-id", "ithings-meta", "ithings-set-token"} {
+			request.Header.Set(name, "forged")
+		}
 		response := httptest.NewRecorder()
 		wrapped.ServeHTTP(response, request)
 		if response.Code != test.status || called != (test.status == http.StatusNoContent) || response.Header().Get("X-Content-Type-Options") != "nosniff" {

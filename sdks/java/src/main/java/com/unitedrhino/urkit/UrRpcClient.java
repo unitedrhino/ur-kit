@@ -76,6 +76,7 @@ public final class UrRpcClient implements AutoCloseable {
             return new ForwardingClientCall.SimpleForwardingClientCall<>(next.newCall(method, options)) {
                 /** start 写入平台令牌及非空上下文。 */
                 @Override public void start(Listener<Response> listener, Metadata headers) {
+                    UrMiddleware.stripRpcIdentity(headers);
                     headers.put(TOKEN, token);
                     if (tenantCode != null && !tenantCode.isBlank()) headers.put(TENANT, tenantCode);
                     if (projectId != null && !projectId.isBlank()) headers.put(PROJECT, projectId);
