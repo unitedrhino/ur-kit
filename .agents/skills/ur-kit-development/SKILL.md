@@ -9,6 +9,7 @@ description: 开发 ur-kit 合同、SDK、中间件、缓存、协议及 IoT 基
 2. 合同只通过 `python3 scripts/sync_contracts.py --saas <saas-path> --sha <full-sha>` 更新；先运行对应 SaaS 服务的 `build.sh` 并提交生成物，再以该提交导出。
 3. `web-shared/` 只通过 `scripts/sync_web_shared.py` 按固定 SaaS 提交更新。同步后运行 `scripts/configure_web_workspace.py`、`pnpm install --frozen-lockfile`、`pnpm -r run stub --if-present` 和 `pnpm --filter org-iot-client build`；快照适配逻辑写回同步脚本。
 4. 先运行 `python3 scripts/generate_java_pb.py` 两次核对消息与 gRPC 服务 Stub 哈希，再验证 Go/Java/Node 的 HTTP、RPC 示例、Java Maven 编译、`things/sdk/seed` 幂等性及重复生成无差异，最后才发布标签。Linux x86_64 的 gRPC Java 插件固定版本并校验 SHA-256；其他平台设置 `UR_KIT_GRPC_JAVA_PLUGIN`。检查旧客户端 `apilegacy` 受影响字段与鉴权。
+   HTTP 输入、ID、空值、时间与错误响应以 `sdks/conformance/README.md` 和共同样本为准；三语言客户端改动后一起核对。
 5. Web 和 mobile 位于 `apps/iot-basic/`，改动客户端请求时一起核对合同版本。不要复制私有环境配置。
 6. `cache/platform` 的企业 `tenant` Hash、在线状态和 IM 游标可注入 `cache/redis`；企业资料使用完整 JSON 并核对 Hash 字段与 JSON `code`，不要截断平台扩展字段。游标必须由 Redis 原子比较 64 位十进制 ID，不得经 Lua 浮点数转换。变更时运行 `go test -race ./cache/...`。`upstream/` 仅为 SaaS 源码对照快照，含私有导入的包不得当作可发布 SDK。
 7. `apps/iot-basic/Dockerfile` 从仓库根上下文构建 Web 与 Go，运行阶段只包含静态页面和 Go 二进制。`web/.env.production` 提供可公开的本地构建默认值，目标平台数字应用 ID 必须在构建时通过 `VITE_GLOB_APPID` 覆盖；不要依赖被忽略的开发机 `web/.env`。后端集成测试在 `apps/iot-basic/backend` 执行，镜像测试核对 Web 深层路径、样例业务接口、平台路径代理和健康检查；`mobile` 独立构建，不进入运行镜像。

@@ -29,6 +29,8 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
@@ -65,7 +67,14 @@ public class UrKitJavaTest {
     }
     /** HTTP 客户端调用受保护路由，并检查错误码与安全头。 */
     @Test void httpRoundTrip() throws Exception {
+        Path fixturePath = Path.of("..", "conformance", "http-response.json");
+        if (!Files.exists(fixturePath)) fixturePath = Path.of("sdks", "conformance", "http-response.json");
+        byte[] fixture = Files.readAllBytes(fixturePath);
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/api/fixture", exchange -> {
+            exchange.sendResponseHeaders(200, fixture.length);
+            try (var output = exchange.getResponseBody()) { output.write(fixture); }
+        });
         server.createContext("/api/ping", UrMiddleware.http(exchange -> {
             UrMiddleware.Identity identity = (UrMiddleware.Identity) exchange.getAttribute(UrMiddleware.HTTP_IDENTITY_ATTRIBUTE);
             byte[] body = ("{\"userId\":\"" + identity.userId() + "\",\"appId\":\""
@@ -85,6 +94,19 @@ public class UrKitJavaTest {
                     .contains("9007199254740993"));
             assertTrue(new UrHttpClient(origin, "good").postJson("/api/ping", "{}", "acme", "p1", "7")
                     .contains("\"appId\":\"7\""));
+            String conformance = new UrHttpClient(origin, "good").postJson("/api/fixture", "null", "acme", "p1");
+            assertEquals(new String(fixture, StandardCharsets.UTF_8), conformance);
+            assertTrue(conformance.contains("\"id\":9007199254740993"));
+            assertTrue(conformance.contains("\"nullable\":null"));
+            assertTrue(conformance.contains("\"receivedTime\":1760000000123"));
+            assertThrows(IllegalArgumentException.class, () -> new UrHttpClient(origin, " "));
+            assertThrows(IllegalArgumentException.class, () -> new UrHttpClient("http://user:pass@127.0.0.1", "good"));
+            assertThrows(IllegalArgumentException.class, () -> new UrHttpClient(origin + "/root", "good"));
+            assertThrows(IllegalArgumentException.class, () -> new UrHttpClient(origin + "/?key=value", "good"));
+            assertThrows(IllegalArgumentException.class,
+                    () -> new UrHttpClient(origin, "good").postJson("/api/fixture?x=1", "{}", null, null));
+            assertThrows(IllegalArgumentException.class,
+                    () -> new UrHttpClient(origin, "good").postJson("/api/fixture", null, null, null));
             HttpRequest webRequest = HttpRequest.newBuilder(URI.create(origin + "/api/ping"))
                     .header("token", "good").POST(HttpRequest.BodyPublishers.ofString("{}")).build();
             assertEquals(200, HttpClient.newHttpClient().send(webRequest,

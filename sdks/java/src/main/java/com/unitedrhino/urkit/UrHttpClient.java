@@ -20,6 +20,7 @@ public final class UrHttpClient {
         this.baseUri = URI.create(baseUrl);
         if (!("http".equals(baseUri.getScheme()) || "https".equals(baseUri.getScheme()))
                 || baseUri.getHost() == null || baseUri.getUserInfo() != null
+                || baseUri.getRawQuery() != null || baseUri.getRawFragment() != null
                 || (baseUri.getPath() != null && !baseUri.getPath().isEmpty() && !"/".equals(baseUri.getPath()))) {
             throw new IllegalArgumentException("baseUrl must be a credential-free HTTP(S) origin");
         }
@@ -36,9 +37,10 @@ public final class UrHttpClient {
     /** postJson 发送包含可选 app-id 的平台请求，保持原始 JSON 响应。 */
     public String postJson(String path, String jsonBody, String tenantCode, String projectId, String appId)
             throws IOException, InterruptedException {
-        if (path == null || !path.startsWith("/") || path.startsWith("//")) {
+        if (path == null || !path.startsWith("/") || path.startsWith("//") || path.contains("?") || path.contains("#")) {
             throw new IllegalArgumentException("path must start with one slash");
         }
+        if (jsonBody == null) throw new IllegalArgumentException("JSON body is required; use null explicitly");
         URI target = baseUri.resolve(path);
         if (!target.getScheme().equals(baseUri.getScheme()) || !target.getAuthority().equals(baseUri.getAuthority())) {
             throw new IllegalArgumentException("cross-origin API path");

@@ -34,11 +34,14 @@ func (err *APIError) Error() string { return fmt.Sprintf("platform API status %d
 
 // PostJSON 向平台发送 JSON POST，并用 UseNumber 保留大整数与 ID 精度。
 func (client Client) PostJSON(ctx context.Context, path string, requestBody, responseBody any) error {
+	if strings.TrimSpace(client.Token) == "" {
+		return errors.New("platform token is required")
+	}
 	base, err := url.Parse(client.BaseURL)
-	if err != nil || base == nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" {
+	if err != nil || base == nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" || base.User != nil || base.RawQuery != "" || base.Fragment != "" || (base.Path != "" && base.Path != "/") {
 		return errors.New("invalid platform URL")
 	}
-	if !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") {
+	if !strings.HasPrefix(path, "/") || strings.HasPrefix(path, "//") || strings.ContainsAny(path, "?#") {
 		return errors.New("path must be absolute within platform")
 	}
 	body, err := json.Marshal(requestBody)

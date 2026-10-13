@@ -2,6 +2,7 @@
 
 `UrHttpClient` 使用 JDK 17 标准库发送平台 JSON POST；响应保留原始 JSON，以便消费方按 `BigInteger` / `BigDecimal` 解析 ID 和数值。认证令牌只放请求头，错误消息不打印令牌。
 HTTP 和 RPC 客户端均可发送 `tenant-code`、`project-id` 与可选 `app-id`；ID 按字符串传递，避免中间层转换精度。
+HTTP 客户端的地址、路径、空值与错误语义见 [三语言共同用例](../conformance/README.md)。
 
 `UrRpcClient` 接收生成代码提供的 `MethodDescriptor`，支持阻塞 unary 调用或把认证后的 `Channel` 交给生成的 Stub。例如 `dm.DeviceManageGrpc.newBlockingStub(client.channel())`；`UrProtoMethods.unary("包.服务/方法", 请求默认实例, 响应默认实例)` 可用于没有强类型 Stub 的其他方法。`UrMiddleware` 为 Java HTTP 与 gRPC 服务注入可信身份，并执行可注入的权限判断。认证器须连接实际平台认证能力，不能使用示例中的固定令牌验证器。
 
