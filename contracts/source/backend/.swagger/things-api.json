@@ -522,13 +522,12 @@
             "description": " 创建时间",
             "type": "string"
           },
-          "deviceName": {
-            "description": " 设备名",
+          "deviceID": {
+            "description": " 设备记录 ID（dm_device_info.id），列表展示「设备名称(设备ID)」",
             "type": "string"
           },
-          "deviceID": {
-            "description": "设备记录 ID",
-            "title": "DeviceID",
+          "deviceName": {
+            "description": " 设备名",
             "type": "string"
           },
           "falseAlarm": {
@@ -1253,18 +1252,6 @@
             "format": "int64",
             "type": "integer"
           },
-          "repeatIntervalSeconds": {
-            "default": "0",
-            "description": "未处理重复提醒间隔秒数，0=不重复",
-            "title": "RepeatIntervalSeconds",
-            "type": "integer"
-          },
-          "repeatMaxCount": {
-            "default": "0",
-            "description": "重复提醒最大次数，0=不限",
-            "title": "RepeatMaxCount",
-            "type": "integer"
-          },
           "levels": {
             "description": " 告警级别列表",
             "items": {
@@ -1274,6 +1261,16 @@
           },
           "order": {
             "description": " 顺序",
+            "format": "int64",
+            "type": "integer"
+          },
+          "repeatIntervalSeconds": {
+            "description": " 未处理重复提醒间隔秒数，0=不重复",
+            "format": "int64",
+            "type": "integer"
+          },
+          "repeatMaxCount": {
+            "description": " 重复提醒最大次数，0=不限",
             "format": "int64",
             "type": "integer"
           },
