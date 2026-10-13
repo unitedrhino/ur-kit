@@ -7,6 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.net.httpserver.HttpServer;
 import com.google.protobuf.StringValue;
+import dm.DeviceManageGrpc;
+import dm.DeviceManageOuterClass;
 import io.grpc.MethodDescriptor;
 import io.grpc.Metadata;
 import io.grpc.Server;
@@ -41,6 +43,25 @@ public class UrKitJavaTest {
                 .parse(method.getRequestMarshaller().stream(StringValue.of("demo"))).getValue());
         assertThrows(IllegalArgumentException.class, () -> UrProtoMethods.unary(
                 "invalid", StringValue.getDefaultInstance(), StringValue.getDefaultInstance()));
+    }
+    /** 生成的强类型服务 Stub 通过认证 Channel 调用固定合同中的设备方法。 */
+    @Test void generatedServiceStubRoundTrip() throws Exception {
+        ServerServiceDefinition service = ServerServiceDefinition.builder(DeviceManageGrpc.SERVICE_NAME)
+                .addMethod(DeviceManageGrpc.getDeviceInfoGetOneMethod(), ServerCalls.asyncUnaryCall((request, observer) -> {
+                    assertEquals("9007199254740993", UrMiddleware.IDENTITY.get().userId());
+                    observer.onNext(DeviceManageOuterClass.DeviceInfo.newBuilder()
+                            .setDeviceName(request.getDeviceName()).build());
+                    observer.onCompleted();
+                })).build();
+        Server server = ServerBuilder.forPort(0).addService(ServerInterceptors.intercept(service,
+                UrMiddleware.rpc(token -> "good".equals(token)
+                        ? new UrMiddleware.Identity("9007199254740993", "acme", "p1") : null,
+                        (identity, resource, action) -> true, "device", "read"))).build().start();
+        try (UrRpcClient client = new UrRpcClient("127.0.0.1:" + server.getPort(), "good", "acme", "p1", false)) {
+            var request = DeviceManageOuterClass.DeviceInfoGetOneReq.newBuilder().setDeviceName("sensor-1").build();
+            assertEquals("sensor-1", DeviceManageGrpc.newBlockingStub(client.channel())
+                    .deviceInfoGetOne(request).getDeviceName());
+        } finally { server.shutdownNow(); }
     }
     /** HTTP 客户端调用受保护路由，并检查错误码与安全头。 */
     @Test void httpRoundTrip() throws Exception {
