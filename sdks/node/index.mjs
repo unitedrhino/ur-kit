@@ -7,13 +7,14 @@ export function createClient({ baseUrl, token, fetchImpl = globalThis.fetch }) {
     throw new Error('invalid platform URL');
   }
   return {
-    async post(path, body, { signal, tenantCode, projectId } = {}) {
+    async post(path, body, { signal, tenantCode, projectId, appId } = {}) {
       if (!path.startsWith('/') || path.startsWith('//')) throw new Error('invalid API path');
       const url = new URL(path, base);
       if (url.origin !== base.origin) throw new Error('cross-origin API path');
       const headers = { 'content-type': 'application/json', 'ithings-token': token };
       if (tenantCode) headers['tenant-code'] = tenantCode;
       if (projectId) headers['project-id'] = String(projectId);
+      if (appId != null && appId !== '') headers['app-id'] = String(appId);
       const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal });
       const raw = await response.text();
       if (!response.ok) {

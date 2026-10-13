@@ -13,7 +13,9 @@ from pathlib import Path
 # REPO 指向公共仓根目录；SOURCE 是 SaaS 指定提交导出的合同快照。
 REPO = Path(__file__).resolve().parents[1]
 SOURCE = REPO / "contracts/source/backend"
+# OUTPUT 只保存可重复生成的 Maven 构建产物，不写入 Git。
 OUTPUT = REPO / "sdks/java/target/generated-sources/urkit/java"
+# PROTO_DIRS 按服务分组，避免同名短路径导入相互冲突。
 PROTO_DIRS = (
     "core/service/aisvr/proto",
     "core/service/imsvr/proto",
@@ -35,7 +37,7 @@ def tree_digest(directory: Path) -> str:
 
 
 def main() -> None:
-    """校验 proto 与 protoc，再原子替换 Java 生成目录。"""
+    """校验 proto 与 protoc，完整生成后替换 Java 生成目录。"""
     if shutil.which("protoc") is None:
         raise SystemExit("需要安装 protoc 才能生成 Java protobuf 消息代码")
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)

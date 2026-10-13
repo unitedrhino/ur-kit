@@ -14,6 +14,7 @@ type Context struct {
 	Token      string
 	TenantCode string
 	ProjectID  string
+	AppID      string
 }
 
 // UnaryClientInterceptor 为一元 RPC 注入平台认证元数据，不发送可伪造的 ithings-user。
@@ -45,6 +46,9 @@ func withMetadata(ctx context.Context, identity Context) context.Context {
 	}
 	if project := strings.TrimSpace(identity.ProjectID); project != "" {
 		copy.Set("project-id", project)
+	}
+	if app := strings.TrimSpace(identity.AppID); app != "" {
+		copy.Set("app-id", app)
 	}
 	return metadata.NewOutgoingContext(ctx, copy)
 }

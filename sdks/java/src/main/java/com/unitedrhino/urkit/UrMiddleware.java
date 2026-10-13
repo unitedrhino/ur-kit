@@ -22,6 +22,7 @@ public final class UrMiddleware {
     /** HTTP_IDENTITY_ATTRIBUTE 是 HTTP 业务处理器取得身份的属性名。 */
     public static final String HTTP_IDENTITY_ATTRIBUTE = "ur.identity";
     private static final Metadata.Key<String> TOKEN = Metadata.Key.of("ithings-token", Metadata.ASCII_STRING_MARSHALLER);
+    /** TOKEN_ALIAS 对应平台 Web 客户端使用的 token 请求头。 */
     private static final Metadata.Key<String> TOKEN_ALIAS = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> AUTHORIZATION = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
     private static final Logger LOGGER = Logger.getLogger(UrMiddleware.class.getName());

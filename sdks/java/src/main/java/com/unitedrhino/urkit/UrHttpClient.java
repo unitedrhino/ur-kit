@@ -30,6 +30,12 @@ public final class UrHttpClient {
     /** postJson 发送 JSON 字符串；返回原始响应，调用方可用 BigInteger/BigDecimal 解析数字。 */
     public String postJson(String path, String jsonBody, String tenantCode, String projectId)
             throws IOException, InterruptedException {
+        return postJson(path, jsonBody, tenantCode, projectId, null);
+    }
+
+    /** postJson 发送包含可选 app-id 的平台请求，保持原始 JSON 响应。 */
+    public String postJson(String path, String jsonBody, String tenantCode, String projectId, String appId)
+            throws IOException, InterruptedException {
         if (path == null || !path.startsWith("/") || path.startsWith("//")) {
             throw new IllegalArgumentException("path must start with one slash");
         }
@@ -44,6 +50,7 @@ public final class UrHttpClient {
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
         if (tenantCode != null && !tenantCode.isBlank()) request.header("tenant-code", tenantCode);
         if (projectId != null && !projectId.isBlank()) request.header("project-id", projectId);
+        if (appId != null && !appId.isBlank()) request.header("app-id", appId);
         HttpResponse<String> response = transport.send(request.build(), HttpResponse.BodyHandlers.ofString());
         if (response.statusCode() < 200 || response.statusCode() >= 300) {
             throw new ApiException(response.statusCode(), response.body());

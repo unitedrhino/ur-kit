@@ -13,11 +13,14 @@ import (
 	"strings"
 )
 
-// Client 保存平台地址、令牌与可替换的 HTTP 传输。
+// Client 保存平台地址、令牌、业务上下文与可替换的 HTTP 传输。
 type Client struct {
-	BaseURL string
-	Token   string
-	HTTP    *http.Client
+	BaseURL    string
+	Token      string
+	TenantCode string
+	ProjectID  string
+	AppID      string
+	HTTP       *http.Client
 }
 
 // APIError 表示平台返回的非成功状态和原始响应体。
@@ -49,6 +52,15 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 	}
 	request.Header.Set("Content-Type", "application/json")
 	request.Header.Set("ithings-token", client.Token)
+	if client.TenantCode != "" {
+		request.Header.Set("tenant-code", client.TenantCode)
+	}
+	if client.ProjectID != "" {
+		request.Header.Set("project-id", client.ProjectID)
+	}
+	if client.AppID != "" {
+		request.Header.Set("app-id", client.AppID)
+	}
 	transport := client.HTTP
 	if transport == nil {
 		transport = http.DefaultClient

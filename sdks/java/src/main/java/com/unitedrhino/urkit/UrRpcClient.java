@@ -20,17 +20,24 @@ public final class UrRpcClient implements AutoCloseable {
     private static final Metadata.Key<String> TOKEN = Metadata.Key.of("ithings-token", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> TENANT = Metadata.Key.of("tenant-code", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> PROJECT = Metadata.Key.of("project-id", Metadata.ASCII_STRING_MARSHALLER);
+    /** APP 是平台应用上下文元数据键。 */
+    private static final Metadata.Key<String> APP = Metadata.Key.of("app-id", Metadata.ASCII_STRING_MARSHALLER);
     private final ManagedChannel channel;
     private final Channel authenticated;
 
     /** 创建客户端；target 是 gRPC 地址，token 是平台令牌，useTls 控制传输加密。 */
     public UrRpcClient(String target, String token, String tenantCode, String projectId, boolean useTls) {
+        this(target, token, tenantCode, projectId, null, useTls);
+    }
+
+    /** 创建带可选 app-id 的客户端，保持原五参数构造器兼容。 */
+    public UrRpcClient(String target, String token, String tenantCode, String projectId, String appId, boolean useTls) {
         if (target == null || target.isBlank() || token == null || token.isBlank()) {
             throw new IllegalArgumentException("target and token are required");
         }
         ManagedChannelBuilder<?> builder = ManagedChannelBuilder.forTarget(target);
         channel = useTls ? builder.useTransportSecurity().build() : builder.usePlaintext().build();
-        authenticated = ClientInterceptors.intercept(channel, new AuthInterceptor(token, tenantCode, projectId));
+        authenticated = ClientInterceptors.intercept(channel, new AuthInterceptor(token, tenantCode, projectId, appId));
     }
 
     /** channel 返回带认证元数据的 Channel，可交给生成的异步或阻塞 Stub。 */
@@ -53,12 +60,14 @@ public final class UrRpcClient implements AutoCloseable {
         private final String token;
         private final String tenantCode;
         private final String projectId;
+        private final String appId;
 
         /** 保存要发送的身份和项目上下文。 */
-        private AuthInterceptor(String token, String tenantCode, String projectId) {
+        private AuthInterceptor(String token, String tenantCode, String projectId, String appId) {
             this.token = Objects.requireNonNull(token);
             this.tenantCode = tenantCode;
             this.projectId = projectId;
+            this.appId = appId;
         }
 
         /** interceptCall 在每个 RPC 调用开始时写入认证元数据。 */
@@ -70,6 +79,7 @@ public final class UrRpcClient implements AutoCloseable {
                     headers.put(TOKEN, token);
                     if (tenantCode != null && !tenantCode.isBlank()) headers.put(TENANT, tenantCode);
                     if (projectId != null && !projectId.isBlank()) headers.put(PROJECT, projectId);
+                    if (appId != null && !appId.isBlank()) headers.put(APP, appId);
                     super.start(listener, headers);
                 }
             };

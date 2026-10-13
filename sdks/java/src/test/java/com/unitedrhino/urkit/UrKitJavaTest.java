@@ -6,10 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.net.httpserver.HttpServer;
+import com.google.protobuf.StringValue;
 import io.grpc.MethodDescriptor;
+import io.grpc.Metadata;
 import io.grpc.Server;
 import io.grpc.ServerBuilder;
 import io.grpc.ServerInterceptors;
+import io.grpc.ServerCall;
+import io.grpc.ServerCallHandler;
+import io.grpc.ServerInterceptor;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
@@ -22,16 +27,28 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
 /** UrKitJavaTest 用本机服务验证令牌转发、权限和可信上下文。 */
 public class UrKitJavaTest {
+    /** 生成消息类可以用 protobuf 编解码器构建可调用的 gRPC 方法描述符。 */
+    @Test void generatedMessageDescriptor() {
+        MethodDescriptor<StringValue, StringValue> method = UrProtoMethods.unary(
+                "dm.DeviceManage/deviceInfoGetOne", StringValue.getDefaultInstance(), StringValue.getDefaultInstance());
+        assertEquals("dm.DeviceManage/deviceInfoGetOne", method.getFullMethodName());
+        assertEquals("demo", method.getRequestMarshaller()
+                .parse(method.getRequestMarshaller().stream(StringValue.of("demo"))).getValue());
+        assertThrows(IllegalArgumentException.class, () -> UrProtoMethods.unary(
+                "invalid", StringValue.getDefaultInstance(), StringValue.getDefaultInstance()));
+    }
     /** HTTP 客户端调用受保护路由，并检查错误码与安全头。 */
     @Test void httpRoundTrip() throws Exception {
         HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
         server.createContext("/api/ping", UrMiddleware.http(exchange -> {
             UrMiddleware.Identity identity = (UrMiddleware.Identity) exchange.getAttribute(UrMiddleware.HTTP_IDENTITY_ATTRIBUTE);
-            byte[] body = ("{\"userId\":\"" + identity.userId() + "\"}").getBytes(StandardCharsets.UTF_8);
+            byte[] body = ("{\"userId\":\"" + identity.userId() + "\",\"appId\":\""
+                    + exchange.getRequestHeaders().getFirst("app-id") + "\"}").getBytes(StandardCharsets.UTF_8);
             exchange.sendResponseHeaders(200, body.length);
             try (var output = exchange.getResponseBody()) { output.write(body); }
         }, token -> "good".equals(token) ? new UrMiddleware.Identity("9007199254740993", "acme", "p1") : null,
@@ -45,6 +62,8 @@ public class UrKitJavaTest {
             String origin = "http://127.0.0.1:" + server.getAddress().getPort();
             assertTrue(new UrHttpClient(origin, "good").postJson("/api/ping", "{}", "acme", "p1")
                     .contains("9007199254740993"));
+            assertTrue(new UrHttpClient(origin, "good").postJson("/api/ping", "{}", "acme", "p1", "7")
+                    .contains("\"appId\":\"7\""));
             HttpRequest webRequest = HttpRequest.newBuilder(URI.create(origin + "/api/ping"))
                     .header("token", "good").POST(HttpRequest.BodyPublishers.ofString("{}")).build();
             assertEquals(200, HttpClient.newHttpClient().send(webRequest,
@@ -58,6 +77,15 @@ public class UrKitJavaTest {
 
     /** RPC 客户端使用服务方法描述符，并经中间件取得可信身份。 */
     @Test void rpcRoundTrip() throws Exception {
+        AtomicReference<String> seenAppId = new AtomicReference<>();
+        ServerInterceptor appInspector = new ServerInterceptor() {
+            /** interceptCall 读取测试请求的应用上下文，再交给身份中间件。 */
+            @Override public <Request, Response> ServerCall.Listener<Request> interceptCall(
+                    ServerCall<Request, Response> call, Metadata headers, ServerCallHandler<Request, Response> next) {
+                seenAppId.set(headers.get(Metadata.Key.of("app-id", Metadata.ASCII_STRING_MARSHALLER)));
+                return next.startCall(call, headers);
+            }
+        };
         MethodDescriptor<String, String> method = MethodDescriptor.<String, String>newBuilder()
                 .setType(MethodDescriptor.MethodType.UNARY).setFullMethodName("test.Echo/Say")
                 .setRequestMarshaller(new StringMarshaller()).setResponseMarshaller(new StringMarshaller()).build();
@@ -66,7 +94,7 @@ public class UrKitJavaTest {
                     observer.onNext(UrMiddleware.IDENTITY.get().userId() + ":" + request);
                     observer.onCompleted();
                 })).build();
-        Server server = ServerBuilder.forPort(0).addService(ServerInterceptors.intercept(service,
+        Server server = ServerBuilder.forPort(0).addService(ServerInterceptors.intercept(service, appInspector,
                 UrMiddleware.rpc(token -> "good".equals(token)
                         ? new UrMiddleware.Identity("9007199254740993", "acme", "p1") : null,
                         (identity, resource, action) -> true, "device", "read"))).build().start();
@@ -74,6 +102,10 @@ public class UrKitJavaTest {
             String target = "127.0.0.1:" + server.getPort();
             try (UrRpcClient client = new UrRpcClient(target, "good", "acme", "p1", false)) {
                 assertEquals("9007199254740993:hello", client.unary(method, "hello"));
+            }
+            try (UrRpcClient client = new UrRpcClient(target, "good", "acme", "p1", "7", false)) {
+                assertEquals("9007199254740993:app", client.unary(method, "app"));
+                assertEquals("7", seenAppId.get());
             }
             try (UrRpcClient client = new UrRpcClient(target, "bad", null, null, false)) {
                 assertEquals(Status.Code.UNAUTHENTICATED, assertThrows(StatusRuntimeException.class,

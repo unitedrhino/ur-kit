@@ -11,9 +11,10 @@ test('post 保留原始大整数响应', async () => {
       assert.equal(url.pathname, '/api/v1/system/test/get-one');
       assert.equal(options.headers['ithings-token'], 'test-token');
       assert.equal(options.headers['tenant-code'], 'demo');
+      assert.equal(options.headers['app-id'], '7');
       return { ok: true, text: async () => '{"id":9007199254740993,"value":null}' };
     },
   });
-  const result = await client.post('/api/v1/system/test/get-one', {}, { tenantCode: 'demo' });
+  const result = await client.post('/api/v1/system/test/get-one', {}, { tenantCode: 'demo', appId: '7' });
   assert.equal(result, '{"id":9007199254740993,"value":null}');
 });
