@@ -190,7 +190,7 @@ type (
         BindLevel int64 `json:"bindLevel,optional,optional"` //绑定级别: 1:强绑定(默认,只有用户解绑之后才能绑定) 2:中绑定(可以通过token强制解绑设备) 3:弱绑定(app可以内部解绑被绑定的设备)
         ProtocolConf map[string]string `json:"protocolConf,optional,omitempty"` //协议配置
         SubProtocolConf map[string]string `json:"subProtocolConf,optional,omitempty"` //子协议协议配置
-        DefaultAgentId int64 `json:"defaultAgentId,optional"` //默认绑定的 Agent ID，0 表示未绑定
+        DefaultAgentId int64 `json:"defaultAgentId,optional,string"` //默认绑定的 Agent ID，十进制字符串传输，0 表示未绑定
         CompatMode int64 `json:"compatMode,optional"` //协议兼容模式 1:旧productID(大写D) 2:新productId(小写d,默认)
     //  DevStatus *string `json:"devStatus,optional,omitempty"`                           // 产品状态
         Protocol           *ProtocolInfo           `json:"protocol,optional,omitempty"`

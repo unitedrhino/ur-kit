@@ -9782,9 +9782,8 @@
             "type": "object"
           },
           "defaultAgentId": {
-            "description": "默认绑定的 Agent ID，0 表示未绑定",
-            "format": "int64",
-            "type": "integer"
+            "description": "默认绑定的 Agent ID，十进制字符串传输，0 表示未绑定",
+            "type": "string"
           },
           "desc": {
             "description": "描述",
