@@ -10217,8 +10217,7 @@
           },
           "id": {
             "description": "配置编号",
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           }
         },
         "title": "ProductRemoteConfigLastestGetOneResp",
@@ -11865,8 +11864,7 @@
         "properties": {
           "areaID": {
             "description": "项目区域id 只读",
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "avatar": {
             "description": " 头像",
@@ -11877,8 +11875,7 @@
             "type": "string"
           },
           "createdTime": {
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "desc": {
             "type": "string"
@@ -11902,8 +11899,7 @@
             "type": "array"
           },
           "id": {
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "if": {
             "type": "string"
@@ -12062,8 +12058,7 @@
         "properties": {
           "areaID": {
             "description": "项目区域id 只读",
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "avatar": {
             "description": " 头像",
@@ -12074,8 +12069,7 @@
             "type": "string"
           },
           "createdTime": {
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "desc": {
             "type": "string"
@@ -12099,8 +12093,7 @@
             "type": "array"
           },
           "id": {
-            "format": "int64",
-            "type": "integer"
+            "type": "string"
           },
           "if": {
             "type": "string"

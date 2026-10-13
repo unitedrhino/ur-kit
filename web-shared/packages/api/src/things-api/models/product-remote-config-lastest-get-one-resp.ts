@@ -27,5 +27,5 @@ export interface ProductRemoteConfigLastestGetOneResp {
     /**
      * 配置编号
      */
-    'id'?: number;
+    'id'?: string;
 }

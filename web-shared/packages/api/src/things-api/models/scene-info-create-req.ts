@@ -22,7 +22,7 @@ export interface SceneInfoCreateReq {
     /**
      * 项目区域id 只读
      */
-    'areaID'?: number;
+    'areaID'?: string;
     /**
      *  头像
      */
@@ -31,7 +31,7 @@ export interface SceneInfoCreateReq {
      * 自定义字段
      */
     'body'?: string;
-    'createdTime'?: number;
+    'createdTime'?: string;
     'desc'?: string;
     /**
      * 只读
@@ -46,7 +46,7 @@ export interface SceneInfoCreateReq {
      * 执行路径
      */
     'flowPath'?: Array<SceneFlowInfo>;
-    'id'?: number;
+    'id'?: string;
     'if'?: string;
     /**
      * 是否是常用的

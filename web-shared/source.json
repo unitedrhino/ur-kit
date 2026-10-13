@@ -1,5 +1,5 @@
 {
-  "saasCommit": "c1a6a846dbf6a02e54903dc4ae2a6cbbf92431b1",
+  "saasCommit": "7c268b6c5d5b3916c493f54e5cf4c19487474276",
   "packages": {
     "@unitedrhino/saas-ui": "packages/saas-ui",
     "@vben-core/composables": "packages/@core/composables",
