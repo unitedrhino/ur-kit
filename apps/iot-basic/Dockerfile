@@ -8,6 +8,7 @@ COPY apps/iot-basic/web/package.json ./apps/iot-basic/web/package.json
 RUN --mount=type=cache,id=ur-kit-basic-pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prefer-offline && pnpm -r run stub --if-present
 COPY apps/iot-basic/web/ ./apps/iot-basic/web/
+ARG VITE_GLOB_APPID=600
 RUN pnpm --filter org-iot-client build
 
 FROM golang:1.25-alpine AS backend-build

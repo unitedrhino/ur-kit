@@ -5,9 +5,9 @@
 从 ur-kit 仓库根目录构建 Web 与 Go 的单容器镜像：
 
 ```sh
-docker build -f apps/iot-basic/Dockerfile -t ur-kit-iot-basic:<版本> .
+docker build -f apps/iot-basic/Dockerfile --build-arg VITE_GLOB_APPID=<平台应用标识> -t ur-kit-iot-basic:<版本> .
 ```
 
-在 `apps/iot-basic/` 中通过 Compose 启动时，设置 `PLATFORM_URL` 为部署环境的平台 HTTP(S) 根地址，并给 `IMAGE_VERSION` 设置不可变版本。运行镜像不含构建工具或移动端源码。移动端在 `mobile/` 内按其 `AGENTS.md` 独立构建。
+在 `apps/iot-basic/` 中通过 Compose 启动时，设置 `PLATFORM_URL` 为部署环境的平台 HTTP(S) 根地址、`VITE_GLOB_APPID` 为数字应用标识，并给 `IMAGE_VERSION` 设置不可变版本。`web/.env.production` 的数字 ID 是本地示例默认值，不能代替目标平台应用配置。运行镜像不含构建工具或移动端源码。移动端在 `mobile/` 内按其 `AGENTS.md` 独立构建。
 
 后端本机验证：`cd backend && go test ./...`。Web 构建与移动端验证见仓库根目录 `README.md`。
