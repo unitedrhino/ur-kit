@@ -10620,6 +10620,11 @@
             "format": "int64",
             "type": "integer"
           },
+          "myAuthType": {
+            "description": "当前请求用户在此项目的权限：1管理、2读写、3只读、0无权限",
+            "format": "int64",
+            "type": "integer"
+          },
           "position": {
             "$ref": "#/components/schemas/Point"
           },
