@@ -15,3 +15,5 @@
 `protocol/cloud.ConfigManager` 通过注入配置键、相等性和资源初始化函数管理云协议配置；整批更新失败会释放本轮新资源并保留旧版本，成功更新时关闭被替换或删除的旧资源。`GRPCConfigSource` 使用公开 pb 客户端按协议代码分页拉取配置，调用方提供 map 解码函数及带平台授权身份的上下文；`Refresh` 在完整拉取后才更新管理器。`ForEachConfig` 遍历使用该协议的产品，按主协议/子协议选择配置键，并让接入方实现产品设备同步回调；单个产品失败不会阻断其他产品。实际设备同步和平台权限由接入服务实现。
 
 `protocol/cloud.ProductIDMap` 迁移原协议 SDK 的外部产品 ID 映射能力。调用方提供 `GRPCProductSource` 和协议配置字段名（通常为 `productID`），在已有定时任务或事件回调中调用 `Refresh`；分页或重复外部 ID 出错时保留旧快照。`Get` 查询平台产品 ID，`PlatformIDs` 返回副本。`DeviceProtocolConfig` 通过接入方提供的产品查询函数，按产品子协议归属选择设备的主协议或子协议配置。调度器和平台身份仍由接入服务注入。
+
+`cache.NewProductInfoCache`、`cache.NewDeviceInfoCache` 使用公开 `dm` RPC 缓存产品与设备资料。`cache.NewTSLCache` 使用公开物模型 RPC 缓存产品 JSON，并将设备级属性、事件和行为与产品模型合并：同名条目以设备为准，空设备模型继承产品模型；产品 RPC 故障时仅有设备自身模型可降级。缓存键显式包含企业编码，调用方必须提供与该编码一致的可信认证上下文，并在产品或设备变更事件中调用 `InvalidateProduct` / `InvalidateDevice`。产品变更会失效已访问的设备聚合模型，在途旧响应不能回填。返回 JSON 是副本且保留扩展字段；平台内部 `schema.Model` 的完整语义校验与索引构建仍由 SaaS 适配层负责，不能直接用 JSON 聚合结果替换原内部模型。
