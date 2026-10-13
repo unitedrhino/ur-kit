@@ -280,3 +280,36 @@ func TestProtocolRPCHeartbeatFailure(t *testing.T) {
 		t.Fatal("平台注册失败后 RPC 端口仍在监听")
 	}
 }
+
+// TestProtocolReportConnection 验证非 MQTT 上下线沿用平台事件主题和毫秒时间戳。
+func TestProtocolReportConnection(t *testing.T) {
+	bus := &fakeBus{}
+	protocol, err := NewProtocol(Options{
+		Info: &dm.ProtocolInfo{Code: "modbus"}, Registry: &fakeRegistry{}, Bus: bus, RegisterIP: "127.0.0.1",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := protocol.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(protocol.Stop)
+	connection := tracking.Connection{ProductID: "product", DeviceName: "sensor", Action: "connected"}
+	if err := protocol.ReportConnection(context.Background(), connection); err != nil {
+		t.Fatal(err)
+	}
+	if bus.topic != "device.up.status.connected" {
+		t.Fatalf("上线主题错误: %s", bus.topic)
+	}
+	var published tracking.Connection
+	if err := json.Unmarshal(bus.payload, &published); err != nil || published.Timestamp == 0 || published.ClientID != "" {
+		t.Fatalf("连接事件格式错误: %+v %v", published, err)
+	}
+	connection.Action = "disconnected"
+	if err := protocol.ReportConnection(context.Background(), connection); err != nil || bus.topic != "device.up.status.disconnected" {
+		t.Fatalf("下线主题错误: %s %v", bus.topic, err)
+	}
+	if err := protocol.ReportConnection(context.Background(), tracking.Connection{ProductID: "product", DeviceName: "sensor", Action: "unknown"}); err == nil {
+		t.Fatal("未知连接状态未拒绝")
+	}
+}

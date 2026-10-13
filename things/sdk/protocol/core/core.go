@@ -35,6 +35,13 @@ type Message struct {
 	ProtocolCode string `json:"protocolCode"`
 }
 
+const (
+	// ConnectedTopic 保留非 MQTT 设备上线事件的既有主题。
+	ConnectedTopic = "device.up.status.connected"
+	// DisconnectedTopic 保留非 MQTT 设备下线事件的既有主题。
+	DisconnectedTopic = "device.up.status.disconnected"
+)
+
 // Registry 由平台适配层实现协议登记与心跳，不暴露 SaaS 内部服务类型。
 type Registry interface {
 	Register(context.Context, *dm.ProtocolInfo) error
@@ -283,6 +290,33 @@ func (protocol *Protocol) Publish(ctx context.Context, message *Message) error {
 		return err
 	}
 	topic := fmt.Sprintf("device.up.%s.%s.%s", message.Handle, message.ProductID, message.DeviceName)
+	return protocol.options.Bus.Publish(ctx, topic, data)
+}
+
+// ReportConnection 发布非 MQTT 设备上下线事件，不创建 MQTT 会话映射。
+func (protocol *Protocol) ReportConnection(ctx context.Context, connection tracking.Connection) error {
+	protocol.mu.RLock()
+	started := protocol.started && !protocol.stopped
+	protocol.mu.RUnlock()
+	if !started || connection.ProductID == "" || connection.DeviceName == "" {
+		return errors.New("protocol not running or device connection invalid")
+	}
+	var topic string
+	switch connection.Action {
+	case "connected":
+		topic = ConnectedTopic
+	case "disconnected":
+		topic = DisconnectedTopic
+	default:
+		return errors.New("unsupported connection action")
+	}
+	if connection.Timestamp == 0 {
+		connection.Timestamp = time.Now().UnixMilli()
+	}
+	data, err := json.Marshal(connection)
+	if err != nil {
+		return err
+	}
 	return protocol.options.Bus.Publish(ctx, topic, data)
 }
 
