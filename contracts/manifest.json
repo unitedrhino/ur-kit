@@ -12,7 +12,7 @@
     "backend/.swagger/roadDetection-roadDetection.json": "769c3bf1b95534e772641ac915a85cfb92ba525436f8a4d57142b7b056921a06",
     "backend/.swagger/sale-sale.json": "9bbca0c456b17f691c788b10c70a595e698af63c8938e9b417d9da120720ebe9",
     "backend/.swagger/things-ai.json": "ec3c5a7c374d762182c264dfe7473aeef6c7a597e337115787253d6c39f6890f",
-    "backend/.swagger/things-api.json": "d796d951cf21aa42140165c28d4f017e57bdc774976caf601d2215df7df8b9a6",
+    "backend/.swagger/things-api.json": "8c8d1bf8b114927c4515699f37dabd5a177337db0a710fe44801c7ee3ee3587e",
     "backend/.swagger/things-av.json": "f0626cd833849066981abceaf595f9dda6c24a3c55b77455d945420513ca990e",
     "backend/.swagger/things-card.json": "f5a20993a8120381eb0e5248416c6d41ae3af2660e9af76b9db6a40f6fe39b9f",
     "backend/.swagger/things-dm.json": "67118ab7527343decd1ad5462e78ebb9759a2df469e435693862a10ee8ca26af",
@@ -286,7 +286,7 @@
     "backend/things/service/apisvr/http/things/scene.api": "4884ceb7ba8ead2c98d909d0f59a12fa9b94f2617b8d0f35624a088215f10981",
     "backend/things/service/apisvr/http/things/schema/common.api": "e7fe7ff5b7b9b2f2024e4a7f2d3361d0000b58ca00993daa572c77ed8f78cdc4",
     "backend/things/service/apisvr/http/things/schema/info.api": "00850630bd0878aed42735234b5b69b87fc64ba60b534a93c08d6588e765913b",
-    "backend/things/service/apisvr/http/things/user/area.api": "f88b29602afc496e787a0b12dd830487f1eaa28f0800c18018b2ce8273b80e9e",
+    "backend/things/service/apisvr/http/things/user/area.api": "6a32f8b192c7c0a6ca0b212aa6c92f1b3d2d35875b7e0ede27ac8f3bfa4eed87",
     "backend/things/service/apisvr/http/things/user/device.api": "d109a842134d3ffc69568df5688f69ae98cde67c57349f6f66d8f5dd014ea599",
     "backend/things/service/apisvr/http/things_ee.api": "c8af01c5452a655be3648305a9c2c0dabb30020b31f57a532c4790100fc83d69",
     "backend/things/service/avsvr/http/av.api": "5874fc8f33c7089970eaad43162fdcc65c39437e0e67596b7ee946c45d600745",
@@ -413,6 +413,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "5a904d18f9292bac79cc292551e52ef07c13006b",
+  "saas_commit": "684591e405d7707d3184a6cc69a36d29db9a636a",
   "schema": 1
 }

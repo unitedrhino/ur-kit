@@ -12648,9 +12648,8 @@
       "UserAreaApplyCreateReq": {
         "properties": {
           "areaID": {
-            "description": " 区域ID",
-            "format": "int64",
-            "type": "integer"
+            "description": " 区域ID，以字符串传输避免大整数精度丢失",
+            "type": "string"
           },
           "authType": {
             "description": " 权限类型 1:读权限 4:管理权限",
