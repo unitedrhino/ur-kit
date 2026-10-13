@@ -133,6 +133,82 @@ func (tracker *Tracker) Touch(ctx context.Context, device Device, received time.
 	return err
 }
 
+// TouchMany 按产品批量更新活动毫秒时间，不创建或修改 MQTT 会话。
+func (tracker *Tracker) TouchMany(ctx context.Context, devices []Device, received time.Time) error {
+	if tracker == nil || tracker.Client == nil {
+		return errors.New("redis client is required")
+	}
+	if len(devices) == 0 {
+		return nil
+	}
+	groups := make(map[string][]redis.Z)
+	for _, device := range devices {
+		if device.ProductID == "" || device.DeviceName == "" {
+			return errors.New("product and device are required")
+		}
+		groups[device.ProductID] = append(groups[device.ProductID], redis.Z{
+			Score: float64(received.UnixMilli()), Member: TopicKey(device),
+		})
+	}
+	pipe := tracker.Client.TxPipeline()
+	for productID, members := range groups {
+		key := activityKey(productID)
+		pipe.ZAdd(ctx, key, members...)
+		pipe.Expire(ctx, key, ActivityTTL)
+	}
+	_, err := pipe.Exec(ctx)
+	return err
+}
+
+// ActiveByProduct 返回时间窗内指定产品的活动设备；同毫秒的大批设备不会因翻页丢失。
+func (tracker *Tracker) ActiveByProduct(ctx context.Context, productID string, since time.Duration) (map[Device]struct{}, error) {
+	if tracker == nil || tracker.Client == nil {
+		return nil, errors.New("redis client is required")
+	}
+	if productID == "" || since <= 0 {
+		return nil, errors.New("product and positive duration are required")
+	}
+	now := time.Now()
+	query := &redis.ZRangeBy{
+		Min:   fmt.Sprint(now.Add(-since).UnixMilli()),
+		Max:   fmt.Sprint(now.UnixMilli()),
+		Count: 1000,
+	}
+	active := make(map[Device]struct{})
+	for {
+		pairs, err := tracker.Client.ZRevRangeByScoreWithScores(ctx, activityKey(productID), query).Result()
+		if err != nil {
+			return nil, err
+		}
+		for _, pair := range pairs {
+			key, ok := pair.Member.(string)
+			if !ok {
+				continue
+			}
+			prefix, deviceName, ok := strings.Cut(key, ":")
+			if ok && prefix == productID && deviceName != "" {
+				active[Device{ProductID: productID, DeviceName: deviceName}] = struct{}{}
+			}
+		}
+		if len(pairs) < int(query.Count) {
+			break
+		}
+		query.Offset += int64(len(pairs))
+	}
+	return active, nil
+}
+
+// DeleteActivity 删除设备最近活动记录，不改变当前 MQTT 会话。
+func (tracker *Tracker) DeleteActivity(ctx context.Context, device Device) error {
+	if tracker == nil || tracker.Client == nil {
+		return errors.New("redis client is required")
+	}
+	if device.ProductID == "" || device.DeviceName == "" {
+		return errors.New("product and device are required")
+	}
+	return tracker.Client.ZRem(ctx, activityKey(device.ProductID), TopicKey(device)).Err()
+}
+
 // clearScript 仅清除仍属于目标客户端的设备映射，保护已经接替的新会话。
 var clearScript = redis.NewScript(`
 local raw = redis.call('HGET', KEYS[2], ARGV[1])

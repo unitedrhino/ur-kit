@@ -4,6 +4,7 @@ package tracking
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -111,5 +112,51 @@ func TestTrackerTouch(t *testing.T) {
 	connected, err := tracker.IsConnected(context.Background(), device)
 	if err != nil || connected {
 		t.Fatalf("活动更新误报 MQTT 在线: %v %v", connected, err)
+	}
+}
+
+// TestTrackerActivityBatchAndQuery 验证批量写入、同毫秒分页、产品隔离和时间边界。
+func TestTrackerActivityBatchAndQuery(t *testing.T) {
+	server := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	tracker, err := NewTracker(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	now := time.Now().Truncate(time.Millisecond)
+	devices := make([]Device, 1005)
+	for i := range devices {
+		devices[i] = Device{ProductID: "product-a", DeviceName: fmt.Sprintf("sensor-%04d", i)}
+	}
+	devices = append(devices, Device{ProductID: "product-b", DeviceName: "other"})
+	if err := tracker.TouchMany(ctx, devices, now); err != nil {
+		t.Fatal(err)
+	}
+	if err := tracker.Touch(ctx, Device{ProductID: "product-a", DeviceName: "old"}, now.Add(-2*time.Hour)); err != nil {
+		t.Fatal(err)
+	}
+	active, err := tracker.ActiveByProduct(ctx, "product-a", time.Hour)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(active) != 1005 {
+		t.Fatalf("同毫秒活动设备分页丢失: got %d want 1005", len(active))
+	}
+	if _, ok := active[Device{ProductID: "product-b", DeviceName: "other"}]; ok {
+		t.Fatal("跨产品活动设备进入结果")
+	}
+	if _, ok := active[Device{ProductID: "product-a", DeviceName: "old"}]; ok {
+		t.Fatal("超出时间窗的设备进入结果")
+	}
+	if err := tracker.DeleteActivity(ctx, devices[0]); err != nil {
+		t.Fatal(err)
+	}
+	active, err = tracker.ActiveByProduct(ctx, "product-a", time.Hour)
+	if err != nil || len(active) != 1004 {
+		t.Fatalf("删除活动失败: %d %v", len(active), err)
+	}
+	if _, ok := active[devices[0]]; ok {
+		t.Fatal("删除后设备仍在活动结果中")
 	}
 }
