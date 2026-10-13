@@ -6,25 +6,30 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"strconv"
 	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
 	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	protocolsync "github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/status"
 )
 
 // fakeRegistry 记录注册与心跳，并允许测试启动失败后的资源清理。
 type fakeRegistry struct {
-	mu       sync.Mutex
-	infos    []*dm.ProtocolInfo
-	services []*dm.ProtocolService
-	err      error
+	mu           sync.Mutex
+	infos        []*dm.ProtocolInfo
+	services     []*dm.ProtocolService
+	err          error
+	heartbeatErr error
 }
 
 // Register 保存协议登记请求。
@@ -40,6 +45,9 @@ func (registry *fakeRegistry) Heartbeat(_ context.Context, service *dm.ProtocolS
 	registry.mu.Lock()
 	defer registry.mu.Unlock()
 	registry.services = append(registry.services, service)
+	if registry.heartbeatErr != nil {
+		return registry.heartbeatErr
+	}
 	return registry.err
 }
 
@@ -180,5 +188,95 @@ func TestGRPCRegistry(t *testing.T) {
 	service := &dm.ProtocolService{Code: "modbus", WebPort: 8081}
 	if err := registry.Heartbeat(context.Background(), service); err != nil || client.service != service {
 		t.Fatalf("心跳 RPC 错误: %v", err)
+	}
+}
+
+// syncServer 实现原 Things 协议同步 RPC，验证生成代码可由独立协议核心注册。
+type syncServer struct {
+	protocolsync.UnimplementedProtocolSyncServer
+}
+
+// SyncProduct 返回成功，表示产品同步请求已抵达协议服务。
+func (syncServer) SyncProduct(context.Context, *protocolsync.Empty) (*protocolsync.Empty, error) {
+	return &protocolsync.Empty{}, nil
+}
+
+// TestProtocolRPCServer 验证原协议同步服务可调用、发现端口正确且停止后关闭连接。
+func TestProtocolRPCServer(t *testing.T) {
+	registry := &fakeRegistry{}
+	var intercepted atomic.Bool
+	protocol, err := NewProtocol(Options{
+		Info: &dm.ProtocolInfo{Code: "modbus"}, Registry: registry, Bus: &fakeBus{}, RegisterIP: "127.0.0.1",
+		RPCListenAddr: "127.0.0.1:0", RPCRegistrars: []func(*grpc.Server){func(server *grpc.Server) {
+			protocolsync.RegisterProtocolSyncServer(server, syncServer{})
+		}},
+		RPCServerOptions: []grpc.ServerOption{grpc.UnaryInterceptor(func(ctx context.Context, request any, _ *grpc.UnaryServerInfo, next grpc.UnaryHandler) (any, error) {
+			intercepted.Store(true)
+			return next(ctx, request)
+		})},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := protocol.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	t.Cleanup(protocol.Stop)
+	if protocol.RPCPort() == 0 {
+		t.Fatal("RPC 服务未分配端口")
+	}
+	registry.mu.Lock()
+	advertised := registry.services[0].Port
+	registry.mu.Unlock()
+	if advertised != protocol.RPCPort() {
+		t.Fatalf("平台注册端口错误: %d/%d", advertised, protocol.RPCPort())
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	address := "127.0.0.1:" + strconv.FormatInt(protocol.RPCPort(), 10)
+	connection, err := grpc.NewClient(address, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer connection.Close()
+	if _, err := protocolsync.NewProtocolSyncClient(connection).SyncProduct(ctx, &protocolsync.Empty{}); err != nil {
+		t.Fatalf("协议 RPC 调用失败: %v", err)
+	}
+	if !intercepted.Load() {
+		t.Fatal("协议 RPC 调用未经过接入方中间件")
+	}
+	protocol.Stop()
+	stoppedCtx, stoppedCancel := context.WithTimeout(context.Background(), 200*time.Millisecond)
+	defer stoppedCancel()
+	if _, err := protocolsync.NewProtocolSyncClient(connection).SyncProduct(stoppedCtx, &protocolsync.Empty{}); err == nil {
+		t.Fatal("协议停止后 RPC 仍可调用")
+	}
+}
+
+// TestProtocolRPCHeartbeatFailure 验证平台注册失败时释放已监听的 RPC 端口。
+func TestProtocolRPCHeartbeatFailure(t *testing.T) {
+	registry := &fakeRegistry{heartbeatErr: errors.New("platform unavailable")}
+	protocol, err := NewProtocol(Options{
+		Info: &dm.ProtocolInfo{Code: "modbus"}, Registry: registry, Bus: &fakeBus{}, RegisterIP: "127.0.0.1",
+		RPCListenAddr: "127.0.0.1:0", RPCRegistrars: []func(*grpc.Server){func(server *grpc.Server) {
+			protocolsync.RegisterProtocolSyncServer(server, syncServer{})
+		}},
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := protocol.Start(context.Background()); err == nil {
+		t.Fatal("平台注册失败后协议仍启动")
+	}
+	registry.mu.Lock()
+	port := registry.services[0].Port
+	registry.mu.Unlock()
+	if port == 0 || protocol.RPCPort() != 0 {
+		t.Fatalf("启动失败后的端口状态错误: %d/%d", port, protocol.RPCPort())
+	}
+	connection, err := net.DialTimeout("tcp", "127.0.0.1:"+strconv.FormatInt(port, 10), 100*time.Millisecond)
+	if err == nil {
+		_ = connection.Close()
+		t.Fatal("平台注册失败后 RPC 端口仍在监听")
 	}
 }

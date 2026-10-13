@@ -17,6 +17,7 @@ import (
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/reflection"
 	"google.golang.org/grpc/status"
 )
 
@@ -77,34 +78,50 @@ type Activity interface {
 
 // Options 保存协议外部依赖与运行配置；WebHandler 优先于 WebDir。
 type Options struct {
-	Info              *dm.ProtocolInfo
-	Registry          Registry
-	Bus               Bus
-	Activity          Activity
-	RegisterIP        string
-	WebDir            string
-	WebHandler        http.Handler
-	WebListenAddr     string
+	Info          *dm.ProtocolInfo
+	Registry      Registry
+	Bus           Bus
+	Activity      Activity
+	RegisterIP    string
+	WebDir        string
+	WebHandler    http.Handler
+	WebListenAddr string
+	// RPCListenAddr 是自注册 gRPC 服务的监听地址；有服务注册器时必填。
+	RPCListenAddr string
+	// RPCRegistrars 负责注册协议自己的 gRPC 服务，例如 ProtocolSync。
+	RPCRegistrars []func(*grpc.Server)
+	// RPCServerOptions 由接入方注入认证、权限、日志等 gRPC 服务选项。
+	RPCServerOptions []grpc.ServerOption
+	// RPCReflection 仅在明确开启时暴露服务反射。
+	RPCReflection     bool
 	HeartbeatInterval time.Duration
 	Logger            *slog.Logger
 }
 
 // Protocol 管理一个独立协议实例；Stop 可重复调用。
 type Protocol struct {
-	options Options
-	mu      sync.RWMutex
-	started bool
-	stopped bool
-	webPort int64
-	server  *http.Server
-	cancel  context.CancelFunc
-	wait    sync.WaitGroup
+	options   Options
+	mu        sync.RWMutex
+	started   bool
+	stopped   bool
+	webPort   int64
+	rpcPort   int64
+	server    *http.Server
+	rpcServer *grpc.Server
+	cancel    context.CancelFunc
+	wait      sync.WaitGroup
 }
 
 // NewProtocol 验证必要的平台适配器与协议代码。
 func NewProtocol(options Options) (*Protocol, error) {
 	if options.Info == nil || options.Info.Code == "" || options.Registry == nil || options.Bus == nil || options.RegisterIP == "" {
 		return nil, errors.New("protocol info, registry, bus and register IP are required")
+	}
+	if len(options.RPCRegistrars) > 0 && options.RPCListenAddr == "" {
+		return nil, errors.New("RPC listen address is required when registering RPC services")
+	}
+	if len(options.RPCRegistrars) == 0 && options.RPCListenAddr != "" {
+		return nil, errors.New("RPC service registrar is required when setting RPC listen address")
 	}
 	if options.HeartbeatInterval <= 0 {
 		options.HeartbeatInterval = time.Minute
@@ -142,11 +159,28 @@ func (protocol *Protocol) Start(ctx context.Context) error {
 		}
 		protocol.webPort = int64(listener.Addr().(*net.TCPAddr).Port)
 	}
+	var rpcListener net.Listener
+	if len(protocol.options.RPCRegistrars) > 0 {
+		var err error
+		rpcListener, err = net.Listen("tcp", protocol.options.RPCListenAddr)
+		if err != nil {
+			if listener != nil {
+				_ = listener.Close()
+			}
+			protocol.webPort = 0
+			return fmt.Errorf("listen protocol RPC: %w", err)
+		}
+		protocol.rpcPort = int64(rpcListener.Addr().(*net.TCPAddr).Port)
+	}
 	if err := protocol.heartbeat(ctx); err != nil {
 		if listener != nil {
 			_ = listener.Close()
 		}
+		if rpcListener != nil {
+			_ = rpcListener.Close()
+		}
 		protocol.webPort = 0
+		protocol.rpcPort = 0
 		return fmt.Errorf("initial protocol heartbeat: %w", err)
 	}
 	runCtx, cancel := context.WithCancel(ctx)
@@ -162,6 +196,22 @@ func (protocol *Protocol) Start(ctx context.Context) error {
 			}
 		}()
 	}
+	if rpcListener != nil {
+		protocol.rpcServer = grpc.NewServer(protocol.options.RPCServerOptions...)
+		for _, register := range protocol.options.RPCRegistrars {
+			register(protocol.rpcServer)
+		}
+		if protocol.options.RPCReflection {
+			reflection.Register(protocol.rpcServer)
+		}
+		protocol.wait.Add(1)
+		go func() {
+			defer protocol.wait.Done()
+			if err := protocol.rpcServer.Serve(rpcListener); err != nil && protocol.options.Logger != nil {
+				protocol.options.Logger.Error("protocol RPC server stopped", "error", err)
+			}
+		}()
+	}
 	protocol.wait.Add(1)
 	go protocol.runHeartbeat(runCtx)
 	return nil
@@ -171,7 +221,7 @@ func (protocol *Protocol) Start(ctx context.Context) error {
 func (protocol *Protocol) heartbeat(ctx context.Context) error {
 	return protocol.options.Registry.Heartbeat(ctx, &dm.ProtocolService{
 		Code: protocol.options.Info.Code, Ip: protocol.options.RegisterIP,
-		Status: 1, WebPort: protocol.webPort,
+		Status: 1, Port: protocol.rpcPort, WebPort: protocol.webPort,
 	})
 }
 
@@ -197,6 +247,13 @@ func (protocol *Protocol) WebPort() int64 {
 	protocol.mu.RLock()
 	defer protocol.mu.RUnlock()
 	return protocol.webPort
+}
+
+// RPCPort 返回协议自注册 gRPC 服务的监听端口；未配置时为零。
+func (protocol *Protocol) RPCPort() int64 {
+	protocol.mu.RLock()
+	defer protocol.mu.RUnlock()
+	return protocol.rpcPort
 }
 
 // Publish 在上行前固定接收时间与协议代码，并发送兼容的设备主题。
@@ -257,12 +314,16 @@ func (protocol *Protocol) Stop() {
 	protocol.stopped = true
 	cancel := protocol.cancel
 	server := protocol.server
+	rpcServer := protocol.rpcServer
 	protocol.mu.Unlock()
 	if cancel != nil {
 		cancel()
 	}
 	if server != nil {
 		_ = server.Close()
+	}
+	if rpcServer != nil {
+		rpcServer.Stop()
 	}
 	protocol.wait.Wait()
 }
