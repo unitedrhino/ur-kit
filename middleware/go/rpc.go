@@ -121,6 +121,7 @@ func newRPCAuthRequest(ctx context.Context, incoming metadata.MD) *http.Request 
 	request, _ := http.NewRequestWithContext(ctx, http.MethodPost, "http://rpc.local/", nil)
 	request.Header.Set("tenant-code", first(incoming.Get("tenant-code")))
 	request.Header.Set("project-id", first(incoming.Get("project-id")))
+	request.Header.Set("app-id", first(incoming.Get("app-id")))
 	return request
 }
 

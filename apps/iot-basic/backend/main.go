@@ -15,7 +15,6 @@ import (
 	"time"
 
 	middleware "github.com/unitedrhino/ur-kit/middleware/go"
-	"github.com/unitedrhino/ur-kit/sdks/go/httpclient"
 )
 
 // main 启动健康检查与经平台令牌验证的样例端点。
@@ -45,9 +44,7 @@ func newHandler(platform, webDir string) (http.Handler, error) {
 		writer.Header().Set("Content-Type", "application/json")
 		_ = json.NewEncoder(writer).Encode(map[string]string{"message": "pong", "userId": identity.UserID})
 	}), middleware.Options{
-		Authenticator: middleware.AuthenticatorFunc(func(request *http.Request, token string) (middleware.Identity, error) {
-			return verifyPlatformToken(request, platform, token)
-		}),
+		Authenticator: middleware.PlatformAuthenticator{BaseURL: platform},
 	}))
 	proxy := httputil.NewSingleHostReverseProxy(target)
 	for _, prefix := range []string{"/api/v1/system/", "/api/v1/things/", "/api/v1/data/"} {
@@ -74,32 +71,4 @@ func newHandler(platform, webDir string) (http.Handler, error) {
 		})
 	}
 	return mux, nil
-}
-
-// verifyPlatformToken 向平台查询用户与企业归属，只有平台确认成员关系后才接受请求上下文。
-func verifyPlatformToken(request *http.Request, platform, token string) (middleware.Identity, error) {
-	var response struct {
-		Code int `json:"code"`
-		Data struct {
-			UserID  string `json:"userID"`
-			Tenants []struct {
-				TenantCode string `json:"tenantCode"`
-				Status     int64  `json:"status"`
-			} `json:"tenants"`
-		} `json:"data"`
-	}
-	client := httpclient.Client{BaseURL: platform, Token: token}
-	if err := client.PostJSON(request.Context(), "/api/v1/system/user/self/get-one", map[string]bool{"withTenant": true}, &response); err != nil {
-		return middleware.Identity{}, err
-	}
-	if response.Code != 200 || response.Data.UserID == "" {
-		return middleware.Identity{}, errors.New("platform rejected token")
-	}
-	wantedTenant := strings.TrimSpace(request.Header.Get("tenant-code"))
-	for _, tenant := range response.Data.Tenants {
-		if tenant.TenantCode == wantedTenant && tenant.Status == 1 && wantedTenant != "" {
-			return middleware.Identity{UserID: response.Data.UserID, TenantCode: wantedTenant}, nil
-		}
-	}
-	return middleware.Identity{}, errors.New("tenant membership not verified")
 }

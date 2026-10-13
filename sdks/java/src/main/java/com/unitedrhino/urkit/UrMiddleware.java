@@ -26,6 +26,9 @@ public final class UrMiddleware {
     /** TOKEN_ALIAS 对应平台 Web 客户端使用的 token 请求头。 */
     private static final Metadata.Key<String> TOKEN_ALIAS = Metadata.Key.of("token", Metadata.ASCII_STRING_MARSHALLER);
     private static final Metadata.Key<String> AUTHORIZATION = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> TENANT = Metadata.Key.of("tenant-code", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> PROJECT = Metadata.Key.of("project-id", Metadata.ASCII_STRING_MARSHALLER);
+    private static final Metadata.Key<String> APP = Metadata.Key.of("app-id", Metadata.ASCII_STRING_MARSHALLER);
     /** INTERNAL_IDENTITY_HEADERS 是只有平台认证后才能写入的元数据字段。 */
     private static final List<String> INTERNAL_IDENTITY_HEADERS = List.of(
             "ithings-user", "ithings-user-role", "ithings-tenant-code",
@@ -48,6 +51,12 @@ public final class UrMiddleware {
         Identity authenticate(String token) throws Exception;
     }
 
+    /** ScopedAuthenticator 同时验证令牌与客户端选择的企业、项目和应用上下文。 */
+    @FunctionalInterface public interface ScopedAuthenticator {
+        /** authenticate 返回平台确认的身份，非法选择值时抛出异常。 */
+        Identity authenticate(String token, String tenantCode, String projectId, String appId) throws Exception;
+    }
+
     /** Authorizer 根据可信身份判断能否执行资源动作。 */
     @FunctionalInterface public interface Authorizer {
         /** allow 返回指定身份对资源动作是否有权访问。 */
@@ -60,6 +69,13 @@ public final class UrMiddleware {
     /** http 为业务处理器补安全头、认证、权限和不含令牌的日志。 */
     public static HttpHandler http(HttpHandler next, Authenticator authenticate,
                                    Authorizer authorize, String resource, String action) {
+        return httpScoped(next, authenticate == null ? null : (token, tenant, project, app) -> authenticate.authenticate(token),
+                authorize, resource, action);
+    }
+
+    /** httpScoped 在 HTTP 请求进入业务处理器前核验令牌与企业、项目选择值。 */
+    public static HttpHandler httpScoped(HttpHandler next, ScopedAuthenticator authenticate,
+                                         Authorizer authorize, String resource, String action) {
         Objects.requireNonNull(next);
         return exchange -> {
             long started = System.nanoTime();
@@ -73,7 +89,10 @@ public final class UrMiddleware {
                                      exchange.getRequestHeaders().getFirst("Authorization"));
                 if (token == null) { error(exchange, 401, "unauthorized"); return; }
                 Identity identity;
-                try { identity = authenticate.authenticate(token); }
+                try { identity = authenticate.authenticate(token,
+                        exchange.getRequestHeaders().getFirst("tenant-code"),
+                        exchange.getRequestHeaders().getFirst("project-id"),
+                        exchange.getRequestHeaders().getFirst("app-id")); }
                 catch (Exception ignored) { error(exchange, 401, "unauthorized"); return; }
                 if (identity == null) { error(exchange, 401, "unauthorized"); return; }
                 if (resource != null && !resource.isBlank() &&
@@ -93,6 +112,13 @@ public final class UrMiddleware {
     /** rpc 为 unary 与 streaming gRPC 调用提供同样的身份和权限检查。 */
     public static ServerInterceptor rpc(Authenticator authenticate, Authorizer authorize,
                                          String resource, String action) {
+        return rpcScoped(authenticate == null ? null : (token, tenant, project, app) -> authenticate.authenticate(token),
+                authorize, resource, action);
+    }
+
+    /** rpcScoped 在 gRPC 请求进入业务处理器前核验令牌与企业、项目选择元数据。 */
+    public static ServerInterceptor rpcScoped(ScopedAuthenticator authenticate, Authorizer authorize,
+                                               String resource, String action) {
         return new ServerInterceptor() {
             /** interceptCall 拒绝缺失或无效令牌，并把验证身份写入 gRPC Context。 */
             @Override public <Request, Response> ServerCall.Listener<Request> interceptCall(
@@ -104,7 +130,7 @@ public final class UrMiddleware {
                     String provided = token(headers.get(TOKEN), headers.get(TOKEN_ALIAS), headers.get(AUTHORIZATION));
                     if (provided == null) return reject(call, Status.UNAUTHENTICATED.withDescription("unauthorized"));
                     Identity identity;
-                    try { identity = authenticate.authenticate(provided); }
+                    try { identity = authenticate.authenticate(provided, headers.get(TENANT), headers.get(PROJECT), headers.get(APP)); }
                     catch (Exception ignored) { return reject(call, Status.UNAUTHENTICATED.withDescription("unauthorized")); }
                     if (identity == null) return reject(call, Status.UNAUTHENTICATED.withDescription("unauthorized"));
                     if (resource != null && !resource.isBlank() &&

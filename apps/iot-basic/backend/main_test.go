@@ -8,10 +8,12 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	middleware "github.com/unitedrhino/ur-kit/middleware/go"
 )
 
-// TestVerifyPlatformToken 验证认证请求与企业成员检查。
-func TestVerifyPlatformToken(t *testing.T) {
+// TestPlatformAuthenticatorIntegration 验证基础应用复用公共认证器而非自行信任请求头。
+func TestPlatformAuthenticatorIntegration(t *testing.T) {
 	platform := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
 		if request.URL.Path != "/api/v1/system/user/self/get-one" || request.Header.Get("ithings-token") != "valid" {
 			t.Error("平台认证请求不符合合同")
@@ -22,12 +24,13 @@ func TestVerifyPlatformToken(t *testing.T) {
 	defer platform.Close()
 	request := httptest.NewRequest(http.MethodPost, "/api/v1/iot-basic/ping", nil)
 	request.Header.Set("tenant-code", "demo")
-	identity, err := verifyPlatformToken(request, platform.URL, "valid")
+	auth := middleware.PlatformAuthenticator{BaseURL: platform.URL}
+	identity, err := auth.Authenticate(request, "valid")
 	if err != nil || identity.UserID != "9007199254740993" || identity.TenantCode != "demo" {
 		t.Fatalf("平台认证失败: identity=%+v err=%v", identity, err)
 	}
 	request.Header.Set("tenant-code", "other")
-	if _, err := verifyPlatformToken(request, platform.URL, "valid"); err == nil {
+	if _, err := auth.Authenticate(request, "valid"); err == nil {
 		t.Fatal("不属于用户的企业被接受")
 	}
 }

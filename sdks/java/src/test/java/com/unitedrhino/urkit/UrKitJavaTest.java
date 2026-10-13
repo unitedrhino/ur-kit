@@ -60,8 +60,8 @@ public class UrKitJavaTest {
                     observer.onCompleted();
                 })).build();
         Server server = ServerBuilder.forPort(0).addService(ServerInterceptors.intercept(service,
-                UrMiddleware.rpc(token -> "good".equals(token)
-                        ? new UrMiddleware.Identity("9007199254740993", "acme", "p1") : null,
+                UrMiddleware.rpcScoped((token, tenant, project, app) -> "good".equals(token) && "acme".equals(tenant) && "p1".equals(project)
+                        ? new UrMiddleware.Identity("9007199254740993", tenant, project) : null,
                         (identity, resource, action) -> true, "device", "read"))).build().start();
         try (UrRpcClient client = new UrRpcClient("127.0.0.1:" + server.getPort(), "good", "acme", "p1", false)) {
             var request = DeviceManageOuterClass.DeviceInfoGetOneReq.newBuilder().setDeviceName("sensor-1").build();

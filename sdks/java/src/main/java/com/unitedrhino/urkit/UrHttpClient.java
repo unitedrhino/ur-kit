@@ -24,7 +24,8 @@ public final class UrHttpClient {
                 || (baseUri.getPath() != null && !baseUri.getPath().isEmpty() && !"/".equals(baseUri.getPath()))) {
             throw new IllegalArgumentException("baseUrl must be a credential-free HTTP(S) origin");
         }
-        this.transport = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10)).build();
+        this.transport = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10))
+                .followRedirects(HttpClient.Redirect.NEVER).build();
         this.token = token;
     }
 
