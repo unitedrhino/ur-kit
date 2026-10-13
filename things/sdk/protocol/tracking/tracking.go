@@ -117,6 +117,22 @@ func (tracker *Tracker) Sync(ctx context.Context, connection Connection, receive
 	return syncScript.Run(ctx, tracker.Client, []string{DeviceKey, ClientKey, activityKey(device.ProductID)}, TopicKey(device), connection.ClientID, device.ProductID, device.DeviceName, connectionJSON, deviceJSON, received.UnixMilli(), int64(ActivityTTL.Seconds())).Err()
 }
 
+// Touch 更新产品内设备的最后活动毫秒时间，不改变 MQTT 会话归属。
+func (tracker *Tracker) Touch(ctx context.Context, device Device, received time.Time) error {
+	if tracker == nil || tracker.Client == nil {
+		return errors.New("redis client is required")
+	}
+	if device.ProductID == "" || device.DeviceName == "" {
+		return errors.New("product and device are required")
+	}
+	key := activityKey(device.ProductID)
+	pipe := tracker.Client.TxPipeline()
+	pipe.ZAdd(ctx, key, redis.Z{Score: float64(received.UnixMilli()), Member: TopicKey(device)})
+	pipe.Expire(ctx, key, ActivityTTL)
+	_, err := pipe.Exec(ctx)
+	return err
+}
+
 // clearScript 仅清除仍属于目标客户端的设备映射，保护已经接替的新会话。
 var clearScript = redis.NewScript(`
 local raw = redis.call('HGET', KEYS[2], ARGV[1])

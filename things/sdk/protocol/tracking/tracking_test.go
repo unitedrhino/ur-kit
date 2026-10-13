@@ -92,3 +92,24 @@ func TestTrackerReconcile(t *testing.T) {
 		t.Fatalf("会话清理不正确: devices=%d clients=%d", client.HLen(ctx, DeviceKey).Val(), client.HLen(ctx, ClientKey).Val())
 	}
 }
+
+// TestTrackerTouch 验证上行活动更新不创建 MQTT 在线会话。
+func TestTrackerTouch(t *testing.T) {
+	server := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	tracker, err := NewTracker(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	device := Device{ProductID: "p", DeviceName: "sensor"}
+	if err := tracker.Touch(context.Background(), device, time.UnixMilli(1700000000123)); err != nil {
+		t.Fatal(err)
+	}
+	if client.ZScore(context.Background(), activityKey("p"), TopicKey(device)).Val() != 1700000000123 {
+		t.Fatal("最后活动毫秒时间错误")
+	}
+	connected, err := tracker.IsConnected(context.Background(), device)
+	if err != nil || connected {
+		t.Fatalf("活动更新误报 MQTT 在线: %v %v", connected, err)
+	}
+}
