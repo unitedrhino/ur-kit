@@ -18,4 +18,6 @@
 
 `protocol/cloud.GRPCDeviceSource.ForEachDevice` 为产品同步回调提供设备分页读取：按产品 ID 查询，检查页总数、产品归属和重复设备；单台设备处理失败继续处理并汇总错误。可在 `ForEachConfig` 的产品回调中调用，具体设备同步动作由接入方实现。分页读取发生错误时，已执行的设备回调不会回滚；需要原子替换设备快照时应由接入方先暂存完整结果。
 
-`cache.NewProductInfoCache`、`cache.NewDeviceInfoCache` 使用公开 `dm` RPC 缓存产品与设备资料。`cache.NewTSLCache` 使用公开物模型 RPC 缓存产品 JSON，并将设备级属性、事件和行为与产品模型合并：同名条目以设备为准，空设备模型继承产品模型；产品 RPC 故障时仅有设备自身模型可降级。缓存键显式包含企业编码，调用方必须提供与该编码一致的可信认证上下文，并在产品或设备变更事件中调用 `InvalidateProduct` / `InvalidateDevice`。产品变更会失效已访问的设备聚合模型，在途旧响应不能回填。返回 JSON 是副本且保留扩展字段；平台内部 `schema.Model` 的完整语义校验与索引构建仍由 SaaS 适配层负责，不能直接用 JSON 聚合结果替换原内部模型。
+`cache.NewProductInfoCache`、`cache.NewDeviceInfoCache` 使用公开 `dm` RPC 缓存产品与设备资料。`cache.NewTSLCache` 使用公开物模型 RPC 缓存产品 JSON，并将设备级属性、事件和行为与产品模型合并：同名条目以设备为准，空设备模型继承产品模型；产品 RPC 故障时仅有设备自身模型可降级。缓存键显式包含企业编码，调用方必须提供与该编码一致的可信认证上下文，并在产品或设备变更事件中调用 `InvalidateProduct` / `InvalidateDevice`。产品变更会失效已访问的设备聚合模型，在途旧响应不能回填。返回 JSON 是副本且保留扩展字段。
+
+`schema` 从合同锁定的 SaaS 提交同步物模型纯值语义，包含严格校验、属性/事件/行为索引、参数推断和 AI 视图；`upstream/schema` 保留逐文件原始快照及校验和，`python3 scripts/sync_schema.py --saas <saas-path> --sha <manifest.saas_commit>` 可重复生成公开源码。`cache.TSLCache.ProductModel` / `DeviceModel` 在 JSON 缓存结果上调用严格校验，返回独占的 `*schema.Model`。设备覆盖后如果模型仍缺少有效功能定义，会返回参数错误。公开包尚未包含原仓 `schema/repo.go` 的数据库能力，SaaS 内部调用点也未改用本包；接入前须按具体服务完成兼容迁移。

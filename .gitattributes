@@ -1,0 +1,2 @@
+# 保留 SaaS 物模型原始快照的 CRLF 字节，校验和以源提交内容为准。
+things/sdk/upstream/schema/*.go whitespace=cr-at-eol

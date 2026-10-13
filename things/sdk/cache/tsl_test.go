@@ -169,6 +169,45 @@ func TestTSLCacheRejectsInvalidInputs(t *testing.T) {
 	}
 }
 
+// TestTSLCacheTypedModels 验证公开模型的严格校验、设备覆盖、索引及返回值隔离。
+func TestTSLCacheTypedModels(t *testing.T) {
+	productTSL := `{"properties":[{"identifier":"temperature","name":"产品温度","define":{"type":"int","min":"0","max":"100"}},{"identifier":"humidity","name":"湿度","define":{"type":"int","min":"0","max":"100"}}]}`
+	deviceTSL := `{"properties":[{"identifier":"temperature","name":"设备温度","define":{"type":"int","min":"-20","max":"120"}}]}`
+	cache, err := NewTSLCache(time.Minute,
+		productTSLReaderFunc(func(context.Context, *dm.ProductSchemaTslGetOneReq) (*dm.ProductSchemaTslGetOneResp, error) {
+			return &dm.ProductSchemaTslGetOneResp{Tsl: productTSL}, nil
+		}),
+		deviceTSLReaderFunc(func(context.Context, *dm.DeviceSchemaTslGetOneReq) (*dm.DeviceSchemaTslGetOneResp, error) {
+			return &dm.DeviceSchemaTslGetOneResp{Tsl: deviceTSL}, nil
+		}))
+	if err != nil {
+		t.Fatal(err)
+	}
+	productKey := ProductKey{TenantCode: "tenant-a", ProductID: "p"}
+	deviceKey := DeviceKey{TenantCode: "tenant-a", ProductID: "p", DeviceName: "d"}
+	productModel, err := cache.ProductModel(context.Background(), productKey)
+	if err != nil || productModel.Property["temperature"] == nil {
+		t.Fatalf("产品模型索引错误: %v", err)
+	}
+	deviceModel, err := cache.DeviceModel(context.Background(), deviceKey)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(deviceModel.Properties) != 2 || deviceModel.Property["temperature"].Name != "设备温度" || deviceModel.Property["humidity"] == nil {
+		t.Fatalf("设备覆盖或继承错误: %s", deviceModel.String())
+	}
+	deviceModel.Property["temperature"].Name = "调用方修改"
+	again, err := cache.DeviceModel(context.Background(), deviceKey)
+	if err != nil || again.Property["temperature"].Name != "设备温度" {
+		t.Fatalf("调用方修改污染缓存: %v", err)
+	}
+	productTSL = `{"properties":[{"identifier":"invalid","name":"无类型"}]}`
+	cache.InvalidateProduct(productKey)
+	if _, err := cache.ProductModel(context.Background(), productKey); err == nil {
+		t.Fatal("非法模型没有被严格校验拒绝")
+	}
+}
+
 // TestTSLCacheProductInvalidationDuringDeviceLoad 验证在途设备 RPC 不会回填产品变更前的模型。
 func TestTSLCacheProductInvalidationDuringDeviceLoad(t *testing.T) {
 	started := make(chan struct{})

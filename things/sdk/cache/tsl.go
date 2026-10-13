@@ -12,6 +12,7 @@ import (
 
 	"github.com/unitedrhino/ur-kit/cache/common"
 	dm "github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/things/sdk/schema"
 	"google.golang.org/grpc"
 )
 
@@ -90,6 +91,15 @@ func (cache *TSLCache) Product(ctx context.Context, key ProductKey) ([]byte, err
 	return cache.product(ctx, key)
 }
 
+// ProductModel 校验产品物模型并建立属性、事件和行为索引；返回值由调用方独占。
+func (cache *TSLCache) ProductModel(ctx context.Context, key ProductKey) (*schema.Model, error) {
+	data, err := cache.Product(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return schema.ValidateWithFmt(data)
+}
+
 // product 读取已经校验过键的产品物模型并复制返回值。
 func (cache *TSLCache) product(ctx context.Context, key ProductKey) ([]byte, error) {
 	data, found, err := cache.products.Get(ctx, key)
@@ -122,6 +132,15 @@ func (cache *TSLCache) Device(ctx context.Context, key DeviceKey) ([]byte, error
 		return nil, errors.New("device TSL not found")
 	}
 	return append([]byte(nil), data...), nil
+}
+
+// DeviceModel 校验设备覆盖后的完整物模型并建立索引；返回值由调用方独占。
+func (cache *TSLCache) DeviceModel(ctx context.Context, key DeviceKey) (*schema.Model, error) {
+	data, err := cache.Device(ctx, key)
+	if err != nil {
+		return nil, err
+	}
+	return schema.ValidateWithFmt(data)
 }
 
 // InvalidateProduct 删除产品及其已读取设备物模型，阻止旧 RPC 响应回填。

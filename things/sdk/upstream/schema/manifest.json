@@ -1,0 +1,20 @@
+{
+  "files": {
+    "affordance.go": "e2a2b589d9ef05d31252c5c5653ff3a0ac0ce35fddbf3a17c1f8c583f89fbc20",
+    "ai.go": "90493b9f28680ff4f09596a80671eb9dfff2d16ee3e9d5a84d1d1eddf82e8a9a",
+    "ai_test.go": "9573f5da5199d83640017a70debd45247a02e57fc557f5384247a9961dd7aad0",
+    "baseParam.go": "62ae2be262262e3275b776d54cdda55025e4a7ca35629211df347692863ddb1f",
+    "define.go": "c9051d1f9b34b08cf8e63f52c5dd605fb86f325c9b3d124a3d194b7163f1a7bd",
+    "inference.go": "727ea676d0468eb2eebd0d3764701a3502d05ef57479ff1787d5e0e81e36c6fc",
+    "inference_test.go": "674b2b3e099ada47046c66bb107116bc607d95e9b2f1bb0d45736f0ee53d0aa9",
+    "init.go": "f9c7551b9b65723f18f540c14c145fe85661d307f81c25ac14607b392c8277ad",
+    "model.go": "eb2c56fbf7a841e00cb4281e5d41c7bcd7301e348073b7f6e12d974a45681880",
+    "modelParam.go": "38507c1a0a3b96ae1bf627d837d6c3e4a0b2f4654e7598282059fbd734ffa62d",
+    "modelSimple.go": "13a39d939214f35640d27ad2fa245588a386cbbc132098e13dd102b67a14c02d",
+    "modifyCheck.go": "14d8486ac9b24edc9bdbea83391fd86906b3d1fae4de31ada927a9a8563b4b87",
+    "schema_test.go": "0c772428a6bf3db11e7ea97c9784add6bf0ceda10a48de88f5f03a1081036600",
+    "validate.go": "7c6a08532c11161233b6ce61ee491c9f79012e4a1de6cea51c273597c525ba08",
+    "validate_thingmodel_test.go": "6d1a940bc3a0f942211be7007b4b29c90bf84f6fffd4e6f97ab1be931c80e4aa"
+  },
+  "saas_commit": "882d6bdc87fa92ff22ffa0f366a2b8cf1725da5b"
+}
