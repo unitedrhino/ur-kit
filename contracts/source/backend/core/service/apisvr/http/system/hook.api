@@ -171,7 +171,7 @@ type (
 
     HookCapabilityGetListReq {
         Page     *PageInfo `json:"page,optional"`       // 分页参数
-        ServerID int64     `json:"serverID,optional"`   // 服务ID筛选
+        ServerID int64     `json:"serverID,optional,string"`   // 服务ID筛选，字符串传输以避免大整数精度丢失
         Code     string    `json:"code,optional"`       // 能力编码筛选
         SubCode  string    `json:"subCode,optional"`    // 子编码筛选
     }

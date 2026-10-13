@@ -1,7 +1,7 @@
 {
   "files": {
     "backend/.swagger/core-ai.json": "80a4d68ea03abd0ed2140d89580269fd99b6df77dc456265bb7db03e1bef738e",
-    "backend/.swagger/core-api.json": "7290a899c857153acfc834338f14fd9f57354e9e8575540c3d25431fbfecf538",
+    "backend/.swagger/core-api.json": "6f344f0cdec7ff20a4aff4a94f1059000997a9dc49b8c122a1f6f10cadb309fb",
     "backend/.swagger/core-data.json": "ae04c19a36dea0b5af796a833e558cc9658a96ff95964f462cdffa5413b45b4a",
     "backend/.swagger/core-im.json": "9bcbc6121c39050906d29204f28f0d39b5e4bcb0e173c04930e8637c5d5801c2",
     "backend/.swagger/energy-energy.json": "37989d9d6af1d6116c7fe0bd80d49ed31c1cf84970b5742de7d42351e84fa7f3",
@@ -108,7 +108,7 @@
     "backend/core/service/apisvr/http/system/dict/detail.api": "51c1114e590d34847228d7efc70c1d32ee847e9a4f21322e8b0f974babe47205",
     "backend/core/service/apisvr/http/system/dict/info.api": "15231a2816245d72cdc9b24ca82c7d26b5e341db2dad208b886d486e72a38207",
     "backend/core/service/apisvr/http/system/flow.api": "1de2013a6e00d04235c442249a53e5e49b918726ddbe9d6353df75956f986533",
-    "backend/core/service/apisvr/http/system/hook.api": "6ebf21aaf863ede80ff2f40ca4e1dcf7e4dc9ad4ef39c846ee9d1a227902737f",
+    "backend/core/service/apisvr/http/system/hook.api": "fa22683f001d7e2f52a51ab548d238be5dbcddd61bfebf14f14746b9000d7c19",
     "backend/core/service/apisvr/http/system/job.api": "e9994ea55267b563366326eca5c4244fa7daaeba9820531bfa99160b40b207c1",
     "backend/core/service/apisvr/http/system/log.api": "bab8e03c5d4e3aa642b9a538119b207cbc662d5ccea985415ea8ec42359abdaf",
     "backend/core/service/apisvr/http/system/mall.api": "d574e8ee85e1d3dba1e98b7212c5e5ba6f3c5b207203c3222f8d0be2cbc45d05",
@@ -413,6 +413,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "7c268b6c5d5b3916c493f54e5cf4c19487474276",
+  "saas_commit": "5a904d18f9292bac79cc292551e52ef07c13006b",
   "schema": 1
 }

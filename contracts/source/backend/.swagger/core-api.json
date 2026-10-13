@@ -3473,9 +3473,8 @@
             "$ref": "#/components/schemas/PageInfo"
           },
           "serverID": {
-            "description": " 服务ID筛选",
-            "format": "int64",
-            "type": "integer"
+            "description": " 服务ID筛选，字符串传输以避免大整数精度丢失",
+            "type": "string"
           },
           "subCode": {
             "description": " 子编码筛选",
