@@ -1,4 +1,4 @@
-// 本文件使用本地模拟 Modbus TCP 服务验证读寄存器与事务头。
+// 本文件使用本地模拟 Modbus TCP 服务验证读写寄存器与事务头。
 package modbus
 
 import (
@@ -7,6 +7,7 @@ import (
 	"io"
 	"net"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -44,5 +45,57 @@ func TestReadHoldingRegisters(t *testing.T) {
 	}
 	if err := <-done; err != nil {
 		t.Fatal(err)
+	}
+}
+
+// TestWriteSingleRegister 验证功能码 6 的请求格式、设备回显和异常码。
+func TestWriteSingleRegister(t *testing.T) {
+	cases := []struct {
+		name     string
+		response []byte
+		wantErr  string
+	}{
+		{name: "success", response: []byte{0, 1, 0, 0, 0, 6, 7, 6, 0, 10, 1, 2}},
+		{name: "exception", response: []byte{0, 1, 0, 0, 0, 3, 7, 0x86, 2}, wantErr: "exception code 2"},
+		{name: "wrong echo", response: []byte{0, 1, 0, 0, 0, 6, 7, 6, 0, 11, 1, 2}, wantErr: "invalid modbus write response"},
+	}
+	for _, test := range cases {
+		t.Run(test.name, func(t *testing.T) {
+			listener, err := net.Listen("tcp", "127.0.0.1:0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer listener.Close()
+			done := make(chan error, 1)
+			go func() {
+				connection, acceptErr := listener.Accept()
+				if acceptErr != nil {
+					done <- acceptErr
+					return
+				}
+				defer connection.Close()
+				request := make([]byte, 12)
+				if _, readErr := io.ReadFull(connection, request); readErr != nil {
+					done <- readErr
+					return
+				}
+				if request[6] != 7 || request[7] != 6 || binary.BigEndian.Uint16(request[8:10]) != 10 || binary.BigEndian.Uint16(request[10:12]) != 258 {
+					done <- io.ErrUnexpectedEOF
+					return
+				}
+				_, writeErr := connection.Write(test.response)
+				done <- writeErr
+			}()
+			err = (Client{Address: listener.Addr().String(), UnitID: 7}).WriteSingleRegister(context.Background(), 10, 258)
+			if test.wantErr == "" && err != nil {
+				t.Fatalf("写入失败: %v", err)
+			}
+			if test.wantErr != "" && (err == nil || !strings.Contains(err.Error(), test.wantErr)) {
+				t.Fatalf("错误响应未识别: %v", err)
+			}
+			if serverErr := <-done; serverErr != nil {
+				t.Fatal(serverErr)
+			}
+		})
 	}
 }
