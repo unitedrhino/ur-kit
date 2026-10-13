@@ -1,0 +1,12 @@
+# 本文件用占位环境变量在本机启动公开 IoT 基础应用示例。
+services:
+  iot-basic:
+    build:
+      context: ../..
+      dockerfile: apps/iot-basic/Dockerfile
+    image: ur-kit-iot-basic:${IMAGE_VERSION:-local}
+    ports:
+      - "${HTTP_PORT:-8080}:8080"
+    environment:
+      PLATFORM_URL: ${PLATFORM_URL:?请配置平台 HTTP(S) 根地址}
+    restart: unless-stopped
