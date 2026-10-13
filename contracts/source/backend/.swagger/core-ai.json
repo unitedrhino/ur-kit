@@ -26,6 +26,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "groupIDString": {
+            "description": " 无损十进制助手组ID筛选",
+            "type": "string"
+          },
           "isGetAll": {
             "description": " 是否返回所有（管理员看全租户，默认 false=个人视图）",
             "format": "boolean",
@@ -173,6 +177,10 @@
             "format": "int64",
             "type": "integer"
           },
+          "idString": {
+            "description": " 无损十进制助手组ID",
+            "type": "string"
+          },
           "interactionMode": {
             "description": " 组级交互策略；未传不修改，空值恢复 auto 默认",
             "type": "string"
@@ -276,10 +284,18 @@
             "format": "int64",
             "type": "integer"
           },
+          "groupIDString": {
+            "description": " 无损十进制助手组ID",
+            "type": "string"
+          },
           "id": {
             "description": " 助手ID",
             "format": "int64",
             "type": "integer"
+          },
+          "idString": {
+            "description": " 无损十进制助手ID",
+            "type": "string"
           },
           "interactionMode": {
             "description": " 交互策略 auto/halfDuplex/fullDuplex；空值继承分组",

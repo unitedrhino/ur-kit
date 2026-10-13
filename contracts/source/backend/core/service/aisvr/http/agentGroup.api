@@ -17,6 +17,7 @@ info (
 		authCode string `json:"authCode,optional"` // 第三方权限认证码
 
 	ID            int64  `json:"id,optional"`            // 助手组ID
+	idString      string `json:"idString,optional"`      // 无损十进制助手组ID
 	tenantCode    string `json:"tenantCode,optional"`    // 租户编码，"common"=平台级
 	code          string `json:"code"`                   // 助手组编码（租户内唯一）
 	name          string `json:"name"`                   // 助手组名称

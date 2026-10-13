@@ -1,6 +1,6 @@
 {
   "files": {
-    "backend/.swagger/core-ai.json": "80a4d68ea03abd0ed2140d89580269fd99b6df77dc456265bb7db03e1bef738e",
+    "backend/.swagger/core-ai.json": "38dee77034f8a165937ac635b14a6ea5a03f5043955d76a80aee7b5a71a005f1",
     "backend/.swagger/core-api.json": "6f344f0cdec7ff20a4aff4a94f1059000997a9dc49b8c122a1f6f10cadb309fb",
     "backend/.swagger/core-data.json": "ae04c19a36dea0b5af796a833e558cc9658a96ff95964f462cdffa5413b45b4a",
     "backend/.swagger/core-im.json": "9bcbc6121c39050906d29204f28f0d39b5e4bcb0e173c04930e8637c5d5801c2",
@@ -21,8 +21,8 @@
     "backend/.swagger/things-view.json": "256def21660b9db7070f557d4de153e8806628c79970ac67b2dde5a3ef56c3db",
     "backend/.swagger/view-view.json": "256def21660b9db7070f557d4de153e8806628c79970ac67b2dde5a3ef56c3db",
     "backend/.swagger/ykwlsvr-ykwlsvr.json": "67c2fbe7a25da19f4f9e34793be45e8246adec1ad9bc0537791026ffa03db70b",
-    "backend/core/service/aisvr/http/agent.api": "1e19773ca9d8570e64a377e846d1605a90724cbf50ea5f40bd1a1fa9b4907bb3",
-    "backend/core/service/aisvr/http/agentGroup.api": "4b1711233bbdb9da580a6e3a3ab952cf60f6e8b152fb5ab1d993d5f3d66e48b6",
+    "backend/core/service/aisvr/http/agent.api": "21d9f78cb8b3da547df05de8d8fcaa0edfd78659fbcc1b60ff968be5ff22b8ba",
+    "backend/core/service/aisvr/http/agentGroup.api": "91af11df072bf9d96c7419ea06829c84c1fb48346b9b30652a8c32084d524b36",
     "backend/core/service/aisvr/http/ai.api": "5a3e7847aceadc3ac48aa1d2fad47c6625905ba194bcca18e43aff97a8e86ebc",
     "backend/core/service/aisvr/http/aitool.api": "b52a272c8486fbd5b411a9214a3fffc986c6b1d6776faad917609d7d61741960",
     "backend/core/service/aisvr/http/chat.api": "2b7d8c0f98f201e9bb875c92d0032aa2c28d500ecf65e941c453785e4713f71f",
@@ -413,6 +413,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "bf0f40f584564e93b69f4f369fdfa564fdbb3535",
+  "saas_commit": "13e38ff9d680a917aa22caefbe8260d27f1374f1",
   "schema": 1
 }

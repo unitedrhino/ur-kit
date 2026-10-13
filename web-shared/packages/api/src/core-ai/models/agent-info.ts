@@ -49,9 +49,17 @@ export interface AgentInfo {
      */
     'groupID'?: number;
     /**
+     *  无损十进制助手组ID
+     */
+    'groupIDString'?: string;
+    /**
      *  助手ID
      */
     'id'?: number;
+    /**
+     *  无损十进制助手ID
+     */
+    'idString'?: string;
     /**
      *  交互策略 auto/halfDuplex/fullDuplex；空值继承分组
      */

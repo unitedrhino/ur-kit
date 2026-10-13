@@ -49,6 +49,10 @@ export interface AgentGroupInfo {
      */
     'id'?: number;
     /**
+     *  无损十进制助手组ID
+     */
+    'idString'?: string;
+    /**
      *  组级交互策略；未传不修改，空值恢复 auto 默认
      */
     'interactionMode'?: string;

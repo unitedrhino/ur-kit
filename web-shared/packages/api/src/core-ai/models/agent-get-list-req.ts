@@ -24,6 +24,10 @@ export interface AgentGetListReq {
      */
     'groupID'?: number;
     /**
+     *  无损十进制助手组ID筛选
+     */
+    'groupIDString'?: string;
+    /**
      *  是否返回所有（管理员看全租户，默认 false=个人视图）
      */
     'isGetAll'?: boolean;
