@@ -87,8 +87,8 @@ service api {
 service api {
     @doc(
         summary: "获取项目配置详情"
-        description: "查询项目的扩展配置信息，通过code标识配置类型。配置以params字段存储JSON格式数据，用于存储项目级别的自定义参数。"
-        authType: "admin"
+        description: "按当前项目权限查询指定code的扩展配置。已授权的只读项目成员可查看，配置以params字段存储JSON格式数据。"
+        authType: "all"
         group: "things/project/profile"
         resource: "things/project/profile"
         action: "view"
@@ -98,8 +98,8 @@ service api {
     post /get-one (WithCode) returns (ProjectProfile)
     @doc(
         summary: "更新项目配置"
-        description: "修改项目指定code的配置内容，params字段支持JSON格式存储复杂配置。不同code对应不同配置模块，可独立更新。"
-        authType: "admin"
+        description: "修改当前项目指定code的配置内容，须具有项目读写权限。不同code独立更新，不影响项目标签和其他配置。"
+        authType: "all"
         isNeedAuth: "true"
         group: "things/project/profile"
         resource: "things/project/profile"

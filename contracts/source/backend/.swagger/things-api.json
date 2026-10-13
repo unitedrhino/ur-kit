@@ -24407,7 +24407,7 @@
     },
     "/api/v1/things/project/profile/get-one": {
       "post": {
-        "description": "查询项目的扩展配置信息，通过code标识配置类型。配置以params字段存储JSON格式数据，用于存储项目级别的自定义参数。",
+        "description": "按当前项目权限查询指定code的扩展配置。已授权的只读项目成员可查看，配置以params字段存储JSON格式数据。",
         "operationId": "postApiV1ThingsProjectProfileGet-one",
         "requestBody": {
           "content": {
@@ -24452,7 +24452,7 @@
           "thingsProjectProfile"
         ],
         "x-action": "view",
-        "x-auth-type": "admin",
+        "x-auth-type": "all",
         "x-group": "things/project/profile",
         "x-log-mode": "1",
         "x-oper-type": "view",
@@ -24461,7 +24461,7 @@
     },
     "/api/v1/things/project/profile/update": {
       "post": {
-        "description": "修改项目指定code的配置内容，params字段支持JSON格式存储复杂配置。不同code对应不同配置模块，可独立更新。",
+        "description": "修改当前项目指定code的配置内容，须具有项目读写权限。不同code独立更新，不影响项目标签和其他配置。",
         "operationId": "postApiV1ThingsProjectProfileUpdate",
         "requestBody": {
           "content": {
@@ -24503,7 +24503,7 @@
           "thingsProjectProfile"
         ],
         "x-action": "update",
-        "x-auth-type": "admin",
+        "x-auth-type": "all",
         "x-group": "things/project/profile",
         "x-log-mode": "1",
         "x-oper-type": "update",
