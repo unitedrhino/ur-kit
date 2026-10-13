@@ -49,6 +49,7 @@ type fakePahoClient struct {
 	publishToken   paho.Token
 	subscribeToken paho.Token
 	callback       paho.MessageHandler
+	subscribeCalls chan string
 	topic          string
 	qos            byte
 	retained       bool
@@ -71,6 +72,9 @@ func (client *fakePahoClient) Publish(topic string, qos byte, retained bool, pay
 // Subscribe 保存主题与回调并返回模拟确认。
 func (client *fakePahoClient) Subscribe(topic string, qos byte, callback paho.MessageHandler) paho.Token {
 	client.topic, client.qos, client.callback = topic, qos, callback
+	if client.subscribeCalls != nil {
+		client.subscribeCalls <- topic
+	}
 	return client.subscribeToken
 }
 
@@ -133,5 +137,35 @@ func TestPahoTokenErrors(t *testing.T) {
 	cancel()
 	if err := transport.Connect(ctx); !errors.Is(err, context.Canceled) || !client.disconnected {
 		t.Fatalf("取消未终止连接: %v", err)
+	}
+}
+
+// TestPahoReconnectRestoresConfirmedSubscription 验证重连回调恢复已确认订阅并保留原回调。
+func TestPahoReconnectRestoresConfirmedSubscription(t *testing.T) {
+	originalCalled := make(chan struct{}, 1)
+	options := paho.NewClientOptions().SetOnConnectHandler(func(paho.Client) { originalCalled <- struct{}{} })
+	transport, err := NewPahoTransport(options, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+	client := &fakePahoClient{subscribeToken: completedToken(nil), subscribeCalls: make(chan string, 2)}
+	transport.Client = client
+	if err := transport.Subscribe(context.Background(), "device/+/+", 1, func(context.Context, string, []byte) error { return nil }); err != nil {
+		t.Fatal(err)
+	}
+	<-client.subscribeCalls
+	options.OnConnect(client)
+	select {
+	case <-originalCalled:
+	case <-time.After(time.Second):
+		t.Fatal("调用方的连接回调丢失")
+	}
+	select {
+	case topic := <-client.subscribeCalls:
+		if topic != "device/+/+" {
+			t.Fatalf("恢复错误主题: %s", topic)
+		}
+	case <-time.After(time.Second):
+		t.Fatal("已确认订阅未在重连后恢复")
 	}
 }

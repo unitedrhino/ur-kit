@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	"sync"
 	"time"
 
 	paho "github.com/eclipse/paho.mqtt.golang"
@@ -12,8 +13,16 @@ import (
 
 // PahoTransport 使用现有 Paho MQTT 客户端提供可重连的消息收发。
 type PahoTransport struct {
-	Client paho.Client
-	Logger *slog.Logger
+	Client        paho.Client
+	Logger        *slog.Logger
+	mu            sync.RWMutex
+	subscriptions map[string]pahoSubscription
+}
+
+// pahoSubscription 保存已确认的主题、QoS 和回调，供重连时恢复。
+type pahoSubscription struct {
+	qos     byte
+	handler paho.MessageHandler
 }
 
 // NewPahoTransport 创建客户端并启用自动重连、订阅恢复和独立回调。
@@ -21,8 +30,17 @@ func NewPahoTransport(options *paho.ClientOptions, logger *slog.Logger) (*PahoTr
 	if options == nil {
 		return nil, errors.New("MQTT client options are required")
 	}
+	transport := &PahoTransport{Logger: logger, subscriptions: make(map[string]pahoSubscription)}
+	originalOnConnect := options.OnConnect
 	options.SetAutoReconnect(true).SetResumeSubs(true).SetOrderMatters(false)
-	return &PahoTransport{Client: paho.NewClient(options), Logger: logger}, nil
+	options.SetOnConnectHandler(func(client paho.Client) {
+		if originalOnConnect != nil {
+			originalOnConnect(client)
+		}
+		go transport.restoreSubscriptions(client)
+	})
+	transport.Client = paho.NewClient(options)
+	return transport, nil
 }
 
 // WrapPahoClient 复用调用方已配置的 Paho 客户端；自动重连策略由调用方保证。
@@ -30,7 +48,25 @@ func WrapPahoClient(client paho.Client, logger *slog.Logger) (*PahoTransport, er
 	if client == nil {
 		return nil, errors.New("MQTT client is required")
 	}
-	return &PahoTransport{Client: client, Logger: logger}, nil
+	return &PahoTransport{Client: client, Logger: logger, subscriptions: make(map[string]pahoSubscription)}, nil
+}
+
+// restoreSubscriptions 在 Broker 新连接建立后重发已确认的订阅，避免清理会话时丢消息。
+func (transport *PahoTransport) restoreSubscriptions(client paho.Client) {
+	transport.mu.RLock()
+	current := make(map[string]pahoSubscription, len(transport.subscriptions))
+	for topic, subscription := range transport.subscriptions {
+		current[topic] = subscription
+	}
+	transport.mu.RUnlock()
+	for topic, subscription := range current {
+		ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+		err := waitToken(ctx, client.Subscribe(topic, subscription.qos, subscription.handler))
+		cancel()
+		if err != nil && transport.Logger != nil {
+			transport.Logger.Error("MQTT resubscribe failed", "topic", topic, "error", err)
+		}
+	}
 }
 
 // waitToken 等待 Broker 操作结束，同时响应调用方的取消信号。
@@ -80,7 +116,16 @@ func (transport *PahoTransport) Subscribe(ctx context.Context, topic string, qos
 			transport.Logger.Error("MQTT message handler failed", "topic", message.Topic(), "error", err)
 		}
 	}
-	return waitToken(ctx, transport.Client.Subscribe(topic, qos, callback))
+	if err := waitToken(ctx, transport.Client.Subscribe(topic, qos, callback)); err != nil {
+		return err
+	}
+	transport.mu.Lock()
+	if transport.subscriptions == nil {
+		transport.subscriptions = make(map[string]pahoSubscription)
+	}
+	transport.subscriptions[topic] = pahoSubscription{qos: qos, handler: callback}
+	transport.mu.Unlock()
+	return nil
 }
 
 // Close 断开 Broker 连接并等待在途消息短暂完成。
