@@ -16,4 +16,6 @@
 
 `protocol/cloud.ProductIDMap` 迁移原协议 SDK 的外部产品 ID 映射能力。调用方提供 `GRPCProductSource` 和协议配置字段名（通常为 `productID`），在已有定时任务或事件回调中调用 `Refresh`；分页或重复外部 ID 出错时保留旧快照。`Get` 查询平台产品 ID，`PlatformIDs` 返回副本。`DeviceProtocolConfig` 通过接入方提供的产品查询函数，按产品子协议归属选择设备的主协议或子协议配置。调度器和平台身份仍由接入服务注入。
 
+`protocol/cloud.GRPCDeviceSource.ForEachDevice` 为产品同步回调提供设备分页读取：按产品 ID 查询，检查页总数、产品归属和重复设备；单台设备处理失败继续处理并汇总错误。可在 `ForEachConfig` 的产品回调中调用，具体设备同步动作由接入方实现。分页读取发生错误时，已执行的设备回调不会回滚；需要原子替换设备快照时应由接入方先暂存完整结果。
+
 `cache.NewProductInfoCache`、`cache.NewDeviceInfoCache` 使用公开 `dm` RPC 缓存产品与设备资料。`cache.NewTSLCache` 使用公开物模型 RPC 缓存产品 JSON，并将设备级属性、事件和行为与产品模型合并：同名条目以设备为准，空设备模型继承产品模型；产品 RPC 故障时仅有设备自身模型可降级。缓存键显式包含企业编码，调用方必须提供与该编码一致的可信认证上下文，并在产品或设备变更事件中调用 `InvalidateProduct` / `InvalidateDevice`。产品变更会失效已访问的设备聚合模型，在途旧响应不能回填。返回 JSON 是副本且保留扩展字段；平台内部 `schema.Model` 的完整语义校验与索引构建仍由 SaaS 适配层负责，不能直接用 JSON 聚合结果替换原内部模型。
