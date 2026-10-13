@@ -12,6 +12,21 @@ message ProjectWithID{
 }
 message ProjectEmpty{
 }
+message ProjectAttachmentAddReq{
+  int64 projectID = 1; // 项目ID
+  string filePath = 2; // 临时桶中的文件路径
+  string useBy = 3; // 附件用途
+}
+message ProjectAttachmentAddResp{
+  int64 id = 1; // 附件ID
+  string fileName = 2; // 文件名
+  string fileUrl = 3; // 限时下载地址
+  string useBy = 4; // 附件用途
+}
+message ProjectAttachmentDeleteReq{
+  int64 projectID = 1; // 项目ID
+  int64 id = 2; // 附件ID
+}
 
 
 service ProjectManage {
@@ -19,6 +34,8 @@ service ProjectManage {
   rpc projectInfoUpdate (ProjectInfo) returns(ProjectEmpty); //更新项目信息
   rpc projectInfoDelete (ProjectWithID) returns(ProjectEmpty); //删除项目
   rpc projectInfoGetOne (ProjectWithID) returns (ProjectInfo); //获取项目信息详情
+  rpc projectAttachmentAdd (ProjectAttachmentAddReq) returns (ProjectAttachmentAddResp); // 追加项目私有附件
+  rpc projectAttachmentDelete (ProjectAttachmentDeleteReq) returns (ProjectEmpty); // 删除项目附件
   rpc projectInfoGetList (ProjectInfoGetListReq) returns (ProjectInfoGetListResp); //获取项目信息列表（支持分页和过滤）
 
   rpc projectProfileGetOne(ProjectProfileGetOneReq)returns(ProjectProfile); //获取项目配置文件详情

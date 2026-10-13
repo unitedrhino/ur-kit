@@ -77,6 +77,41 @@ service api {
 }
 
 @server(
+    group: things/project/attachment
+    prefix: /api/v1/things/project/attachment
+    accessCodePrefix: "thingsProjectAttachment"
+    accessNamePrefix: "项目附件"
+    accessGroup: "项目管理"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "追加项目私有附件"
+        description: "把当前用户上传到临时桶的文件追加到项目附件，须具有目标项目读写权限。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/project/attachment"
+        resource: "things/project/attachment"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler attachmentAdd
+    post /add (ProjectAttachmentAddReq) returns (Attachment)
+    @doc(
+        summary: "删除项目私有附件"
+        description: "从项目移除指定附件，须具有目标项目读写权限。"
+        authType: "all"
+        isNeedAuth: "false"
+        group: "things/project/attachment"
+        resource: "things/project/attachment"
+        action: "delete"
+        recordLogMode: "3"
+    )
+    @handler attachmentDelete
+    post /delete (ProjectAttachmentDeleteReq) returns ()
+}
+
+@server(
     group: things/project/profile
     prefix: /api/v1/things/project/profile
     accessCodePrefix: "thingsProjectManage"
@@ -226,6 +261,19 @@ type (
 
 type (
 
+
+    // ProjectAttachmentAddReq 追加私有附件时提交项目、临时文件路径和用途。
+    ProjectAttachmentAddReq {
+        ProjectID int64 `json:"projectID,string"`
+        FilePath string `json:"filePath"`
+        UseBy string `json:"useBy,optional"`
+    }
+
+    // ProjectAttachmentDeleteReq 删除私有附件时指定项目和附件 ID。
+    ProjectAttachmentDeleteReq {
+        ProjectID int64 `json:"projectID,string"`
+        ID int64 `json:"id,string"`
+    }
 
     // ProjectInfoCreateReq 新增项目请求体，仅包含可写字段
     ProjectInfoCreateReq {

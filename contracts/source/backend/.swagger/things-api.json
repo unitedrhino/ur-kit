@@ -10477,6 +10477,41 @@
         "title": "ProductSchemaTslImportReq",
         "type": "object"
       },
+      "ProjectAttachmentAddReq": {
+        "properties": {
+          "filePath": {
+            "type": "string"
+          },
+          "projectID": {
+            "type": "string"
+          },
+          "useBy": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectID",
+          "filePath"
+        ],
+        "title": "ProjectAttachmentAddReq",
+        "type": "object"
+      },
+      "ProjectAttachmentDeleteReq": {
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "projectID": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectID",
+          "id"
+        ],
+        "title": "ProjectAttachmentDeleteReq",
+        "type": "object"
+      },
       "ProjectCrud": {
         "properties": {
           "createdTime": {
@@ -23825,6 +23860,113 @@
         "x-log-mode": "1",
         "x-oper-type": "update",
         "x-resource": "things/product/schema"
+      }
+    },
+    "/api/v1/things/project/attachment/add": {
+      "post": {
+        "description": "把当前用户上传到临时桶的文件追加到项目附件，须具有目标项目读写权限。",
+        "operationId": "postApiV1ThingsProjectAttachmentAdd",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAttachmentAddReq"
+              }
+            }
+          },
+          "description": " ProjectAttachmentAddReq 追加私有附件时提交项目、临时文件路径和用途。",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/Attachment"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "追加项目私有附件",
+        "tags": [
+          "things/project/attachment",
+          "thingsProjectAttachment"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "things/project/attachment",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "things/project/attachment"
+      }
+    },
+    "/api/v1/things/project/attachment/delete": {
+      "post": {
+        "description": "从项目移除指定附件，须具有目标项目读写权限。",
+        "operationId": "postApiV1ThingsProjectAttachmentDelete",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAttachmentDeleteReq"
+              }
+            }
+          },
+          "description": " ProjectAttachmentDeleteReq 删除私有附件时指定项目和附件 ID。",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "删除项目私有附件",
+        "tags": [
+          "things/project/attachment",
+          "thingsProjectAttachment"
+        ],
+        "x-action": "delete",
+        "x-auth-type": "all",
+        "x-group": "things/project/attachment",
+        "x-log-mode": "3",
+        "x-oper-type": "delete",
+        "x-resource": "things/project/attachment"
       }
     },
     "/api/v1/things/project/crud/create": {
