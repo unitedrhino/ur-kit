@@ -73,6 +73,7 @@ message ProjectInfo {
   map<string, string> tags = 21;
   int64 sort = 22;          // 排序标记,不能为0,默认为1
   repeated Attachment attachments =27;//附件列表
+  bool updateAttachments = 29; // 是否显式更新附件列表，空列表表示清空
   int64 myAuthType =28;//当前请求用户在此项目的权限：1管理、2读写、3只读、0无权限
 }
 message ProjectInfoGetListReq {

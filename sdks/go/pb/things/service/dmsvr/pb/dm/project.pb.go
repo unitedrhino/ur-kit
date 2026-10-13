@@ -315,9 +315,10 @@ type ProjectInfo struct {
 	IsSysCreated      int64                   `protobuf:"varint,18,opt,name=isSysCreated,proto3" json:"isSysCreated,omitempty"`          //是否是系统创建的（1:是，2:否），系统创建的只有管理员可以删除
 	Areas             []*AreaInfo             `protobuf:"bytes,19,rep,name=areas,proto3" json:"areas,omitempty"`                         //
 	Tags              map[string]string       `protobuf:"bytes,21,rep,name=tags,proto3" json:"tags,omitempty" protobuf_key:"bytes,1,opt,name=key" protobuf_val:"bytes,2,opt,name=value"`
-	Sort              int64                   `protobuf:"varint,22,opt,name=sort,proto3" json:"sort,omitempty"`              // 排序标记,不能为0,默认为1
-	Attachments       []*Attachment           `protobuf:"bytes,27,rep,name=attachments,proto3" json:"attachments,omitempty"` //附件列表
-	MyAuthType        int64                   `protobuf:"varint,28,opt,name=myAuthType,proto3" json:"myAuthType,omitempty"`  //当前请求用户在此项目的权限：1管理、2读写、3只读、0无权限
+	Sort              int64                   `protobuf:"varint,22,opt,name=sort,proto3" json:"sort,omitempty"`                           // 排序标记,不能为0,默认为1
+	Attachments       []*Attachment           `protobuf:"bytes,27,rep,name=attachments,proto3" json:"attachments,omitempty"`              //附件列表
+	UpdateAttachments bool                    `protobuf:"varint,29,opt,name=updateAttachments,proto3" json:"updateAttachments,omitempty"` // 是否显式更新附件列表，空列表表示清空
+	MyAuthType        int64                   `protobuf:"varint,28,opt,name=myAuthType,proto3" json:"myAuthType,omitempty"`               //当前请求用户在此项目的权限：1管理、2读写、3只读、0无权限
 	unknownFields     protoimpl.UnknownFields
 	sizeCache         protoimpl.SizeCache
 }
@@ -511,6 +512,13 @@ func (x *ProjectInfo) GetAttachments() []*Attachment {
 		return x.Attachments
 	}
 	return nil
+}
+
+func (x *ProjectInfo) GetUpdateAttachments() bool {
+	if x != nil {
+		return x.UpdateAttachments
+	}
+	return false
 }
 
 func (x *ProjectInfo) GetMyAuthType() int64 {
@@ -1081,7 +1089,7 @@ const file_project_proto_rawDesc = "" +
 	"\x05useBy\x18\x04 \x01(\tR\x05useBy\"J\n" +
 	"\x1aProjectAttachmentDeleteReq\x12\x1c\n" +
 	"\tprojectID\x18\x01 \x01(\x03R\tprojectID\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\x03R\x02id\"\xd1\a\n" +
+	"\x02id\x18\x02 \x01(\x03R\x02id\"\xff\a\n" +
 	"\vProjectInfo\x12\x1e\n" +
 	"\n" +
 	"tenantCode\x18\x14 \x01(\tR\n" +
@@ -1110,7 +1118,8 @@ const file_project_proto_rawDesc = "" +
 	"\x05areas\x18\x13 \x03(\v2\f.dm.AreaInfoR\x05areas\x12-\n" +
 	"\x04tags\x18\x15 \x03(\v2\x19.dm.ProjectInfo.TagsEntryR\x04tags\x12\x12\n" +
 	"\x04sort\x18\x16 \x01(\x03R\x04sort\x120\n" +
-	"\vattachments\x18\x1b \x03(\v2\x0e.dm.AttachmentR\vattachments\x12\x1e\n" +
+	"\vattachments\x18\x1b \x03(\v2\x0e.dm.AttachmentR\vattachments\x12,\n" +
+	"\x11updateAttachments\x18\x1d \x01(\bR\x11updateAttachments\x12\x1e\n" +
 	"\n" +
 	"myAuthType\x18\x1c \x01(\x03R\n" +
 	"myAuthType\x1a7\n" +
