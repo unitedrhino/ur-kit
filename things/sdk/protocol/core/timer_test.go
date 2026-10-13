@@ -83,3 +83,46 @@ func TestTimerRegistrationAndHandlers(t *testing.T) {
 		t.Fatalf("追加处理器未参与后续触发: %v %v", err, called)
 	}
 }
+
+// TestTimerStop 等待运行中的处理器结束，并阻止平台残留触发再次访问协议资源。
+func TestTimerStop(t *testing.T) {
+	scheduler := &fakeTimerScheduler{}
+	timer, err := NewTimer(TimerOptions{ProtocolCode: "cloud", ServerName: "gateway", GroupCode: "group", Scheduler: scheduler})
+	if err != nil {
+		t.Fatal(err)
+	}
+	entered := make(chan struct{})
+	release := make(chan struct{})
+	calls := 0
+	if err := timer.RegisterHandler(func(context.Context, time.Time) error { calls++; close(entered); <-release; return nil }); err != nil {
+		t.Fatal(err)
+	}
+	if err := timer.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	runDone := make(chan error, 1)
+	go func() { runDone <- scheduler.task.Handler(context.Background(), time.Now()) }()
+	<-entered
+	stopDone := make(chan struct{})
+	go func() { timer.Stop(); close(stopDone) }()
+	select {
+	case <-stopDone:
+		t.Fatal("定时器退出未等待执行中的处理器")
+	case <-time.After(20 * time.Millisecond):
+	}
+	close(release)
+	if err := <-runDone; err != nil {
+		t.Fatal(err)
+	}
+	<-stopDone
+	timer.Stop()
+	if err := scheduler.task.Handler(context.Background(), time.Now()); err != nil || calls != 1 {
+		t.Fatalf("停止后仍运行处理器: calls=%d err=%v", calls, err)
+	}
+	if err := timer.RegisterHandler(func(context.Context, time.Time) error { return nil }); err == nil {
+		t.Fatal("停止后仍可添加处理器")
+	}
+	if err := timer.Start(context.Background()); err == nil {
+		t.Fatal("停止后仍可注册平台任务")
+	}
+}

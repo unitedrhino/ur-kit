@@ -41,10 +41,12 @@ type TimerOptions struct {
 // Timer 只注册一个平台任务，并在每次触发时执行全部已登记处理器。
 type Timer struct {
 	mu          sync.RWMutex
+	active      sync.WaitGroup
 	options     TimerOptions
 	handlers    []TimerHandler
 	registering bool
 	started     bool
+	stopped     bool
 }
 
 // NewTimer 校验平台任务标识；调度表达式默认为每十分钟一次。
@@ -64,6 +66,10 @@ func (timer *Timer) RegisterHandler(handler TimerHandler) error {
 		return errors.New("timer and handler are required")
 	}
 	timer.mu.Lock()
+	if timer.stopped {
+		timer.mu.Unlock()
+		return errors.New("protocol timer is stopped")
+	}
 	timer.handlers = append(timer.handlers, handler)
 	timer.mu.Unlock()
 	return nil
@@ -75,7 +81,7 @@ func (timer *Timer) Start(ctx context.Context) error {
 		return errors.New("timer is required")
 	}
 	timer.mu.Lock()
-	if timer.started || timer.registering {
+	if timer.stopped || timer.started || timer.registering {
 		timer.mu.Unlock()
 		return errors.New("protocol timer already registered or registering")
 	}
@@ -98,12 +104,16 @@ func (timer *Timer) Start(ctx context.Context) error {
 	err := options.Scheduler.Register(ctx, task)
 	timer.mu.Lock()
 	timer.registering = false
-	if err == nil {
+	stopped := timer.stopped
+	if err == nil && !stopped {
 		timer.started = true
 	}
 	timer.mu.Unlock()
 	if err != nil {
 		return fmt.Errorf("register protocol timer: %w", err)
+	}
+	if stopped {
+		return errors.New("protocol timer stopped during registration")
 	}
 	return nil
 }
@@ -113,9 +123,15 @@ func (timer *Timer) RunOnce(ctx context.Context, triggeredAt time.Time) error {
 	if timer == nil {
 		return errors.New("timer is required")
 	}
-	timer.mu.RLock()
+	timer.mu.Lock()
+	if timer.stopped {
+		timer.mu.Unlock()
+		return nil
+	}
 	handlers := append([]TimerHandler(nil), timer.handlers...)
-	timer.mu.RUnlock()
+	timer.active.Add(1)
+	timer.mu.Unlock()
+	defer timer.active.Done()
 	var failures []error
 	for index, handler := range handlers {
 		if err := handler(ctx, triggeredAt); err != nil {
@@ -123,4 +139,16 @@ func (timer *Timer) RunOnce(ctx context.Context, triggeredAt time.Time) error {
 		}
 	}
 	return errors.Join(failures...)
+}
+
+// Stop 阻止新触发并等待正在执行的处理器退出；平台已登记任务由接入方管理。
+func (timer *Timer) Stop() {
+	if timer == nil {
+		return
+	}
+	timer.mu.Lock()
+	timer.stopped = true
+	timer.handlers = nil
+	timer.mu.Unlock()
+	timer.active.Wait()
 }
