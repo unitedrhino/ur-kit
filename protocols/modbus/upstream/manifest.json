@@ -1,0 +1,31 @@
+{
+  "excluded_environment_files": [
+    "etc/modbus.yaml",
+    "etc/modbusDocker.yaml"
+  ],
+  "files": {
+    "build.sh": "7bacf2245ab03815d0fa5bac990a1305413cb6cbab1acef58d6ae445e88698fe",
+    "client/modbus/modbus.go": "619d0c646a289ff492a99b4f9ce4b97f8548501d45ed10aa97f163c55249aaf7",
+    "internal/config/config.go": "c0c8fb0a5a0666220801bf5ec87843882b5a122045c9b08fde77e9064f9335bc",
+    "internal/domain/def.go": "90576095ecedc713588da757dd3ea6aa4c9c3133fb1c263a663ea312c9cb8513",
+    "internal/domain/read.go": "c20001731616c04570487c6c3bebd6384517290b2c8cd82617ba10aba29fe43e",
+    "internal/event/down.go": "bbac683293d8accea81d13d0d236ae3cf144b43563fda236b2332a498785b9df",
+    "internal/event/up.go": "8b9f4e44b722cb1737b78b07ff05ebd8d9412a9394d73e28ce134b0834e6ba3f",
+    "internal/event/up_test.go": "8c340d749b37cb28ae045c38825615d7f78cd6d2133749a8c1921194a5d7deb4",
+    "internal/logic/modbus/pingLogic.go": "44084546efb726af8ed13313ade570ab9ce7965e35bb3e151e8d1c7bdb144b99",
+    "internal/server/modbus/modbusServer.go": "cebe4b939a36c5ee372cf60fcbda3cf62d1736038cc77ef6ab90601f38815486",
+    "internal/startup/init.go": "6029915715721cade810f1db879d77d8af7a46bf37e1e0bf34936d212f3269b5",
+    "internal/svc/connector.go": "a3a1d77a9b8fa28c124842e3dc4751a46d5936b0137edc8dd252f1da5e658a57",
+    "internal/svc/serviceContext.go": "9b2915f8abfd2563dadccbc83f6e7fa39fa1647dcfc8cbd308072ddf4b3ce5bf",
+    "internal/web/handler.go": "51e96ef275e557060c3f2b2b3b2ed81a9982c8ffd44687979779fb6669f7e906",
+    "internal/web/handler_test.go": "16ce19b9f214e381fb76706a3ed31ea787ee405c85e3b3eff60499f259dec796",
+    "internal/web/ping.go": "8174727513470420d77ee341d822b36981f8a3cb0c91745ec6aa5198d176a093",
+    "internal/web/ping_test.go": "4260c4e207f89c164165d719c588c857664a589ec05f4b9ca64ab43be2ad8a14",
+    "modbus.go": "b09cc59f3b5f1a5e2bc8cc9b5a921e55b47eba809b96af75725f5d1603187052",
+    "pb/modbus/modbus.pb.go": "6148360b8547400af26f9f7e10e4d3a7bea9e3dc264107d1918142041d535d22",
+    "pb/modbus/modbus_grpc.pb.go": "2ec7fcd288467ece4a78337a0b28fde97f3c18439a060e250d39e7aa7b03b0c7",
+    "proto/modbus.proto": "9161b2d83c399401465b92d82d4a1080db50a0323e4594592d10481b182e6e19",
+    "web/index.html": "b9a2f517959cc3c91c04439c8118ad7d74b1e858caf1ce42d83ad776249d00ea"
+  },
+  "saas_commit": "882d6bdc87fa92ff22ffa0f366a2b8cf1725da5b"
+}
