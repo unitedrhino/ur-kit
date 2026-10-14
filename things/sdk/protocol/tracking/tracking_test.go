@@ -160,3 +160,62 @@ func TestTrackerActivityBatchAndQuery(t *testing.T) {
 		t.Fatal("删除后设备仍在活动结果中")
 	}
 }
+
+// TestTrackerActiveAll 验证旧版全产品查询只枚举会话产品并保留三十天时间窗。
+func TestTrackerActiveAll(t *testing.T) {
+	server := miniredis.RunT(t)
+	client := redis.NewClient(&redis.Options{Addr: server.Addr()})
+	tracker, err := NewTracker(client)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	now := time.Now()
+	for _, connection := range []Connection{
+		{ClientID: "a", ProductID: "product-a", DeviceName: "sensor-a"},
+		{ClientID: "b", ProductID: "product-b", DeviceName: "sensor-b"},
+	} {
+		if err := tracker.Sync(ctx, connection, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+	for _, item := range []struct {
+		device Device
+		at     time.Time
+	}{
+		{Device{ProductID: "product-a", DeviceName: "other"}, now},
+		{Device{ProductID: "product-b", DeviceName: "old"}, now.Add(-31 * 24 * time.Hour)},
+		{Device{ProductID: "product-c", DeviceName: "activity-only"}, now},
+	} {
+		if err := tracker.Touch(ctx, item.device, item.at); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := client.HSet(ctx, DeviceKey, "invalid", `{}`).Err(); err != nil {
+		t.Fatal(err)
+	}
+	active, err := tracker.ActiveAll(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(active) != 3 {
+		t.Fatalf("旧版全产品活动汇总错误: got %d want 3", len(active))
+	}
+	for _, device := range []Device{
+		{ProductID: "product-a", DeviceName: "sensor-a"},
+		{ProductID: "product-a", DeviceName: "other"},
+		{ProductID: "product-b", DeviceName: "sensor-b"},
+	} {
+		if _, exists := active[device]; !exists {
+			t.Fatalf("活动设备缺失: %+v", device)
+		}
+	}
+	for _, device := range []Device{
+		{ProductID: "product-b", DeviceName: "old"},
+		{ProductID: "product-c", DeviceName: "activity-only"},
+	} {
+		if _, exists := active[device]; exists {
+			t.Fatalf("返回过期或无会话产品设备: %+v", device)
+		}
+	}
+}

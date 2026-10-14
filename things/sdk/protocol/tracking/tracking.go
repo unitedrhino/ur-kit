@@ -198,6 +198,35 @@ func (tracker *Tracker) ActiveByProduct(ctx context.Context, productID string, s
 	return active, nil
 }
 
+// ActiveAll 按旧协议会话索引汇总近三十天活动设备；仅枚举仍有 MQTT 会话的产品。
+func (tracker *Tracker) ActiveAll(ctx context.Context) (map[Device]struct{}, error) {
+	if tracker == nil || tracker.Client == nil {
+		return nil, errors.New("redis client is required")
+	}
+	keys, err := tracker.Client.HKeys(ctx, DeviceKey).Result()
+	if err != nil {
+		return nil, err
+	}
+	products := make(map[string]struct{})
+	for _, key := range keys {
+		productID, deviceName, valid := strings.Cut(key, ":")
+		if valid && productID != "" && deviceName != "" {
+			products[productID] = struct{}{}
+		}
+	}
+	result := make(map[Device]struct{})
+	for productID := range products {
+		devices, err := tracker.ActiveByProduct(ctx, productID, ActivityTTL)
+		if err != nil {
+			return nil, err
+		}
+		for device := range devices {
+			result[device] = struct{}{}
+		}
+	}
+	return result, nil
+}
+
 // DeleteActivity 删除设备最近活动记录，不改变当前 MQTT 会话。
 func (tracker *Tracker) DeleteActivity(ctx context.Context, device Device) error {
 	if tracker == nil || tracker.Client == nil {
