@@ -27,12 +27,14 @@ pnpm --filter org-iot-client build
 
 Go、Java、Node HTTP 客户端共享 [合同用例](sdks/conformance/README.md)，覆盖大整数 ID、显式空值、毫秒时间戳、地址与路径校验。RPC 客户端均以本机服务验证实际往返；[Node 调用示例](sdks/node/README.md) 使用固定的 `protocolSync` 合同。修改客户端时在对应语言目录运行测试。
 
+Core/Things 的强类型 HTTP 操作与模型见 [生成客户端](sdks/openapi/README.md)。它们由锁定 SaaS 提交的 Swagger 生成，提供 Go、Java、Node 三种源码；Node 大整数 ID 列表使用新增字符串字段。
+
 IoT 基础应用的 Web 与 Go 可使用 [Dockerfile](apps/iot-basic/Dockerfile) 构建成一个容器；本机启动和端侧构建见 [应用说明](apps/iot-basic/README.md)。
 
 ## 当前可用范围
 
 - `sdks/{go,java,node}` 和 `middleware/{go,java,node}` 提供 HTTP/RPC 客户端及身份、权限、错误、日志和基础安全头适配；Java protobuf 消息需先运行 `python3 scripts/generate_java_pb.py`。
 - `cache/{common,platform,redis}` 提供独立 TTL、Redis/业务回源三级缓存与事件失效、业务缓存接口，以及与平台 `tenant` Hash 兼容的完整企业 JSON、Redis 在线状态与游标存储。`things/sdk/{seed,deviceauth,protocol,cache}` 提供独立种子、设备认证、配置/产品读取、协议注册、周期任务、MQTT 收发与会话跟踪，以及基于公开 Things RPC 的产品/设备资料 TTL 缓存。云协议可用 `cloud.NewRuntime` 组合 `core.Protocol`、配置来源、配置管理器、更新通知及周期任务；`cloud.RegisterDeviceSync` 将产品与设备分页接到周期任务，停止时等待在执行的定时处理器退出。`protocols/modbus` 有可运行的本地模拟设备。
-- `cache/*/upstream` 与 `things/sdk/upstream` 保留 SaaS 源码对照，其中仍有私有导入，不能作为独立依赖。`v0.1.0`、`v0.2.0` 和 `v0.2.1` 为 Git 源码标签；`v0.2.1` 增加 Go/Node RPC 空令牌拦截及三语言本机实际往返验证。使用方应固定标签与对应合同清单；原服务调用点迁移和真实平台联调尚未完成。
+- `cache/*/upstream` 与 `things/sdk/upstream` 保留 SaaS 源码对照，其中仍有私有导入，不能作为独立依赖。`v0.1.0` 至 `v0.2.2` 为 Git 源码标签；`v0.2.1` 增加 Go/Node RPC 空令牌拦截，`v0.2.2` 增加 Core/Things 的三语言强类型 HTTP 客户端。使用方应固定标签与对应合同清单；原服务调用点迁移和真实平台联调尚未完成。
 
 各目录的最短验证命令和接入约束见 [开发技能](.agents/skills/ur-kit-development/SKILL.md)。

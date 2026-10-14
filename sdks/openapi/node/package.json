@@ -1,0 +1,17 @@
+{
+  "name": "@unitedrhino/ur-kit-openapi-node",
+  "version": "0.2.2",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    "./core": "./dist/core/index.js",
+    "./things": "./dist/things/index.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "node --test generated.test.cjs"
+  },
+  "devDependencies": {
+    "typescript": "5.9.3"
+  }
+}

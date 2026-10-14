@@ -146,4 +146,5 @@ type AlarmInfoGetListResp {
 
 type AlarmEvaluateTriggerReq {
 	AlarmIDs []int64 `json:"alarmIDs,optional"` // 告警ID列表，为空表示全量扫描
+	AlarmIDStrings []string `json:"alarmIDStrings,optional"` // 无损传递大整数告警ID；与alarmIDs不可同时填写
 }

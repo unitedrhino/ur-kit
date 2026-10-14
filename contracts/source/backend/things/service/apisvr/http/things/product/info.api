@@ -237,6 +237,7 @@ type (
         AreaID int64 `json:"areaID,string,optional"` //过滤区域下有设备的产品
         AreaIDPath string `json:"areaIDPath,optional"` //过滤区域id路径下有设备的产品
         CategoryIDs []int64 `json:"categoryIDs,optional"`                                     //产品品类
+        CategoryIDStrings []string `json:"categoryIDStrings,optional"` // 无损传递大整数品类ID；与categoryIDs不可同时填写
     }
 
     ProductInfoGetListResp  {

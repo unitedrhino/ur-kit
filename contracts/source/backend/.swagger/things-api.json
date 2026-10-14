@@ -496,6 +496,13 @@
       },
       "AlarmEvaluateTriggerReq": {
         "properties": {
+          "alarmIDStrings": {
+            "description": " 无损传递大整数告警ID；与alarmIDs不可同时填写",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "alarmIDs": {
             "description": " 告警ID列表，为空表示全量扫描",
             "items": {
@@ -4459,6 +4466,13 @@
           },
           "productCategoryID": {
             "type": "string"
+          },
+          "productCategoryIDStrings": {
+            "description": " 无损传递大整数品类ID；与productCategoryIDs不可同时填写",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "productCategoryIDs": {
             "items": {
@@ -9916,6 +9930,13 @@
             "description": "过滤区域id路径下有设备的产品",
             "type": "string"
           },
+          "categoryIDStrings": {
+            "description": " 无损传递大整数品类ID；与categoryIDs不可同时填写",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
           "categoryIDs": {
             "description": "产品品类",
             "items": {
@@ -12034,6 +12055,13 @@
           "productID": {
             "description": "产品id",
             "type": "string"
+          },
+          "sceneIDStrings": {
+            "description": " 无损传递大整数场景ID；与sceneIDs不可同时填写",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
           },
           "sceneIDs": {
             "description": "根据场景ID来过滤",
