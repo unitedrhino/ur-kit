@@ -3,6 +3,17 @@
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+version=""
+if [[ $# -eq 2 && "$1" == "--version" ]]; then
+  version="$2"
+  if [[ ! "$version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+    echo '版本必须是 vX.Y.Z 格式' >&2
+    exit 2
+  fi
+elif [[ $# -ne 0 ]]; then
+  echo '用法: bash scripts/test_external_consumer.sh [--version vX.Y.Z]' >&2
+  exit 2
+fi
 consumer_dir="$(mktemp -d)"
 trap 'rm -rf "$consumer_dir"' EXIT
 go_bin="${GO_BIN:-go}"
@@ -13,7 +24,11 @@ fi
 cp "$repo_dir/tests/consumer/consumer_test.go" "$consumer_dir/consumer_test.go"
 cd "$consumer_dir"
 GOWORK=off "$go_bin" mod init example.com/urkit-consumer >/dev/null
-GOWORK=off "$go_bin" mod edit -replace "github.com/unitedrhino/ur-kit=$repo_dir"
+if [[ -n "$version" ]]; then
+  GOWORK=off "$go_bin" get "github.com/unitedrhino/ur-kit@$version"
+else
+  GOWORK=off "$go_bin" mod edit -replace "github.com/unitedrhino/ur-kit=$repo_dir"
+fi
 GOWORK=off "$go_bin" mod tidy
 GOWORK=off "$go_bin" test -count=1 ./...
 GOWORK=off "$go_bin" list -deps ./... > "$consumer_dir/dependencies.txt"
