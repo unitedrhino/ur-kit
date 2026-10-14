@@ -5,7 +5,9 @@ import argparse
 import hashlib
 import json
 import re
+import shutil
 import subprocess
+import tempfile
 from pathlib import Path
 
 
@@ -47,23 +49,62 @@ def manifest_bytes(sha: str, files: dict[str, bytes]) -> bytes:
     return (json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True) + "\n").encode()
 
 
-def check_snapshot(files: dict[str, bytes], manifest: bytes) -> None:
+def check_snapshot(files: dict[str, bytes], manifest: bytes, target: Path = TARGET) -> None:
     """检查已发布快照逐文件一致，并拒绝残留的旧源码文件。"""
+    if target.is_symlink() or any(path.is_symlink() for path in target.rglob("*")):
+        raise ValueError("SDK 快照不得包含符号链接")
     expected = set(files)
     actual = {
         relative.as_posix()
-        for path in TARGET.rglob("*")
+        for path in target.rglob("*")
         if path.is_file()
-        if (relative := path.relative_to(TARGET)).parts[0] != "schema"
+        if (relative := path.relative_to(target)).parts[0] != "schema"
         and relative.as_posix() not in ("go.mod", "manifest.json")
     }
     if actual != expected:
         raise ValueError(f"SDK 快照文件集合不一致：缺少 {sorted(expected - actual)}，多出 {sorted(actual - expected)}")
     for name, content in files.items():
-        if (TARGET / name).read_bytes() != content:
+        if (target / name).read_bytes() != content:
             raise ValueError(f"SDK 快照内容不一致: {name}")
-    if not MANIFEST.is_file() or MANIFEST.read_bytes() != manifest:
+    snapshot_manifest = target / "manifest.json"
+    if not snapshot_manifest.is_file() or snapshot_manifest.read_bytes() != manifest:
         raise ValueError("SDK 快照清单不一致")
+
+
+def protect_existing(new_files: dict[str, bytes]) -> None:
+    """在替换前检查现有快照，防止覆盖用户修改或未知文件。"""
+    if not TARGET.exists():
+        return
+    if TARGET.is_symlink() or any(path.is_symlink() for path in TARGET.rglob("*")):
+        raise ValueError("现有 SDK 快照包含符号链接")
+    if not MANIFEST.exists():
+        current = {
+            relative.as_posix(): path.read_bytes()
+            for path in TARGET.rglob("*")
+            if path.is_file()
+            if (relative := path.relative_to(TARGET)).parts[0] != "schema"
+            and relative.as_posix() != "go.mod"
+        }
+        if current != new_files:
+            raise ValueError("现有 SDK 快照没有清单且与来源不同，请先审核差异")
+        return
+    previous = json.loads(MANIFEST.read_text())
+    recorded = previous.get("files")
+    if not isinstance(recorded, dict):
+        raise ValueError("现有 SDK 快照清单无效")
+    contents: dict[str, bytes] = {}
+    for name, expected_hash in recorded.items():
+        parts = Path(name).parts
+        if not parts or Path(name).is_absolute() or any(part in (".", "..") for part in parts):
+            raise ValueError(f"现有 SDK 快照清单路径无效: {name}")
+        path = TARGET / name
+        if not path.is_file() or path.is_symlink():
+            raise ValueError(f"现有 SDK 快照文件缺失或类型无效: {name}")
+        content = path.read_bytes()
+        if hashlib.sha256(content).hexdigest() != expected_hash:
+            raise ValueError(f"现有 SDK 快照文件已有修改: {name}")
+        contents[name] = content
+    check_snapshot(contents, MANIFEST.read_bytes())
 
 
 def main() -> None:
@@ -86,12 +127,31 @@ def main() -> None:
         check_snapshot(files, manifest)
         print(f"已校验 {len(files)} 个 Things SDK 原始文件，来源 {sha}")
         return
-    for name, content in files.items():
-        target = TARGET / name
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(content)
-    MANIFEST.write_bytes(manifest)
-    check_snapshot(files, manifest)
+    protect_existing(files)
+    # 先构造完整快照并校验，再替换目录；合成 go.mod 和单独同步的 schema 保留。
+    TARGET.parent.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory(prefix="ur-kit-things-sdk-", dir=TARGET.parent) as temporary:
+        stage = Path(temporary) / "upstream"
+        stage.mkdir()
+        if (TARGET / "go.mod").is_file():
+            shutil.copy2(TARGET / "go.mod", stage / "go.mod")
+        if (TARGET / "schema").is_dir():
+            shutil.copytree(TARGET / "schema", stage / "schema")
+        for name, content in files.items():
+            target = stage / name
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_bytes(content)
+        (stage / "manifest.json").write_bytes(manifest)
+        check_snapshot(files, manifest, stage)
+        backup = Path(temporary) / "previous"
+        if TARGET.exists():
+            TARGET.rename(backup)
+        try:
+            stage.rename(TARGET)
+        except BaseException:
+            if backup.exists() and not TARGET.exists():
+                backup.rename(TARGET)
+            raise
     print(f"已同步 {len(files)} 个 Things SDK 原始文件，来源 {sha}")
 
 
