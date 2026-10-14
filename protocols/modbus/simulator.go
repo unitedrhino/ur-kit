@@ -45,7 +45,7 @@ func (simulator *Simulator) SetDiscreteInputs(values []bool) {
 	simulator.discreteInputs = append([]bool(nil), values...)
 }
 
-// Serve 在指定监听器上响应功能码 1～6、16；上下文取消后关闭监听器并等待连接退出。
+// Serve 在指定监听器上响应功能码 1～6、15、16；上下文取消后关闭监听器并等待连接退出。
 func (simulator *Simulator) Serve(ctx context.Context, listener net.Listener) error {
 	if simulator == nil || listener == nil {
 		return errors.New("modbus simulator and listener are required")
@@ -105,8 +105,28 @@ func (simulator *Simulator) respond(request []byte) []byte {
 		return []byte{0x80, 3}
 	}
 	function := request[0]
-	if function < 1 || function > 6 && function != 16 {
+	if function < 1 || function > 6 && function != 15 && function != 16 {
 		return []byte{function | 0x80, 1}
+	}
+	if function == 15 {
+		if len(request) < 6 {
+			return []byte{0x8f, 3}
+		}
+		address := int(binary.BigEndian.Uint16(request[1:3]))
+		quantity := int(binary.BigEndian.Uint16(request[3:5]))
+		byteCount := (quantity + 7) / 8
+		if quantity < 1 || quantity > 1968 || int(request[5]) != byteCount || len(request) != 6+byteCount {
+			return []byte{0x8f, 3}
+		}
+		simulator.mu.Lock()
+		defer simulator.mu.Unlock()
+		if address >= len(simulator.coils) || quantity > len(simulator.coils)-address {
+			return []byte{0x8f, 2}
+		}
+		for index := 0; index < quantity; index++ {
+			simulator.coils[address+index] = request[6+index/8]&(1<<uint(index%8)) != 0
+		}
+		return append([]byte(nil), request[:5]...)
 	}
 	if function == 16 {
 		if len(request) < 6 {

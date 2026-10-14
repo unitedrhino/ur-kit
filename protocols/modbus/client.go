@@ -93,6 +93,32 @@ func (client Client) WriteSingleCoil(ctx context.Context, address uint16, value 
 	return client.writeSingle(ctx, 5, address, word)
 }
 
+// WriteMultipleCoils 使用功能码 15 批量写入连续线圈，并核对设备回显的起点和数量。
+func (client Client) WriteMultipleCoils(ctx context.Context, address uint16, values []bool) error {
+	if len(values) == 0 || len(values) > 1968 || uint32(address)+uint32(len(values)) > 65536 {
+		return errors.New("coil range must contain 1..1968 values within address space")
+	}
+	byteCount := (len(values) + 7) / 8
+	request := make([]byte, 6+byteCount)
+	request[0] = 15
+	binary.BigEndian.PutUint16(request[1:3], address)
+	binary.BigEndian.PutUint16(request[3:5], uint16(len(values)))
+	request[5] = byte(byteCount)
+	for index, value := range values {
+		if value {
+			request[6+index/8] |= 1 << uint(index%8)
+		}
+	}
+	response, err := client.exchange(ctx, request)
+	if err != nil {
+		return err
+	}
+	if len(response) != 5 || response[0] != 15 || binary.BigEndian.Uint16(response[1:3]) != address || binary.BigEndian.Uint16(response[3:5]) != uint16(len(values)) {
+		return errors.New("invalid modbus coil write response")
+	}
+	return nil
+}
+
 // WriteSingleRegister 使用功能码 6 写入保持寄存器，并核对设备回显的地址和值。
 func (client Client) WriteSingleRegister(ctx context.Context, address, value uint16) error {
 	return client.writeSingle(ctx, 6, address, value)

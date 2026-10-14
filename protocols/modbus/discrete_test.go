@@ -151,7 +151,7 @@ func TestDiscreteValidation(t *testing.T) {
 		{[]byte{4, 0, 0, 0, 1}, []byte{0x84, 2}},
 		{[]byte{5, 0, 0, 0, 1}, []byte{0x85, 3}},
 		{[]byte{1, 0, 0, 0, 0}, []byte{0x81, 3}},
-		{[]byte{15, 0, 0, 0, 1}, []byte{0x8f, 1}},
+		{[]byte{15, 0, 0, 0, 1}, []byte{0x8f, 3}},
 	} {
 		if got := simulator.respond(test.request); !reflect.DeepEqual(got, test.want) {
 			t.Fatalf("请求=%v 响应=%v, want=%v", test.request, got, test.want)
