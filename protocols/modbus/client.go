@@ -135,6 +135,67 @@ func (client Client) WriteSingleRegister(ctx context.Context, address, value uin
 	return nil
 }
 
+// WriteMultipleRegisters 使用功能码 16 写入连续保持寄存器，并核对设备回显的起点和数量。
+func (client Client) WriteMultipleRegisters(ctx context.Context, address uint16, values []uint16) error {
+	if len(values) == 0 || len(values) > 123 || uint32(address)+uint32(len(values)) > 65536 {
+		return errors.New("register range must contain 1..123 values within address space")
+	}
+	if client.Address == "" {
+		return errors.New("modbus address is empty")
+	}
+	timeout := client.Timeout
+	if timeout <= 0 {
+		timeout = 3 * time.Second
+	}
+	connection, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "tcp", client.Address)
+	if err != nil {
+		return err
+	}
+	defer connection.Close()
+	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
+	defer stop()
+	if deadline, ok := ctx.Deadline(); ok {
+		_ = connection.SetDeadline(deadline)
+	} else {
+		_ = connection.SetDeadline(time.Now().Add(timeout))
+	}
+	request := make([]byte, 13+len(values)*2)
+	binary.BigEndian.PutUint16(request[0:2], 1)
+	binary.BigEndian.PutUint16(request[4:6], uint16(len(request)-6))
+	request[6], request[7] = client.UnitID, 16
+	binary.BigEndian.PutUint16(request[8:10], address)
+	binary.BigEndian.PutUint16(request[10:12], uint16(len(values)))
+	request[12] = byte(len(values) * 2)
+	for index, value := range values {
+		binary.BigEndian.PutUint16(request[13+index*2:], value)
+	}
+	if err := writeFrame(connection, request); err != nil {
+		return err
+	}
+	header := make([]byte, 7)
+	if _, err := io.ReadFull(connection, header); err != nil {
+		return err
+	}
+	if binary.BigEndian.Uint16(header[0:2]) != 1 || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != client.UnitID {
+		return errors.New("invalid modbus transaction, protocol or unit")
+	}
+	length := binary.BigEndian.Uint16(header[4:6])
+	if length != 3 && length != 6 {
+		return errors.New("invalid modbus response length")
+	}
+	pdu := make([]byte, length-1)
+	if _, err := io.ReadFull(connection, pdu); err != nil {
+		return err
+	}
+	if length == 3 && pdu[0] == 0x90 {
+		return fmt.Errorf("modbus exception code %d", pdu[1])
+	}
+	if length != 6 || pdu[0] != 16 || binary.BigEndian.Uint16(pdu[1:3]) != address || binary.BigEndian.Uint16(pdu[3:5]) != uint16(len(values)) {
+		return errors.New("invalid modbus write response")
+	}
+	return nil
+}
+
 // writeFrame 确保完整写出一帧；零字节短写返回明确错误。
 func writeFrame(connection net.Conn, frame []byte) error {
 	for len(frame) > 0 {

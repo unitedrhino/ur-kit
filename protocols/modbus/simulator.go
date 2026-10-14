@@ -21,7 +21,7 @@ func NewSimulator(initial []uint16) *Simulator {
 	return &Simulator{registers: append([]uint16(nil), initial...)}
 }
 
-// Serve 在指定监听器上响应功能码 3 和 6；上下文取消后关闭监听器并等待连接退出。
+// Serve 在指定监听器上响应功能码 3、6、16；上下文取消后关闭监听器并等待连接退出。
 func (simulator *Simulator) Serve(ctx context.Context, listener net.Listener) error {
 	if simulator == nil || listener == nil {
 		return errors.New("modbus simulator and listener are required")
@@ -78,8 +78,27 @@ func (simulator *Simulator) serveConnection(connection net.Conn) {
 // respond 按 Modbus 异常码反馈无效功能、地址或数量，避免越界访问寄存器。
 func (simulator *Simulator) respond(request []byte) []byte {
 	function := request[0]
-	if function != 3 && function != 6 {
+	if function != 3 && function != 6 && function != 16 {
 		return []byte{function | 0x80, 1}
+	}
+	if function == 16 {
+		if len(request) < 6 {
+			return []byte{0x90, 3}
+		}
+		address := int(binary.BigEndian.Uint16(request[1:3]))
+		quantity := int(binary.BigEndian.Uint16(request[3:5]))
+		if quantity < 1 || quantity > 123 || int(request[5]) != quantity*2 || len(request) != 6+quantity*2 {
+			return []byte{0x90, 3}
+		}
+		simulator.mu.Lock()
+		defer simulator.mu.Unlock()
+		if address >= len(simulator.registers) || quantity > len(simulator.registers)-address {
+			return []byte{0x90, 2}
+		}
+		for index := 0; index < quantity; index++ {
+			simulator.registers[address+index] = binary.BigEndian.Uint16(request[6+index*2:])
+		}
+		return append([]byte(nil), request[:5]...)
 	}
 	if len(request) != 5 {
 		return []byte{function | 0x80, 3}
