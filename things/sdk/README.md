@@ -12,6 +12,8 @@
 
 `protocol/runtimeconfig.Resolve` 使用公开协议管理 RPC 获取启动配置：无客户端、未找到或空配置时使用本地默认值，RPC 故障和非法 JSON 显式报错；调用方负责传入平台授权上下文。`MergeConfigJSON` 接收调用方自己的配置类型并合并 JSON 覆写，保留未提交字段，允许显式设置 `false`、`0` 和 `null`，不再要求导入 SaaS 内部 `conf` 包。
 
+只需要本地配置合并的现有平台服务应导入 `protocol/configmerge`：该纯值包不加载 Things protobuf，可避免在同一进程中同时注册 SaaS 旧生成包和 ur-kit 新生成包。`protocol/runtimeconfig.MergeConfigJSON` 保留原公开入口并委托给同一实现，但该包还含协议管理 RPC 客户端，已加载旧 `dm` protobuf 的服务不要直接引入整个包。
+
 `protocol/cloud.ConfigManager` 通过注入配置键、相等性和资源初始化函数管理云协议配置；整批更新失败会释放本轮新资源并保留旧版本，成功更新时关闭被替换或删除的旧资源。`GRPCConfigSource` 使用公开 pb 客户端按协议代码分页拉取配置，调用方提供 map 解码函数及带平台授权身份的上下文；`Refresh` 在完整拉取后才更新管理器。`ForEachConfig` 遍历使用该协议的产品，按主协议/子协议选择配置键，并让接入方实现产品设备同步回调；单个产品失败不会阻断其他产品。实际设备同步和平台权限由接入服务实现。
 
 `protocol/cloud.ProductIDMap` 迁移原协议 SDK 的外部产品 ID 映射能力。调用方提供 `GRPCProductSource` 和协议配置字段名（通常为 `productID`），在已有定时任务或事件回调中调用 `Refresh`；分页、重复平台产品或重复外部 ID 出错时保留旧快照。`Get` 查询平台产品 ID，`PlatformIDs` 返回副本。`DeviceProtocolConfig` 通过接入方提供的产品查询函数，按产品子协议归属选择设备的主协议或子协议配置。调度器和平台身份仍由接入服务注入。
