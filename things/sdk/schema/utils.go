@@ -16,7 +16,12 @@ func GetArray(identifier string) (name string, index int, ok bool) {
 	if len(parts) < 2 {
 		return identifier, 0, false
 	}
-	index, err := strconv.Atoi(parts[1])
+	// 兼容 Things 的数组位置转换：先去掉前导零，再解析带符号的位置。
+	position := strings.TrimLeft(parts[1], "0")
+	if position == "" {
+		return parts[0], 0, true
+	}
+	index, err := strconv.Atoi(position)
 	if err != nil {
 		return parts[0], 0, false
 	}
