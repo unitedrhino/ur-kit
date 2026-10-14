@@ -18,7 +18,7 @@ func TestConfiguredPointEndToEnd(t *testing.T) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	done := make(chan error, 1)
-	simulator := NewSimulator([]uint16{0xa53c, 0, 0})
+	simulator := NewSimulator([]uint16{0xa53c, 0x3ca5, 0})
 	simulator.SetCoils([]bool{false})
 	simulator.SetDiscreteInputs([]bool{true})
 	simulator.SetInputRegisters([]uint16{0x1234, 0x5678})
@@ -42,6 +42,13 @@ func TestConfiguredPointEndToEnd(t *testing.T) {
 	}
 	if words, err := client.ReadHoldingRegisters(ctx, 0, 1); err != nil || !reflect.DeepEqual(words, []uint16{0xa55c}) {
 		t.Fatalf("未选位被改写: %v, err=%v", words, err)
+	}
+	swapped := Point{Address: 1, RegisterType: "HOLDING_REGISTER", ValueType: "uint16", ByteSwap: true, MultiWrite: true, Bit: 4, BitLen: 3}
+	if err := client.WritePoint(ctx, swapped, uint16(5)); err != nil {
+		t.Fatal(err)
+	}
+	if words, err := client.ReadHoldingRegisters(ctx, 1, 1); err != nil || !reflect.DeepEqual(words, []uint16{0x5ca5}) {
+		t.Fatalf("交换字节后的位域写入错误: %v, err=%v", words, err)
 	}
 	input := Point{RegisterType: "INPUT_REGISTER", ValueType: "uint32"}
 	if value, err := client.ReadPoint(ctx, input); err != nil || value != uint32(0x12345678) {
