@@ -1,5 +1,7 @@
 # Things SDK 迁移
 
+从公开仓全新检出后运行 `bash scripts/test_external_consumer.sh`，脚本在临时仓外 Go module 中导入公开缓存、协议、物模型和种子包，运行本机 Modbus TCP 往返，并检查依赖树没有 SaaS 私有模块。`upstream/` 保存源字节和清单，不是可编译的公开入口；完整旧服务调用点迁移仍按下文边界逐组进行。
+
 `upstream/` 是 SaaS `backend/things/sdk` 固定提交的完整源码快照，包含 `protocol`、`deviceauth`、`seed`，由 `scripts/sync_things_sdk.py` 按 `contracts/manifest.json` 的来源 SHA 同步并写入逐文件哈希；`upstream/schema` 由 `scripts/sync_schema.py` 同步。SaaS 的 `shell/sync-ur-kit-contracts.sh` 在合同导出后调用这两个同步器。原始快照保留私有导入，仅供逐包解耦与对照；公开可编译 API 位于本目录其他包。更新后用 `python3 scripts/sync_things_sdk.py --saas <saas仓库> --sha <合同SHA> --check` 核对原始快照。
 
 `deviceauth.NewDeviceAuth` 保留原 SDK 构造入口名称，接收标准 `grpc.ClientConnInterface`；go-zero 调用方传入现有客户端的 `Conn()`。`LoginAuthReq`、`AccessAuthReq`、`DeviceRegisterReq`、`DeviceRegisterResp`、`Request` 和 `Response` 是公开 protobuf 消息别名，登录、访问认证与注册均可直接调用。连接及令牌元数据由接入方管理；本机真实 gRPC 往返测试覆盖三种方法。
