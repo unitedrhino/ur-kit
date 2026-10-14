@@ -77,11 +77,11 @@ export const Api = {
 
   /**
    * 添加分组设备
-   * /api/v1/things/group/device/multi-create
+   * /api/v1/things/group/device/batch-create
    */
   async addGroupDevice(groupID: string, list: ThingsApi.DeviceCore[]) {
     return await ThingsApi.postApiV1ThingsGroupDeviceBatchCreate({
-      groupID: groupID as any, //TODO: 后端后面还会改成 string  先number  后面再改
+      groupID,
       list: list,
     });
   },
