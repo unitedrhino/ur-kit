@@ -1,6 +1,6 @@
 // 本文件核对 IoT 基础应用固定的合同与共享 Web 包快照，防止不同 SaaS 来源被意外混用。
 import { createHash } from 'node:crypto';
-import { readFile, readdir } from 'node:fs/promises';
+import { readFile, readdir, realpath, stat } from 'node:fs/promises';
 import path from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -13,6 +13,43 @@ const LOCK = path.join(ROOT, 'apps/iot-basic/ur-kit.lock.json');
 const SHARED = path.join(ROOT, 'web-shared');
 // CONTRACTS 保存 SaaS 固定提交导出的 API 与 proto 清单。
 const CONTRACTS = path.join(ROOT, 'contracts/manifest.json');
+// APP_MANIFESTS 列出必须独立安装的 Web 与 uni-app 依赖声明。
+const APP_MANIFESTS = [
+  path.join(ROOT, 'apps/iot-basic/web/package.json'),
+  path.join(ROOT, 'apps/iot-basic/mobile/package.json'),
+];
+
+// verifyAppDependencies 禁止应用通过工作区浮动版本或仓外路径依赖 SaaS 源码。
+async function verifyAppDependencies() {
+  for (const manifestPath of APP_MANIFESTS) {
+    const manifest = JSON.parse(await readFile(manifestPath));
+    for (const kind of ['dependencies', 'devDependencies', 'optionalDependencies']) {
+      for (const [name, version] of Object.entries(manifest[kind] ?? {})) {
+        if (typeof version !== 'string') {
+          throw new Error(`${manifestPath}: ${name} 的依赖版本无效`);
+        }
+        if (version.startsWith('workspace:')) {
+          throw new Error(`${manifestPath}: ${name} 使用未锁定的工作区依赖`);
+        }
+        if (!version.startsWith('link:') && !version.startsWith('file:')) {
+          continue;
+        }
+        const target = path.resolve(path.dirname(manifestPath), version.slice(version.indexOf(':') + 1));
+        const withinRoot = path.relative(ROOT, target);
+        if (withinRoot === '..' || withinRoot.startsWith(`..${path.sep}`) || path.isAbsolute(withinRoot)) {
+          throw new Error(`${manifestPath}: ${name} 指向 ur-kit 仓库外`);
+        }
+        if (!(await stat(target)).isDirectory()) {
+          throw new Error(`${manifestPath}: ${name} 的本地依赖不是目录`);
+        }
+        const resolved = path.relative(ROOT, await realpath(target));
+        if (resolved === '..' || resolved.startsWith(`..${path.sep}`) || path.isAbsolute(resolved)) {
+          throw new Error(`${manifestPath}: ${name} 经符号链接指向 ur-kit 仓库外`);
+        }
+      }
+    }
+  }
+}
 
 // sourceFiles 列出共享包可发布的普通文件，过滤安装和构建产生的临时目录。
 async function sourceFiles(relative = '') {
@@ -73,6 +110,7 @@ async function currentLock() {
 
 // main 输出当前锁或核对已提交锁；更新锁必须由开发者显式审阅并提交。
 async function main() {
+  await verifyAppDependencies();
   const actual = await currentLock();
   const args = process.argv.slice(2);
   if (args.length === 1 && args[0] === '--print') {

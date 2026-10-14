@@ -17,6 +17,9 @@ function codegenDir() {
   const bin = path.join(mobile, 'node_modules/.bin');
   fs.mkdirSync(contracts, { recursive: true });
   fs.mkdirSync(bin, { recursive: true });
+  const web = path.join(fixture, 'apps/iot-basic/web');
+  fs.mkdirSync(web, { recursive: true });
+  fs.writeFileSync(path.join(web, 'package.json'), '{"dependencies":{}}\n');
   fs.mkdirSync(path.join(mobile, 'src/data/openapi'), { recursive: true });
   fs.writeFileSync(path.join(mobile, 'package.json'), '{"type":"commonjs"}\n');
   fs.copyFileSync(path.resolve(__dirname, '../codegen.js'), path.join(mobile, 'codegen.js'));
@@ -83,6 +86,14 @@ test('OpenAPI 两组客户端全部成功后替换，生成失败、版本锁和
     assert.match(index, /core_api/);
     assert.match(index, /things_api/);
     assert.equal(fs.readFileSync(path.join(output, 'things-api/client.ts'), 'utf8'), 'things-api.json');
+
+    const webManifest = path.join(fixture, 'apps/iot-basic/web/package.json');
+    fs.writeFileSync(webManifest, '{"dependencies":{"@example/outside":"link:../../../../outside"}}\n');
+    const outsideDependency = runCodegen(mobile);
+    assert.equal(outsideDependency.status, 1);
+    assert.match(outsideDependency.stderr, /指向 ur-kit 仓库外/);
+    assert.equal(fs.readFileSync(path.join(output, 'index.ts'), 'utf8'), index);
+    fs.writeFileSync(webManifest, '{"dependencies":{}}\n');
 
     const lockPath = path.join(fixture, 'apps/iot-basic/ur-kit.lock.json');
     const locked = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
