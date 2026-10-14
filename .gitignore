@@ -6,5 +6,6 @@ dist/
 **/target/
 **/__pycache__/
 .temp/
+apps/iot-basic/mobile/src/data/openapi/generated/
 *.pem
 *.key
