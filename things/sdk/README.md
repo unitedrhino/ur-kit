@@ -13,8 +13,11 @@
 | 云配置、产品映射、设备同步与变更通知 | `protocol.NewCloudProtocol`、`protocol/cloud` |
 | 协议运行配置合并和定时任务 | `protocol/runtimeconfig`、`protocol/core.Timer` |
 | NATS 上下行及配置变更订阅 | `protocol/natsbus`，复用调用方连接与队列组 |
+| 现有 go-zero 分片 KV 的 MQTT 会话迁移 | `protocol/tracking/gozero`，保持旧键与 JSON 字段 |
 
 `protocol/natsbus` 使用普通 NATS 订阅，回调失败只记录日志，不提供持久重投；需要持久消费的应用须注入实现 `core.Bus` 的 JetStream 或平台事件总线适配器。设置 `UR_KIT_TEST_NATS_URL=nats://<本机地址>` 后运行 `go test -race ./things/sdk/protocol/natsbus` 可验证本机真实 NATS 往返。
+
+`protocol/tracking/gozero` 接受调用方现有的 go-zero `kv.Store`，适合在不变更 `device:mqtt:*`、`device:lastActivity:*` 键的情况下迁移平台服务。它保持旧实现的分键操作语义；新建的独立协议服务优先使用 `protocol/tracking.Tracker` 的单 Redis 客户端原子脚本实现，分片 KV 不可直接执行该多键脚本。
 
 从公开仓全新检出后运行 `bash scripts/test_external_consumer.sh`，脚本在临时仓外 Go module 中导入公开缓存、协议、物模型和种子包，运行本机 Modbus TCP 往返，并检查依赖树没有 SaaS 私有模块。`upstream/` 保存源字节和清单，不是可编译的公开入口；完整旧服务调用点迁移仍按下文边界逐组进行。
 

@@ -21,6 +21,7 @@ import (
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/natsbus"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/runtimeconfig"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
+	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking/gozero"
 	"github.com/unitedrhino/ur-kit/things/sdk/schema"
 	"github.com/unitedrhino/ur-kit/things/sdk/seed"
 )
