@@ -2,7 +2,7 @@
 
 `web/` 是公开 IoT 客户端，`mobile/` 是 uni-app，`backend/` 是可运行的 Go 接入样例。Go 服务提供 `/healthz`、经平台认证的 `/api/v1/iot-basic/ping`，并在设置 `WEB_DIR` 时提供 Web SPA；Core/Things/Data 平台 API 按明确路径转发到 `PLATFORM_URL`，保持请求方法、认证头、响应状态和内容。
 
-`ur-kit.lock.json` 同时锁定 `contracts/manifest.json` 与 `web-shared/` 的 SaaS 来源和内容摘要。仓库根目录运行 `node scripts/verify_iot_basic.mjs` 核对；Web 构建、Docker 构建及移动端 `pnpm codegen` 会自动执行核对。合同或共享包从固定 SaaS 提交更新后，运行 `node scripts/verify_iot_basic.mjs --print` 生成待审阅的新锁内容，确认合同与共享包兼容后再更新锁文件并提交；不能在构建时自动改锁。
+`ur-kit.lock.json` 同时锁定 `contracts/manifest.json` 与 `web-shared/` 的 SaaS 来源和内容摘要。仓库根目录运行 `node scripts/verify_iot_basic.mjs` 核对；Web 构建、Docker 构建、移动端 `pnpm codegen` 及 uni-app 开发/构建均会自动执行核对。合同或共享包从固定 SaaS 提交更新后，运行 `node scripts/verify_iot_basic.mjs --print` 生成待审阅的新锁内容，确认合同与共享包兼容后再更新锁文件并提交；不能在构建时自动改锁。
 
 从 ur-kit 仓库根目录构建 Web 与 Go 的单容器镜像：
 

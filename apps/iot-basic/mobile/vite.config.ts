@@ -3,6 +3,7 @@
  */
 import { defineConfig, loadEnv, type PluginOption } from 'vite';
 import uni from '@dcloudio/vite-plugin-uni';
+import { execFileSync } from 'node:child_process';
 import path from 'node:path';
 import fs from 'node:fs';
 import sharp from 'sharp';
@@ -148,6 +149,11 @@ function createThemeStylePlugin(env: ThemeEnv): PluginOption {
 }
 
 export default defineConfig(({ mode }) => {
+  // 所有 uni-app 开发与构建入口共用同一应用锁，拒绝不匹配的合同或共享包快照。
+  execFileSync(process.execPath, [path.resolve(__dirname, '../../../scripts/verify_iot_basic.mjs')], {
+    cwd: path.resolve(__dirname, '../../..'),
+    stdio: 'inherit',
+  });
   const env = { ...loadEnv(mode, __dirname, ''), ...process.env };
   const themeTokens = resolveThemeTokens(env);
 
