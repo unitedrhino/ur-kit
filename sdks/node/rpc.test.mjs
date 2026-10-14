@@ -19,6 +19,9 @@ test('动态加载 proto 服务并生成认证元数据', () => {
     assert.deepEqual(metadata.get('project-id'), ['9007199254740993']);
     assert.deepEqual(metadata.get('app-id'), ['7']);
     assert.deepEqual(metadata.get('ithings-user'), []);
+    assert.deepEqual(rpcMetadata({ token: 'test-token', projectId: 9007199254740993n }).get('project-id'), ['9007199254740993']);
+    assert.throws(() => rpcMetadata({ token: 'test-token', projectId: 9007199254740993 }), /安全整数/);
+    assert.throws(() => rpcMetadata({ token: 'test-token', appId: 9007199254740993 }), /安全整数/);
   } finally {
     rmSync(directory, { recursive: true, force: true });
   }

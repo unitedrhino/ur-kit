@@ -1,6 +1,7 @@
 // 本文件按固定 proto 合同动态创建 Node gRPC 客户端。
 import grpc from '@grpc/grpc-js';
 import protoLoader from '@grpc/proto-loader';
+import { headerID } from './id.mjs';
 
 // createRpcClient 从指定 proto 文件加载服务；非本机地址必须显式传入 TLS 凭据。
 export function createRpcClient({ protoPath, packageName, serviceName, address, credentials }) {
@@ -20,7 +21,7 @@ export function rpcMetadata({ token, tenantCode, projectId, appId }) {
   const metadata = new grpc.Metadata();
   if (token) metadata.set('ithings-token', token);
   if (tenantCode) metadata.set('tenant-code', tenantCode);
-  if (projectId != null) metadata.set('project-id', String(projectId));
-  if (appId != null) metadata.set('app-id', String(appId));
+  if (projectId != null) metadata.set('project-id', headerID(projectId));
+  if (appId != null) metadata.set('app-id', headerID(appId));
   return metadata;
 }

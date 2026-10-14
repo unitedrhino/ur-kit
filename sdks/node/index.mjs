@@ -1,4 +1,5 @@
 // 本文件提供 Node.js 平台 HTTP 客户端，ID 保持 JSON 原始字面值。
+import { headerID } from './id.mjs';
 
 // createClient 创建带令牌的平台客户端；大整数响应保留为原始文本供合同层解析。
 export function createClient({ baseUrl, token, fetchImpl = globalThis.fetch }) {
@@ -15,8 +16,8 @@ export function createClient({ baseUrl, token, fetchImpl = globalThis.fetch }) {
       if (url.origin !== base.origin) throw new Error('cross-origin API path');
       const headers = { 'content-type': 'application/json', 'ithings-token': token };
       if (tenantCode) headers['tenant-code'] = tenantCode;
-      if (projectId) headers['project-id'] = String(projectId);
-      if (appId != null && appId !== '') headers['app-id'] = String(appId);
+      if (projectId) headers['project-id'] = headerID(projectId);
+      if (appId != null && appId !== '') headers['app-id'] = headerID(appId);
       const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal, redirect: 'manual' });
       const raw = await response.text();
       if (!response.ok) {

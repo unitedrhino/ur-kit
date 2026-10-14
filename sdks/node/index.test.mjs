@@ -27,6 +27,17 @@ test('post 保留原始大整数响应', async () => {
   assert.match(result, /"receivedTime":1760000000123/);
 });
 
+test('post 保留 BigInt 项目 ID 请求头', async () => {
+  const client = createClient({
+    baseUrl: 'https://example.invalid', token: 'test-token',
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.headers['project-id'], '9007199254740993');
+      return { ok: true, text: async () => '{}' };
+    },
+  });
+  assert.equal(await client.post('/api/demo', null, { projectId: 9007199254740993n }), '{}');
+});
+
 test('post 拒绝空令牌、非根地址及含查询的接口路径', async () => {
   for (const options of [
     { baseUrl: 'https://example.invalid', token: ' ' },
@@ -37,6 +48,8 @@ test('post 拒绝空令牌、非根地址及含查询的接口路径', async () 
   const client = createClient({ baseUrl: 'https://example.invalid', token: 'valid', fetchImpl: () => { throw new Error('不应发送请求'); } });
   await assert.rejects(client.post('/api/demo?x=1', {}));
   await assert.rejects(client.post('/api/demo', undefined));
+  await assert.rejects(client.post('/api/demo', {}, { projectId: 9007199254740993 }), /安全整数/);
+  await assert.rejects(client.post('/api/demo', {}, { appId: 9007199254740993 }), /安全整数/);
 });
 
 test('post 保留平台错误状态与响应且不泄露令牌', async () => {
