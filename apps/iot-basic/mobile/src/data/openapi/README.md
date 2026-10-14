@@ -5,7 +5,7 @@
 ## 重新生成
 
 ```bash
-cd apps/mobile-uniapp && pnpm codegen
+pnpm --dir apps/iot-basic/mobile codegen
 ```
 
 ## 使用规则

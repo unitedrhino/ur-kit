@@ -283,9 +283,9 @@ components:
 
 ## Overview
 
-本设计系统用于 `apps/mobile-uniapp` 后续迭代，目标是让首页、设备、场景、我的、蓝牙配网、OTA、AI 会话等页面保持一致的视觉语言和交互习惯。
+本设计系统用于 `apps/iot-basic/mobile` 后续迭代，目标是让首页、设备、场景、我的、蓝牙配网、OTA、AI 会话等页面保持一致的视觉语言和交互习惯。
 
-主参考选择 `/Users/ykhl/Desktop/design/awesome-design-md/design-md/apple/DESIGN.md`。原因是当前项目已经采用系统字体、蓝色交互主色、浅色卡片和低装饰移动端体验，与 Apple 式的清晰、克制、系统原生感最贴合。文档格式参考 `/Users/ykhl/Desktop/design/design.md` 的 DESIGN.md 规范：YAML front matter 是机器可读 token，正文是设计意图和执行规则。
+视觉参考采用系统字体、蓝色交互主色、浅色卡片和低装饰移动端体验。YAML front matter 保存机器可读的设计 token，正文说明设计意图和执行规则。
 
 产品气质是 **安静可信的 IoT 控制台**：它不是营销页，也不是重后台，而是用户每天反复打开的设备管理工具。UI 应该让设备状态、控制入口和异常反馈一眼可读；装饰、复杂渐变、夸张阴影和强品牌化插画都要让位给操作效率。
 

@@ -6,21 +6,21 @@
 
 1. 启动 dev server:
    ```bash
-   cd apps/web/apps/org-iot-client && pnpm vite --mode development --port 3006
+   pnpm --filter org-iot-client exec vite --mode development --port 3006
    ```
 2. 确保 Playwright chromium 已安装:
    ```bash
-   cd e2e && npx playwright install chromium
+   pnpm --filter org-iot-client exec playwright install chromium
    ```
 
 ## 脚本列表
 
 ### dashboard-e2e.mjs — 端到端验证
 
-自动登录 → 选租户 → 选项目 → 截图各粒度视图。
+自动登录 → 选企业 → 选项目 → 截图各粒度视图。
 
 ```bash
-node apps/web/apps/org-iot-client/src/views/energy/dashboard/scripts/dashboard-e2e.mjs --headed
+node apps/iot-basic/web/src/views/energy/dashboard/scripts/dashboard-e2e.mjs --headed
 ```
 
 截图输出到 `.temp/dashboard-screenshots/`。
@@ -30,7 +30,7 @@ node apps/web/apps/org-iot-client/src/views/energy/dashboard/scripts/dashboard-e
 可用环境变量:
 - `DASHBOARD_PORT` — dev server 端口（默认 3006）
 - `DASHBOARD_USER` / `DASHBOARD_PASS` — 登录凭据
-- `DASHBOARD_TENANT` / `DASHBOARD_PROJECT` — 租户/项目名
+- `DASHBOARD_TENANT` / `DASHBOARD_PROJECT` — 企业/项目名
 - `DASHBOARD_FORCE_DEFAULT` — 是否强制切回默认大屏（默认开启；设为 `0` 可关闭）
 
 ### dashboard-api-debug.mjs — API 响应诊断
@@ -39,7 +39,7 @@ node apps/web/apps/org-iot-client/src/views/energy/dashboard/scripts/dashboard-e
 
 ```bash
 # 捕获所有 API
-node apps/web/apps/org-iot-client/src/views/energy/dashboard/scripts/dashboard-api-debug.mjs
+node apps/iot-basic/web/src/views/energy/dashboard/scripts/dashboard-api-debug.mjs
 
 # 只看区域 API
 node ...dashboard-api-debug.mjs --api=area
