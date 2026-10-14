@@ -31,3 +31,13 @@ test('令牌和权限验证后才进入处理器', async () => {
   await handler({ method: 'POST', url: '/demo', headers: { token: 'good', 'ithings-user': 'forged' } }, webHeader);
   assert.equal(webHeader.body, 'ok');
 });
+
+test('格式错误的 Authorization 返回未认证响应', async () => {
+  const response = { statusCode: 200, headers: {}, setHeader(key, value) { this.headers[key] = value; }, end(body) { this.body = body; } };
+  const handler = protectHTTP(() => { throw new Error('不应进入业务处理器'); }, {
+    authenticate: async () => { throw new Error('不应调用认证器'); },
+  });
+  await handler({ method: 'POST', url: '/demo', headers: { authorization: ['Bearer good'] } }, response);
+  assert.equal(response.statusCode, 401);
+  assert.deepEqual(JSON.parse(response.body), { code: 'unauthorized' });
+});

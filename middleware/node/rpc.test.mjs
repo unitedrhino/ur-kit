@@ -22,3 +22,17 @@ test('RPC 一元方法只接受验证后的身份', async () => {
   webMetadata.set('token', 'good');
   await new Promise((resolve, reject) => handler({ metadata: webMetadata }, (error, response) => error ? reject(error) : (assert.deepEqual(response, { ok: true }), resolve())));
 });
+
+test('非字符串 RPC Authorization 返回未认证错误', async () => {
+  const handler = protectUnaryRPC(() => { throw new Error('不应进入业务处理器'); }, {
+    authenticate: async () => { throw new Error('不应调用认证器'); },
+  });
+  const metadata = {
+    get(name) { return name === 'authorization' ? [Buffer.from('Bearer good')] : []; },
+    remove() {},
+  };
+  await new Promise((resolve, reject) => handler({ metadata }, (error) => {
+    if (error?.code === grpc.status.UNAUTHENTICATED) resolve();
+    else reject(error ?? new Error('缺少未认证错误'));
+  }));
+});

@@ -16,3 +16,14 @@ export function stripUntrustedIdentityHeaders(headers) {
     if (untrustedIdentityHeaders.includes(name.toLowerCase())) delete headers[name];
   }
 }
+
+// readToken 按平台既有优先级读取令牌，拒绝数组、二进制或非 Bearer 授权值。
+export function readToken(primary, secondary, authorization) {
+  for (const value of [primary, secondary]) {
+    if (value == null || value === '') continue;
+    return typeof value === 'string' ? value.trim() : null;
+  }
+  if (typeof authorization !== 'string') return null;
+  const match = /^Bearer\s+(.+)$/i.exec(authorization.trim());
+  return match?.[1]?.trim() || null;
+}

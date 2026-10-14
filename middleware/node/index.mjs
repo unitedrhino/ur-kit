@@ -1,5 +1,5 @@
 // 本文件提供 Node HTTP 服务的可注入认证、权限与脱敏日志中间件。
-import { stripUntrustedIdentityHeaders } from './identity.mjs';
+import { readToken, stripUntrustedIdentityHeaders } from './identity.mjs';
 export { createPlatformAuthenticator } from './platform.mjs';
 
 // protectHTTP 包装异步业务处理器；认证器必须验证令牌并返回可信身份。
@@ -9,9 +9,9 @@ export function protectHTTP(handler, { authenticate, authorize, resource, action
     response.setHeader('X-Frame-Options', 'DENY');
     response.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
     stripUntrustedIdentityHeaders(request.headers);
-    const token = request.headers['ithings-token'] || request.headers.token || request.headers.authorization?.replace(/^Bearer /, '');
     const started = Date.now();
     try {
+      const token = readToken(request.headers['ithings-token'], request.headers.token, request.headers.authorization);
       if (typeof authenticate !== 'function') return sendError(response, 500, 'auth_not_configured');
       if (!token) return sendError(response, 401, 'unauthorized');
       let identity;
