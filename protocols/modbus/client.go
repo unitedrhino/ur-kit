@@ -35,6 +35,8 @@ func (client Client) ReadHoldingRegisters(ctx context.Context, address, quantity
 		return nil, err
 	}
 	defer connection.Close()
+	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
+	defer stop()
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = connection.SetDeadline(deadline)
 	} else {
@@ -47,7 +49,7 @@ func (client Client) ReadHoldingRegisters(ctx context.Context, address, quantity
 	request[7] = 3
 	binary.BigEndian.PutUint16(request[8:10], address)
 	binary.BigEndian.PutUint16(request[10:12], quantity)
-	if _, err := connection.Write(request); err != nil {
+	if err := writeFrame(connection, request); err != nil {
 		return nil, err
 	}
 	header := make([]byte, 7)
@@ -92,6 +94,8 @@ func (client Client) WriteSingleRegister(ctx context.Context, address, value uin
 		return err
 	}
 	defer connection.Close()
+	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
+	defer stop()
 	if deadline, ok := ctx.Deadline(); ok {
 		_ = connection.SetDeadline(deadline)
 	} else {
@@ -104,7 +108,7 @@ func (client Client) WriteSingleRegister(ctx context.Context, address, value uin
 	request[7] = 6
 	binary.BigEndian.PutUint16(request[8:10], address)
 	binary.BigEndian.PutUint16(request[10:12], value)
-	if _, err := connection.Write(request); err != nil {
+	if err := writeFrame(connection, request); err != nil {
 		return err
 	}
 	header := make([]byte, 7)
@@ -127,6 +131,21 @@ func (client Client) WriteSingleRegister(ctx context.Context, address, value uin
 	}
 	if length != 6 || pdu[0] != 6 || binary.BigEndian.Uint16(pdu[1:3]) != address || binary.BigEndian.Uint16(pdu[3:5]) != value {
 		return errors.New("invalid modbus write response")
+	}
+	return nil
+}
+
+// writeFrame 确保完整写出一帧；零字节短写返回明确错误。
+func writeFrame(connection net.Conn, frame []byte) error {
+	for len(frame) > 0 {
+		written, err := connection.Write(frame)
+		if err != nil {
+			return err
+		}
+		if written == 0 {
+			return io.ErrShortWrite
+		}
+		frame = frame[written:]
 	}
 	return nil
 }

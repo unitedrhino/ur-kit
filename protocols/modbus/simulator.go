@@ -69,7 +69,7 @@ func (simulator *Simulator) serveConnection(connection net.Conn) {
 		}
 		response := simulator.respond(request)
 		binary.BigEndian.PutUint16(header[4:6], uint16(len(response)+1))
-		if _, err := connection.Write(append(header, response...)); err != nil {
+		if err := writeFrame(connection, append(header, response...)); err != nil {
 			return
 		}
 	}

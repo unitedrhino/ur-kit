@@ -9,6 +9,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 // TestReadHoldingRegisters 验证请求地址、数量与响应解析。
@@ -45,6 +46,58 @@ func TestReadHoldingRegisters(t *testing.T) {
 	}
 	if err := <-done; err != nil {
 		t.Fatal(err)
+	}
+}
+
+// TestClientCancellation 验证连接已建立且设备无响应时读写均及时响应上下文取消。
+func TestClientCancellation(t *testing.T) {
+	for _, operation := range []string{"read", "write"} {
+		t.Run(operation, func(t *testing.T) {
+			listener, err := net.Listen("tcp", "127.0.0.1:0")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer listener.Close()
+			requestReceived := make(chan struct{})
+			go func() {
+				connection, acceptErr := listener.Accept()
+				if acceptErr != nil {
+					return
+				}
+				defer connection.Close()
+				request := make([]byte, 12)
+				if _, readErr := io.ReadFull(connection, request); readErr == nil {
+					close(requestReceived)
+				}
+				_, _ = io.Copy(io.Discard, connection)
+			}()
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			result := make(chan error, 1)
+			client := Client{Address: listener.Addr().String(), UnitID: 7, Timeout: 10 * time.Second}
+			go func() {
+				if operation == "read" {
+					_, err := client.ReadHoldingRegisters(ctx, 10, 1)
+					result <- err
+					return
+				}
+				result <- client.WriteSingleRegister(ctx, 10, 1)
+			}()
+			select {
+			case <-requestReceived:
+			case <-time.After(2 * time.Second):
+				t.Fatal("设备没有收到请求")
+			}
+			cancel()
+			select {
+			case err := <-result:
+				if err == nil {
+					t.Fatal("取消后请求仍返回成功")
+				}
+			case <-time.After(2 * time.Second):
+				t.Fatal("取消后请求仍在等待设备响应")
+			}
+		})
 	}
 }
 
