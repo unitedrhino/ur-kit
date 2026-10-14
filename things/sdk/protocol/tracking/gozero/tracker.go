@@ -57,16 +57,17 @@ func (tracker *Tracker) Touch(ctx context.Context, device tracking.Device, recei
 
 // TouchMany 批量更新设备活动时间；不同产品使用各自的分片键。
 func (tracker *Tracker) TouchMany(ctx context.Context, devices []tracking.Device, received time.Time) error {
+	var firstErr error
 	batch, ok := tracker.Store.(interface {
 		ZaddsCtx(context.Context, string, ...redis.Pair) (int64, error)
 	})
 	if !ok {
 		for _, device := range devices {
-			if err := tracker.Touch(ctx, device, received); err != nil {
-				return err
+			if err := tracker.Touch(ctx, device, received); err != nil && firstErr == nil {
+				firstErr = err
 			}
 		}
-		return nil
+		return firstErr
 	}
 	groups := make(map[string][]redis.Pair)
 	for _, device := range devices {
@@ -78,13 +79,16 @@ func (tracker *Tracker) TouchMany(ctx context.Context, devices []tracking.Device
 	}
 	for key, pairs := range groups {
 		if _, err := batch.ZaddsCtx(ctx, key, pairs...); err != nil {
-			return err
+			if firstErr == nil {
+				firstErr = err
+			}
+			continue
 		}
-		if err := tracker.Store.ExpireCtx(ctx, key, int(tracking.ActivityTTL.Seconds())); err != nil {
-			return err
+		if err := tracker.Store.ExpireCtx(ctx, key, int(tracking.ActivityTTL.Seconds())); err != nil && firstErr == nil {
+			firstErr = err
 		}
 	}
-	return nil
+	return firstErr
 }
 
 // ActiveByProduct 查询指定产品在时间窗内有活动记录的设备。

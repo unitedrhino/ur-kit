@@ -4,6 +4,7 @@ package gozero
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"testing"
 	"time"
@@ -14,6 +15,22 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 )
+
+// failingBatchStore 模拟某个产品所在分片写入失败。
+type failingBatchStore struct {
+	Store
+	batch interface {
+		ZaddsCtx(context.Context, string, ...redis.Pair) (int64, error)
+	}
+}
+
+// ZaddsCtx 只让 p1 分片失败，检查 p2 分片仍完成更新。
+func (store failingBatchStore) ZaddsCtx(ctx context.Context, key string, pairs ...redis.Pair) (int64, error) {
+	if key == tracking.ActivityPrefix+":p1" {
+		return 0, errors.New("p1 unavailable")
+	}
+	return store.batch.ZaddsCtx(ctx, key, pairs...)
+}
 
 // TestLegacyStoreSessionLifecycle 验证双向映射、迟到断连及退出清理。
 func TestLegacyStoreSessionLifecycle(t *testing.T) {
@@ -126,5 +143,24 @@ func TestActivityQueries(t *testing.T) {
 	devices, err = tracker.ActiveByProduct(ctx, "p1", time.Minute, now)
 	if err != nil || len(devices) != 1001 {
 		t.Fatalf("删除活动后结果不匹配: %d %v", len(devices), err)
+	}
+}
+
+// TestTouchManyContinuesOtherProducts 验证一个分片失败时继续更新其他产品。
+func TestTouchManyContinuesOtherProducts(t *testing.T) {
+	server := miniredis.RunT(t)
+	base := kv.NewStore(cache.ClusterConf{{RedisConf: redis.RedisConf{Host: server.Addr(), Type: redis.NodeType}, Weight: 100}})
+	store := failingBatchStore{Store: base, batch: base}
+	tracker, err := NewTracker(store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.UnixMilli(1780000000000)
+	if err := tracker.TouchMany(context.Background(), []tracking.Device{{ProductID: "p1", DeviceName: "failed"}, {ProductID: "p2", DeviceName: "saved"}}, now); err == nil {
+		t.Fatal("分片失败未返回错误")
+	}
+	active, err := tracker.ActiveByProduct(context.Background(), "p2", time.Minute, now)
+	if err != nil || len(active) != 1 {
+		t.Fatalf("其他产品未继续写入: %d %v", len(active), err)
 	}
 }
