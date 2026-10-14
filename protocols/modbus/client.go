@@ -10,11 +10,13 @@ import (
 	"time"
 )
 
-// Client 保存 Modbus TCP 连接地址、单元号与拨号超时。
+// Client 保存 Modbus TCP 或 RTU over TCP 连接地址、单元号与拨号超时。
 type Client struct {
 	Address string
 	UnitID  byte
 	Timeout time.Duration
+	// RTUOverTCP 使用带 CRC 的 RTU 帧经 TCP 传输；默认仍使用 MBAP 帧。
+	RTUOverTCP bool
 }
 
 // ReadHoldingRegisters 使用功能码 3 读取保持寄存器，返回设备的无符号 16 位字。

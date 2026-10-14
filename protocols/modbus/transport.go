@@ -35,6 +35,9 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	} else {
 		_ = connection.SetDeadline(time.Now().Add(timeout))
 	}
+	if client.RTUOverTCP {
+		return exchangeRTU(connection, client.UnitID, requestPDU)
+	}
 	request := make([]byte, 7+len(requestPDU))
 	binary.BigEndian.PutUint16(request[0:2], 1)
 	binary.BigEndian.PutUint16(request[4:6], uint16(len(requestPDU)+1))
