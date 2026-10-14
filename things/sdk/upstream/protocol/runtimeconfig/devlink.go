@@ -1,14 +1,12 @@
 package runtimeconfig
 
 import (
-	"encoding/json"
-	"reflect"
-	"strings"
-
 	"gitee.com/unitedrhino/share/conf"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configmerge"
 	storecache "github.com/zeromicro/go-zero/core/stores/cache"
 )
 
+// Config 汇集协议运行时可由存储配置覆写的服务参数。
 type Config struct {
 	TimedJobRpc conf.RpcClientConf     `json:"timedJobRpc,omitempty"`
 	Event       conf.EventConf         `json:"event,omitempty"`
@@ -16,71 +14,16 @@ type Config struct {
 	DevLink     conf.DevLinkConf       `json:"devLink,omitempty"`
 }
 
+// MergeConfigJSON 将显式提供的 JSON 字段应用到基础配置，非空覆写时返回独立副本。
 func MergeConfigJSON(base Config, configJSON string) (Config, error) {
-	if strings.TrimSpace(configJSON) == "" {
-		return base, nil
-	}
-
-	var override Config
-	if err := json.Unmarshal([]byte(configJSON), &override); err != nil {
-		return Config{}, err
-	}
-
-	out := base
-	mergeValue(reflect.ValueOf(&out).Elem(), reflect.ValueOf(override))
-	return out, nil
+	return configmerge.MergeConfigJSON(base, configJSON)
 }
 
+// MergeDevLinkConfigJSON 只返回设备连接部分的合并配置。
 func MergeDevLinkConfigJSON(base conf.DevLinkConf, configJSON string) (conf.DevLinkConf, error) {
 	out, err := MergeConfigJSON(Config{DevLink: base}, configJSON)
 	if err != nil {
 		return conf.DevLinkConf{}, err
 	}
 	return out.DevLink, nil
-}
-
-func mergeValue(dst, src reflect.Value) {
-	if !src.IsValid() || !dst.CanSet() {
-		return
-	}
-	if src.Kind() == reflect.Ptr {
-		if src.IsNil() {
-			return
-		}
-		if dst.Kind() == reflect.Ptr {
-			if dst.IsNil() {
-				dst.Set(reflect.New(dst.Type().Elem()))
-			}
-			mergeValue(dst.Elem(), src.Elem())
-			return
-		}
-		mergeValue(dst, src.Elem())
-		return
-	}
-	if dst.Kind() == reflect.Ptr {
-		if dst.IsNil() {
-			dst.Set(reflect.New(dst.Type().Elem()))
-		}
-		mergeValue(dst.Elem(), src)
-		return
-	}
-
-	switch src.Kind() {
-	case reflect.Struct:
-		for i := 0; i < src.NumField(); i++ {
-			mergeValue(dst.Field(i), src.Field(i))
-		}
-	case reflect.Slice:
-		if src.Len() > 0 {
-			dst.Set(src)
-		}
-	case reflect.Map:
-		if !src.IsNil() && src.Len() > 0 {
-			dst.Set(src)
-		}
-	default:
-		if !src.IsZero() {
-			dst.Set(src)
-		}
-	}
 }

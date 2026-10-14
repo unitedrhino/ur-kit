@@ -4,7 +4,7 @@
     "deviceauth/pb/dg/dg.pb.go": "30f1aec4aabe87a8facf8290257e91f5813cad5494690d746727f6ed225bc0ab",
     "deviceauth/pb/dg/dg_grpc.pb.go": "b17c21cd5569e6371a652f1bbcd9a8ff5424496ed31152b7fcdafafa66bcfeb2",
     "protocol/cloudProtocol.go": "72ae4d0a8c05789f0b67d9b7fe82fe2625cd848b8036446162e20a5fb492ba69",
-    "protocol/coreProtocol.go": "ae80d8ccb12f0db06fc7ec6894081bbd7f24f07fd13a44917a94ebc36c471bd0",
+    "protocol/coreProtocol.go": "bae5827d4c13208dc7a261dc4c25f7bbef5936b737b4cdae20e9971854527bf6",
     "protocol/coreProtocol_web_test.go": "597eb4af684ea22bc8ecbaa7805996eb62c0d8c69c1a3865b07c4fc51166b229",
     "protocol/default.go": "596cfd371d4b153e5a2819850877e90e31d31eba058d01a8790cb20228f503fd",
     "protocol/mqttProtocol.go": "f95bf61181a883476fba94430187cd4994502186e49c682256d87252f3dfc56a",
@@ -12,12 +12,12 @@
     "protocol/mqtt_tracking.go": "e9111a94870633bba70287da7bc3a053657c4662e1177dca61b912faf0d766f8",
     "protocol/readme.md": "dba20d2b1d13c60699d235e06d1c7cb8ed9e21126138fc21062cc6db815c7369",
     "protocol/runtime_bootstrap.go": "ac5e1536c98221fbd907ea57517e3448d51edb50f477715152fb7b48481c7a4b",
-    "protocol/runtimeconfig/devlink.go": "802cc7b0e9ab44ea1df8b97f431da775303c7cbed231fdbf0d26a9ed48094471",
-    "protocol/runtimeconfig/devlink_test.go": "d5d6067d0e20232f492e3476bcc4ef99726e93b0575007c9a96c5e01b110bf47",
+    "protocol/runtimeconfig/devlink.go": "af89a6947f458fe802dd1c1d8a678627d6a52bad83d4ad68b1a114401020830f",
+    "protocol/runtimeconfig/devlink_test.go": "545ca831bddb61bea4e61896b101a284fcadcc74cc9f55abc32867da3afa49e9",
     "seed/doc.go": "f22825cf1b3d2cb73586099af3a7f51d2cd76d35f23683d5d363d71c8dbd7277",
     "seed/ensure.go": "9da98b7149a896792c9fe2e89abffb40c64fc55bf27de05b0e7e979cce9dd612",
     "seed/ensure_test.go": "6126b541a118c29856e3e83a5983964d2d928a77ec743dee6ee62dd177915176",
     "seed/types.go": "caeb6a31e377c72fe5649672e6a310ef1a87b0d850487886183a28a2dd6f85cc"
   },
-  "saas_commit": "882d6bdc87fa92ff22ffa0f366a2b8cf1725da5b"
+  "saas_commit": "09bbf5e5d0f3acfb707e135993ea9d7453a7a480"
 }

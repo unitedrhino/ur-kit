@@ -29,7 +29,7 @@ import (
 	"gitee.com/unitedrhino/things/service/dmsvr/dmExport"
 	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/devices"
-	"gitee.com/unitedrhino/things/share/rpcs/protocolSync/pb/protocolSync"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	storecache "github.com/zeromicro/go-zero/core/stores/cache"

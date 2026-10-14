@@ -96,3 +96,21 @@ func TestMergeDevLinkConfigJSONInvalidJSON(t *testing.T) {
 		t.Fatal("expected invalid json error")
 	}
 }
+
+// TestMergeConfigJSONExplicitEmptyAndNull 验证空字符串和空指针可清除默认连接设置。
+func TestMergeConfigJSONExplicitEmptyAndNull(t *testing.T) {
+	base := Config{DevLink: conf.DevLinkConf{Mqtt: &conf.MqttConf{
+		ClientID: "default-client",
+		OpenApi:  &conf.DevOpenApi{Host: "http://example.invalid"},
+	}}}
+	out, err := MergeConfigJSON(base, `{"devLink":{"mqtt":{"clientID":"","openApi":null}}}`)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out.DevLink.Mqtt == nil || out.DevLink.Mqtt.ClientID != "" || out.DevLink.Mqtt.OpenApi != nil {
+		t.Fatalf("显式空值未生效: %+v", out.DevLink.Mqtt)
+	}
+	if base.DevLink.Mqtt.ClientID != "default-client" || base.DevLink.Mqtt.OpenApi == nil {
+		t.Fatalf("基础配置被修改: %+v", base.DevLink.Mqtt)
+	}
+}
