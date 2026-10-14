@@ -18,8 +18,9 @@ export function createRpcClient({ protoPath, packageName, serviceName, address, 
 
 // rpcMetadata 创建认证元数据；不发送可伪造的内部身份对象。
 export function rpcMetadata({ token, tenantCode, projectId, appId }) {
+  if (typeof token !== 'string' || !token.trim()) throw new Error('platform token is required');
   const metadata = new grpc.Metadata();
-  if (token) metadata.set('ithings-token', token);
+  metadata.set('ithings-token', token);
   if (tenantCode) metadata.set('tenant-code', tenantCode);
   if (projectId != null) metadata.set('project-id', headerID(projectId));
   if (appId != null) metadata.set('app-id', headerID(appId));

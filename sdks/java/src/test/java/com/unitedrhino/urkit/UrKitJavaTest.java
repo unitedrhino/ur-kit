@@ -131,6 +131,8 @@ public class UrKitJavaTest {
 
     /** RPC 客户端使用服务方法描述符，并经中间件取得可信身份。 */
     @Test void rpcRoundTrip() throws Exception {
+        assertThrows(IllegalArgumentException.class,
+                () -> new UrRpcClient("127.0.0.1:1", " ", null, null, false));
         AtomicReference<String> seenAppId = new AtomicReference<>();
         ServerInterceptor appInspector = new ServerInterceptor() {
             /** interceptCall 读取测试请求的应用上下文，再交给身份中间件。 */

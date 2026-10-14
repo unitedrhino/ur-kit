@@ -6,7 +6,9 @@ import (
 	"testing"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // TestUnaryClientInterceptor 验证请求元数据与客户端调用语义。
@@ -21,5 +23,29 @@ func TestUnaryClientInterceptor(t *testing.T) {
 	})
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+// TestUnaryClientInterceptorRejectsMissingToken 确认空令牌在发往平台前被拒绝。
+func TestUnaryClientInterceptorRejectsMissingToken(t *testing.T) {
+	invoked := false
+	err := UnaryClientInterceptor(Context{Token: "  "})(context.Background(), "/Demo/Read", nil, nil, nil, func(context.Context, string, any, any, *grpc.ClientConn, ...grpc.CallOption) error {
+		invoked = true
+		return nil
+	})
+	if status.Code(err) != codes.Unauthenticated || invoked {
+		t.Fatalf("空令牌应在调用前拒绝，err=%v invoked=%v", err, invoked)
+	}
+}
+
+// TestStreamClientInterceptorRejectsMissingToken 确认流式 RPC 不发送空令牌请求。
+func TestStreamClientInterceptorRejectsMissingToken(t *testing.T) {
+	invoked := false
+	_, err := StreamClientInterceptor(Context{})(context.Background(), &grpc.StreamDesc{}, nil, "/Demo/Watch", func(context.Context, *grpc.StreamDesc, *grpc.ClientConn, string, ...grpc.CallOption) (grpc.ClientStream, error) {
+		invoked = true
+		return nil, nil
+	})
+	if status.Code(err) != codes.Unauthenticated || invoked {
+		t.Fatalf("空令牌应在建流前拒绝，err=%v invoked=%v", err, invoked)
 	}
 }

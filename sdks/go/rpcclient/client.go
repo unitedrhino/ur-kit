@@ -6,7 +6,9 @@ import (
 	"strings"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
+	"google.golang.org/grpc/status"
 )
 
 // Context 保存需要随 RPC 发送的令牌、企业和项目标识。
@@ -20,6 +22,9 @@ type Context struct {
 // UnaryClientInterceptor 为一元 RPC 注入平台认证元数据，不发送可伪造的 ithings-user。
 func UnaryClientInterceptor(identity Context) grpc.UnaryClientInterceptor {
 	return func(ctx context.Context, method string, request, reply any, connection *grpc.ClientConn, invoke grpc.UnaryInvoker, options ...grpc.CallOption) error {
+		if strings.TrimSpace(identity.Token) == "" {
+			return status.Error(codes.Unauthenticated, "platform token is required")
+		}
 		return invoke(withMetadata(ctx, identity), method, request, reply, connection, options...)
 	}
 }
@@ -27,6 +32,9 @@ func UnaryClientInterceptor(identity Context) grpc.UnaryClientInterceptor {
 // StreamClientInterceptor 为流式 RPC 注入平台认证元数据。
 func StreamClientInterceptor(identity Context) grpc.StreamClientInterceptor {
 	return func(ctx context.Context, description *grpc.StreamDesc, connection *grpc.ClientConn, method string, stream grpc.Streamer, options ...grpc.CallOption) (grpc.ClientStream, error) {
+		if strings.TrimSpace(identity.Token) == "" {
+			return nil, status.Error(codes.Unauthenticated, "platform token is required")
+		}
 		return stream(withMetadata(ctx, identity), description, connection, method, options...)
 	}
 }
