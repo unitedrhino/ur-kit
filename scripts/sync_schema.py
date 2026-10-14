@@ -14,7 +14,7 @@ SOURCE = "backend/things/share/domain/schema"
 FILES = (
     "affordance.go", "ai.go", "ai_test.go", "baseParam.go", "define.go",
     "inference.go", "inference_test.go", "init.go", "model.go",
-    "modelParam.go", "modelSimple.go", "modifyCheck.go", "schema_test.go", "validate.go",
+    "modelParam.go", "modelSimple.go", "modifyCheck.go", "repo.go", "schema_test.go", "validate.go",
     "utils_normalize_test.go", "validate_thingmodel_test.go",
 )
 RAW_ONLY = ("utils.go",)
@@ -22,6 +22,7 @@ IMPORTS = {
     "gitee.com/unitedrhino/share/def": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/def",
     "gitee.com/unitedrhino/share/errors": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/errors",
     "gitee.com/unitedrhino/share/utils": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/utils",
+    "gitee.com/unitedrhino/things/share/devices": "github.com/unitedrhino/ur-kit/things/sdk/schema/compat/devices",
 }
 
 
@@ -58,6 +59,14 @@ def main() -> None:
         content = original.decode().replace("\r\n", "\n")
         for old, new in IMPORTS.items():
             content = content.replace(old, new)
+        if name == "repo.go":
+            for declaration, comment in {
+                "Info struct {": "Info 保存产品物模型模板的持久化元数据。",
+                "Repo interface {": "Repo 定义物模型模板的读取、导入和删除能力。",
+                "ReadRepo interface {": "ReadRepo 定义物模型读取与缓存失效能力。",
+                "GetSchemaModel func(": "GetSchemaModel 按公开设备标识读取完整物模型。",
+            }.items():
+                content = content.replace("\t" + declaration, "\t// " + comment + "\n\t" + declaration)
         if not content.startswith("// 文件说明："):
             content = f"// 文件说明：从 SaaS 固定提交移植 {name} 的物模型语义。\n" + content
         generated = public / name
