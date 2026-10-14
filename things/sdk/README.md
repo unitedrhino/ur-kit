@@ -1,6 +1,6 @@
 # Things SDK 迁移
 
-`upstream/` 是 SaaS `backend/things/sdk` 固定提交的源码快照，包含 `protocol`、`deviceauth`、`seed`。它保留原始导入关系，当前仅供逐包解耦与对照，不能作为独立可用的 SDK 发布。迁移完成后将稳定 API 移到本目录，并在独立仓通过测试。
+`upstream/` 是 SaaS `backend/things/sdk` 固定提交的完整源码快照，包含 `protocol`、`deviceauth`、`seed`，由 `scripts/sync_things_sdk.py` 按 `contracts/manifest.json` 的来源 SHA 同步并写入逐文件哈希；`upstream/schema` 由 `scripts/sync_schema.py` 同步。SaaS 的 `shell/sync-ur-kit-contracts.sh` 在合同导出后调用这两个同步器。原始快照保留私有导入，仅供逐包解耦与对照；公开可编译 API 位于本目录其他包。更新后用 `python3 scripts/sync_things_sdk.py --saas <saas仓库> --sha <合同SHA> --check` 核对原始快照。
 
 `protocol/tracking` 提供独立 MQTT 会话跟踪器，使用调用方注入的 Redis 客户端，并与原 `device:mqtt:*` 和 `device:lastActivity:*` 键及 JSON 消息字段兼容。`Sync`、`ClearClient` 和孤立记录清理在并发重连时只删除旧会话；`Touch`、`TouchMany` 只记录上行活动，不伪造在线状态。`ActiveByProduct` 按产品和时间窗查询活动设备，支持同毫秒大量设备分页；`ActiveAll` 按原协议会话索引汇总近三十天仍有 MQTT 会话的产品活动，不包含仅有活动时间而无 MQTT 会话的产品；`DeleteActivity` 删除活动记录而不修改会话映射。
 
