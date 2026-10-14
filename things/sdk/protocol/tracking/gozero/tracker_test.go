@@ -56,3 +56,32 @@ func TestLegacyStoreSessionLifecycle(t *testing.T) {
 		t.Fatalf("清理后设备仍在线: %v %v", connected, err)
 	}
 }
+
+// TestDeviceByClient 验证旧反向映射的命中、缺失与损坏数据行为。
+func TestDeviceByClient(t *testing.T) {
+	server := miniredis.RunT(t)
+	store := kv.NewStore(cache.ClusterConf{{RedisConf: redis.RedisConf{Host: server.Addr(), Type: redis.NodeType}, Weight: 100}})
+	tracker, err := NewTracker(store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	device, found, err := tracker.DeviceByClient(ctx, "missing")
+	if err != nil || found || device != (tracking.Device{}) {
+		t.Fatalf("缺失映射返回错误结果: %+v %v %v", device, found, err)
+	}
+	connection := tracking.Connection{ProductID: "p1", DeviceName: "d1", ClientID: "client-1"}
+	if err := tracker.Sync(ctx, connection, time.Now()); err != nil {
+		t.Fatal(err)
+	}
+	device, found, err = tracker.DeviceByClient(ctx, connection.ClientID)
+	if err != nil || !found || device.ProductID != connection.ProductID || device.DeviceName != connection.DeviceName {
+		t.Fatalf("会话反向映射不匹配: %+v %v %v", device, found, err)
+	}
+	if err := store.HsetCtx(ctx, tracking.ClientKey, connection.ClientID, "{"); err != nil {
+		t.Fatal(err)
+	}
+	if _, _, err := tracker.DeviceByClient(ctx, connection.ClientID); err == nil {
+		t.Fatal("损坏的反向映射未返回错误")
+	}
+}

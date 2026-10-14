@@ -63,6 +63,28 @@ func (tracker *Tracker) IsConnected(ctx context.Context, device tracking.Device)
 	return isDeviceMqttConnected(ctx, tracker.Store, device)
 }
 
+// DeviceByClient 读取旧客户端反向映射；未命中返回 false，损坏数据返回错误。
+func (tracker *Tracker) DeviceByClient(ctx context.Context, clientID string) (tracking.Device, bool, error) {
+	var device tracking.Device
+	if clientID == "" {
+		return device, false, nil
+	}
+	raw, err := tracker.Store.HgetCtx(ctx, tracking.ClientKey, clientID)
+	if errors.Is(err, redis.Nil) || raw == "" {
+		return device, false, nil
+	}
+	if err != nil {
+		return device, false, err
+	}
+	if err := json.Unmarshal([]byte(raw), &device); err != nil {
+		return tracking.Device{}, false, err
+	}
+	if device.ProductID == "" || device.DeviceName == "" {
+		return tracking.Device{}, false, errors.New("client device mapping is incomplete")
+	}
+	return device, true, nil
+}
+
 // isDeviceMqttConnected 从旧设备哈希读取当前客户端映射。
 func isDeviceMqttConnected(
 	ctx context.Context,
