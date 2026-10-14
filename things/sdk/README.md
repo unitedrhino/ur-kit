@@ -1,5 +1,7 @@
 # Things SDK 迁移
 
+MQTT 设备客户端的动态订阅管理使用 `protocol/mqtt.Admin`：通过 EMQX v5 管理 HTTP API 查询现有订阅、差量批量订阅或取消订阅。调用方提供管理地址和 API Key/Secret；该客户端不创建额外 MQTT 连接。
+
 公开接入路径与原 SDK 能力的对应关系如下。运行项目仍需注入平台 RPC、事件总线、存储与授权上下文；`upstream/` 是完整原始源码快照，不是可编译的公开依赖。
 
 | 原 SDK 能力 | 公开接入路径 |
