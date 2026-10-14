@@ -2,6 +2,10 @@
 !package.json
 !pnpm-lock.yaml
 !pnpm-workspace.yaml
+!contracts/
+!contracts/manifest.json
+!scripts/
+!scripts/verify_iot_basic.mjs
 !go.mod
 !go.sum
 !web-shared/
@@ -14,6 +18,7 @@
 !sdks/go/**
 !apps/
 !apps/iot-basic/
+!apps/iot-basic/ur-kit.lock.json
 !apps/iot-basic/backend/
 !apps/iot-basic/backend/**
 !apps/iot-basic/web/

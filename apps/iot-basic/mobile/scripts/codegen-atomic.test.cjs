@@ -38,6 +38,18 @@ function codegenDir() {
     files[relative] = createHash('sha256').update(body).digest('hex');
   }
   fs.writeFileSync(path.join(fixture, 'contracts/manifest.json'), JSON.stringify({ saas_commit: 'a'.repeat(40), files }));
+  const verifierDir = path.join(fixture, 'scripts');
+  fs.mkdirSync(verifierDir, { recursive: true });
+  fs.copyFileSync(path.join(root, 'scripts/verify_iot_basic.mjs'), path.join(verifierDir, 'verify_iot_basic.mjs'));
+  const shared = path.join(fixture, 'web-shared');
+  fs.mkdirSync(shared);
+  fs.writeFileSync(path.join(shared, 'source.json'), JSON.stringify({ saasCommit: 'b'.repeat(40), packages: {} }));
+  const lock = spawnSync(process.execPath, [path.join(verifierDir, 'verify_iot_basic.mjs'), '--print'], {
+    cwd: fixture,
+    encoding: 'utf8',
+  });
+  assert.equal(lock.status, 0, lock.stderr);
+  fs.writeFileSync(path.join(fixture, 'apps/iot-basic/ur-kit.lock.json'), lock.stdout);
   const fakeGenerator = path.join(bin, 'openapi-generator-cli');
   fs.writeFileSync(fakeGenerator, `#!/usr/bin/env node
 const fs=require('node:fs'); const path=require('node:path');
@@ -62,7 +74,7 @@ function runCodegen(mobile, extraEnv = {}) {
   });
 }
 
-test('OpenAPI 两组客户端全部成功后替换，失败和合同篡改保留旧产物', () => {
+test('OpenAPI 两组客户端全部成功后替换，生成失败、版本锁和合同篡改保留旧产物', () => {
   const { fixture, mobile, contracts, output } = codegenDir();
   try {
     const first = runCodegen(mobile);
@@ -71,6 +83,15 @@ test('OpenAPI 两组客户端全部成功后替换，失败和合同篡改保留
     assert.match(index, /core_api/);
     assert.match(index, /things_api/);
     assert.equal(fs.readFileSync(path.join(output, 'things-api/client.ts'), 'utf8'), 'things-api.json');
+
+    const lockPath = path.join(fixture, 'apps/iot-basic/ur-kit.lock.json');
+    const locked = JSON.parse(fs.readFileSync(lockPath, 'utf8'));
+    fs.writeFileSync(lockPath, JSON.stringify({ ...locked, webSharedSHA256: '0'.repeat(64) }));
+    const mismatched = runCodegen(mobile);
+    assert.equal(mismatched.status, 1);
+    assert.match(mismatched.stderr, /版本锁不匹配/);
+    assert.equal(fs.readFileSync(path.join(output, 'index.ts'), 'utf8'), index);
+    fs.writeFileSync(lockPath, JSON.stringify(locked));
 
     const failed = runCodegen(mobile, { MOCK_FAIL_SPEC: 'things-api.json' });
     assert.equal(failed.status, 1);

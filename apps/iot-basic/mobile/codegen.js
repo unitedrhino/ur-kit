@@ -30,6 +30,10 @@ const INVALID_ARRAY_SCHEMAS = {
 
 /** verifyContracts 核对源 Swagger 与合同清单的逐文件哈希，返回可生成的文件路径。 */
 function verifyContracts() {
+  execFileSync(process.execPath, [path.join(REPO_ROOT, 'scripts/verify_iot_basic.mjs')], {
+    cwd: REPO_ROOT,
+    stdio: 'inherit',
+  });
   const manifest = JSON.parse(fs.readFileSync(path.join(CONTRACTS_ROOT, 'manifest.json'), 'utf8'));
   if (!/^[0-9a-f]{40}$/.test(manifest.saas_commit || '')) {
     throw new Error('合同清单缺少完整 SaaS 来源提交');
