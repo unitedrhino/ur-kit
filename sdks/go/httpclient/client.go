@@ -21,6 +21,10 @@ type Client struct {
 	ProjectID  string
 	AppID      string
 	HTTP       *http.Client
+	// TokenHeader 仅接受平台支持的两个令牌头；空值使用 ithings-token。
+	TokenHeader string
+	// ResponseLimit 限制响应字节数；空值使用 16 MiB，上限也是 16 MiB。
+	ResponseLimit int64
 }
 
 // APIError 表示平台返回的非成功状态和原始响应体。
@@ -36,6 +40,20 @@ func (err *APIError) Error() string { return fmt.Sprintf("platform API status %d
 func (client Client) PostJSON(ctx context.Context, path string, requestBody, responseBody any) error {
 	if strings.TrimSpace(client.Token) == "" {
 		return errors.New("platform token is required")
+	}
+	tokenHeader := client.TokenHeader
+	if tokenHeader == "" {
+		tokenHeader = "ithings-token"
+	}
+	if tokenHeader != "ithings-token" && tokenHeader != "token" {
+		return errors.New("invalid platform token header")
+	}
+	responseLimit := client.ResponseLimit
+	if responseLimit == 0 {
+		responseLimit = 16 << 20
+	}
+	if responseLimit < 0 || responseLimit > 16<<20 {
+		return errors.New("invalid platform response limit")
 	}
 	base, err := url.Parse(client.BaseURL)
 	if err != nil || base == nil || (base.Scheme != "http" && base.Scheme != "https") || base.Host == "" || base.User != nil || base.RawQuery != "" || base.Fragment != "" || (base.Path != "" && base.Path != "/") {
@@ -54,7 +72,7 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 		return err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set("ithings-token", client.Token)
+	request.Header.Set(tokenHeader, client.Token)
 	if client.TenantCode != "" {
 		request.Header.Set("tenant-code", client.TenantCode)
 	}
@@ -76,9 +94,12 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 		return err
 	}
 	defer response.Body.Close()
-	data, err := io.ReadAll(io.LimitReader(response.Body, 16<<20))
+	data, err := io.ReadAll(io.LimitReader(response.Body, responseLimit+1))
 	if err != nil {
 		return err
+	}
+	if int64(len(data)) > responseLimit {
+		return errors.New("platform response exceeds limit")
 	}
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
 		return &APIError{Status: response.StatusCode, Body: data}

@@ -100,3 +100,34 @@ func TestPostJSONRejectsRedirect(t *testing.T) {
 		t.Fatalf("平台重定向未安全停止: %v leaked=%d", err, leaked.Load())
 	}
 }
+
+// TestPostJSONTokenHeaderAndLimit 验证旧平台令牌头可显式选择，超长响应会在解码前拒绝。
+func TestPostJSONTokenHeaderAndLimit(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		requests.Add(1)
+		if request.Header.Get("token") != "private-token" || request.Header.Get("ithings-token") != "" {
+			t.Error("令牌头未使用受控的 token 形式")
+		}
+		_, _ = writer.Write([]byte(`{"code":200,"data":"long response"}`))
+	}))
+	defer server.Close()
+	client := Client{BaseURL: server.URL, Token: "private-token", TokenHeader: "token", ResponseLimit: 8}
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, nil); err == nil || !strings.Contains(err.Error(), "exceeds limit") {
+		t.Fatalf("超长响应未拒绝: %v", err)
+	}
+	client.ResponseLimit = 1024
+	var response map[string]any
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, &response); err != nil || response["code"] != json.Number("200") {
+		t.Fatalf("受控令牌头或响应解码失败: %v %#v", err, response)
+	}
+	client.TokenHeader = "x-user-role"
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, nil); err == nil || requests.Load() != 2 {
+		t.Fatalf("非法令牌头进入平台请求: %v, requests=%d", err, requests.Load())
+	}
+	client.TokenHeader = "token"
+	client.ResponseLimit = 16<<20 + 1
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, nil); err == nil || requests.Load() != 2 {
+		t.Fatalf("过大响应上限进入平台请求: %v, requests=%d", err, requests.Load())
+	}
+}

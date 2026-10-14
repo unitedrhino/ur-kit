@@ -8,5 +8,6 @@
 - 认证令牌不能为空；服务端身份必须从可信认证器取得。HTTP 非 2xx 响应保留状态码与原始响应体，错误消息不得包含令牌。
 - RPC 客户端同样在调用前拒绝空令牌；Go 与 Node 用固定 `protocolSync.proto` 的本机真实 gRPC 往返验证生成消息及完整项目编号，Java 用生成的服务 Stub 做本机往返。
 - 三语言客户端均禁止跟随平台 HTTP 重定向；收到 3xx 时按非成功状态返回，令牌不得传向跳转目标。调用方注入的 Go HTTP 客户端重定向策略也会被本 SDK 覆盖。
+- Go `httpclient.Client` 默认发送 `ithings-token`；接入保留旧 `token` 头的服务时可显式设置 `TokenHeader: "token"`，其余头名会在请求前拒绝。`ResponseLimit` 可将默认 16 MiB 响应上限收紧，超限时即使调用方不解码响应体也返回错误。
 
 修改这些语义时同步更新三语言测试，并核对 SaaS `apilegacy` 的旧客户端协议。
