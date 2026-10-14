@@ -8,7 +8,7 @@
 
 `protocol/core.Timer` 将原协议的周期同步任务拆成可注入的 `TimerScheduler`：传入任务组，向 Timer 登记一个或多个处理器后调用 `Start`。它使用与原协议一致的任务代码、主题、优先级和默认十分钟周期；平台触发时运行全部处理器并汇总错误。`core.GRPCTimerScheduler` 可直接使用公开 `timed` pb 的任务组与任务客户端，并通过接入方的 `TimerEventBus` 订阅平台事件。任务 RPC 失败后重试不会重复订阅；需要启动即同步时，接入方显式调用 `RunOnce`。本机 gRPC 集成测试已通过，真实平台事件总线联调仍待完成。
 
-`protocol/mqtt` 提供 QoS 1 发布、共享订阅、EMQX 客户端上下线解析和兼容会话事件。`NewPahoTransport` 使用 Paho 客户端，记录已确认订阅并在自动重连后重新订阅，同时保留调用方的连接回调；先调用 `Connect(ctx)`，再通过 `mqtt.NewProtocol` 注入协议核心、事件总线和可选 `tracking.Tracker`，注册设备消息或连接事件处理器。其他 Broker 客户端可实现 `mqtt.Transport`。真实 Broker 收发测试可设置 `UR_KIT_TEST_MQTT_BROKER=tcp://<broker-host>:1883` 后运行 `go test -race ./things/sdk/protocol/mqtt`；原协议定时任务、设备/产品缓存迁移仍需完成。
+`protocol/mqtt` 提供 QoS 1 发布、共享订阅、EMQX 客户端上下线解析和兼容会话事件。`NewPahoTransport` 使用 Paho 客户端，记录已确认订阅并在自动重连后重新订阅，同时保留调用方的连接回调；先调用 `Connect(ctx)`，再通过 `mqtt.NewProtocol` 注入协议核心、事件总线和可选 `tracking.Tracker`，注册设备消息或连接事件处理器。其他 Broker 客户端可实现 `mqtt.Transport`。真实 Broker 收发测试可设置 `UR_KIT_TEST_MQTT_BROKER=tcp://<broker-host>:1883` 后运行 `go test -race ./things/sdk/protocol/mqtt`；周期任务和设备/产品资料缓存已有公开实现，原 Things 服务调用点迁移仍需完成。
 
 `protocol/runtimeconfig.Resolve` 使用公开协议管理 RPC 获取启动配置：无客户端、未找到或空配置时使用本地默认值，RPC 故障和非法 JSON 显式报错；调用方负责传入平台授权上下文。`MergeConfigJSON` 接收调用方自己的配置类型并合并 JSON 覆写，保留未提交字段，允许显式设置 `false`、`0` 和 `null`，不再要求导入 SaaS 内部 `conf` 包。
 
