@@ -29,6 +29,7 @@ func (mapping *ProductIDMap) Refresh(ctx context.Context, source GRPCProductSour
 		size = 100
 	}
 	byRemote := make(map[string]string)
+	seenProducts := make(map[string]struct{})
 	platform := make([]string, 0)
 	var processed int64
 	total := int64(-1)
@@ -50,6 +51,10 @@ func (mapping *ProductIDMap) Refresh(ctx context.Context, source GRPCProductSour
 			if product == nil || product.ProductID == "" {
 				return fmt.Errorf("invalid protocol product on page %d", page)
 			}
+			if _, exists := seenProducts[product.ProductID]; exists {
+				return fmt.Errorf("duplicate protocol product %s on page %d", product.ProductID, page)
+			}
+			seenProducts[product.ProductID] = struct{}{}
 			properties := product.ProtocolConf
 			if product.GetSubProtocolCode().GetValue() == source.ProtocolCode {
 				properties = product.SubProtocolConf

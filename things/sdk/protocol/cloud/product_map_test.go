@@ -74,6 +74,13 @@ func TestProductIDMapRefresh(t *testing.T) {
 	if mapping.Get("remote-2") != "platform-2" {
 		t.Fatal("冲突产品 ID 覆盖了已生效映射")
 	}
+	products[1] = products[0]
+	if err := mapping.Refresh(context.Background(), source, "productID"); err == nil {
+		t.Fatal("分页重复平台产品未拒绝")
+	}
+	if !reflect.DeepEqual(mapping.PlatformIDs(), []string{"platform-1", "platform-2"}) {
+		t.Fatal("重复平台产品污染了已生效映射")
+	}
 	products = nil
 	if err := mapping.Refresh(context.Background(), source, "productID"); err != nil {
 		t.Fatal(err)
