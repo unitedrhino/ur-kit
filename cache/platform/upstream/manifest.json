@@ -1,0 +1,15 @@
+{
+  "files": {
+    "imDelivered.go": "89e4c119402f978919c997217d79ed89b4b03f6ea19d27081f174e3594143bf1",
+    "imDelivered_integration_test.go": "3abef44c07c824f87ab2da9a77795415fb80b67034116442c5303edd4295ed6d",
+    "imDelivered_redis_test.go": "6d3a7d81f04f40050f18e052394c3056412dd32ae2c0e7f18f1273f5db333409",
+    "tenant.go": "1d09bc1f0ffb2b05b92c071746d184bc80da519b84a13b0d6d5eec2e3f843fc0",
+    "tenant_adapter.go": "21eeebdcb429973770b661a67283f6d5ed4ba160efe0095ef4f7c8ee6c9443b8",
+    "tenant_adapter_integration_test.go": "8600dda5888ea764711e2f83df598ec93f017dcdd9fd5a8b83e0af96e0a94197",
+    "userAuthArea.go": "8df607ec14ca1c7681953419df717767f0402782e77ab279098185d6c0aa5393",
+    "userAuthProject.go": "ec39ff7a22ee35a394f33f593a94ca7331cda7413322e51cf60da39b5d7850e7",
+    "userOnline.go": "d5f5b430491602138a084db56a5642b9350e7562368513db4ca169f915e93193"
+  },
+  "saas_commit": "439f67f2a3e88203fa322400923a9e5b8b6bdffd",
+  "source": "backend/core/share/caches/"
+}

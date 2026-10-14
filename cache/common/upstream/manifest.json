@@ -1,0 +1,14 @@
+{
+  "files": {
+    "cache.go": "2390d0836f6316f416957181c5b0031708ad49873bcdbe5b3b61f1c35ef5a3b0",
+    "cache_invalidation_order_test.go": "8517ced76129e287dc43a98654745a48edf0b00093bb6deb8b6f0e678ecbd102",
+    "cache_publication.go": "2e50a9d6b8c65302f8ca98bd7f2ec695215f6fa44414b4c7db110da282e40636",
+    "cache_publication_compat_test.go": "ad67e39a08d9736b6898b809fa587d7b60c1bf2cd84cdd3a0cb353a39d8a1530",
+    "cache_race_test.go": "9795b688ad00118b429fd77fc1f0743e6b31799076d3cdc486628881d5d4d5d8",
+    "cache_test.go": "fb02b3ee9de9491d709270aa96825b49a46d3b8cbdff3f7b34c206f5eaf412fe",
+    "common.go": "339147064345bd319b9cf0467a125a9696a9fceaebdc8db487b55bed0bd0ab41",
+    "utils.go": "572b234b60453247ab6a046b2a58453686e2d932fdfc93ae79ddff8e1b04de38"
+  },
+  "saas_commit": "439f67f2a3e88203fa322400923a9e5b8b6bdffd",
+  "source": "backend/share/caches/"
+}

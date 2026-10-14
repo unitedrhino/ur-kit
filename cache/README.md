@@ -6,4 +6,4 @@
 
 `redis/` 实现三级缓存的 `GetString`/`SetTTL`/`SetNXTTL`/`Delete`、在线状态的 TTL 存储及 IM 游标的原子最大值更新；Lua 使用十进制字符串比较，保留大于 JavaScript 安全整数的 64 位 ID。使用 `NewStore(redisClient)` 后可注入 `common.NewLayeredCache`、`platform.NewUserOnlineCache` 和 `platform.NewDeliveredCursor`。
 
-`common/upstream` 与 `platform/upstream` 是 SaaS 当前缓存代码快照，仍保留原始 Redis、事件总线与业务模型依赖；SaaS 服务使用公共接口前还需接入事件适配器并迁移调用点。快照本身不是可发布包。
+`common/upstream` 与 `platform/upstream` 是合同锁定的 SaaS 提交中的完整缓存源码快照，分别对应 `backend/share/caches` 和 `backend/core/share/caches`。运行 `python3 scripts/sync_cache.py --saas <saas-path> --sha <contracts/manifest.json 中的完整提交>` 更新，追加 `--check` 只读核对 17 份文件及哈希；来源提交必须与合同清单一致。两个目录的 `go.mod` 仅隔离仍含私有 Redis、事件总线与业务模型导入的原源码，不属于 SaaS 快照。可发布接口位于上层 `common/`、`platform/` 和 `redis/`；SaaS 服务使用这些接口前仍需接入适配器并迁移调用点。
