@@ -1,7 +1,7 @@
 // 本文件验证生成的 Things HTTP 客户端以字符串无损发送大整数 ID。
 const assert = require('node:assert/strict');
 const test = require('node:test');
-const { Configuration, ThingsAlarmInfoApi } = require('./dist/things/index.js');
+const { Configuration, ThingsAlarmInfoApi, ThingsProjectAlarmSourceApi } = require('./dist/things/index.js');
 
 test('Things 告警 ID 列表保持大整数原文并携带认证头', async () => {
   let called = false;
@@ -25,4 +25,30 @@ test('Things 告警 ID 列表保持大整数原文并携带认证头', async () 
     alarmEvaluateTriggerReq: { alarmIDStrings: ['9007199254740993'] },
   });
   assert.equal(called, true);
+});
+
+test('Things 结构来源接口保留项目 ID 字符串且只生成一个写入方法', async () => {
+  const seen = [];
+  const api = new ThingsProjectAlarmSourceApi(new Configuration({
+    basePath: 'http://local.test',
+    headers: { Authorization: 'Bearer service-token' },
+    fetchApi: async (url, init) => {
+      seen.push([url, init.method, init.headers.Authorization, JSON.parse(init.body)]);
+      return new Response(JSON.stringify({ code: 200, data: { alarmStatus: 5 } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+  }));
+  const result = await api.postApiV1ThingsProjectAlarmSourceStructureSet({
+    projectAlarmSourceSetReq: { projectID: '9007199254740993', level: 4 },
+  });
+  assert.equal(result.data?.alarmStatus, 5);
+  assert.deepEqual(seen, [[
+    'http://local.test/api/v1/things/project/alarm-source/structure-set',
+    'POST',
+    'Bearer service-token',
+    { projectID: '9007199254740993', level: 4 },
+  ]]);
+  assert.equal('postApiV1ThingsProjectAlarmSourceStructureSet_1' in api, false);
 });

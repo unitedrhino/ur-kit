@@ -28,6 +28,7 @@ const (
 	ProjectManage_ProjectAttachmentAdd_FullMethodName    = "/dm.ProjectManage/projectAttachmentAdd"
 	ProjectManage_ProjectAttachmentDelete_FullMethodName = "/dm.ProjectManage/projectAttachmentDelete"
 	ProjectManage_ProjectInfoGetList_FullMethodName      = "/dm.ProjectManage/projectInfoGetList"
+	ProjectManage_ProjectAlarmSourceSet_FullMethodName   = "/dm.ProjectManage/projectAlarmSourceSet"
 	ProjectManage_ProjectProfileGetOne_FullMethodName    = "/dm.ProjectManage/projectProfileGetOne"
 	ProjectManage_ProjectProfileUpdate_FullMethodName    = "/dm.ProjectManage/projectProfileUpdate"
 	ProjectManage_ProjectProfileGetList_FullMethodName   = "/dm.ProjectManage/projectProfileGetList"
@@ -49,6 +50,7 @@ type ProjectManageClient interface {
 	ProjectAttachmentAdd(ctx context.Context, in *ProjectAttachmentAddReq, opts ...grpc.CallOption) (*ProjectAttachmentAddResp, error)
 	ProjectAttachmentDelete(ctx context.Context, in *ProjectAttachmentDeleteReq, opts ...grpc.CallOption) (*ProjectEmpty, error)
 	ProjectInfoGetList(ctx context.Context, in *ProjectInfoGetListReq, opts ...grpc.CallOption) (*ProjectInfoGetListResp, error)
+	ProjectAlarmSourceSet(ctx context.Context, in *ProjectAlarmSourceSetReq, opts ...grpc.CallOption) (*ProjectAlarmSourceSetResp, error)
 	ProjectProfileGetOne(ctx context.Context, in *ProjectProfileGetOneReq, opts ...grpc.CallOption) (*ProjectProfile, error)
 	ProjectProfileUpdate(ctx context.Context, in *ProjectProfile, opts ...grpc.CallOption) (*ProjectEmpty, error)
 	ProjectProfileGetList(ctx context.Context, in *ProjectProfileGetListReq, opts ...grpc.CallOption) (*ProjectProfileGetListResp, error)
@@ -131,6 +133,16 @@ func (c *projectManageClient) ProjectInfoGetList(ctx context.Context, in *Projec
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ProjectInfoGetListResp)
 	err := c.cc.Invoke(ctx, ProjectManage_ProjectInfoGetList_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *projectManageClient) ProjectAlarmSourceSet(ctx context.Context, in *ProjectAlarmSourceSetReq, opts ...grpc.CallOption) (*ProjectAlarmSourceSetResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectAlarmSourceSetResp)
+	err := c.cc.Invoke(ctx, ProjectManage_ProjectAlarmSourceSet_FullMethodName, in, out, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -228,6 +240,7 @@ type ProjectManageServer interface {
 	ProjectAttachmentAdd(context.Context, *ProjectAttachmentAddReq) (*ProjectAttachmentAddResp, error)
 	ProjectAttachmentDelete(context.Context, *ProjectAttachmentDeleteReq) (*ProjectEmpty, error)
 	ProjectInfoGetList(context.Context, *ProjectInfoGetListReq) (*ProjectInfoGetListResp, error)
+	ProjectAlarmSourceSet(context.Context, *ProjectAlarmSourceSetReq) (*ProjectAlarmSourceSetResp, error)
 	ProjectProfileGetOne(context.Context, *ProjectProfileGetOneReq) (*ProjectProfile, error)
 	ProjectProfileUpdate(context.Context, *ProjectProfile) (*ProjectEmpty, error)
 	ProjectProfileGetList(context.Context, *ProjectProfileGetListReq) (*ProjectProfileGetListResp, error)
@@ -266,6 +279,9 @@ func (UnimplementedProjectManageServer) ProjectAttachmentDelete(context.Context,
 }
 func (UnimplementedProjectManageServer) ProjectInfoGetList(context.Context, *ProjectInfoGetListReq) (*ProjectInfoGetListResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProjectInfoGetList not implemented")
+}
+func (UnimplementedProjectManageServer) ProjectAlarmSourceSet(context.Context, *ProjectAlarmSourceSetReq) (*ProjectAlarmSourceSetResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ProjectAlarmSourceSet not implemented")
 }
 func (UnimplementedProjectManageServer) ProjectProfileGetOne(context.Context, *ProjectProfileGetOneReq) (*ProjectProfile, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProjectProfileGetOne not implemented")
@@ -434,6 +450,24 @@ func _ProjectManage_ProjectInfoGetList_Handler(srv interface{}, ctx context.Cont
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ProjectManageServer).ProjectInfoGetList(ctx, req.(*ProjectInfoGetListReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ProjectManage_ProjectAlarmSourceSet_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectAlarmSourceSetReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectManageServer).ProjectAlarmSourceSet(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectManage_ProjectAlarmSourceSet_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectManageServer).ProjectAlarmSourceSet(ctx, req.(*ProjectAlarmSourceSetReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -616,6 +650,10 @@ var ProjectManage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "projectInfoGetList",
 			Handler:    _ProjectManage_ProjectInfoGetList_Handler,
+		},
+		{
+			MethodName: "projectAlarmSourceSet",
+			Handler:    _ProjectManage_ProjectAlarmSourceSet_Handler,
 		},
 		{
 			MethodName: "projectProfileGetOne",

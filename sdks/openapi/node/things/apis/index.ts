@@ -42,6 +42,7 @@ export * from './ThingsProductCustomApi';
 export * from './ThingsProductInfoApi';
 export * from './ThingsProductRemoteConfigApi';
 export * from './ThingsProductSchemaApi';
+export * from './ThingsProjectAlarmSourceApi';
 export * from './ThingsProjectAttachmentApi';
 export * from './ThingsProjectCustomDataApi';
 export * from './ThingsProjectInfoApi';

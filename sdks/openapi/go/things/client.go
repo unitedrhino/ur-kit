@@ -133,6 +133,8 @@ type APIClient struct {
 
 	ThingsProductSchemaAPI *ThingsProductSchemaAPIService
 
+	ThingsProjectAlarmSourceAPI *ThingsProjectAlarmSourceAPIService
+
 	ThingsProjectAttachmentAPI *ThingsProjectAttachmentAPIService
 
 	ThingsProjectCustomDataAPI *ThingsProjectCustomDataAPIService
@@ -234,6 +236,7 @@ func NewAPIClient(cfg *Configuration) *APIClient {
 	c.ThingsProductInfoAPI = (*ThingsProductInfoAPIService)(&c.common)
 	c.ThingsProductRemoteConfigAPI = (*ThingsProductRemoteConfigAPIService)(&c.common)
 	c.ThingsProductSchemaAPI = (*ThingsProductSchemaAPIService)(&c.common)
+	c.ThingsProjectAlarmSourceAPI = (*ThingsProjectAlarmSourceAPIService)(&c.common)
 	c.ThingsProjectAttachmentAPI = (*ThingsProjectAttachmentAPIService)(&c.common)
 	c.ThingsProjectCustomDataAPI = (*ThingsProjectCustomDataAPIService)(&c.common)
 	c.ThingsProjectInfoAPI = (*ThingsProjectInfoAPIService)(&c.common)

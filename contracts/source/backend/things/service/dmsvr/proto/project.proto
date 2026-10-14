@@ -27,6 +27,13 @@ message ProjectAttachmentDeleteReq{
   int64 projectID = 1; // 项目ID
   int64 id = 2; // 附件ID
 }
+message ProjectAlarmSourceSetReq{
+  int64 projectID = 1; // 当前已授权的项目ID
+  int64 level = 2; // 结构监测来源等级，1表示无活跃预警
+}
+message ProjectAlarmSourceSetResp{
+  int64 alarmStatus = 1; // 聚合后的项目展示等级
+}
 
 
 service ProjectManage {
@@ -37,6 +44,7 @@ service ProjectManage {
   rpc projectAttachmentAdd (ProjectAttachmentAddReq) returns (ProjectAttachmentAddResp); // 追加项目私有附件
   rpc projectAttachmentDelete (ProjectAttachmentDeleteReq) returns (ProjectEmpty); // 删除项目附件
   rpc projectInfoGetList (ProjectInfoGetListReq) returns (ProjectInfoGetListResp); //获取项目信息列表（支持分页和过滤）
+  rpc projectAlarmSourceSet (ProjectAlarmSourceSetReq) returns (ProjectAlarmSourceSetResp); //结构服务写入当前项目的预警来源等级
 
   rpc projectProfileGetOne(ProjectProfileGetOneReq)returns(ProjectProfile); //获取项目配置文件详情
   rpc projectProfileUpdate(ProjectProfile)returns(ProjectEmpty); //更新项目配置文件

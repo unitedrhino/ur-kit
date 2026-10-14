@@ -10498,6 +10498,36 @@
         "title": "ProductSchemaTslImportReq",
         "type": "object"
       },
+      "ProjectAlarmSourceSetReq": {
+        "properties": {
+          "level": {
+            "format": "int64",
+            "type": "integer"
+          },
+          "projectID": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectID",
+          "level"
+        ],
+        "title": "ProjectAlarmSourceSetReq",
+        "type": "object"
+      },
+      "ProjectAlarmSourceSetResp": {
+        "properties": {
+          "alarmStatus": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "alarmStatus"
+        ],
+        "title": "ProjectAlarmSourceSetResp",
+        "type": "object"
+      },
       "ProjectAttachmentAddReq": {
         "properties": {
           "filePath": {
@@ -23888,6 +23918,61 @@
         "x-log-mode": "1",
         "x-oper-type": "update",
         "x-resource": "things/product/schema"
+      }
+    },
+    "/api/v1/things/project/alarm-source/structure-set": {
+      "post": {
+        "description": "仅具有结构监测服务角色和项目读写权限的服务账号可更新当前项目的结构监测来源等级。",
+        "operationId": "postApiV1ThingsProjectAlarm-sourceStructure-set",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectAlarmSourceSetReq"
+              }
+            }
+          },
+          "description": " ProjectAlarmSourceSetReq 使用当前服务身份同步结构来源等级。",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProjectAlarmSourceSetResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "同步结构监测项目预警等级",
+        "tags": [
+          "things/project/alarmSource",
+          "thingsProjectAlarmSource"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "things/project/alarmSource",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "things/project/alarm-source"
       }
     },
     "/api/v1/things/project/attachment/add": {

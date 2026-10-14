@@ -1,3 +1,4 @@
+// 本文件提供物模型数组标识解析及平台数据库查询适配。
 package schema
 
 import (
@@ -6,6 +7,7 @@ import (
 	"gitee.com/unitedrhino/share/errors"
 	"gitee.com/unitedrhino/share/stores"
 	"gitee.com/unitedrhino/share/utils"
+	kitSchema "github.com/unitedrhino/ur-kit/things/sdk/schema"
 	sq "gitee.com/unitedrhino/squirrel"
 	"gorm.io/gorm"
 
@@ -16,45 +18,30 @@ func GenArray(identifier string, num int) string {
 	return fmt.Sprintf("%s.%d", identifier, num)
 }
 
+// WhereArray 将公开 SDK 的数组位置筛选应用于 GORM，保留单位置与范围查询语义。
 func WhereArray(db *gorm.DB, identifier string, pos string) *gorm.DB {
-	arrs := strings.Split(identifier, ".")
-	if len(arrs) <= 1 {
-		return db
-	}
-	num, err := utils.ToIntE(arrs[1])
-	if err != nil {
-		if arrs[1] == "*" {
-			return db
-		}
-		nums, err := utils.ParseNumberString(arrs[1])
-		if err == nil {
-			return db.Where(fmt.Sprintf("%s IN ?", pos), nums)
-		}
-		return db
-	}
-	db = db.Where(fmt.Sprintf("%s = ?", pos), num)
-	return db
+    filter := kitSchema.ParseArrayPositionFilter(identifier)
+    if len(filter.Values) == 0 {
+        return db
+    }
+    if filter.IsRange {
+        return db.Where(fmt.Sprintf("%s IN ?", pos), filter.Values)
+    }
+    return db.Where(fmt.Sprintf("%s = ?", pos), int(filter.Values[0]))
 }
 
+// WhereArray2 将公开 SDK 的数组位置筛选应用于 TDengine SQL 构造器。
 func WhereArray2(db sq.SelectBuilder, identifier string, pos string) sq.SelectBuilder {
-	arrs := strings.Split(identifier, ".")
-	if len(arrs) <= 1 {
-		return db
-	}
-	num, err := utils.ToIntE(arrs[1])
-	if err != nil {
-		if arrs[1] == "*" {
-			return db
-		}
-		nums, err := utils.ParseNumberString(arrs[1])
-		if err == nil {
-			return db.Where(fmt.Sprintf("%s IN (%s)", pos, stores.ArrayToSql(nums)))
-		}
-		return db
-	}
-	db = db.Where(fmt.Sprintf("%s = ?", pos), num)
-	return db
+    filter := kitSchema.ParseArrayPositionFilter(identifier)
+    if len(filter.Values) == 0 {
+        return db
+    }
+    if filter.IsRange {
+        return db.Where(fmt.Sprintf("%s IN (%s)", pos, stores.ArrayToSql(filter.Values)))
+    }
+    return db.Where(fmt.Sprintf("%s = ?", pos), int(filter.Values[0]))
 }
+
 func GetArray(identifier string) (ident string, num int, ok bool) {
 	arrs := strings.Split(identifier, ".")
 	if len(arrs) <= 1 {

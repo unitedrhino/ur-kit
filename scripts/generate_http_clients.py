@@ -37,6 +37,11 @@ def prepared_spec(name: str, temporary: Path) -> Path:
         raise SystemExit(f"{name}.{bad}.lists 已变化，需复核 Swagger 修正规则：{item}")
     schemas[bad]["properties"]["lists"]["items"]["items"] = {}
     if name == "things-api":
+        alarm_sync = spec["paths"]["/api/v1/things/project/alarm-source/structure-set"]["post"]
+        if alarm_sync.get("tags") != ["things/project/alarmSource", "thingsProjectAlarmSource"]:
+            raise SystemExit(f"结构来源接口 Swagger 标签已变化，需复核重复客户端修正规则：{alarm_sync.get('tags')}")
+        # 两个原始标签归一成同一类名，生成器会为一个接口产出两份相同方法；只在客户端视图保留业务组标签。
+        alarm_sync["tags"] = ["things/project/alarmSource"]
         for schema in ("DataAreaDetail", "DeviceSchemaUpdateReq"):
             empty = schemas[schema]["properties"].pop("", None)
             if not isinstance(empty, dict) or "$ref" not in empty:

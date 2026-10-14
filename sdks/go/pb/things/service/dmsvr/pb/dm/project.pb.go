@@ -292,6 +292,102 @@ func (x *ProjectAttachmentDeleteReq) GetId() int64 {
 	return 0
 }
 
+type ProjectAlarmSourceSetReq struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	ProjectID     int64                  `protobuf:"varint,1,opt,name=projectID,proto3" json:"projectID,omitempty"` // 当前已授权的项目ID
+	Level         int64                  `protobuf:"varint,2,opt,name=level,proto3" json:"level,omitempty"`         // 结构监测来源等级，1表示无活跃预警
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProjectAlarmSourceSetReq) Reset() {
+	*x = ProjectAlarmSourceSetReq{}
+	mi := &file_project_proto_msgTypes[5]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProjectAlarmSourceSetReq) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectAlarmSourceSetReq) ProtoMessage() {}
+
+func (x *ProjectAlarmSourceSetReq) ProtoReflect() protoreflect.Message {
+	mi := &file_project_proto_msgTypes[5]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectAlarmSourceSetReq.ProtoReflect.Descriptor instead.
+func (*ProjectAlarmSourceSetReq) Descriptor() ([]byte, []int) {
+	return file_project_proto_rawDescGZIP(), []int{5}
+}
+
+func (x *ProjectAlarmSourceSetReq) GetProjectID() int64 {
+	if x != nil {
+		return x.ProjectID
+	}
+	return 0
+}
+
+func (x *ProjectAlarmSourceSetReq) GetLevel() int64 {
+	if x != nil {
+		return x.Level
+	}
+	return 0
+}
+
+type ProjectAlarmSourceSetResp struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	AlarmStatus   int64                  `protobuf:"varint,1,opt,name=alarmStatus,proto3" json:"alarmStatus,omitempty"` // 聚合后的项目展示等级
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ProjectAlarmSourceSetResp) Reset() {
+	*x = ProjectAlarmSourceSetResp{}
+	mi := &file_project_proto_msgTypes[6]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ProjectAlarmSourceSetResp) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ProjectAlarmSourceSetResp) ProtoMessage() {}
+
+func (x *ProjectAlarmSourceSetResp) ProtoReflect() protoreflect.Message {
+	mi := &file_project_proto_msgTypes[6]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ProjectAlarmSourceSetResp.ProtoReflect.Descriptor instead.
+func (*ProjectAlarmSourceSetResp) Descriptor() ([]byte, []int) {
+	return file_project_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *ProjectAlarmSourceSetResp) GetAlarmStatus() int64 {
+	if x != nil {
+		return x.AlarmStatus
+	}
+	return 0
+}
+
 type ProjectInfo struct {
 	state             protoimpl.MessageState  `protogen:"open.v1"`
 	TenantCode        string                  `protobuf:"bytes,20,opt,name=tenantCode,proto3" json:"tenantCode,omitempty"`               //租户号
@@ -325,7 +421,7 @@ type ProjectInfo struct {
 
 func (x *ProjectInfo) Reset() {
 	*x = ProjectInfo{}
-	mi := &file_project_proto_msgTypes[5]
+	mi := &file_project_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -337,7 +433,7 @@ func (x *ProjectInfo) String() string {
 func (*ProjectInfo) ProtoMessage() {}
 
 func (x *ProjectInfo) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[5]
+	mi := &file_project_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -350,7 +446,7 @@ func (x *ProjectInfo) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectInfo.ProtoReflect.Descriptor instead.
 func (*ProjectInfo) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{5}
+	return file_project_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *ProjectInfo) GetTenantCode() string {
@@ -546,7 +642,7 @@ type ProjectInfoGetListReq struct {
 
 func (x *ProjectInfoGetListReq) Reset() {
 	*x = ProjectInfoGetListReq{}
-	mi := &file_project_proto_msgTypes[6]
+	mi := &file_project_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -558,7 +654,7 @@ func (x *ProjectInfoGetListReq) String() string {
 func (*ProjectInfoGetListReq) ProtoMessage() {}
 
 func (x *ProjectInfoGetListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[6]
+	mi := &file_project_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -571,7 +667,7 @@ func (x *ProjectInfoGetListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectInfoGetListReq.ProtoReflect.Descriptor instead.
 func (*ProjectInfoGetListReq) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{6}
+	return file_project_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *ProjectInfoGetListReq) GetPage() *PageInfo {
@@ -654,7 +750,7 @@ type ProjectInfoGetListResp struct {
 
 func (x *ProjectInfoGetListResp) Reset() {
 	*x = ProjectInfoGetListResp{}
-	mi := &file_project_proto_msgTypes[7]
+	mi := &file_project_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -666,7 +762,7 @@ func (x *ProjectInfoGetListResp) String() string {
 func (*ProjectInfoGetListResp) ProtoMessage() {}
 
 func (x *ProjectInfoGetListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[7]
+	mi := &file_project_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -679,7 +775,7 @@ func (x *ProjectInfoGetListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectInfoGetListResp.ProtoReflect.Descriptor instead.
 func (*ProjectInfoGetListResp) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{7}
+	return file_project_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *ProjectInfoGetListResp) GetTotal() int64 {
@@ -706,7 +802,7 @@ type ProjectProfile struct {
 
 func (x *ProjectProfile) Reset() {
 	*x = ProjectProfile{}
-	mi := &file_project_proto_msgTypes[8]
+	mi := &file_project_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -718,7 +814,7 @@ func (x *ProjectProfile) String() string {
 func (*ProjectProfile) ProtoMessage() {}
 
 func (x *ProjectProfile) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[8]
+	mi := &file_project_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -731,7 +827,7 @@ func (x *ProjectProfile) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectProfile.ProtoReflect.Descriptor instead.
 func (*ProjectProfile) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{8}
+	return file_project_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *ProjectProfile) GetCode() string {
@@ -757,7 +853,7 @@ type ProjectProfileGetOneReq struct {
 
 func (x *ProjectProfileGetOneReq) Reset() {
 	*x = ProjectProfileGetOneReq{}
-	mi := &file_project_proto_msgTypes[9]
+	mi := &file_project_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -769,7 +865,7 @@ func (x *ProjectProfileGetOneReq) String() string {
 func (*ProjectProfileGetOneReq) ProtoMessage() {}
 
 func (x *ProjectProfileGetOneReq) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[9]
+	mi := &file_project_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -782,7 +878,7 @@ func (x *ProjectProfileGetOneReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectProfileGetOneReq.ProtoReflect.Descriptor instead.
 func (*ProjectProfileGetOneReq) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{9}
+	return file_project_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *ProjectProfileGetOneReq) GetCode() string {
@@ -801,7 +897,7 @@ type ProjectProfileGetListReq struct {
 
 func (x *ProjectProfileGetListReq) Reset() {
 	*x = ProjectProfileGetListReq{}
-	mi := &file_project_proto_msgTypes[10]
+	mi := &file_project_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -813,7 +909,7 @@ func (x *ProjectProfileGetListReq) String() string {
 func (*ProjectProfileGetListReq) ProtoMessage() {}
 
 func (x *ProjectProfileGetListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[10]
+	mi := &file_project_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -826,7 +922,7 @@ func (x *ProjectProfileGetListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectProfileGetListReq.ProtoReflect.Descriptor instead.
 func (*ProjectProfileGetListReq) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{10}
+	return file_project_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *ProjectProfileGetListReq) GetCodes() []string {
@@ -845,7 +941,7 @@ type ProjectProfileGetListResp struct {
 
 func (x *ProjectProfileGetListResp) Reset() {
 	*x = ProjectProfileGetListResp{}
-	mi := &file_project_proto_msgTypes[11]
+	mi := &file_project_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -857,7 +953,7 @@ func (x *ProjectProfileGetListResp) String() string {
 func (*ProjectProfileGetListResp) ProtoMessage() {}
 
 func (x *ProjectProfileGetListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[11]
+	mi := &file_project_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -870,7 +966,7 @@ func (x *ProjectProfileGetListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectProfileGetListResp.ProtoReflect.Descriptor instead.
 func (*ProjectProfileGetListResp) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{11}
+	return file_project_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *ProjectProfileGetListResp) GetProfiles() []*ProjectProfile {
@@ -893,7 +989,7 @@ type ProjectCrud struct {
 
 func (x *ProjectCrud) Reset() {
 	*x = ProjectCrud{}
-	mi := &file_project_proto_msgTypes[12]
+	mi := &file_project_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -905,7 +1001,7 @@ func (x *ProjectCrud) String() string {
 func (*ProjectCrud) ProtoMessage() {}
 
 func (x *ProjectCrud) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[12]
+	mi := &file_project_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -918,7 +1014,7 @@ func (x *ProjectCrud) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCrud.ProtoReflect.Descriptor instead.
 func (*ProjectCrud) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{12}
+	return file_project_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *ProjectCrud) GetId() int64 {
@@ -967,7 +1063,7 @@ type ProjectCrudGetListReq struct {
 
 func (x *ProjectCrudGetListReq) Reset() {
 	*x = ProjectCrudGetListReq{}
-	mi := &file_project_proto_msgTypes[13]
+	mi := &file_project_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -979,7 +1075,7 @@ func (x *ProjectCrudGetListReq) String() string {
 func (*ProjectCrudGetListReq) ProtoMessage() {}
 
 func (x *ProjectCrudGetListReq) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[13]
+	mi := &file_project_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -992,7 +1088,7 @@ func (x *ProjectCrudGetListReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCrudGetListReq.ProtoReflect.Descriptor instead.
 func (*ProjectCrudGetListReq) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{13}
+	return file_project_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *ProjectCrudGetListReq) GetPage() *PageInfo {
@@ -1026,7 +1122,7 @@ type ProjectCrudGetListResp struct {
 
 func (x *ProjectCrudGetListResp) Reset() {
 	*x = ProjectCrudGetListResp{}
-	mi := &file_project_proto_msgTypes[14]
+	mi := &file_project_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1038,7 +1134,7 @@ func (x *ProjectCrudGetListResp) String() string {
 func (*ProjectCrudGetListResp) ProtoMessage() {}
 
 func (x *ProjectCrudGetListResp) ProtoReflect() protoreflect.Message {
-	mi := &file_project_proto_msgTypes[14]
+	mi := &file_project_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1051,7 +1147,7 @@ func (x *ProjectCrudGetListResp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ProjectCrudGetListResp.ProtoReflect.Descriptor instead.
 func (*ProjectCrudGetListResp) Descriptor() ([]byte, []int) {
-	return file_project_proto_rawDescGZIP(), []int{14}
+	return file_project_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *ProjectCrudGetListResp) GetTotal() int64 {
@@ -1089,7 +1185,12 @@ const file_project_proto_rawDesc = "" +
 	"\x05useBy\x18\x04 \x01(\tR\x05useBy\"J\n" +
 	"\x1aProjectAttachmentDeleteReq\x12\x1c\n" +
 	"\tprojectID\x18\x01 \x01(\x03R\tprojectID\x12\x0e\n" +
-	"\x02id\x18\x02 \x01(\x03R\x02id\"\xff\a\n" +
+	"\x02id\x18\x02 \x01(\x03R\x02id\"N\n" +
+	"\x18ProjectAlarmSourceSetReq\x12\x1c\n" +
+	"\tprojectID\x18\x01 \x01(\x03R\tprojectID\x12\x14\n" +
+	"\x05level\x18\x02 \x01(\x03R\x05level\"=\n" +
+	"\x19ProjectAlarmSourceSetResp\x12 \n" +
+	"\valarmStatus\x18\x01 \x01(\x03R\valarmStatus\"\xff\a\n" +
 	"\vProjectInfo\x12\x1e\n" +
 	"\n" +
 	"tenantCode\x18\x14 \x01(\tR\n" +
@@ -1168,7 +1269,7 @@ const file_project_proto_rawDesc = "" +
 	"\x05value\x18\x02 \x01(\v2\v.dm.CompareR\x05value:\x028\x01\"S\n" +
 	"\x16ProjectCrudGetListResp\x12\x14\n" +
 	"\x05total\x18\x01 \x01(\x03R\x05total\x12#\n" +
-	"\x04list\x18\x02 \x03(\v2\x0f.dm.ProjectCrudR\x04list2\xee\a\n" +
+	"\x04list\x18\x02 \x03(\v2\x0f.dm.ProjectCrudR\x04list2\xc4\b\n" +
 	"\rProjectManage\x127\n" +
 	"\x11projectInfoCreate\x12\x0f.dm.ProjectInfo\x1a\x11.dm.ProjectWithID\x126\n" +
 	"\x11projectInfoUpdate\x12\x0f.dm.ProjectInfo\x1a\x10.dm.ProjectEmpty\x128\n" +
@@ -1176,7 +1277,8 @@ const file_project_proto_rawDesc = "" +
 	"\x11projectInfoGetOne\x12\x11.dm.ProjectWithID\x1a\x0f.dm.ProjectInfo\x12Q\n" +
 	"\x14projectAttachmentAdd\x12\x1b.dm.ProjectAttachmentAddReq\x1a\x1c.dm.ProjectAttachmentAddResp\x12K\n" +
 	"\x17projectAttachmentDelete\x12\x1e.dm.ProjectAttachmentDeleteReq\x1a\x10.dm.ProjectEmpty\x12K\n" +
-	"\x12projectInfoGetList\x12\x19.dm.ProjectInfoGetListReq\x1a\x1a.dm.ProjectInfoGetListResp\x12G\n" +
+	"\x12projectInfoGetList\x12\x19.dm.ProjectInfoGetListReq\x1a\x1a.dm.ProjectInfoGetListResp\x12T\n" +
+	"\x15projectAlarmSourceSet\x12\x1c.dm.ProjectAlarmSourceSetReq\x1a\x1d.dm.ProjectAlarmSourceSetResp\x12G\n" +
 	"\x14projectProfileGetOne\x12\x1b.dm.ProjectProfileGetOneReq\x1a\x12.dm.ProjectProfile\x12<\n" +
 	"\x14projectProfileUpdate\x12\x12.dm.ProjectProfile\x1a\x10.dm.ProjectEmpty\x12T\n" +
 	"\x15projectProfileGetList\x12\x1c.dm.ProjectProfileGetListReq\x1a\x1d.dm.ProjectProfileGetListResp\x127\n" +
@@ -1198,83 +1300,87 @@ func file_project_proto_rawDescGZIP() []byte {
 	return file_project_proto_rawDescData
 }
 
-var file_project_proto_msgTypes = make([]protoimpl.MessageInfo, 17)
+var file_project_proto_msgTypes = make([]protoimpl.MessageInfo, 19)
 var file_project_proto_goTypes = []any{
 	(*ProjectWithID)(nil),              // 0: dm.ProjectWithID
 	(*ProjectEmpty)(nil),               // 1: dm.ProjectEmpty
 	(*ProjectAttachmentAddReq)(nil),    // 2: dm.ProjectAttachmentAddReq
 	(*ProjectAttachmentAddResp)(nil),   // 3: dm.ProjectAttachmentAddResp
 	(*ProjectAttachmentDeleteReq)(nil), // 4: dm.ProjectAttachmentDeleteReq
-	(*ProjectInfo)(nil),                // 5: dm.ProjectInfo
-	(*ProjectInfoGetListReq)(nil),      // 6: dm.ProjectInfoGetListReq
-	(*ProjectInfoGetListResp)(nil),     // 7: dm.ProjectInfoGetListResp
-	(*ProjectProfile)(nil),             // 8: dm.ProjectProfile
-	(*ProjectProfileGetOneReq)(nil),    // 9: dm.ProjectProfileGetOneReq
-	(*ProjectProfileGetListReq)(nil),   // 10: dm.ProjectProfileGetListReq
-	(*ProjectProfileGetListResp)(nil),  // 11: dm.ProjectProfileGetListResp
-	(*ProjectCrud)(nil),                // 12: dm.ProjectCrud
-	(*ProjectCrudGetListReq)(nil),      // 13: dm.ProjectCrudGetListReq
-	(*ProjectCrudGetListResp)(nil),     // 14: dm.ProjectCrudGetListResp
-	nil,                                // 15: dm.ProjectInfo.TagsEntry
-	nil,                                // 16: dm.ProjectCrudGetListReq.ParamsEntry
-	(*Point)(nil),                      // 17: dm.Point
-	(*wrapperspb.FloatValue)(nil),      // 18: google.protobuf.FloatValue
-	(*wrapperspb.StringValue)(nil),     // 19: google.protobuf.StringValue
-	(*wrapperspb.Int64Value)(nil),      // 20: google.protobuf.Int64Value
-	(*AreaInfo)(nil),                   // 21: dm.AreaInfo
-	(*Attachment)(nil),                 // 22: dm.Attachment
-	(*PageInfo)(nil),                   // 23: dm.PageInfo
-	(*Compare)(nil),                    // 24: dm.Compare
+	(*ProjectAlarmSourceSetReq)(nil),   // 5: dm.ProjectAlarmSourceSetReq
+	(*ProjectAlarmSourceSetResp)(nil),  // 6: dm.ProjectAlarmSourceSetResp
+	(*ProjectInfo)(nil),                // 7: dm.ProjectInfo
+	(*ProjectInfoGetListReq)(nil),      // 8: dm.ProjectInfoGetListReq
+	(*ProjectInfoGetListResp)(nil),     // 9: dm.ProjectInfoGetListResp
+	(*ProjectProfile)(nil),             // 10: dm.ProjectProfile
+	(*ProjectProfileGetOneReq)(nil),    // 11: dm.ProjectProfileGetOneReq
+	(*ProjectProfileGetListReq)(nil),   // 12: dm.ProjectProfileGetListReq
+	(*ProjectProfileGetListResp)(nil),  // 13: dm.ProjectProfileGetListResp
+	(*ProjectCrud)(nil),                // 14: dm.ProjectCrud
+	(*ProjectCrudGetListReq)(nil),      // 15: dm.ProjectCrudGetListReq
+	(*ProjectCrudGetListResp)(nil),     // 16: dm.ProjectCrudGetListResp
+	nil,                                // 17: dm.ProjectInfo.TagsEntry
+	nil,                                // 18: dm.ProjectCrudGetListReq.ParamsEntry
+	(*Point)(nil),                      // 19: dm.Point
+	(*wrapperspb.FloatValue)(nil),      // 20: google.protobuf.FloatValue
+	(*wrapperspb.StringValue)(nil),     // 21: google.protobuf.StringValue
+	(*wrapperspb.Int64Value)(nil),      // 22: google.protobuf.Int64Value
+	(*AreaInfo)(nil),                   // 23: dm.AreaInfo
+	(*Attachment)(nil),                 // 24: dm.Attachment
+	(*PageInfo)(nil),                   // 25: dm.PageInfo
+	(*Compare)(nil),                    // 26: dm.Compare
 }
 var file_project_proto_depIdxs = []int32{
-	17, // 0: dm.ProjectInfo.Position:type_name -> dm.Point
-	18, // 1: dm.ProjectInfo.area:type_name -> google.protobuf.FloatValue
-	19, // 2: dm.ProjectInfo.desc:type_name -> google.protobuf.StringValue
-	19, // 3: dm.ProjectInfo.address:type_name -> google.protobuf.StringValue
-	20, // 4: dm.ProjectInfo.deviceCount:type_name -> google.protobuf.Int64Value
-	20, // 5: dm.ProjectInfo.deviceOnlineCount:type_name -> google.protobuf.Int64Value
-	21, // 6: dm.ProjectInfo.areas:type_name -> dm.AreaInfo
-	15, // 7: dm.ProjectInfo.tags:type_name -> dm.ProjectInfo.TagsEntry
-	22, // 8: dm.ProjectInfo.attachments:type_name -> dm.Attachment
-	23, // 9: dm.ProjectInfoGetListReq.page:type_name -> dm.PageInfo
-	5,  // 10: dm.ProjectInfoGetListResp.list:type_name -> dm.ProjectInfo
-	8,  // 11: dm.ProjectProfileGetListResp.profiles:type_name -> dm.ProjectProfile
-	23, // 12: dm.ProjectCrudGetListReq.page:type_name -> dm.PageInfo
-	16, // 13: dm.ProjectCrudGetListReq.params:type_name -> dm.ProjectCrudGetListReq.ParamsEntry
-	12, // 14: dm.ProjectCrudGetListResp.list:type_name -> dm.ProjectCrud
-	24, // 15: dm.ProjectCrudGetListReq.ParamsEntry.value:type_name -> dm.Compare
-	5,  // 16: dm.ProjectManage.projectInfoCreate:input_type -> dm.ProjectInfo
-	5,  // 17: dm.ProjectManage.projectInfoUpdate:input_type -> dm.ProjectInfo
+	19, // 0: dm.ProjectInfo.Position:type_name -> dm.Point
+	20, // 1: dm.ProjectInfo.area:type_name -> google.protobuf.FloatValue
+	21, // 2: dm.ProjectInfo.desc:type_name -> google.protobuf.StringValue
+	21, // 3: dm.ProjectInfo.address:type_name -> google.protobuf.StringValue
+	22, // 4: dm.ProjectInfo.deviceCount:type_name -> google.protobuf.Int64Value
+	22, // 5: dm.ProjectInfo.deviceOnlineCount:type_name -> google.protobuf.Int64Value
+	23, // 6: dm.ProjectInfo.areas:type_name -> dm.AreaInfo
+	17, // 7: dm.ProjectInfo.tags:type_name -> dm.ProjectInfo.TagsEntry
+	24, // 8: dm.ProjectInfo.attachments:type_name -> dm.Attachment
+	25, // 9: dm.ProjectInfoGetListReq.page:type_name -> dm.PageInfo
+	7,  // 10: dm.ProjectInfoGetListResp.list:type_name -> dm.ProjectInfo
+	10, // 11: dm.ProjectProfileGetListResp.profiles:type_name -> dm.ProjectProfile
+	25, // 12: dm.ProjectCrudGetListReq.page:type_name -> dm.PageInfo
+	18, // 13: dm.ProjectCrudGetListReq.params:type_name -> dm.ProjectCrudGetListReq.ParamsEntry
+	14, // 14: dm.ProjectCrudGetListResp.list:type_name -> dm.ProjectCrud
+	26, // 15: dm.ProjectCrudGetListReq.ParamsEntry.value:type_name -> dm.Compare
+	7,  // 16: dm.ProjectManage.projectInfoCreate:input_type -> dm.ProjectInfo
+	7,  // 17: dm.ProjectManage.projectInfoUpdate:input_type -> dm.ProjectInfo
 	0,  // 18: dm.ProjectManage.projectInfoDelete:input_type -> dm.ProjectWithID
 	0,  // 19: dm.ProjectManage.projectInfoGetOne:input_type -> dm.ProjectWithID
 	2,  // 20: dm.ProjectManage.projectAttachmentAdd:input_type -> dm.ProjectAttachmentAddReq
 	4,  // 21: dm.ProjectManage.projectAttachmentDelete:input_type -> dm.ProjectAttachmentDeleteReq
-	6,  // 22: dm.ProjectManage.projectInfoGetList:input_type -> dm.ProjectInfoGetListReq
-	9,  // 23: dm.ProjectManage.projectProfileGetOne:input_type -> dm.ProjectProfileGetOneReq
-	8,  // 24: dm.ProjectManage.projectProfileUpdate:input_type -> dm.ProjectProfile
-	10, // 25: dm.ProjectManage.projectProfileGetList:input_type -> dm.ProjectProfileGetListReq
-	12, // 26: dm.ProjectManage.projectCrudCreate:input_type -> dm.ProjectCrud
-	12, // 27: dm.ProjectManage.projectCrudUpdate:input_type -> dm.ProjectCrud
-	0,  // 28: dm.ProjectManage.projectCrudDelete:input_type -> dm.ProjectWithID
-	0,  // 29: dm.ProjectManage.projectCrudGetOne:input_type -> dm.ProjectWithID
-	13, // 30: dm.ProjectManage.projectCrudGetList:input_type -> dm.ProjectCrudGetListReq
-	0,  // 31: dm.ProjectManage.projectInfoCreate:output_type -> dm.ProjectWithID
-	1,  // 32: dm.ProjectManage.projectInfoUpdate:output_type -> dm.ProjectEmpty
-	1,  // 33: dm.ProjectManage.projectInfoDelete:output_type -> dm.ProjectEmpty
-	5,  // 34: dm.ProjectManage.projectInfoGetOne:output_type -> dm.ProjectInfo
-	3,  // 35: dm.ProjectManage.projectAttachmentAdd:output_type -> dm.ProjectAttachmentAddResp
-	1,  // 36: dm.ProjectManage.projectAttachmentDelete:output_type -> dm.ProjectEmpty
-	7,  // 37: dm.ProjectManage.projectInfoGetList:output_type -> dm.ProjectInfoGetListResp
-	8,  // 38: dm.ProjectManage.projectProfileGetOne:output_type -> dm.ProjectProfile
-	1,  // 39: dm.ProjectManage.projectProfileUpdate:output_type -> dm.ProjectEmpty
-	11, // 40: dm.ProjectManage.projectProfileGetList:output_type -> dm.ProjectProfileGetListResp
-	0,  // 41: dm.ProjectManage.projectCrudCreate:output_type -> dm.ProjectWithID
-	1,  // 42: dm.ProjectManage.projectCrudUpdate:output_type -> dm.ProjectEmpty
-	1,  // 43: dm.ProjectManage.projectCrudDelete:output_type -> dm.ProjectEmpty
-	12, // 44: dm.ProjectManage.projectCrudGetOne:output_type -> dm.ProjectCrud
-	14, // 45: dm.ProjectManage.projectCrudGetList:output_type -> dm.ProjectCrudGetListResp
-	31, // [31:46] is the sub-list for method output_type
-	16, // [16:31] is the sub-list for method input_type
+	8,  // 22: dm.ProjectManage.projectInfoGetList:input_type -> dm.ProjectInfoGetListReq
+	5,  // 23: dm.ProjectManage.projectAlarmSourceSet:input_type -> dm.ProjectAlarmSourceSetReq
+	11, // 24: dm.ProjectManage.projectProfileGetOne:input_type -> dm.ProjectProfileGetOneReq
+	10, // 25: dm.ProjectManage.projectProfileUpdate:input_type -> dm.ProjectProfile
+	12, // 26: dm.ProjectManage.projectProfileGetList:input_type -> dm.ProjectProfileGetListReq
+	14, // 27: dm.ProjectManage.projectCrudCreate:input_type -> dm.ProjectCrud
+	14, // 28: dm.ProjectManage.projectCrudUpdate:input_type -> dm.ProjectCrud
+	0,  // 29: dm.ProjectManage.projectCrudDelete:input_type -> dm.ProjectWithID
+	0,  // 30: dm.ProjectManage.projectCrudGetOne:input_type -> dm.ProjectWithID
+	15, // 31: dm.ProjectManage.projectCrudGetList:input_type -> dm.ProjectCrudGetListReq
+	0,  // 32: dm.ProjectManage.projectInfoCreate:output_type -> dm.ProjectWithID
+	1,  // 33: dm.ProjectManage.projectInfoUpdate:output_type -> dm.ProjectEmpty
+	1,  // 34: dm.ProjectManage.projectInfoDelete:output_type -> dm.ProjectEmpty
+	7,  // 35: dm.ProjectManage.projectInfoGetOne:output_type -> dm.ProjectInfo
+	3,  // 36: dm.ProjectManage.projectAttachmentAdd:output_type -> dm.ProjectAttachmentAddResp
+	1,  // 37: dm.ProjectManage.projectAttachmentDelete:output_type -> dm.ProjectEmpty
+	9,  // 38: dm.ProjectManage.projectInfoGetList:output_type -> dm.ProjectInfoGetListResp
+	6,  // 39: dm.ProjectManage.projectAlarmSourceSet:output_type -> dm.ProjectAlarmSourceSetResp
+	10, // 40: dm.ProjectManage.projectProfileGetOne:output_type -> dm.ProjectProfile
+	1,  // 41: dm.ProjectManage.projectProfileUpdate:output_type -> dm.ProjectEmpty
+	13, // 42: dm.ProjectManage.projectProfileGetList:output_type -> dm.ProjectProfileGetListResp
+	0,  // 43: dm.ProjectManage.projectCrudCreate:output_type -> dm.ProjectWithID
+	1,  // 44: dm.ProjectManage.projectCrudUpdate:output_type -> dm.ProjectEmpty
+	1,  // 45: dm.ProjectManage.projectCrudDelete:output_type -> dm.ProjectEmpty
+	14, // 46: dm.ProjectManage.projectCrudGetOne:output_type -> dm.ProjectCrud
+	16, // 47: dm.ProjectManage.projectCrudGetList:output_type -> dm.ProjectCrudGetListResp
+	32, // [32:48] is the sub-list for method output_type
+	16, // [16:32] is the sub-list for method input_type
 	16, // [16:16] is the sub-list for extension type_name
 	16, // [16:16] is the sub-list for extension extendee
 	0,  // [0:16] is the sub-list for field type_name
@@ -1293,7 +1399,7 @@ func file_project_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_project_proto_rawDesc), len(file_project_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   17,
+			NumMessages:   19,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

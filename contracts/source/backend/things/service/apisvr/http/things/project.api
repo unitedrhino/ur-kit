@@ -77,6 +77,29 @@ service api {
 }
 
 @server(
+    group: things/project/alarmSource
+    prefix: /api/v1/things/project/alarm-source
+    accessCodePrefix: "thingsProjectAlarmSource"
+    accessNamePrefix: "项目预警来源"
+    accessGroup: "项目管理"
+    middleware: CheckTokenWare,InitCtxsWare
+)
+service api {
+    @doc(
+        summary: "同步结构监测项目预警等级"
+        description: "仅具有结构监测服务角色和项目读写权限的服务账号可更新当前项目的结构监测来源等级。"
+        authType: "all"
+        isNeedAuth: "true"
+        group: "things/project/alarmSource"
+        resource: "things/project/alarm-source"
+        action: "update"
+        recordLogMode: "3"
+    )
+    @handler structureSet
+    post /structure-set (ProjectAlarmSourceSetReq) returns (ProjectAlarmSourceSetResp)
+}
+
+@server(
     group: things/project/attachment
     prefix: /api/v1/things/project/attachment
     accessCodePrefix: "thingsProjectAttachment"
@@ -273,6 +296,17 @@ type (
     ProjectAttachmentDeleteReq {
         ProjectID int64 `json:"projectID,string"`
         ID int64 `json:"id,string"`
+    }
+
+    // ProjectAlarmSourceSetReq 使用当前服务身份同步结构来源等级。
+    ProjectAlarmSourceSetReq {
+        ProjectID int64 `json:"projectID,string"`
+        Level int64 `json:"level"`
+    }
+
+    // ProjectAlarmSourceSetResp 返回所有来源聚合后的等级。
+    ProjectAlarmSourceSetResp {
+        AlarmStatus int64 `json:"alarmStatus"`
     }
 
     // ProjectInfoCreateReq 新增项目请求体，仅包含可写字段

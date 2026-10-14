@@ -14,10 +14,10 @@
     "modifyCheck.go": "14d8486ac9b24edc9bdbea83391fd86906b3d1fae4de31ada927a9a8563b4b87",
     "repo.go": "8d25494c3e7ec7f7db00c8439c7bcc7ee5fa55c22386ac3fd1c1e9ceeba8f3e9",
     "schema_test.go": "0c772428a6bf3db11e7ea97c9784add6bf0ceda10a48de88f5f03a1081036600",
-    "utils.go": "6efd2b835b61eb9e3716956e533d1480a46e1f04784156a3b82e2b4e0379363a",
+    "utils.go": "362753f05c0310efb18ba560b995b15645f9cd17553ceeb826a442371fac21e3",
     "utils_normalize_test.go": "67681feb6661f834eea010ad465a4b30d18926acbfddf902f18be515cbaa7dd9",
     "validate.go": "7c6a08532c11161233b6ce61ee491c9f79012e4a1de6cea51c273597c525ba08",
     "validate_thingmodel_test.go": "6d1a940bc3a0f942211be7007b4b29c90bf84f6fffd4e6f97ab1be931c80e4aa"
   },
-  "saas_commit": "09bbf5e5d0f3acfb707e135993ea9d7453a7a480"
+  "saas_commit": "ec169106c57562f839e40ccc401fb25d01ec03e7"
 }
