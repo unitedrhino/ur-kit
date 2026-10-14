@@ -6,7 +6,5 @@ web-shared/packages/api/CodeGenerator
 contracts
 cache
 things
-sdks
-middleware
 protocols
-apps
+apps/iot-basic/mobile
