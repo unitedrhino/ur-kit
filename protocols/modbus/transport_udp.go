@@ -29,6 +29,11 @@ func (client Client) exchangeUDP(ctx context.Context, requestPDU []byte) ([]byte
 	} else {
 		_ = connection.SetDeadline(time.Now().Add(timeout))
 	}
+	return client.exchangeUDPOnConn(connection, requestPDU, 1)
+}
+
+// exchangeUDPOnConn 在已有 UDP 套接字上交换完整数据报，并核对事务号。
+func (client Client) exchangeUDPOnConn(connection net.Conn, requestPDU []byte, transaction uint16) ([]byte, error) {
 	var request []byte
 	if client.RTUOverUDP {
 		request = make([]byte, 1+len(requestPDU)+2)
@@ -37,7 +42,7 @@ func (client Client) exchangeUDP(ctx context.Context, requestPDU []byte) ([]byte
 		binary.LittleEndian.PutUint16(request[len(request)-2:], rtuCRC(request[:len(request)-2]))
 	} else {
 		request = make([]byte, 7+len(requestPDU))
-		binary.BigEndian.PutUint16(request[:2], 1)
+		binary.BigEndian.PutUint16(request[:2], transaction)
 		binary.BigEndian.PutUint16(request[4:6], uint16(len(requestPDU)+1))
 		request[6] = client.UnitID
 		copy(request[7:], requestPDU)
@@ -61,12 +66,17 @@ func (client Client) exchangeUDP(ctx context.Context, requestPDU []byte) ([]byte
 	if client.RTUOverUDP {
 		return parseRTUDatagram(frame[:length], client.UnitID, requestPDU[0])
 	}
-	return parseMBAPDatagram(frame[:length], client.UnitID, requestPDU[0])
+	return parseMBAPDatagramWithTransaction(frame[:length], client.UnitID, requestPDU[0], transaction)
 }
 
 // parseMBAPDatagram 校验完整数据报的事务、协议、长度、单元号和异常码。
 func parseMBAPDatagram(frame []byte, unit, function byte) ([]byte, error) {
-	if len(frame) < 9 || binary.BigEndian.Uint16(frame[:2]) != 1 || binary.BigEndian.Uint16(frame[2:4]) != 0 || frame[6] != unit {
+	return parseMBAPDatagramWithTransaction(frame, unit, function, 1)
+}
+
+// parseMBAPDatagramWithTransaction 核对会话每次请求的事务号。
+func parseMBAPDatagramWithTransaction(frame []byte, unit, function byte, transaction uint16) ([]byte, error) {
+	if len(frame) < 9 || binary.BigEndian.Uint16(frame[:2]) != transaction || binary.BigEndian.Uint16(frame[2:4]) != 0 || frame[6] != unit {
 		return nil, errors.New("invalid modbus transaction, protocol or unit")
 	}
 	length := int(binary.BigEndian.Uint16(frame[4:6]))

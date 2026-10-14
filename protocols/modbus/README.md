@@ -4,6 +4,8 @@
 
 `Client.Probe(ctx)` 只打开并关闭 TCP、TLS、UDP 或串口传输，不发送 Modbus 功能码，适合配置页连通测试。UDP 建立本机套接字并不能证明远端设备在线；要验证实际设备响应，仍需读取已知可读点位。
 
+持续采集设备时使用 `session, err := client.OpenSession(ctx)` 建立连接，再通过 `session.Client()` 调用原有读写方法，结束时调用 `session.Close()`。会话在同一 TCP/TLS/UDP/串口连接上串行发送请求，MBAP 事务号逐次递增；响应出错或调用取消后关闭该连接，接入方需重新创建会话。`Probe` 仍适合无需读写的配置验证。
+
 根目录客户端提供 Modbus TCP 线圈、离散输入、输入寄存器和保持寄存器的功能码 1/2/3/4/5/6/15/16。`Point` 接受原协议的 `registerType`、`valueType`、`bit`、`bitLen`、`byteSwap`、`wordSwap`、`multiWrite` 等 JSON 字段；`Client.ReadPoint` / `WritePoint` 按寄存器类型访问设备。保持寄存器 `uint16` 位域写入采用读改写，多个写入方须由接入服务按设备串行化，避免并发覆盖未选中的位。离散输入和输入寄存器只读。`HoldingPoint` 提供 uint16/32/64、int16/32/64、float32/64 和固定寄存器长度字符串的编解码，写入使用对应 Go 类型，不进行隐式数值转换。字符串按 UTF-8 原始字节写入，不足长度填充零字节，读取时去掉末尾零字节。`Simulator` 可配置四类设备点位，支持异常码 1/2/3，供集成测试和示例使用。
 
 从仓库根目录运行 `go run ./protocols/modbus/cmd/demo`，会在回环地址启动模拟设备，读取寄存器 10 的初始值 42，写入 258 并再次读取。运行 `go test -race ./protocols/modbus/...` 验证 TCP/UDP、物理串口伪终端与两类 RTU 网关帧的本机交互、TLS 证书拒绝与读写、批量线圈位序与回显、四类点位、位域、类型编解码、设备异常码及请求取消。示例不连接外部设备，也不需要平台配置；真实串口硬件与现场波特率仍需在设备端验收。

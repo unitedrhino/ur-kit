@@ -20,6 +20,9 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if len(requestPDU) < 1 || len(requestPDU) > 252 {
 		return nil, errors.New("invalid modbus request length")
 	}
+	if client.session != nil {
+		return client.session.exchange(ctx, requestPDU)
+	}
 	if client.Serial != nil {
 		if client.TLS != nil || client.UDP || client.RTUOverTCP || client.RTUOverUDP {
 			return nil, errors.New("modbus serial cannot combine with network transport or tls")
@@ -61,10 +64,15 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if client.RTUOverTCP {
 		return exchangeRTU(connection, client.UnitID, requestPDU)
 	}
+	return exchangeMBAP(connection, client.UnitID, requestPDU, 1)
+}
+
+// exchangeMBAP 在已有连接上收发 MBAP 帧；事务号由会话逐次递增。
+func exchangeMBAP(connection io.ReadWriter, unit byte, requestPDU []byte, transaction uint16) ([]byte, error) {
 	request := make([]byte, 7+len(requestPDU))
-	binary.BigEndian.PutUint16(request[0:2], 1)
+	binary.BigEndian.PutUint16(request[0:2], transaction)
 	binary.BigEndian.PutUint16(request[4:6], uint16(len(requestPDU)+1))
-	request[6] = client.UnitID
+	request[6] = unit
 	copy(request[7:], requestPDU)
 	if err := writeFrame(connection, request); err != nil {
 		return nil, err
@@ -73,7 +81,7 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if _, err := io.ReadFull(connection, header); err != nil {
 		return nil, err
 	}
-	if binary.BigEndian.Uint16(header[0:2]) != 1 || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != client.UnitID {
+	if binary.BigEndian.Uint16(header[0:2]) != transaction || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != unit {
 		return nil, errors.New("invalid modbus transaction, protocol or unit")
 	}
 	length := binary.BigEndian.Uint16(header[4:6])

@@ -34,6 +34,8 @@ type Client struct {
 	UDP bool
 	// RTUOverUDP 使用带 CRC 的 RTU 帧经 UDP 数据报传输，隐含 UDP 传输。
 	RTUOverUDP bool
+	// session 在复用连接时交由 Session 串行收发；由 OpenSession 创建。
+	session *Session
 }
 
 // ReadHoldingRegisters 使用功能码 3 读取保持寄存器，返回设备的无符号 16 位字。
