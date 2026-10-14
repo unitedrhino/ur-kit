@@ -13,6 +13,7 @@ import (
 	"github.com/unitedrhino/ur-kit/protocols/modbus"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/cache"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/deviceauth"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/cloud"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/configmerge"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
@@ -50,6 +51,9 @@ func TestPublicPackages(t *testing.T) {
 	category := seed.Category{ID: 9007199254740993, Code: "meter", Name: "仪表"}
 	if category.ID != 9007199254740993 || (&schema.Model{}).Version != "" {
 		t.Fatal("公开种子或物模型类型不可用")
+	}
+	if !((protocol.DefaultConf{}).Equal(protocol.DefaultConf{})) || (protocol.DefaultConf{}).GenKey() != "" {
+		t.Fatal("无配置协议默认值不可用")
 	}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")

@@ -1,5 +1,18 @@
 # Things SDK 迁移
 
+公开接入路径与原 SDK 能力的对应关系如下。运行项目仍需注入平台 RPC、事件总线、存储与授权上下文；`upstream/` 是完整原始源码快照，不是可编译的公开依赖。
+
+| 原 SDK 能力 | 公开接入路径 |
+|---|---|
+| 设备认证 gRPC 客户端与 protobuf | `deviceauth.NewDeviceAuth`、`sdks/go/pb/things/sdk/deviceauth` |
+| 物模型定义、校验、推断与数组位置过滤 | `schema` |
+| 种子类型、批量确保与幂等写入 | `seed` |
+| 产品与设备资料缓存 | `cache` |
+| 协议注册、心跳、Web 页面、上下行与停止 | `protocol.NewCoreProtocol`、`protocol/core` |
+| MQTT 发布订阅、会话与在线活动 | `protocol.NewMqttProtocol`、`protocol/mqtt`、`protocol/tracking` |
+| 云配置、产品映射、设备同步与变更通知 | `protocol.NewCloudProtocol`、`protocol/cloud` |
+| 协议运行配置合并和定时任务 | `protocol/runtimeconfig`、`protocol/core.Timer` |
+
 从公开仓全新检出后运行 `bash scripts/test_external_consumer.sh`，脚本在临时仓外 Go module 中导入公开缓存、协议、物模型和种子包，运行本机 Modbus TCP 往返，并检查依赖树没有 SaaS 私有模块。`upstream/` 保存源字节和清单，不是可编译的公开入口；完整旧服务调用点迁移仍按下文边界逐组进行。
 
 `upstream/` 是 SaaS `backend/things/sdk` 固定提交的完整源码快照，包含 `protocol`、`deviceauth`、`seed`，由 `scripts/sync_things_sdk.py` 按 `contracts/manifest.json` 的来源 SHA 同步并写入逐文件哈希；`upstream/schema` 由 `scripts/sync_schema.py` 同步。SaaS 的 `shell/sync-ur-kit-contracts.sh` 在合同导出后调用这两个同步器。原始快照保留私有导入，仅供逐包解耦与对照；公开可编译 API 位于本目录其他包。更新后用 `python3 scripts/sync_things_sdk.py --saas <saas仓库> --sha <合同SHA> --check` 核对原始快照。
