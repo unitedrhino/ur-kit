@@ -50,6 +50,8 @@ test('post 拒绝空令牌、非根地址及含查询的接口路径', async () 
   await assert.rejects(client.post('/api/demo', undefined));
   await assert.rejects(client.post('/api/demo', {}, { projectId: 9007199254740993 }), /安全整数/);
   await assert.rejects(client.post('/api/demo', {}, { appId: 9007199254740993 }), /安全整数/);
+  await assert.rejects(client.post('/api/demo', { nested: [{ id: 9007199254740993 }] }), /安全整数/);
+  await assert.rejects(client.post('/api/demo', { value: Number.POSITIVE_INFINITY }), /有限值/);
 });
 
 test('post 保留平台错误状态与响应且不泄露令牌', async () => {
