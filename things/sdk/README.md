@@ -12,6 +12,9 @@
 | MQTT 发布订阅、会话与在线活动 | `protocol.NewMqttProtocol`、`protocol/mqtt`、`protocol/tracking` |
 | 云配置、产品映射、设备同步与变更通知 | `protocol.NewCloudProtocol`、`protocol/cloud` |
 | 协议运行配置合并和定时任务 | `protocol/runtimeconfig`、`protocol/core.Timer` |
+| NATS 上下行及配置变更订阅 | `protocol/natsbus`，复用调用方连接与队列组 |
+
+`protocol/natsbus` 使用普通 NATS 订阅，回调失败只记录日志，不提供持久重投；需要持久消费的应用须注入实现 `core.Bus` 的 JetStream 或平台事件总线适配器。设置 `UR_KIT_TEST_NATS_URL=nats://<本机地址>` 后运行 `go test -race ./things/sdk/protocol/natsbus` 可验证本机真实 NATS 往返。
 
 从公开仓全新检出后运行 `bash scripts/test_external_consumer.sh`，脚本在临时仓外 Go module 中导入公开缓存、协议、物模型和种子包，运行本机 Modbus TCP 往返，并检查依赖树没有 SaaS 私有模块。`upstream/` 保存源字节和清单，不是可编译的公开入口；完整旧服务调用点迁移仍按下文边界逐组进行。
 

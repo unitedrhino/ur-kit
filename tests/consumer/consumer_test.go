@@ -18,6 +18,7 @@ import (
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/configmerge"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/mqtt"
+	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/natsbus"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/runtimeconfig"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
 	"github.com/unitedrhino/ur-kit/things/sdk/schema"
