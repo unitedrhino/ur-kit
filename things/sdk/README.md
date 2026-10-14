@@ -12,6 +12,7 @@
 | MQTT 发布订阅、会话与在线活动 | `protocol.NewMqttProtocol`、`protocol/mqtt`、`protocol/tracking` |
 | 云配置、产品映射、设备同步与变更通知 | `protocol.NewCloudProtocol`、`protocol/cloud` |
 | 协议运行配置合并和定时任务 | `protocol/runtimeconfig`、`protocol/core.Timer` |
+| 主协议与子协议配置选择 | `protocol/configselect.Select`，纯值包可与旧 Things protobuf 共存 |
 | NATS 上下行及配置变更订阅 | `protocol/natsbus`，复用调用方连接与队列组 |
 | 现有 go-zero 分片 KV 的 MQTT 会话迁移 | `protocol/tracking/gozero`，保持旧键与 JSON 字段 |
 

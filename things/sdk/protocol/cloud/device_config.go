@@ -7,6 +7,7 @@ import (
 	"fmt"
 
 	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configselect"
 )
 
 // ProductLookup 由接入方提供产品查询，可使用平台 RPC 或调用方缓存。
@@ -25,8 +26,10 @@ func DeviceProtocolConfig(ctx context.Context, lookup ProductLookup, protocolCod
 	if product == nil || product.ProductID != device.ProductID {
 		return nil, errors.New("device product lookup returned a mismatched product")
 	}
-	if product.GetSubProtocolCode().GetValue() == protocolCode {
-		return device.SubProtocolConf, nil
+	var subCode *string
+	if product.SubProtocolCode != nil {
+		value := product.SubProtocolCode.GetValue()
+		subCode = &value
 	}
-	return device.ProtocolConf, nil
+	return configselect.Select(protocolCode, subCode, device.ProtocolConf, device.SubProtocolConf), nil
 }

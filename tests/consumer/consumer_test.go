@@ -16,6 +16,7 @@ import (
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/cloud"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/configmerge"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configselect"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/mqtt"
 	_ "github.com/unitedrhino/ur-kit/things/sdk/protocol/natsbus"
@@ -56,6 +57,10 @@ func TestPublicPackages(t *testing.T) {
 	}
 	if !((protocol.DefaultConf{}).Equal(protocol.DefaultConf{})) || (protocol.DefaultConf{}).GenKey() != "" {
 		t.Fatal("无配置协议默认值不可用")
+	}
+	subCode := "modbus"
+	if selected := configselect.Select("modbus", &subCode, map[string]string{"source": "main"}, map[string]string{"source": "sub"}); selected["source"] != "sub" {
+		t.Fatalf("协议配置选择错误：%v", selected)
 	}
 
 	listener, err := net.Listen("tcp", "127.0.0.1:0")
