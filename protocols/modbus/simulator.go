@@ -1,4 +1,4 @@
-// 本文件提供仅供本地演示与集成测试使用的 Modbus TCP 保持寄存器模拟器。
+// 本文件提供仅供本地演示与集成测试使用的 Modbus TCP 线圈和寄存器模拟器。
 package modbus
 
 import (
@@ -10,10 +10,13 @@ import (
 	"sync"
 )
 
-// Simulator 保存本地模拟设备的保持寄存器；不同连接可并发访问。
+// Simulator 保存本地模拟设备的四类点位；不同连接可并发访问。
 type Simulator struct {
-	mu        sync.Mutex
-	registers []uint16
+	mu             sync.Mutex
+	registers      []uint16
+	inputRegisters []uint16
+	coils          []bool
+	discreteInputs []bool
 }
 
 // NewSimulator 根据初始值创建模拟设备；输入切片之后的修改不会影响设备。
@@ -21,7 +24,28 @@ func NewSimulator(initial []uint16) *Simulator {
 	return &Simulator{registers: append([]uint16(nil), initial...)}
 }
 
-// Serve 在指定监听器上响应功能码 3、6、16；上下文取消后关闭监听器并等待连接退出。
+// SetInputRegisters 替换只读输入寄存器快照；后续修改输入切片不会影响设备。
+func (simulator *Simulator) SetInputRegisters(values []uint16) {
+	simulator.mu.Lock()
+	defer simulator.mu.Unlock()
+	simulator.inputRegisters = append([]uint16(nil), values...)
+}
+
+// SetCoils 替换可读写线圈快照；后续修改输入切片不会影响设备。
+func (simulator *Simulator) SetCoils(values []bool) {
+	simulator.mu.Lock()
+	defer simulator.mu.Unlock()
+	simulator.coils = append([]bool(nil), values...)
+}
+
+// SetDiscreteInputs 替换只读离散输入快照；后续修改输入切片不会影响设备。
+func (simulator *Simulator) SetDiscreteInputs(values []bool) {
+	simulator.mu.Lock()
+	defer simulator.mu.Unlock()
+	simulator.discreteInputs = append([]bool(nil), values...)
+}
+
+// Serve 在指定监听器上响应功能码 1～6、16；上下文取消后关闭监听器并等待连接退出。
 func (simulator *Simulator) Serve(ctx context.Context, listener net.Listener) error {
 	if simulator == nil || listener == nil {
 		return errors.New("modbus simulator and listener are required")
@@ -75,10 +99,13 @@ func (simulator *Simulator) serveConnection(connection net.Conn) {
 	}
 }
 
-// respond 按 Modbus 异常码反馈无效功能、地址或数量，避免越界访问寄存器。
+// respond 按 Modbus 异常码反馈无效功能、地址或数量，避免越界访问设备点位。
 func (simulator *Simulator) respond(request []byte) []byte {
+	if len(request) == 0 {
+		return []byte{0x80, 3}
+	}
 	function := request[0]
-	if function != 3 && function != 6 && function != 16 {
+	if function < 1 || function > 6 && function != 16 {
 		return []byte{function | 0x80, 1}
 	}
 	if function == 16 {
@@ -107,23 +134,58 @@ func (simulator *Simulator) respond(request []byte) []byte {
 	value := int(binary.BigEndian.Uint16(request[3:5]))
 	simulator.mu.Lock()
 	defer simulator.mu.Unlock()
-	if function == 3 {
-		if value < 1 || value > 125 {
-			return []byte{0x83, 3}
+	switch function {
+	case 1, 2:
+		values := simulator.coils
+		if function == 2 {
+			values = simulator.discreteInputs
 		}
-		if address >= len(simulator.registers) || value > len(simulator.registers)-address {
-			return []byte{0x83, 2}
+		if value < 1 || value > 2000 {
+			return []byte{function | 0x80, 3}
 		}
-		response := make([]byte, 2+value*2)
-		response[0], response[1] = 3, byte(value*2)
+		if address >= len(values) || value > len(values)-address {
+			return []byte{function | 0x80, 2}
+		}
+		byteCount := (value + 7) / 8
+		response := make([]byte, 2+byteCount)
+		response[0], response[1] = function, byte(byteCount)
 		for index := 0; index < value; index++ {
-			binary.BigEndian.PutUint16(response[2+index*2:], simulator.registers[address+index])
+			if values[address+index] {
+				response[2+index/8] |= 1 << uint(index%8)
+			}
 		}
 		return response
+	case 3, 4:
+		values := simulator.registers
+		if function == 4 {
+			values = simulator.inputRegisters
+		}
+		if value < 1 || value > 125 {
+			return []byte{function | 0x80, 3}
+		}
+		if address >= len(values) || value > len(values)-address {
+			return []byte{function | 0x80, 2}
+		}
+		response := make([]byte, 2+value*2)
+		response[0], response[1] = function, byte(value*2)
+		for index := 0; index < value; index++ {
+			binary.BigEndian.PutUint16(response[2+index*2:], values[address+index])
+		}
+		return response
+	case 5:
+		if value != 0 && value != 0xff00 {
+			return []byte{0x85, 3}
+		}
+		if address >= len(simulator.coils) {
+			return []byte{0x85, 2}
+		}
+		simulator.coils[address] = value == 0xff00
+		return append([]byte(nil), request...)
+	default:
+		if address >= len(simulator.registers) {
+			return []byte{0x86, 2}
+		}
+		simulator.registers[address] = uint16(value)
+		return append([]byte(nil), request...)
 	}
-	if address >= len(simulator.registers) {
-		return []byte{0x86, 2}
-	}
-	simulator.registers[address] = uint16(value)
-	return append([]byte(nil), request...)
 }

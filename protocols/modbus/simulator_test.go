@@ -45,7 +45,7 @@ func TestSimulatorEndToEnd(t *testing.T) {
 		request []byte
 		code    byte
 	}{
-		{request: []byte{4, 0, 10, 0, 1}, code: 1},
+		{request: []byte{7, 0, 10, 0, 1}, code: 1},
 		{request: []byte{3, 0, 10, 0, 0}, code: 3},
 	} {
 		connection, dialErr := net.Dial("tcp", listener.Addr().String())

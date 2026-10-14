@@ -1,11 +1,10 @@
-// 本文件提供可在本地模拟验证的 Modbus TCP 保持寄存器读写样例。
+// 本文件提供 Modbus TCP 基础线圈与寄存器读写，供独立协议接入和本地设备模拟使用。
 package modbus
 
 import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -18,118 +17,98 @@ type Client struct {
 	Timeout time.Duration
 }
 
-// ReadHoldingRegisters 读取指定起始地址与数量的保持寄存器，返回无符号 16 位数值。
+// ReadHoldingRegisters 使用功能码 3 读取保持寄存器，返回设备的无符号 16 位字。
 func (client Client) ReadHoldingRegisters(ctx context.Context, address, quantity uint16) ([]uint16, error) {
-	if quantity == 0 || quantity > 125 {
-		return nil, errors.New("quantity must be in 1..125")
+	return client.readRegisters(ctx, 3, address, quantity)
+}
+
+// ReadInputRegisters 使用功能码 4 读取只读输入寄存器，返回设备的无符号 16 位字。
+func (client Client) ReadInputRegisters(ctx context.Context, address, quantity uint16) ([]uint16, error) {
+	return client.readRegisters(ctx, 4, address, quantity)
+}
+
+// readRegisters 核对读取数量、设备字节数与功能码，再解析每个大端寄存器。
+func (client Client) readRegisters(ctx context.Context, function byte, address, quantity uint16) ([]uint16, error) {
+	if quantity == 0 || quantity > 125 || uint32(address)+uint32(quantity) > 65536 {
+		return nil, errors.New("register range must contain 1..125 values within address space")
 	}
-	if client.Address == "" {
-		return nil, errors.New("modbus address is empty")
-	}
-	timeout := client.Timeout
-	if timeout <= 0 {
-		timeout = 3 * time.Second
-	}
-	connection, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "tcp", client.Address)
+	request := make([]byte, 5)
+	request[0] = function
+	binary.BigEndian.PutUint16(request[1:3], address)
+	binary.BigEndian.PutUint16(request[3:5], quantity)
+	response, err := client.exchange(ctx, request)
 	if err != nil {
 		return nil, err
 	}
-	defer connection.Close()
-	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
-	defer stop()
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = connection.SetDeadline(deadline)
-	} else {
-		_ = connection.SetDeadline(time.Now().Add(timeout))
-	}
-	request := make([]byte, 12)
-	binary.BigEndian.PutUint16(request[0:2], 1)
-	binary.BigEndian.PutUint16(request[4:6], 6)
-	request[6] = client.UnitID
-	request[7] = 3
-	binary.BigEndian.PutUint16(request[8:10], address)
-	binary.BigEndian.PutUint16(request[10:12], quantity)
-	if err := writeFrame(connection, request); err != nil {
-		return nil, err
-	}
-	header := make([]byte, 7)
-	if _, err := io.ReadFull(connection, header); err != nil {
-		return nil, err
-	}
-	if binary.BigEndian.Uint16(header[0:2]) != 1 || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != client.UnitID {
-		return nil, errors.New("invalid modbus transaction, protocol or unit")
-	}
-	length := binary.BigEndian.Uint16(header[4:6])
-	if length < 3 || length > 253 {
-		return nil, errors.New("invalid modbus response length")
-	}
-	pdu := make([]byte, int(length)-1)
-	if _, err := io.ReadFull(connection, pdu); err != nil {
-		return nil, err
-	}
-	if pdu[0] == 0x83 {
-		return nil, fmt.Errorf("modbus exception code %d", pdu[1])
-	}
-	if pdu[0] != 3 || int(pdu[1]) != int(quantity)*2 || len(pdu) != 2+int(quantity)*2 {
+	if len(response) != 2+int(quantity)*2 || response[0] != function || int(response[1]) != int(quantity)*2 {
 		return nil, errors.New("invalid modbus register response")
 	}
 	values := make([]uint16, quantity)
 	for index := range values {
-		values[index] = binary.BigEndian.Uint16(pdu[2+index*2 : 4+index*2])
+		values[index] = binary.BigEndian.Uint16(response[2+index*2:])
 	}
 	return values, nil
 }
 
-// WriteSingleRegister 写入一个保持寄存器，并核对设备回显的地址和值。
+// ReadCoils 使用功能码 1 读取线圈；返回切片的顺序与地址递增顺序一致。
+func (client Client) ReadCoils(ctx context.Context, address, quantity uint16) ([]bool, error) {
+	return client.readBits(ctx, 1, address, quantity)
+}
+
+// ReadDiscreteInputs 使用功能码 2 读取只读离散输入。
+func (client Client) ReadDiscreteInputs(ctx context.Context, address, quantity uint16) ([]bool, error) {
+	return client.readBits(ctx, 2, address, quantity)
+}
+
+// readBits 按 Modbus 最低有效位优先的线缆顺序解析连续布尔点位。
+func (client Client) readBits(ctx context.Context, function byte, address, quantity uint16) ([]bool, error) {
+	if quantity == 0 || quantity > 2000 || uint32(address)+uint32(quantity) > 65536 {
+		return nil, errors.New("bit range must contain 1..2000 values within address space")
+	}
+	request := make([]byte, 5)
+	request[0] = function
+	binary.BigEndian.PutUint16(request[1:3], address)
+	binary.BigEndian.PutUint16(request[3:5], quantity)
+	response, err := client.exchange(ctx, request)
+	if err != nil {
+		return nil, err
+	}
+	byteCount := (int(quantity) + 7) / 8
+	if len(response) != 2+byteCount || response[0] != function || int(response[1]) != byteCount {
+		return nil, errors.New("invalid modbus bit response")
+	}
+	values := make([]bool, quantity)
+	for index := range values {
+		values[index] = response[2+index/8]&(1<<uint(index%8)) != 0
+	}
+	return values, nil
+}
+
+// WriteSingleCoil 使用功能码 5 写入线圈，并核对设备回显的地址及 FF00/0000 值。
+func (client Client) WriteSingleCoil(ctx context.Context, address uint16, value bool) error {
+	word := uint16(0)
+	if value {
+		word = 0xff00
+	}
+	return client.writeSingle(ctx, 5, address, word)
+}
+
+// WriteSingleRegister 使用功能码 6 写入保持寄存器，并核对设备回显的地址和值。
 func (client Client) WriteSingleRegister(ctx context.Context, address, value uint16) error {
-	if client.Address == "" {
-		return errors.New("modbus address is empty")
-	}
-	timeout := client.Timeout
-	if timeout <= 0 {
-		timeout = 3 * time.Second
-	}
-	connection, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "tcp", client.Address)
+	return client.writeSingle(ctx, 6, address, value)
+}
+
+// writeSingle 使用五字节 PDU 写入单个布尔或寄存器点位，拒绝不匹配的设备回显。
+func (client Client) writeSingle(ctx context.Context, function byte, address, value uint16) error {
+	request := make([]byte, 5)
+	request[0] = function
+	binary.BigEndian.PutUint16(request[1:3], address)
+	binary.BigEndian.PutUint16(request[3:5], value)
+	response, err := client.exchange(ctx, request)
 	if err != nil {
 		return err
 	}
-	defer connection.Close()
-	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
-	defer stop()
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = connection.SetDeadline(deadline)
-	} else {
-		_ = connection.SetDeadline(time.Now().Add(timeout))
-	}
-	request := make([]byte, 12)
-	binary.BigEndian.PutUint16(request[0:2], 1)
-	binary.BigEndian.PutUint16(request[4:6], 6)
-	request[6] = client.UnitID
-	request[7] = 6
-	binary.BigEndian.PutUint16(request[8:10], address)
-	binary.BigEndian.PutUint16(request[10:12], value)
-	if err := writeFrame(connection, request); err != nil {
-		return err
-	}
-	header := make([]byte, 7)
-	if _, err := io.ReadFull(connection, header); err != nil {
-		return err
-	}
-	if binary.BigEndian.Uint16(header[0:2]) != 1 || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != client.UnitID {
-		return errors.New("invalid modbus transaction, protocol or unit")
-	}
-	length := binary.BigEndian.Uint16(header[4:6])
-	if length != 3 && length != 6 {
-		return errors.New("invalid modbus response length")
-	}
-	pdu := make([]byte, length-1)
-	if _, err := io.ReadFull(connection, pdu); err != nil {
-		return err
-	}
-	if pdu[0] == 0x86 && length == 3 {
-		return fmt.Errorf("modbus exception code %d", pdu[1])
-	}
-	if length != 6 || pdu[0] != 6 || binary.BigEndian.Uint16(pdu[1:3]) != address || binary.BigEndian.Uint16(pdu[3:5]) != value {
+	if len(response) != len(request) || response[0] != function || binary.BigEndian.Uint16(response[1:3]) != address || binary.BigEndian.Uint16(response[3:5]) != value {
 		return errors.New("invalid modbus write response")
 	}
 	return nil
@@ -140,57 +119,19 @@ func (client Client) WriteMultipleRegisters(ctx context.Context, address uint16,
 	if len(values) == 0 || len(values) > 123 || uint32(address)+uint32(len(values)) > 65536 {
 		return errors.New("register range must contain 1..123 values within address space")
 	}
-	if client.Address == "" {
-		return errors.New("modbus address is empty")
+	request := make([]byte, 6+len(values)*2)
+	request[0] = 16
+	binary.BigEndian.PutUint16(request[1:3], address)
+	binary.BigEndian.PutUint16(request[3:5], uint16(len(values)))
+	request[5] = byte(len(values) * 2)
+	for index, value := range values {
+		binary.BigEndian.PutUint16(request[6+index*2:], value)
 	}
-	timeout := client.Timeout
-	if timeout <= 0 {
-		timeout = 3 * time.Second
-	}
-	connection, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "tcp", client.Address)
+	response, err := client.exchange(ctx, request)
 	if err != nil {
 		return err
 	}
-	defer connection.Close()
-	stop := context.AfterFunc(ctx, func() { _ = connection.Close() })
-	defer stop()
-	if deadline, ok := ctx.Deadline(); ok {
-		_ = connection.SetDeadline(deadline)
-	} else {
-		_ = connection.SetDeadline(time.Now().Add(timeout))
-	}
-	request := make([]byte, 13+len(values)*2)
-	binary.BigEndian.PutUint16(request[0:2], 1)
-	binary.BigEndian.PutUint16(request[4:6], uint16(len(request)-6))
-	request[6], request[7] = client.UnitID, 16
-	binary.BigEndian.PutUint16(request[8:10], address)
-	binary.BigEndian.PutUint16(request[10:12], uint16(len(values)))
-	request[12] = byte(len(values) * 2)
-	for index, value := range values {
-		binary.BigEndian.PutUint16(request[13+index*2:], value)
-	}
-	if err := writeFrame(connection, request); err != nil {
-		return err
-	}
-	header := make([]byte, 7)
-	if _, err := io.ReadFull(connection, header); err != nil {
-		return err
-	}
-	if binary.BigEndian.Uint16(header[0:2]) != 1 || binary.BigEndian.Uint16(header[2:4]) != 0 || header[6] != client.UnitID {
-		return errors.New("invalid modbus transaction, protocol or unit")
-	}
-	length := binary.BigEndian.Uint16(header[4:6])
-	if length != 3 && length != 6 {
-		return errors.New("invalid modbus response length")
-	}
-	pdu := make([]byte, length-1)
-	if _, err := io.ReadFull(connection, pdu); err != nil {
-		return err
-	}
-	if length == 3 && pdu[0] == 0x90 {
-		return fmt.Errorf("modbus exception code %d", pdu[1])
-	}
-	if length != 6 || pdu[0] != 16 || binary.BigEndian.Uint16(pdu[1:3]) != address || binary.BigEndian.Uint16(pdu[3:5]) != uint16(len(values)) {
+	if len(response) != 5 || response[0] != 16 || binary.BigEndian.Uint16(response[1:3]) != address || binary.BigEndian.Uint16(response[3:5]) != uint16(len(values)) {
 		return errors.New("invalid modbus write response")
 	}
 	return nil
