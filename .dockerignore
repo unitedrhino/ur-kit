@@ -1,6 +1,7 @@
 .git
 **/node_modules
 **/dist
+web-shared/packages/api/CodeGenerator
 .temp
 contracts
 cache
