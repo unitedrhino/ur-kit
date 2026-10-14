@@ -1,6 +1,8 @@
 // 本文件验证 Node 客户端保留大整数及身份请求头。
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { createServer } from 'node:http';
+import { once } from 'node:events';
 import { test } from 'node:test';
 import { createClient } from './index.mjs';
 
@@ -47,4 +49,28 @@ test('post 保留平台错误状态与响应且不泄露令牌', async () => {
     assert.doesNotMatch(error.message, /secret-token/);
     return true;
   });
+});
+
+test('post 拒绝跨站重定向且不向目标发送令牌', async () => {
+  let leaked = false;
+  const target = createServer((request, response) => {
+    leaked = Boolean(request.headers['ithings-token']);
+    response.writeHead(200).end('{}');
+  });
+  target.listen(0, '127.0.0.1');
+  await once(target, 'listening');
+  const platform = createServer((_request, response) => {
+    response.writeHead(307, { location: `http://127.0.0.1:${target.address().port}/leak` }).end();
+  });
+  platform.listen(0, '127.0.0.1');
+  await once(platform, 'listening');
+  try {
+    const client = createClient({ baseUrl: `http://127.0.0.1:${platform.address().port}`, token: 'private-token' });
+    await assert.rejects(client.post('/api/redirect', null), (error) => error.status === 307);
+    assert.equal(leaked, false);
+  } finally {
+    platform.closeAllConnections();
+    target.closeAllConnections();
+    await Promise.all([new Promise((resolve) => platform.close(resolve)), new Promise((resolve) => target.close(resolve))]);
+  }
 });

@@ -8,6 +8,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"strings"
+	"sync/atomic"
 	"testing"
 )
 
@@ -74,5 +75,28 @@ func TestPostJSONRejectsInvalidInput(t *testing.T) {
 				t.Fatal("非法客户端配置仍发起请求")
 			}
 		})
+	}
+}
+
+// TestPostJSONRejectsRedirect 验证平台重定向不能把令牌带到其他 HTTP 地址。
+func TestPostJSONRejectsRedirect(t *testing.T) {
+	var leaked atomic.Int32
+	target := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		if request.Header.Get("ithings-token") != "" {
+			leaked.Add(1)
+		}
+		writer.WriteHeader(http.StatusOK)
+	}))
+	defer target.Close()
+	platform := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		writer.Header().Set("Location", target.URL+"/leak")
+		writer.WriteHeader(http.StatusTemporaryRedirect)
+	}))
+	defer platform.Close()
+	client := Client{BaseURL: platform.URL, Token: "private-token", HTTP: &http.Client{CheckRedirect: func(*http.Request, []*http.Request) error { return nil }}}
+	err := client.PostJSON(context.Background(), "/api/demo", nil, nil)
+	apiError, ok := err.(*APIError)
+	if !ok || apiError.Status != http.StatusTemporaryRedirect || leaked.Load() != 0 {
+		t.Fatalf("平台重定向未安全停止: %v leaked=%d", err, leaked.Load())
 	}
 }

@@ -68,7 +68,10 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 	if transport == nil {
 		transport = http.DefaultClient
 	}
-	response, err := transport.Do(request)
+	// 每次请求使用独立客户端副本，避免更改调用方共享客户端的重定向策略。
+	requestClient := *transport
+	requestClient.CheckRedirect = func(*http.Request, []*http.Request) error { return http.ErrUseLastResponse }
+	response, err := requestClient.Do(request)
 	if err != nil {
 		return err
 	}

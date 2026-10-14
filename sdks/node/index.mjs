@@ -17,7 +17,7 @@ export function createClient({ baseUrl, token, fetchImpl = globalThis.fetch }) {
       if (tenantCode) headers['tenant-code'] = tenantCode;
       if (projectId) headers['project-id'] = String(projectId);
       if (appId != null && appId !== '') headers['app-id'] = String(appId);
-      const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal });
+      const response = await fetchImpl(url, { method: 'POST', headers, body: JSON.stringify(body), signal, redirect: 'manual' });
       const raw = await response.text();
       if (!response.ok) {
         const error = new Error(`platform API status ${response.status}`);
