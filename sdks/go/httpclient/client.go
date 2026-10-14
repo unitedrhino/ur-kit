@@ -109,5 +109,12 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 	}
 	decoder := json.NewDecoder(bytes.NewReader(data))
 	decoder.UseNumber()
-	return decoder.Decode(responseBody)
+	if err := decoder.Decode(responseBody); err != nil {
+		return err
+	}
+	var trailing any
+	if err := decoder.Decode(&trailing); err != io.EOF {
+		return errors.New("invalid trailing platform response")
+	}
+	return nil
 }

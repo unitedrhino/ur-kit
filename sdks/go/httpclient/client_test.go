@@ -131,3 +131,16 @@ func TestPostJSONTokenHeaderAndLimit(t *testing.T) {
 		t.Fatalf("过大响应上限进入平台请求: %v, requests=%d", err, requests.Load())
 	}
 }
+
+// TestPostJSONRejectsTrailingDocument 验证平台响应只能包含一个完整 JSON 文档。
+func TestPostJSONRejectsTrailingDocument(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		_, _ = writer.Write([]byte(`{"code":200}{"code":403}`))
+	}))
+	defer server.Close()
+	client := Client{BaseURL: server.URL, Token: "private-token"}
+	var response map[string]any
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, &response); err == nil {
+		t.Fatal("多个 JSON 文档被当作一个平台响应")
+	}
+}
