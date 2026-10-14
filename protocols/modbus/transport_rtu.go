@@ -1,4 +1,4 @@
-// 本文件实现 RTU over TCP 的 CRC 帧交换，供无串口的本机模拟与网关接入使用。
+// 本文件实现可复用的 RTU CRC 帧交换，供串口和 TCP 网关接入使用。
 package modbus
 
 import (
@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"net"
 )
 
 // rtuCRC 计算 Modbus RTU 帧的低位优先 CRC16 校验值。
@@ -26,7 +25,7 @@ func rtuCRC(frame []byte) uint16 {
 }
 
 // exchangeRTU 写出带单元号和 CRC 的请求，并按功能码确定响应长度与边界。
-func exchangeRTU(connection net.Conn, unit byte, requestPDU []byte) ([]byte, error) {
+func exchangeRTU(connection io.ReadWriter, unit byte, requestPDU []byte) ([]byte, error) {
 	frame := make([]byte, 1+len(requestPDU)+2)
 	frame[0] = unit
 	copy(frame[1:], requestPDU)

@@ -1,4 +1,4 @@
-// 本文件提供 Modbus TCP 基础线圈与寄存器读写，供独立协议接入和本地设备模拟使用。
+// 本文件提供 Modbus TCP、UDP 与串口基础线圈和寄存器读写，供独立协议接入和本地设备模拟使用。
 package modbus
 
 import (
@@ -7,15 +7,25 @@ import (
 	"encoding/binary"
 	"errors"
 	"io"
-	"net"
 	"time"
 )
 
-// Client 保存 Modbus TCP/UDP 或 RTU over TCP/UDP 连接参数与可选 TLS 配置。
+// SerialConfig 保存物理串口的速率、数据位、停止位与校验位；零值采用 19200、8E1。
+type SerialConfig struct {
+	BaudRate int
+	DataBits int
+	StopBits int
+	Parity   string
+}
+
+// Client 保存 Modbus TCP/UDP、RTU 网关或物理串口的连接参数。
 type Client struct {
+	// Address 为网络地址或物理串口设备路径。
 	Address string
 	UnitID  byte
 	Timeout time.Duration
+	// Serial 非空时经物理串口交换 RTU 帧，不与网络模式或 TLS 混用。
+	Serial *SerialConfig
 	// TLS 非空时校验证书并加密 TCP 连接；调用方应提供可信根证书或系统信任链。
 	TLS *tls.Config
 	// RTUOverTCP 使用带 CRC 的 RTU 帧经 TCP 传输；默认仍使用 MBAP 帧。
@@ -173,7 +183,7 @@ func (client Client) WriteMultipleRegisters(ctx context.Context, address uint16,
 }
 
 // writeFrame 确保完整写出一帧；零字节短写返回明确错误。
-func writeFrame(connection net.Conn, frame []byte) error {
+func writeFrame(connection io.Writer, frame []byte) error {
 	for len(frame) > 0 {
 		written, err := connection.Write(frame)
 		if err != nil {

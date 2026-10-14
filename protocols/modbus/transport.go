@@ -20,6 +20,12 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if len(requestPDU) < 1 || len(requestPDU) > 252 {
 		return nil, errors.New("invalid modbus request length")
 	}
+	if client.Serial != nil {
+		if client.TLS != nil || client.UDP || client.RTUOverTCP || client.RTUOverUDP {
+			return nil, errors.New("modbus serial cannot combine with network transport or tls")
+		}
+		return client.exchangeSerial(ctx, requestPDU)
+	}
 	if client.UDP || client.RTUOverUDP {
 		if client.TLS != nil || client.RTUOverTCP {
 			return nil, errors.New("modbus udp cannot combine with tls or rtu over tcp")
