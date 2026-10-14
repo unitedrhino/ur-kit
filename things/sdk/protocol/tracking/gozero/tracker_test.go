@@ -4,6 +4,7 @@ package gozero
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"testing"
 	"time"
 
@@ -83,5 +84,47 @@ func TestDeviceByClient(t *testing.T) {
 	}
 	if _, _, err := tracker.DeviceByClient(ctx, connection.ClientID); err == nil {
 		t.Fatal("损坏的反向映射未返回错误")
+	}
+}
+
+// TestActivityQueries 验证同毫秒跨页、产品隔离和删除活动记录。
+func TestActivityQueries(t *testing.T) {
+	server := miniredis.RunT(t)
+	store := kv.NewStore(cache.ClusterConf{{RedisConf: redis.RedisConf{Host: server.Addr(), Type: redis.NodeType}, Weight: 100}})
+	tracker, err := NewTracker(store)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+	now := time.UnixMilli(1780000000000)
+	for index := range 1002 {
+		device := tracking.Device{ProductID: "p1", DeviceName: fmt.Sprintf("d%04d", index)}
+		if err := tracker.Touch(ctx, device, now); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if err := tracker.TouchMany(ctx, []tracking.Device{{ProductID: "p2", DeviceName: "other"}}, now); err != nil {
+		t.Fatal(err)
+	}
+	devices, err := tracker.ActiveByProduct(ctx, "p1", time.Minute, now)
+	if err != nil || len(devices) != 1002 {
+		t.Fatalf("同毫秒活动分页丢失: %d %v", len(devices), err)
+	}
+	if _, ok := devices[tracking.Device{ProductID: "p2", DeviceName: "other"}]; ok {
+		t.Fatal("跨产品活动混入结果")
+	}
+	if err := tracker.Sync(ctx, tracking.Connection{ProductID: "p1", DeviceName: "d0000", ClientID: "client-1"}, now); err != nil {
+		t.Fatal(err)
+	}
+	all, err := tracker.ActiveAll(ctx, now)
+	if err != nil || len(all) != 1002 {
+		t.Fatalf("旧会话索引汇总不匹配: %d %v", len(all), err)
+	}
+	if err := tracker.DeleteActivity(ctx, tracking.Device{ProductID: "p1", DeviceName: "d0000"}); err != nil {
+		t.Fatal(err)
+	}
+	devices, err = tracker.ActiveByProduct(ctx, "p1", time.Minute, now)
+	if err != nil || len(devices) != 1001 {
+		t.Fatalf("删除活动后结果不匹配: %d %v", len(devices), err)
 	}
 }

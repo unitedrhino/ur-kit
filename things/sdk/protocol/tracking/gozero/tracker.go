@@ -43,6 +43,111 @@ const activitySmallSetThreshold = 1000
 // activityKey 返回与原协议一致的产品活动集合键。
 func activityKey(productID string) string { return tracking.ActivityPrefix + ":" + productID }
 
+// Touch 更新单个设备的最近活动时间与原有三十天过期时间。
+func (tracker *Tracker) Touch(ctx context.Context, device tracking.Device, received time.Time) error {
+	if device.ProductID == "" || device.DeviceName == "" {
+		return nil
+	}
+	key := activityKey(device.ProductID)
+	if _, err := tracker.Store.ZaddCtx(ctx, key, received.UnixMilli(), tracking.TopicKey(device)); err != nil {
+		return err
+	}
+	return tracker.Store.ExpireCtx(ctx, key, int(tracking.ActivityTTL.Seconds()))
+}
+
+// TouchMany 批量更新设备活动时间；不同产品使用各自的分片键。
+func (tracker *Tracker) TouchMany(ctx context.Context, devices []tracking.Device, received time.Time) error {
+	batch, ok := tracker.Store.(interface {
+		ZaddsCtx(context.Context, string, ...redis.Pair) (int64, error)
+	})
+	if !ok {
+		for _, device := range devices {
+			if err := tracker.Touch(ctx, device, received); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+	groups := make(map[string][]redis.Pair)
+	for _, device := range devices {
+		if device.ProductID == "" || device.DeviceName == "" {
+			continue
+		}
+		key := activityKey(device.ProductID)
+		groups[key] = append(groups[key], redis.Pair{Key: tracking.TopicKey(device), Score: received.UnixMilli()})
+	}
+	for key, pairs := range groups {
+		if _, err := batch.ZaddsCtx(ctx, key, pairs...); err != nil {
+			return err
+		}
+		if err := tracker.Store.ExpireCtx(ctx, key, int(tracking.ActivityTTL.Seconds())); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// ActiveByProduct 查询指定产品在时间窗内有活动记录的设备。
+func (tracker *Tracker) ActiveByProduct(ctx context.Context, productID string, since time.Duration, now time.Time) (map[tracking.Device]struct{}, error) {
+	result := make(map[tracking.Device]struct{})
+	if productID == "" || since <= 0 {
+		return result, nil
+	}
+	minScore, maxScore := now.Add(-since).UnixMilli(), now.UnixMilli()
+	page := 0
+	for {
+		pairs, err := tracker.Store.ZrevrangebyscoreWithScoresAndLimitCtx(ctx, activityKey(productID), minScore, maxScore, page, activitySmallSetThreshold)
+		if err != nil {
+			return nil, err
+		}
+		for _, pair := range pairs {
+			parts := strings.Split(pair.Key, ":")
+			if len(parts) == 2 && parts[0] == productID && parts[1] != "" {
+				result[tracking.Device{ProductID: parts[0], DeviceName: parts[1]}] = struct{}{}
+			}
+		}
+		if len(pairs) < activitySmallSetThreshold {
+			return result, nil
+		}
+		page++
+	}
+}
+
+// ActiveAll 按旧设备会话索引汇总近三十天的活动设备。
+func (tracker *Tracker) ActiveAll(ctx context.Context, now time.Time) (map[tracking.Device]struct{}, error) {
+	entries, err := tracker.Store.HgetallCtx(ctx, tracking.DeviceKey)
+	if err != nil {
+		return nil, err
+	}
+	products := make(map[string]struct{})
+	for key := range entries {
+		parts := strings.Split(key, ":")
+		if len(parts) == 2 && parts[0] != "" {
+			products[parts[0]] = struct{}{}
+		}
+	}
+	result := make(map[tracking.Device]struct{})
+	for productID := range products {
+		devices, err := tracker.ActiveByProduct(ctx, productID, tracking.ActivityTTL, now)
+		if err != nil {
+			return nil, err
+		}
+		for device := range devices {
+			result[device] = struct{}{}
+		}
+	}
+	return result, nil
+}
+
+// DeleteActivity 删除设备的活动记录，不修改 MQTT 会话映射。
+func (tracker *Tracker) DeleteActivity(ctx context.Context, device tracking.Device) error {
+	if device.ProductID == "" || device.DeviceName == "" {
+		return nil
+	}
+	_, err := tracker.Store.ZremCtx(ctx, activityKey(device.ProductID), tracking.TopicKey(device))
+	return err
+}
+
 // Sync 写入设备到客户端的双向映射与活动时间。
 func (tracker *Tracker) Sync(ctx context.Context, connection tracking.Connection, received time.Time) error {
 	return syncDeviceMqttTracking(ctx, tracker.Store, connection, received.UnixMilli())
