@@ -6,7 +6,6 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -96,7 +95,7 @@ func exchangeMBAP(connection io.ReadWriter, unit byte, requestPDU []byte, transa
 		if len(responsePDU) != 2 {
 			return nil, errors.New("invalid modbus exception response")
 		}
-		return nil, fmt.Errorf("modbus exception code %d", responsePDU[1])
+		return nil, ModbusException{Code: responsePDU[1]}
 	}
 	return responsePDU, nil
 }

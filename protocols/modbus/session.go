@@ -144,6 +144,12 @@ func (session *Session) exchange(ctx context.Context, requestPDU []byte) ([]byte
 		err = ctxErr
 	}
 	if err != nil {
+		var exception ModbusException
+		if errors.As(err, &exception) {
+			// 合法异常帧已完整消费，连接仍同步；下次请求继续使用新事务号。
+			session.transaction++
+			return nil, err
+		}
 		session.closed = true
 		if session.port != nil {
 			_ = session.port.Close()

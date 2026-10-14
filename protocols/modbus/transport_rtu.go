@@ -4,7 +4,6 @@ package modbus
 import (
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 )
 
@@ -68,7 +67,7 @@ func exchangeRTU(connection io.ReadWriter, unit byte, requestPDU []byte) ([]byte
 		return nil, errors.New("invalid modbus rtu crc")
 	}
 	if prefix[1] == requestPDU[0]|0x80 {
-		return nil, fmt.Errorf("modbus exception code %d", prefix[2])
+		return nil, ModbusException{Code: prefix[2]}
 	}
 	return response[1 : len(response)-2], nil
 }

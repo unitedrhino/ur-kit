@@ -5,7 +5,6 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"io"
 	"net"
 	"time"
@@ -88,7 +87,7 @@ func parseMBAPDatagramWithTransaction(frame []byte, unit, function byte, transac
 		if len(response) != 2 {
 			return nil, errors.New("invalid modbus exception response")
 		}
-		return nil, fmt.Errorf("modbus exception code %d", response[1])
+		return nil, ModbusException{Code: response[1]}
 	}
 	if response[0] != function {
 		return nil, errors.New("invalid modbus response function")
@@ -108,7 +107,7 @@ func parseRTUDatagram(frame []byte, unit, function byte) ([]byte, error) {
 		if len(frame) != 5 {
 			return nil, errors.New("invalid modbus rtu exception length")
 		}
-		return nil, fmt.Errorf("modbus exception code %d", frame[2])
+		return nil, ModbusException{Code: frame[2]}
 	}
 	if frame[1] != function {
 		return nil, errors.New("invalid modbus rtu function")

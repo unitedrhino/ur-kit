@@ -4,7 +4,7 @@
 
 `Client.Probe(ctx)` 只打开并关闭 TCP、TLS、UDP 或串口传输，不发送 Modbus 功能码，适合配置页连通测试。UDP 建立本机套接字并不能证明远端设备在线；要验证实际设备响应，仍需读取已知可读点位。
 
-持续采集设备时使用 `session, err := client.OpenSession(ctx)` 建立连接，再通过 `session.Client()` 调用原有读写方法，结束时调用 `session.Close()`。会话在同一 TCP/TLS/UDP/串口连接上串行发送请求，MBAP 事务号逐次递增；响应出错或调用取消后关闭该连接，接入方需重新创建会话。`Probe` 仍适合无需读写的配置验证。
+持续采集设备时使用 `session, err := client.OpenSession(ctx)` 建立连接，再通过 `session.Client()` 调用原有读写方法，结束时调用 `session.Close()`。会话在同一 TCP/TLS/UDP/串口连接上串行发送请求，MBAP 事务号逐次递增；设备的合法异常帧返回 `ModbusException` 并保留连接，传输或帧校验失败、调用取消后关闭连接，接入方需重新创建会话。`Probe` 仍适合无需读写的配置验证。
 
 根目录客户端提供 Modbus TCP 线圈、离散输入、输入寄存器和保持寄存器的功能码 1/2/3/4/5/6/15/16。`Point` 接受原协议的 `registerType`、`valueType`、`bit`、`bitLen`、`byteSwap`、`wordSwap`、`multiWrite` 等 JSON 字段；`Client.ReadPoint` / `WritePoint` 按寄存器类型访问设备。保持寄存器 `uint16` 位域写入采用读改写，多个写入方须由接入服务按设备串行化，避免并发覆盖未选中的位。离散输入和输入寄存器只读。`HoldingPoint` 提供 uint16/32/64、int16/32/64、float32/64 和固定寄存器长度字符串的编解码，写入使用对应 Go 类型，不进行隐式数值转换。字符串按 UTF-8 原始字节写入，不足长度填充零字节，读取时去掉末尾零字节。`Simulator` 可配置四类设备点位，支持异常码 1/2/3，供集成测试和示例使用。
 

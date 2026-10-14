@@ -168,3 +168,59 @@ func TestUDPSessionTransactions(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// TestSessionKeepsValidException 验证设备异常帧不会破坏连接或事务序列。
+func TestSessionKeepsValidException(t *testing.T) {
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer listener.Close()
+	done := make(chan error, 1)
+	go func() {
+		connection, err := listener.Accept()
+		if err != nil {
+			done <- err
+			return
+		}
+		defer connection.Close()
+		for transaction := uint16(1); transaction <= 2; transaction++ {
+			request := make([]byte, 12)
+			if _, err := io.ReadFull(connection, request); err != nil {
+				done <- err
+				return
+			}
+			if binary.BigEndian.Uint16(request[:2]) != transaction {
+				done <- errors.New("unexpected transaction after exception")
+				return
+			}
+			response := []byte{0, 0, 0, 0, 0, 3, 7, 0x83, 2}
+			if transaction == 2 {
+				response = []byte{0, 0, 0, 0, 0, 5, 7, 3, 2, 0, 42}
+			}
+			binary.BigEndian.PutUint16(response[:2], transaction)
+			if _, err := connection.Write(response); err != nil {
+				done <- err
+				return
+			}
+		}
+		done <- nil
+	}()
+	session, err := (Client{Address: listener.Addr().String(), UnitID: 7}).OpenSession(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer session.Close()
+	_, err = session.Client().ReadHoldingRegisters(context.Background(), 10, 1)
+	var exception ModbusException
+	if !errors.As(err, &exception) || exception.Code != 2 {
+		t.Fatalf("exception=%v", err)
+	}
+	values, err := session.Client().ReadHoldingRegisters(context.Background(), 10, 1)
+	if err != nil || len(values) != 1 || values[0] != 42 {
+		t.Fatalf("after exception values=%v err=%v", values, err)
+	}
+	if err := <-done; err != nil {
+		t.Fatal(err)
+	}
+}
