@@ -1,6 +1,7 @@
 # Java SDK
 
 `UrHttpClient` 使用 JDK 17 标准库发送平台 JSON POST；响应保留原始 JSON，以便消费方按 `BigInteger` / `BigDecimal` 解析 ID 和数值。认证令牌只放请求头，错误消息不打印令牌。
+非交互服务账号可用 `UrOpenToken.sign(tenantCode, accessKey, accessSecret, Instant.now().plusSeconds(300))` 签发短期 JWT，再用 `UrHttpClient.forBearer(baseUrl, jwt)` 调用平台；登录令牌仍使用 `new UrHttpClient(baseUrl, token)`。AccessSecret 只由运行时注入，不写入仓库。
 HTTP 和 RPC 客户端均可发送 `tenant-code`、`project-id` 与可选 `app-id`；ID 按字符串传递，避免中间层转换精度。
 HTTP 客户端的地址、路径、空值与错误语义见 [三语言共同用例](../conformance/README.md)。
 

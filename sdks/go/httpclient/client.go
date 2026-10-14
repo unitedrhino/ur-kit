@@ -40,7 +40,8 @@ func (err *APIError) Error() string { return fmt.Sprintf("platform API status %d
 
 // PostJSON 向平台发送 JSON POST，并用 UseNumber 保留大整数与 ID 精度。
 func (client Client) PostJSON(ctx context.Context, path string, requestBody, responseBody any) error {
-	if (strings.TrimSpace(client.Token) == "") == (strings.TrimSpace(client.BearerToken) == "") {
+	hasBearer := strings.TrimSpace(client.BearerToken) != ""
+	if (strings.TrimSpace(client.Token) != "") == hasBearer {
 		return errors.New("exactly one platform token is required")
 	}
 	tokenHeader := client.TokenHeader
@@ -74,7 +75,7 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 		return err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	if client.BearerToken != "" {
+	if hasBearer {
 		request.Header.Set("Authorization", "Bearer "+client.BearerToken)
 	} else {
 		request.Header.Set(tokenHeader, client.Token)

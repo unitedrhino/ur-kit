@@ -4,7 +4,7 @@ import { readFile } from 'node:fs/promises';
 import { createServer } from 'node:http';
 import { once } from 'node:events';
 import { test } from 'node:test';
-import { createClient } from './index.mjs';
+import { createClient, signOpenToken } from './index.mjs';
 
 test('post 保留原始大整数响应', async () => {
   const fixture = (await readFile(new URL('../conformance/http-response.json', import.meta.url), 'utf8')).trimEnd();
@@ -88,4 +88,21 @@ test('post 拒绝跨站重定向且不向目标发送令牌', async () => {
     target.closeAllConnections();
     await Promise.all([new Promise((resolve) => platform.close(resolve)), new Promise((resolve) => target.close(resolve))]);
   }
+});
+
+test('访问令牌与三语言共同样本一致且只经 Bearer 头发送', async () => {
+  const sample = JSON.parse(await readFile(new URL('../conformance/open-token.json', import.meta.url), 'utf8'));
+  const jwt = signOpenToken({ ...sample, expiresAt: new Date(sample.expiresAt) });
+  assert.equal(jwt, sample.expected);
+  const client = createClient({
+    baseUrl: 'https://example.invalid', bearerToken: jwt,
+    fetchImpl: async (_url, options) => {
+      assert.equal(options.headers.authorization, `Bearer ${jwt}`);
+      assert.equal(options.headers['ithings-token'], undefined);
+      return { ok: true, text: async () => '{}' };
+    },
+  });
+  assert.equal(await client.post('/api/demo', null), '{}');
+  assert.throws(() => createClient({ baseUrl: 'https://example.invalid', token: 'login', bearerToken: jwt }));
+  assert.throws(() => signOpenToken({ ...sample, accessSecret: '', expiresAt: new Date(sample.expiresAt) }));
 });

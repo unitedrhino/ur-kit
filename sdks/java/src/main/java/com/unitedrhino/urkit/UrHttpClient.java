@@ -13,9 +13,20 @@ public final class UrHttpClient {
     private final URI baseUri;
     private final HttpClient transport;
     private final String token;
+    private final boolean bearer;
 
     /** 创建客户端；baseUrl 必须是无凭据的 HTTP(S) 根地址，token 是平台认证令牌。 */
     public UrHttpClient(String baseUrl, String token) {
+        this(baseUrl, token, false);
+    }
+
+    /** forBearer 创建使用访问令牌 JWT 的平台客户端。 */
+    public static UrHttpClient forBearer(String baseUrl, String jwt) {
+        return new UrHttpClient(baseUrl, jwt, true);
+    }
+
+    /** 保存经过验证的认证类型，避免登录令牌误发为 Bearer。 */
+    private UrHttpClient(String baseUrl, String token, boolean bearer) {
         if (token == null || token.isBlank()) throw new IllegalArgumentException("token is required");
         this.baseUri = URI.create(baseUrl);
         if (!("http".equals(baseUri.getScheme()) || "https".equals(baseUri.getScheme()))
@@ -27,6 +38,7 @@ public final class UrHttpClient {
         this.transport = HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(10))
                 .followRedirects(HttpClient.Redirect.NEVER).build();
         this.token = token;
+        this.bearer = bearer;
     }
 
     /** postJson 发送 JSON 字符串；返回原始响应，调用方可用 BigInteger/BigDecimal 解析数字。 */
@@ -49,8 +61,8 @@ public final class UrHttpClient {
         HttpRequest.Builder request = HttpRequest.newBuilder(target)
                 .timeout(Duration.ofSeconds(30))
                 .header("Content-Type", "application/json")
-                .header("ithings-token", token)
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody));
+        request.header(bearer ? "Authorization" : "ithings-token", bearer ? "Bearer " + token : token);
         if (tenantCode != null && !tenantCode.isBlank()) request.header("tenant-code", tenantCode);
         if (projectId != null && !projectId.isBlank()) request.header("project-id", projectId);
         if (appId != null && !appId.isBlank()) request.header("app-id", appId);

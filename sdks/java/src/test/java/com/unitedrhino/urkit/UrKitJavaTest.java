@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.sun.net.httpserver.HttpServer;
 import com.google.protobuf.StringValue;
+import com.google.gson.JsonParser;
 import dm.DeviceManageGrpc;
 import dm.DeviceManageOuterClass;
 import io.grpc.MethodDescriptor;
@@ -35,6 +36,7 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.util.concurrent.atomic.AtomicReference;
 import org.junit.jupiter.api.Test;
 
@@ -126,6 +128,30 @@ public class UrKitJavaTest {
                     () -> new UrHttpClient(origin, "bad").postJson("/api/ping", "{}", null, null)).status());
             assertEquals(403, assertThrows(UrHttpClient.ApiException.class,
                     () -> new UrHttpClient(origin, "good").postJson("/api/denied", "{}", null, null)).status());
+        } finally { server.stop(0); }
+    }
+
+    /** 访问令牌与三语言共同样本一致，并只通过 Authorization 头发送。 */
+    @Test void openTokenRoundTrip() throws Exception {
+        Path fixturePath = Path.of("..", "conformance", "open-token.json");
+        if (!Files.exists(fixturePath)) fixturePath = Path.of("sdks", "conformance", "open-token.json");
+        var sample = JsonParser.parseString(Files.readString(fixturePath)).getAsJsonObject();
+        String jwt = UrOpenToken.sign(sample.get("tenantCode").getAsString(), sample.get("accessKey").getAsString(),
+                sample.get("accessSecret").getAsString(), Instant.parse(sample.get("expiresAt").getAsString()));
+        assertEquals(sample.get("expected").getAsString(), jwt);
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/api/demo", exchange -> {
+            assertEquals("Bearer " + jwt, exchange.getRequestHeaders().getFirst("Authorization"));
+            assertEquals(null, exchange.getRequestHeaders().getFirst("ithings-token"));
+            byte[] body = "{}".getBytes(StandardCharsets.UTF_8);
+            exchange.sendResponseHeaders(200, body.length);
+            try (var output = exchange.getResponseBody()) { output.write(body); }
+        });
+        server.start();
+        try {
+            assertEquals("{}", UrHttpClient.forBearer("http://127.0.0.1:" + server.getAddress().getPort(), jwt)
+                    .postJson("/api/demo", "{}", "tenant-a", null));
+            assertThrows(IllegalArgumentException.class, () -> UrOpenToken.sign("tenant-a", "ak", "", Instant.now()));
         } finally { server.stop(0); }
     }
 
