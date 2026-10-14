@@ -26,23 +26,34 @@ func ForEachConfig[C any](ctx context.Context, source GRPCProductSource, field s
 	if size <= 0 {
 		size = 100
 	}
-	var processed int64
+	var processed, total int64
 	var failures []error
+	seen := make(map[string]struct{})
 	for page := int64(1); ; page++ {
+		if err := ctx.Err(); err != nil {
+			return errors.Join(append(failures, err)...)
+		}
 		resp, err := source.Client.ProductInfoGetList(ctx, &dm.ProductInfoGetListReq{
 			Page: &dm.PageInfo{Page: page, Size: size}, ProtocolCode: source.ProtocolCode,
 		}, grpc.WaitForReady(true))
 		if err != nil {
 			return errors.Join(append(failures, fmt.Errorf("fetch protocol products page %d: %w", page, err))...)
 		}
-		if resp == nil || len(resp.List) == 0 && processed < resp.Total {
-			return errors.Join(append(failures, errors.New("product pagination ended before total"))...)
+		if resp == nil || resp.Total < 0 || int64(len(resp.List)) > size ||
+			page > 1 && resp.Total != total ||
+			len(resp.List) == 0 && processed < resp.Total ||
+			processed+int64(len(resp.List)) > resp.Total {
+			return errors.Join(append(failures, fmt.Errorf("invalid products page %d", page))...)
 		}
+		total = resp.Total
 		for _, product := range resp.List {
-			if product == nil {
-				failures = append(failures, errors.New("product list contains an empty item"))
-				continue
+			if product == nil || product.ProductID == "" {
+				return errors.Join(append(failures, fmt.Errorf("invalid product on page %d", page))...)
 			}
+			if _, exists := seen[product.ProductID]; exists {
+				return errors.Join(append(failures, fmt.Errorf("duplicate product %s on page %d", product.ProductID, page))...)
+			}
+			seen[product.ProductID] = struct{}{}
 			properties := product.ProtocolConf
 			if product.GetSubProtocolCode().GetValue() == source.ProtocolCode {
 				properties = product.SubProtocolConf
@@ -56,7 +67,7 @@ func ForEachConfig[C any](ctx context.Context, source GRPCProductSource, field s
 			}
 		}
 		processed += int64(len(resp.List))
-		if processed >= resp.Total {
+		if processed >= total {
 			return errors.Join(failures...)
 		}
 	}
