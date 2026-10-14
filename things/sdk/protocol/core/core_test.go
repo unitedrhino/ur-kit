@@ -83,6 +83,35 @@ func (activity *fakeActivity) Touch(_ context.Context, device tracking.Device, r
 	return nil
 }
 
+// TestProtocolStopHandles 验证启动前后均可注册资源退出回调，停止后不得遗留新回调。
+func TestProtocolStopHandles(t *testing.T) {
+	protocol, err := NewProtocol(Options{Info: &dm.ProtocolInfo{Code: "cleanup"}, Registry: &fakeRegistry{}, Bus: &fakeBus{}, RegisterIP: "127.0.0.1"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	var order []int
+	if err := protocol.AddStopHandle(func() { order = append(order, 1) }, nil); err != nil {
+		t.Fatal(err)
+	}
+	if err := protocol.Start(context.Background()); err != nil {
+		t.Fatal(err)
+	}
+	if err := protocol.AddStopHandle(func() {
+		_ = protocol.WebPort()
+		order = append(order, 2)
+	}); err != nil {
+		t.Fatal(err)
+	}
+	protocol.Stop()
+	protocol.Stop()
+	if len(order) != 2 || order[0] != 1 || order[1] != 2 {
+		t.Fatalf("退出回调未按注册顺序且仅执行一次: %v", order)
+	}
+	if err := protocol.AddStopHandle(func() { order = append(order, 3) }); err == nil {
+		t.Fatal("已停止协议仍接受退出回调")
+	}
+}
+
 // TestProtocolLifecycle 验证配置页心跳、旧消息格式和下行主题。
 func TestProtocolLifecycle(t *testing.T) {
 	registry, bus, activity := &fakeRegistry{}, &fakeBus{}, &fakeActivity{}

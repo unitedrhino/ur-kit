@@ -116,6 +116,7 @@ type Protocol struct {
 	server    *http.Server
 	rpcServer *grpc.Server
 	cancel    context.CancelFunc
+	stopHooks []func()
 	wait      sync.WaitGroup
 }
 
@@ -335,7 +336,25 @@ func (protocol *Protocol) SubscribeDownlink(handler func(context.Context, *Messa
 	})
 }
 
-// Stop 停止心跳和配置页；重复调用不重复关闭资源。
+// AddStopHandle 注册调用方资源的退出回调；服务已停止时拒绝新增，避免资源无法释放。
+func (protocol *Protocol) AddStopHandle(handles ...func()) error {
+	if protocol == nil {
+		return errors.New("protocol is required")
+	}
+	protocol.mu.Lock()
+	defer protocol.mu.Unlock()
+	if protocol.stopped {
+		return errors.New("protocol already stopped")
+	}
+	for _, handle := range handles {
+		if handle != nil {
+			protocol.stopHooks = append(protocol.stopHooks, handle)
+		}
+	}
+	return nil
+}
+
+// Stop 停止心跳、配置页及调用方资源；重复调用不重复执行退出回调。
 func (protocol *Protocol) Stop() {
 	if protocol == nil {
 		return
@@ -349,6 +368,8 @@ func (protocol *Protocol) Stop() {
 	cancel := protocol.cancel
 	server := protocol.server
 	rpcServer := protocol.rpcServer
+	hooks := protocol.stopHooks
+	protocol.stopHooks = nil
 	protocol.mu.Unlock()
 	if cancel != nil {
 		cancel()
@@ -360,4 +381,7 @@ func (protocol *Protocol) Stop() {
 		rpcServer.Stop()
 	}
 	protocol.wait.Wait()
+	for _, handle := range hooks {
+		handle()
+	}
 }
