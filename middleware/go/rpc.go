@@ -6,7 +6,6 @@ import (
 	"errors"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 
 	"google.golang.org/grpc"
@@ -43,13 +42,7 @@ func UnaryServerInterceptor(options RPCOptions) grpc.UnaryServerInterceptor {
 		}
 		ctx = stripUntrustedRPCIdentity(ctx, incoming)
 		incoming, _ = metadata.FromIncomingContext(ctx)
-		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
-		if token == "" {
-			token = strings.TrimSpace(first(incoming.Get("token")))
-		}
-		if token == "" {
-			token = strings.TrimPrefix(first(incoming.Get("authorization")), "Bearer ")
-		}
+		token := readToken(first(incoming.Get("ithings-token")), first(incoming.Get("token")), first(incoming.Get("authorization")))
 		if token == "" {
 			return nil, status.Error(codes.Unauthenticated, "unauthorized")
 		}
@@ -85,13 +78,7 @@ func StreamServerInterceptor(options RPCOptions) grpc.StreamServerInterceptor {
 		}
 		ctx = stripUntrustedRPCIdentity(ctx, incoming)
 		incoming, _ = metadata.FromIncomingContext(ctx)
-		token := strings.TrimSpace(first(incoming.Get("ithings-token")))
-		if token == "" {
-			token = strings.TrimSpace(first(incoming.Get("token")))
-		}
-		if token == "" {
-			token = strings.TrimPrefix(first(incoming.Get("authorization")), "Bearer ")
-		}
+		token := readToken(first(incoming.Get("ithings-token")), first(incoming.Get("token")), first(incoming.Get("authorization")))
 		if token == "" {
 			return status.Error(codes.Unauthenticated, "unauthorized")
 		}

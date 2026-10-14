@@ -6,7 +6,6 @@ import (
 	"encoding/json"
 	"log/slog"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -80,13 +79,7 @@ func HTTP(next http.Handler, options Options) http.Handler {
 			writeError(writer, http.StatusInternalServerError, "auth_not_configured")
 			return
 		}
-		token := strings.TrimSpace(request.Header.Get("ithings-token"))
-		if token == "" {
-			token = strings.TrimSpace(request.Header.Get("token"))
-		}
-		if token == "" {
-			token = strings.TrimPrefix(request.Header.Get("Authorization"), "Bearer ")
-		}
+		token := readToken(request.Header.Get("ithings-token"), request.Header.Get("token"), request.Header.Get("Authorization"))
 		if token == "" {
 			writeError(writer, http.StatusUnauthorized, "unauthorized")
 			return

@@ -38,6 +38,7 @@ func TestHTTP(t *testing.T) {
 	}{
 		{"ithings-token", "", http.StatusUnauthorized}, {"ithings-token", "bad", http.StatusUnauthorized},
 		{"ithings-token", "good", http.StatusNoContent}, {"token", "good", http.StatusNoContent},
+		{"Authorization", "Bearer good", http.StatusNoContent},
 	} {
 		called = false
 		request := httptest.NewRequest(http.MethodPost, "/sample", nil)
@@ -51,5 +52,21 @@ func TestHTTP(t *testing.T) {
 		if response.Code != test.status || called != (test.status == http.StatusNoContent) || response.Header().Get("X-Content-Type-Options") != "nosniff" {
 			t.Errorf("token=%q: status=%d called=%v", test.token, response.Code, called)
 		}
+	}
+}
+
+// TestHTTPRejectsNonBearerAuthorization 验证通用授权头必须使用 Bearer 格式。
+func TestHTTPRejectsNonBearerAuthorization(t *testing.T) {
+	wrapped := HTTP(http.HandlerFunc(func(http.ResponseWriter, *http.Request) {
+		t.Fatal("非法授权头不能进入业务处理器")
+	}), Options{Authenticator: AuthenticatorFunc(func(_ *http.Request, _ string) (Identity, error) {
+		return Identity{UserID: "42", TenantCode: "demo"}, nil
+	})})
+	request := httptest.NewRequest(http.MethodPost, "/sample", nil)
+	request.Header.Set("Authorization", "Basic valid")
+	response := httptest.NewRecorder()
+	wrapped.ServeHTTP(response, request)
+	if response.Code != http.StatusUnauthorized {
+		t.Fatalf("非法授权头返回状态: %d", response.Code)
 	}
 }

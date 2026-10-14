@@ -34,6 +34,7 @@ func TestUnaryServerInterceptor(t *testing.T) {
 		{"ithings-token", "good", "/Demo/Write", codes.PermissionDenied},
 		{"ithings-token", "good", "/Demo/Read", codes.OK},
 		{"token", "good", "/Demo/Read", codes.OK},
+		{"authorization", "Bearer good", "/Demo/Read", codes.OK},
 	} {
 		ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs(test.header, test.token, "ithings-user", "forged", "ithings-user-role", "forged", "ithings-tenant-code", "forged", "ithings-project-id", "forged", "ithings-meta", "forged", "ithings-set-token", "forged"))
 		called := false
@@ -89,5 +90,27 @@ func TestStreamServerInterceptor(t *testing.T) {
 	}
 	if code := status.Code(StreamServerInterceptor(RPCOptions{})(nil, fakeServerStream{ctx: ctx}, &grpc.StreamServerInfo{}, nil)); code != codes.Internal {
 		t.Fatalf("缺少认证器应返回内部配置错误: %v", code)
+	}
+}
+
+// TestRPCRejectsNonBearerAuthorization 验证一元和流式 RPC 均拒绝非 Bearer 授权头。
+func TestRPCRejectsNonBearerAuthorization(t *testing.T) {
+	options := RPCOptions{Authenticator: AuthenticatorFunc(func(_ *http.Request, _ string) (Identity, error) {
+		return Identity{UserID: "42", TenantCode: "demo"}, nil
+	})}
+	ctx := metadata.NewIncomingContext(context.Background(), metadata.Pairs("authorization", "Basic valid"))
+	_, err := UnaryServerInterceptor(options)(ctx, nil, &grpc.UnaryServerInfo{FullMethod: "/Demo/Read"}, func(context.Context, any) (any, error) {
+		t.Fatal("非法授权头不能进入一元处理器")
+		return nil, nil
+	})
+	if status.Code(err) != codes.Unauthenticated {
+		t.Fatalf("一元 RPC 错误码: %v", status.Code(err))
+	}
+	err = StreamServerInterceptor(options)(nil, fakeServerStream{ctx: ctx}, &grpc.StreamServerInfo{FullMethod: "/Demo/Stream"}, func(any, grpc.ServerStream) error {
+		t.Fatal("非法授权头不能进入流处理器")
+		return nil
+	})
+	if status.Code(err) != codes.Unauthenticated {
+		t.Fatalf("流式 RPC 错误码: %v", status.Code(err))
 	}
 }
