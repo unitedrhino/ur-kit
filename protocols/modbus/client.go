@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-// Client 保存 Modbus TCP 或 RTU over TCP 连接地址、单元号、拨号超时及可选 TLS 配置。
+// Client 保存 Modbus TCP/UDP 或 RTU over TCP/UDP 连接参数与可选 TLS 配置。
 type Client struct {
 	Address string
 	UnitID  byte
@@ -20,6 +20,10 @@ type Client struct {
 	TLS *tls.Config
 	// RTUOverTCP 使用带 CRC 的 RTU 帧经 TCP 传输；默认仍使用 MBAP 帧。
 	RTUOverTCP bool
+	// UDP 使用 MBAP 帧经 UDP 数据报传输，不与 TLS 或 RTUOverTCP 同时使用。
+	UDP bool
+	// RTUOverUDP 使用带 CRC 的 RTU 帧经 UDP 数据报传输，隐含 UDP 传输。
+	RTUOverUDP bool
 }
 
 // ReadHoldingRegisters 使用功能码 3 读取保持寄存器，返回设备的无符号 16 位字。

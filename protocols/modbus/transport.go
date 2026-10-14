@@ -20,6 +20,12 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if len(requestPDU) < 1 || len(requestPDU) > 252 {
 		return nil, errors.New("invalid modbus request length")
 	}
+	if client.UDP || client.RTUOverUDP {
+		if client.TLS != nil || client.RTUOverTCP {
+			return nil, errors.New("modbus udp cannot combine with tls or rtu over tcp")
+		}
+		return client.exchangeUDP(ctx, requestPDU)
+	}
 	timeout := client.Timeout
 	if timeout <= 0 {
 		timeout = 3 * time.Second
