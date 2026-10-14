@@ -97,6 +97,18 @@ service api {
     )
     @handler structureSet
     post /structure-set (ProjectAlarmSourceSetReq) returns (ProjectAlarmSourceSetResp)
+    @doc(
+        summary: "通知结构预警事件"
+        description: "仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。"
+        authType: "all"
+        isNeedAuth: "true"
+        group: "things/project/alarmSource"
+        resource: "things/project/alarm-source"
+        action: "create"
+        recordLogMode: "3"
+    )
+    @handler structureNotify
+    post /structure-notify (ProjectStructureEventNotifyReq) returns (ProjectStructureEventNotifyResp)
 }
 
 @server(
@@ -307,6 +319,19 @@ type (
     // ProjectAlarmSourceSetResp 返回所有来源聚合后的等级。
     ProjectAlarmSourceSetResp {
         AlarmStatus int64 `json:"alarmStatus"`
+    }
+
+    // ProjectStructureEventNotifyReq 使用结构服务身份提交首次发布的事件。
+    ProjectStructureEventNotifyReq {
+        ProjectID int64 `json:"projectID,string"`
+        EventID int64 `json:"eventID,string"`
+        Level string `json:"level"`
+        Title string `json:"title"`
+    }
+
+    // ProjectStructureEventNotifyResp 返回当前有权接收通知的成员数量。
+    ProjectStructureEventNotifyResp {
+        RecipientCount int64 `json:"recipientCount"`
     }
 
     // ProjectInfoCreateReq 新增项目请求体，仅包含可写字段

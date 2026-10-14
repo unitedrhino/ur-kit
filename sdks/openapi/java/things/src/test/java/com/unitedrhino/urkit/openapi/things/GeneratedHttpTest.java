@@ -6,6 +6,7 @@ import com.unitedrhino.urkit.openapi.things.api.ThingsProjectAlarmSourceApi;
 import com.unitedrhino.urkit.openapi.things.client.ApiClient;
 import com.unitedrhino.urkit.openapi.things.model.AlarmEvaluateTriggerReq;
 import com.unitedrhino.urkit.openapi.things.model.ProjectAlarmSourceSetReq;
+import com.unitedrhino.urkit.openapi.things.model.ProjectStructureEventNotifyReq;
 import org.junit.jupiter.api.Test;
 
 import java.net.InetSocketAddress;
@@ -76,6 +77,38 @@ class GeneratedHttpTest {
             assertTrue(body.get().contains("\"projectID\":\"9007199254740993\""), body.get());
             assertTrue(body.get().contains("\"level\":4"), body.get());
             assertEquals(5L, result.getData().getAlarmStatus());
+        } finally {
+            server.stop(0);
+        }
+    }
+    /** 核对结构事件通知请求保留项目和事件大整数 ID。 */
+    @Test
+    void projectStructureNotifyUsesStringIDs() throws Exception {
+        AtomicReference<String> body = new AtomicReference<>();
+        AtomicReference<String> authorization = new AtomicReference<>();
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/api/v1/things/project/alarm-source/structure-notify", exchange -> {
+            authorization.set(exchange.getRequestHeaders().getFirst("Authorization"));
+            body.set(new String(exchange.getRequestBody().readAllBytes(), StandardCharsets.UTF_8));
+            byte[] response = "{\"code\":200,\"data\":{\"recipientCount\":2}}".getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().set("Content-Type", "application/json");
+            exchange.sendResponseHeaders(200, response.length);
+            try (var out = exchange.getResponseBody()) {
+                out.write(response);
+            }
+        });
+        server.start();
+        try {
+            ApiClient client = new ApiClient()
+                .setHost("127.0.0.1")
+                .setPort(server.getAddress().getPort())
+                .setRequestInterceptor(request -> request.header("Authorization", "Bearer service-token"));
+            var result = new ThingsProjectAlarmSourceApi(client).postApiV1ThingsProjectAlarmSourceStructureNotify(
+                new ProjectStructureEventNotifyReq().projectID("9007199254740993").eventID("9007199254740995").level("red").title("桥梁预警"));
+            assertEquals("Bearer service-token", authorization.get());
+            assertTrue(body.get().contains("\"projectID\":\"9007199254740993\""), body.get());
+            assertTrue(body.get().contains("\"eventID\":\"9007199254740995\""), body.get());
+            assertEquals(2L, result.getData().getRecipientCount());
         } finally {
             server.stop(0);
         }

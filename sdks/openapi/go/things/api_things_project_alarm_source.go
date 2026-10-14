@@ -22,6 +22,117 @@ import (
 // ThingsProjectAlarmSourceAPIService ThingsProjectAlarmSourceAPI service
 type ThingsProjectAlarmSourceAPIService service
 
+type ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest struct {
+	ctx context.Context
+	ApiService *ThingsProjectAlarmSourceAPIService
+	projectStructureEventNotifyReq *ProjectStructureEventNotifyReq
+}
+
+//  ProjectStructureEventNotifyReq 使用结构服务身份提交首次发布的事件。
+func (r ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest) ProjectStructureEventNotifyReq(projectStructureEventNotifyReq ProjectStructureEventNotifyReq) ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest {
+	r.projectStructureEventNotifyReq = &projectStructureEventNotifyReq
+	return r
+}
+
+func (r ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest) Execute() (*PostApiV1ThingsProjectAlarmSourceStructureNotify200Response, *http.Response, error) {
+	return r.ApiService.PostApiV1ThingsProjectAlarmSourceStructureNotifyExecute(r)
+}
+
+/*
+PostApiV1ThingsProjectAlarmSourceStructureNotify 通知结构预警事件
+
+仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest
+*/
+func (a *ThingsProjectAlarmSourceAPIService) PostApiV1ThingsProjectAlarmSourceStructureNotify(ctx context.Context) ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest {
+	return ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return PostApiV1ThingsProjectAlarmSourceStructureNotify200Response
+func (a *ThingsProjectAlarmSourceAPIService) PostApiV1ThingsProjectAlarmSourceStructureNotifyExecute(r ApiPostApiV1ThingsProjectAlarmSourceStructureNotifyRequest) (*PostApiV1ThingsProjectAlarmSourceStructureNotify200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PostApiV1ThingsProjectAlarmSourceStructureNotify200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "ThingsProjectAlarmSourceAPIService.PostApiV1ThingsProjectAlarmSourceStructureNotify")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/things/project/alarm-source/structure-notify"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.projectStructureEventNotifyReq == nil {
+		return localVarReturnValue, nil, reportError("projectStructureEventNotifyReq is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.projectStructureEventNotifyReq
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostApiV1ThingsProjectAlarmSourceStructureSetRequest struct {
 	ctx context.Context
 	ApiService *ThingsProjectAlarmSourceAPIService

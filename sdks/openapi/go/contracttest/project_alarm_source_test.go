@@ -49,3 +49,43 @@ func TestProjectAlarmSourceWire(t *testing.T) {
 		t.Fatalf("聚合结果错误: %+v", response)
 	}
 }
+
+// TestProjectStructureNotifyWire 验证通知接口以字符串无损传递项目和事件 ID。
+func TestProjectStructureNotifyWire(t *testing.T) {
+	const projectID = "9007199254740993"
+	const eventID = "9007199254740995"
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/api/v1/things/project/alarm-source/structure-notify" {
+			t.Errorf("通知路径错误: %s %s", r.Method, r.URL.Path)
+			http.NotFound(w, r)
+			return
+		}
+		if r.Header.Get("token") != "service-token" || r.Header.Get("project-id") != projectID {
+			t.Errorf("认证请求头未保留: %v", r.Header)
+		}
+		var body struct {
+			ProjectID string `json:"projectID"`
+			EventID   string `json:"eventID"`
+			Level     string `json:"level"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.ProjectID != projectID || body.EventID != eventID || body.Level != "red" {
+			t.Errorf("通知请求体错误: %+v: %v", body, err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"code":200,"data":{"recipientCount":2}}`))
+	}))
+	defer server.Close()
+	config := thingsapi.NewConfiguration()
+	config.Servers = thingsapi.ServerConfigurations{{URL: server.URL}}
+	config.HTTPClient = server.Client()
+	config.AddDefaultHeader("token", "service-token")
+	config.AddDefaultHeader("project-id", projectID)
+	client := thingsapi.NewAPIClient(config)
+	response, _, err := client.ThingsProjectAlarmSourceAPI.PostApiV1ThingsProjectAlarmSourceStructureNotify(context.Background()).ProjectStructureEventNotifyReq(*thingsapi.NewProjectStructureEventNotifyReq(eventID, "red", projectID, "桥梁预警")).Execute()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if response == nil || response.Data.RecipientCount != 2 {
+		t.Fatalf("通知结果错误: %+v", response)
+	}
+}

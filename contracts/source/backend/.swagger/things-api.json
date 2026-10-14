@@ -10967,6 +10967,43 @@
         "title": "ProjectProfileGetListResp",
         "type": "object"
       },
+      "ProjectStructureEventNotifyReq": {
+        "properties": {
+          "eventID": {
+            "type": "string"
+          },
+          "level": {
+            "type": "string"
+          },
+          "projectID": {
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "projectID",
+          "eventID",
+          "level",
+          "title"
+        ],
+        "title": "ProjectStructureEventNotifyReq",
+        "type": "object"
+      },
+      "ProjectStructureEventNotifyResp": {
+        "properties": {
+          "recipientCount": {
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "recipientCount"
+        ],
+        "title": "ProjectStructureEventNotifyResp",
+        "type": "object"
+      },
       "ProjectWithID": {
         "properties": {
           "projectID": {
@@ -23918,6 +23955,61 @@
         "x-log-mode": "1",
         "x-oper-type": "update",
         "x-resource": "things/product/schema"
+      }
+    },
+    "/api/v1/things/project/alarm-source/structure-notify": {
+      "post": {
+        "description": "仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。",
+        "operationId": "postApiV1ThingsProjectAlarm-sourceStructure-notify",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectStructureEventNotifyReq"
+              }
+            }
+          },
+          "description": " ProjectStructureEventNotifyReq 使用结构服务身份提交首次发布的事件。",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ProjectStructureEventNotifyResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "通知结构预警事件",
+        "tags": [
+          "things/project/alarmSource",
+          "thingsProjectAlarmSource"
+        ],
+        "x-action": "create",
+        "x-auth-type": "all",
+        "x-group": "things/project/alarmSource",
+        "x-log-mode": "3",
+        "x-oper-type": "create",
+        "x-resource": "things/project/alarm-source"
       }
     },
     "/api/v1/things/project/alarm-source/structure-set": {

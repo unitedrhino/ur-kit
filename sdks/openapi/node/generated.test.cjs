@@ -52,3 +52,29 @@ test('Things 结构来源接口保留项目 ID 字符串且只生成一个写入
   ]]);
   assert.equal('postApiV1ThingsProjectAlarmSourceStructureSet_1' in api, false);
 });
+
+test('Things 结构事件通知接口保留两个大整数 ID 且只生成一个方法', async () => {
+  const seen = [];
+  const api = new ThingsProjectAlarmSourceApi(new Configuration({
+    basePath: 'http://local.test',
+    headers: { Authorization: 'Bearer service-token' },
+    fetchApi: async (url, init) => {
+      seen.push([url, init.method, init.headers.Authorization, JSON.parse(init.body)]);
+      return new Response(JSON.stringify({ code: 200, data: { recipientCount: 2 } }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    },
+  }));
+  const result = await api.postApiV1ThingsProjectAlarmSourceStructureNotify({
+    projectStructureEventNotifyReq: { projectID: '9007199254740993', eventID: '9007199254740995', level: 'red', title: '桥梁预警' },
+  });
+  assert.equal(result.data?.recipientCount, 2);
+  assert.deepEqual(seen, [[
+    'http://local.test/api/v1/things/project/alarm-source/structure-notify',
+    'POST',
+    'Bearer service-token',
+    { projectID: '9007199254740993', eventID: '9007199254740995', level: 'red', title: '桥梁预警' },
+  ]]);
+  assert.equal('postApiV1ThingsProjectAlarmSourceStructureNotify_1' in api, false);
+});

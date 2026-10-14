@@ -21,22 +21,23 @@ import (
 const _ = grpc.SupportPackageIsVersion9
 
 const (
-	ProjectManage_ProjectInfoCreate_FullMethodName       = "/dm.ProjectManage/projectInfoCreate"
-	ProjectManage_ProjectInfoUpdate_FullMethodName       = "/dm.ProjectManage/projectInfoUpdate"
-	ProjectManage_ProjectInfoDelete_FullMethodName       = "/dm.ProjectManage/projectInfoDelete"
-	ProjectManage_ProjectInfoGetOne_FullMethodName       = "/dm.ProjectManage/projectInfoGetOne"
-	ProjectManage_ProjectAttachmentAdd_FullMethodName    = "/dm.ProjectManage/projectAttachmentAdd"
-	ProjectManage_ProjectAttachmentDelete_FullMethodName = "/dm.ProjectManage/projectAttachmentDelete"
-	ProjectManage_ProjectInfoGetList_FullMethodName      = "/dm.ProjectManage/projectInfoGetList"
-	ProjectManage_ProjectAlarmSourceSet_FullMethodName   = "/dm.ProjectManage/projectAlarmSourceSet"
-	ProjectManage_ProjectProfileGetOne_FullMethodName    = "/dm.ProjectManage/projectProfileGetOne"
-	ProjectManage_ProjectProfileUpdate_FullMethodName    = "/dm.ProjectManage/projectProfileUpdate"
-	ProjectManage_ProjectProfileGetList_FullMethodName   = "/dm.ProjectManage/projectProfileGetList"
-	ProjectManage_ProjectCrudCreate_FullMethodName       = "/dm.ProjectManage/projectCrudCreate"
-	ProjectManage_ProjectCrudUpdate_FullMethodName       = "/dm.ProjectManage/projectCrudUpdate"
-	ProjectManage_ProjectCrudDelete_FullMethodName       = "/dm.ProjectManage/projectCrudDelete"
-	ProjectManage_ProjectCrudGetOne_FullMethodName       = "/dm.ProjectManage/projectCrudGetOne"
-	ProjectManage_ProjectCrudGetList_FullMethodName      = "/dm.ProjectManage/projectCrudGetList"
+	ProjectManage_ProjectInfoCreate_FullMethodName           = "/dm.ProjectManage/projectInfoCreate"
+	ProjectManage_ProjectInfoUpdate_FullMethodName           = "/dm.ProjectManage/projectInfoUpdate"
+	ProjectManage_ProjectInfoDelete_FullMethodName           = "/dm.ProjectManage/projectInfoDelete"
+	ProjectManage_ProjectInfoGetOne_FullMethodName           = "/dm.ProjectManage/projectInfoGetOne"
+	ProjectManage_ProjectAttachmentAdd_FullMethodName        = "/dm.ProjectManage/projectAttachmentAdd"
+	ProjectManage_ProjectAttachmentDelete_FullMethodName     = "/dm.ProjectManage/projectAttachmentDelete"
+	ProjectManage_ProjectInfoGetList_FullMethodName          = "/dm.ProjectManage/projectInfoGetList"
+	ProjectManage_ProjectAlarmSourceSet_FullMethodName       = "/dm.ProjectManage/projectAlarmSourceSet"
+	ProjectManage_ProjectStructureEventNotify_FullMethodName = "/dm.ProjectManage/projectStructureEventNotify"
+	ProjectManage_ProjectProfileGetOne_FullMethodName        = "/dm.ProjectManage/projectProfileGetOne"
+	ProjectManage_ProjectProfileUpdate_FullMethodName        = "/dm.ProjectManage/projectProfileUpdate"
+	ProjectManage_ProjectProfileGetList_FullMethodName       = "/dm.ProjectManage/projectProfileGetList"
+	ProjectManage_ProjectCrudCreate_FullMethodName           = "/dm.ProjectManage/projectCrudCreate"
+	ProjectManage_ProjectCrudUpdate_FullMethodName           = "/dm.ProjectManage/projectCrudUpdate"
+	ProjectManage_ProjectCrudDelete_FullMethodName           = "/dm.ProjectManage/projectCrudDelete"
+	ProjectManage_ProjectCrudGetOne_FullMethodName           = "/dm.ProjectManage/projectCrudGetOne"
+	ProjectManage_ProjectCrudGetList_FullMethodName          = "/dm.ProjectManage/projectCrudGetList"
 )
 
 // ProjectManageClient is the client API for ProjectManage service.
@@ -51,6 +52,7 @@ type ProjectManageClient interface {
 	ProjectAttachmentDelete(ctx context.Context, in *ProjectAttachmentDeleteReq, opts ...grpc.CallOption) (*ProjectEmpty, error)
 	ProjectInfoGetList(ctx context.Context, in *ProjectInfoGetListReq, opts ...grpc.CallOption) (*ProjectInfoGetListResp, error)
 	ProjectAlarmSourceSet(ctx context.Context, in *ProjectAlarmSourceSetReq, opts ...grpc.CallOption) (*ProjectAlarmSourceSetResp, error)
+	ProjectStructureEventNotify(ctx context.Context, in *ProjectStructureEventNotifyReq, opts ...grpc.CallOption) (*ProjectStructureEventNotifyResp, error)
 	ProjectProfileGetOne(ctx context.Context, in *ProjectProfileGetOneReq, opts ...grpc.CallOption) (*ProjectProfile, error)
 	ProjectProfileUpdate(ctx context.Context, in *ProjectProfile, opts ...grpc.CallOption) (*ProjectEmpty, error)
 	ProjectProfileGetList(ctx context.Context, in *ProjectProfileGetListReq, opts ...grpc.CallOption) (*ProjectProfileGetListResp, error)
@@ -149,6 +151,16 @@ func (c *projectManageClient) ProjectAlarmSourceSet(ctx context.Context, in *Pro
 	return out, nil
 }
 
+func (c *projectManageClient) ProjectStructureEventNotify(ctx context.Context, in *ProjectStructureEventNotifyReq, opts ...grpc.CallOption) (*ProjectStructureEventNotifyResp, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(ProjectStructureEventNotifyResp)
+	err := c.cc.Invoke(ctx, ProjectManage_ProjectStructureEventNotify_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *projectManageClient) ProjectProfileGetOne(ctx context.Context, in *ProjectProfileGetOneReq, opts ...grpc.CallOption) (*ProjectProfile, error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
 	out := new(ProjectProfile)
@@ -241,6 +253,7 @@ type ProjectManageServer interface {
 	ProjectAttachmentDelete(context.Context, *ProjectAttachmentDeleteReq) (*ProjectEmpty, error)
 	ProjectInfoGetList(context.Context, *ProjectInfoGetListReq) (*ProjectInfoGetListResp, error)
 	ProjectAlarmSourceSet(context.Context, *ProjectAlarmSourceSetReq) (*ProjectAlarmSourceSetResp, error)
+	ProjectStructureEventNotify(context.Context, *ProjectStructureEventNotifyReq) (*ProjectStructureEventNotifyResp, error)
 	ProjectProfileGetOne(context.Context, *ProjectProfileGetOneReq) (*ProjectProfile, error)
 	ProjectProfileUpdate(context.Context, *ProjectProfile) (*ProjectEmpty, error)
 	ProjectProfileGetList(context.Context, *ProjectProfileGetListReq) (*ProjectProfileGetListResp, error)
@@ -282,6 +295,9 @@ func (UnimplementedProjectManageServer) ProjectInfoGetList(context.Context, *Pro
 }
 func (UnimplementedProjectManageServer) ProjectAlarmSourceSet(context.Context, *ProjectAlarmSourceSetReq) (*ProjectAlarmSourceSetResp, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProjectAlarmSourceSet not implemented")
+}
+func (UnimplementedProjectManageServer) ProjectStructureEventNotify(context.Context, *ProjectStructureEventNotifyReq) (*ProjectStructureEventNotifyResp, error) {
+	return nil, status.Error(codes.Unimplemented, "method ProjectStructureEventNotify not implemented")
 }
 func (UnimplementedProjectManageServer) ProjectProfileGetOne(context.Context, *ProjectProfileGetOneReq) (*ProjectProfile, error) {
 	return nil, status.Error(codes.Unimplemented, "method ProjectProfileGetOne not implemented")
@@ -472,6 +488,24 @@ func _ProjectManage_ProjectAlarmSourceSet_Handler(srv interface{}, ctx context.C
 	return interceptor(ctx, in, info, handler)
 }
 
+func _ProjectManage_ProjectStructureEventNotify_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProjectStructureEventNotifyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ProjectManageServer).ProjectStructureEventNotify(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: ProjectManage_ProjectStructureEventNotify_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ProjectManageServer).ProjectStructureEventNotify(ctx, req.(*ProjectStructureEventNotifyReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _ProjectManage_ProjectProfileGetOne_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProjectProfileGetOneReq)
 	if err := dec(in); err != nil {
@@ -654,6 +688,10 @@ var ProjectManage_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "projectAlarmSourceSet",
 			Handler:    _ProjectManage_ProjectAlarmSourceSet_Handler,
+		},
+		{
+			MethodName: "projectStructureEventNotify",
+			Handler:    _ProjectManage_ProjectStructureEventNotify_Handler,
 		},
 		{
 			MethodName: "projectProfileGetOne",

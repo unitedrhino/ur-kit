@@ -17,8 +17,10 @@ import com.unitedrhino.urkit.openapi.things.client.ApiException;
 import com.unitedrhino.urkit.openapi.things.client.ApiResponse;
 import com.unitedrhino.urkit.openapi.things.client.Pair;
 
+import com.unitedrhino.urkit.openapi.things.model.PostApiV1ThingsProjectAlarmSourceStructureNotify200Response;
 import com.unitedrhino.urkit.openapi.things.model.PostApiV1ThingsProjectAlarmSourceStructureSet200Response;
 import com.unitedrhino.urkit.openapi.things.model.ProjectAlarmSourceSetReq;
+import com.unitedrhino.urkit.openapi.things.model.ProjectStructureEventNotifyReq;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -80,6 +82,84 @@ public class ThingsProjectAlarmSourceApi {
       body = "[no body]";
     }
     return operationId + " call failed with: " + statusCode + " - " + body;
+  }
+
+  /**
+   * 通知结构预警事件
+   * 仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。
+   * @param projectStructureEventNotifyReq  ProjectStructureEventNotifyReq 使用结构服务身份提交首次发布的事件。 (required)
+   * @return PostApiV1ThingsProjectAlarmSourceStructureNotify200Response
+   * @throws ApiException if fails to make API call
+   */
+  public PostApiV1ThingsProjectAlarmSourceStructureNotify200Response postApiV1ThingsProjectAlarmSourceStructureNotify(ProjectStructureEventNotifyReq projectStructureEventNotifyReq) throws ApiException {
+    ApiResponse<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response> localVarResponse = postApiV1ThingsProjectAlarmSourceStructureNotifyWithHttpInfo(projectStructureEventNotifyReq);
+    return localVarResponse.getData();
+  }
+
+  /**
+   * 通知结构预警事件
+   * 仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。
+   * @param projectStructureEventNotifyReq  ProjectStructureEventNotifyReq 使用结构服务身份提交首次发布的事件。 (required)
+   * @return ApiResponse&lt;PostApiV1ThingsProjectAlarmSourceStructureNotify200Response&gt;
+   * @throws ApiException if fails to make API call
+   */
+  public ApiResponse<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response> postApiV1ThingsProjectAlarmSourceStructureNotifyWithHttpInfo(ProjectStructureEventNotifyReq projectStructureEventNotifyReq) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = postApiV1ThingsProjectAlarmSourceStructureNotifyRequestBuilder(projectStructureEventNotifyReq);
+    try {
+      HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
+          localVarRequestBuilder.build(),
+          HttpResponse.BodyHandlers.ofInputStream());
+      if (memberVarResponseInterceptor != null) {
+        memberVarResponseInterceptor.accept(localVarResponse);
+      }
+      try {
+        if (localVarResponse.statusCode()/ 100 != 2) {
+          throw getApiException("postApiV1ThingsProjectAlarmSourceStructureNotify", localVarResponse);
+        }
+        return new ApiResponse<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response>(
+          localVarResponse.statusCode(),
+          localVarResponse.headers().map(),
+          localVarResponse.body() == null ? null : memberVarObjectMapper.readValue(localVarResponse.body(), new TypeReference<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response>() {}) // closes the InputStream
+        );
+      } finally {
+      }
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private HttpRequest.Builder postApiV1ThingsProjectAlarmSourceStructureNotifyRequestBuilder(ProjectStructureEventNotifyReq projectStructureEventNotifyReq) throws ApiException {
+    // verify the required parameter 'projectStructureEventNotifyReq' is set
+    if (projectStructureEventNotifyReq == null) {
+      throw new ApiException(400, "Missing the required parameter 'projectStructureEventNotifyReq' when calling postApiV1ThingsProjectAlarmSourceStructureNotify");
+    }
+
+    HttpRequest.Builder localVarRequestBuilder = HttpRequest.newBuilder();
+
+    String localVarPath = "/api/v1/things/project/alarm-source/structure-notify";
+
+    localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
+
+    localVarRequestBuilder.header("Content-Type", "application/json");
+    localVarRequestBuilder.header("Accept", "application/json");
+
+    try {
+      byte[] localVarPostBody = memberVarObjectMapper.writeValueAsBytes(projectStructureEventNotifyReq);
+      localVarRequestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(localVarPostBody));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    if (memberVarReadTimeout != null) {
+      localVarRequestBuilder.timeout(memberVarReadTimeout);
+    }
+    if (memberVarInterceptor != null) {
+      memberVarInterceptor.accept(localVarRequestBuilder);
+    }
+    return localVarRequestBuilder;
   }
 
   /**

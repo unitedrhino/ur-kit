@@ -96,6 +96,7 @@ message MessageInfoSendReq{
   map<string,string> params =12;//通知变量参数
   int64 NotifyTime = 11;//通知时间,不传为立刻通知（毫秒时间戳）
   repeated string accounts =13; //直接填写的接收账号列表（手机号/邮箱）；按渠道语义解析：sms 渠道为手机号，email 渠道为邮箱；站内信渠道不支持
+  string idempotencyKey =14; //站内定向消息的企业内幂等键；相同键只创建一次消息和收件箱记录
 }
 message MessageInfoGetListReq{
   PageInfo page =1; //分页信息

@@ -15,15 +15,25 @@
 
 import * as runtime from '../runtime';
 import type {
+  PostApiV1ThingsProjectAlarmSourceStructureNotify200Response,
   PostApiV1ThingsProjectAlarmSourceStructureSet200Response,
   ProjectAlarmSourceSetReq,
+  ProjectStructureEventNotifyReq,
 } from '../models/index';
 import {
+    PostApiV1ThingsProjectAlarmSourceStructureNotify200ResponseFromJSON,
+    PostApiV1ThingsProjectAlarmSourceStructureNotify200ResponseToJSON,
     PostApiV1ThingsProjectAlarmSourceStructureSet200ResponseFromJSON,
     PostApiV1ThingsProjectAlarmSourceStructureSet200ResponseToJSON,
     ProjectAlarmSourceSetReqFromJSON,
     ProjectAlarmSourceSetReqToJSON,
+    ProjectStructureEventNotifyReqFromJSON,
+    ProjectStructureEventNotifyReqToJSON,
 } from '../models/index';
+
+export interface PostApiV1ThingsProjectAlarmSourceStructureNotifyRequest {
+    projectStructureEventNotifyReq: ProjectStructureEventNotifyReq;
+}
 
 export interface PostApiV1ThingsProjectAlarmSourceStructureSetRequest {
     projectAlarmSourceSetReq: ProjectAlarmSourceSetReq;
@@ -33,6 +43,44 @@ export interface PostApiV1ThingsProjectAlarmSourceStructureSetRequest {
  *
  */
 export class ThingsProjectAlarmSourceApi extends runtime.BaseAPI {
+
+    /**
+     * 仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。
+     * 通知结构预警事件
+     */
+    async postApiV1ThingsProjectAlarmSourceStructureNotifyRaw(requestParameters: PostApiV1ThingsProjectAlarmSourceStructureNotifyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response>> {
+        if (requestParameters['projectStructureEventNotifyReq'] == null) {
+            throw new runtime.RequiredError(
+                'projectStructureEventNotifyReq',
+                'Required parameter "projectStructureEventNotifyReq" was null or undefined when calling postApiV1ThingsProjectAlarmSourceStructureNotify().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/things/project/alarm-source/structure-notify`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: ProjectStructureEventNotifyReqToJSON(requestParameters['projectStructureEventNotifyReq']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PostApiV1ThingsProjectAlarmSourceStructureNotify200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 仅结构监测服务角色可为当前有读写权限的项目发布事件站内信，收件人由平台从当前有效项目权限中计算。
+     * 通知结构预警事件
+     */
+    async postApiV1ThingsProjectAlarmSourceStructureNotify(requestParameters: PostApiV1ThingsProjectAlarmSourceStructureNotifyRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1ThingsProjectAlarmSourceStructureNotify200Response> {
+        const response = await this.postApiV1ThingsProjectAlarmSourceStructureNotifyRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
 
     /**
      * 仅具有结构监测服务角色和项目读写权限的服务账号可更新当前项目的结构监测来源等级。

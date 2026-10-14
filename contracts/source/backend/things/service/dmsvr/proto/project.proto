@@ -34,6 +34,15 @@ message ProjectAlarmSourceSetReq{
 message ProjectAlarmSourceSetResp{
   int64 alarmStatus = 1; // 聚合后的项目展示等级
 }
+message ProjectStructureEventNotifyReq{
+  int64 projectID = 1; // 当前授权项目
+  int64 eventID = 2; // 结构监测事件 ID
+  string level = 3; // blue yellow orange red
+  string title = 4; // 事件标题
+}
+message ProjectStructureEventNotifyResp{
+  int64 recipientCount = 1; // 实际发送的项目成员数量
+}
 
 
 service ProjectManage {
@@ -45,6 +54,7 @@ service ProjectManage {
   rpc projectAttachmentDelete (ProjectAttachmentDeleteReq) returns (ProjectEmpty); // 删除项目附件
   rpc projectInfoGetList (ProjectInfoGetListReq) returns (ProjectInfoGetListResp); //获取项目信息列表（支持分页和过滤）
   rpc projectAlarmSourceSet (ProjectAlarmSourceSetReq) returns (ProjectAlarmSourceSetResp); //结构服务写入当前项目的预警来源等级
+  rpc projectStructureEventNotify (ProjectStructureEventNotifyReq) returns (ProjectStructureEventNotifyResp); //结构事件首次发布后通知项目有权成员
 
   rpc projectProfileGetOne(ProjectProfileGetOneReq)returns(ProjectProfile); //获取项目配置文件详情
   rpc projectProfileUpdate(ProjectProfile)returns(ProjectEmpty); //更新项目配置文件
