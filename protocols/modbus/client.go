@@ -3,6 +3,7 @@ package modbus
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"io"
@@ -10,11 +11,13 @@ import (
 	"time"
 )
 
-// Client 保存 Modbus TCP 或 RTU over TCP 连接地址、单元号与拨号超时。
+// Client 保存 Modbus TCP 或 RTU over TCP 连接地址、单元号、拨号超时及可选 TLS 配置。
 type Client struct {
 	Address string
 	UnitID  byte
 	Timeout time.Duration
+	// TLS 非空时校验证书并加密 TCP 连接；调用方应提供可信根证书或系统信任链。
+	TLS *tls.Config
 	// RTUOverTCP 使用带 CRC 的 RTU 帧经 TCP 传输；默认仍使用 MBAP 帧。
 	RTUOverTCP bool
 }

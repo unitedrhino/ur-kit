@@ -3,6 +3,7 @@ package modbus
 
 import (
 	"context"
+	"crypto/tls"
 	"encoding/binary"
 	"errors"
 	"fmt"
@@ -23,7 +24,17 @@ func (client Client) exchange(ctx context.Context, requestPDU []byte) ([]byte, e
 	if timeout <= 0 {
 		timeout = 3 * time.Second
 	}
-	connection, err := (&net.Dialer{Timeout: timeout}).DialContext(ctx, "tcp", client.Address)
+	dialer := &net.Dialer{Timeout: timeout}
+	var connection net.Conn
+	var err error
+	if client.TLS != nil {
+		// TLS 拨号把握手也纳入请求上下文；克隆配置避免修改调用方共享对象。
+		dialCtx, cancel := context.WithTimeout(ctx, timeout)
+		connection, err = (&tls.Dialer{NetDialer: dialer, Config: client.TLS.Clone()}).DialContext(dialCtx, "tcp", client.Address)
+		cancel()
+	} else {
+		connection, err = dialer.DialContext(ctx, "tcp", client.Address)
+	}
 	if err != nil {
 		return nil, err
 	}
