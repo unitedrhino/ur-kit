@@ -132,6 +132,27 @@ func TestPostJSONTokenHeaderAndLimit(t *testing.T) {
 	}
 }
 
+// TestPostJSONBearerToken 验证访问令牌只经 Authorization 发送，且不与登录令牌混用。
+func TestPostJSONBearerToken(t *testing.T) {
+	var requests atomic.Int32
+	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {
+		requests.Add(1)
+		if request.Header.Get("Authorization") != "Bearer signed-jwt" || request.Header.Get("token") != "" || request.Header.Get("ithings-token") != "" {
+			t.Error("访问令牌认证头错误")
+		}
+		_, _ = writer.Write([]byte(`{"code":200}`))
+	}))
+	defer server.Close()
+	client := Client{BaseURL: server.URL, BearerToken: "signed-jwt"}
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, nil); err != nil {
+		t.Fatal(err)
+	}
+	client.Token = "login-token"
+	if err := client.PostJSON(context.Background(), "/api/demo", nil, nil); err == nil || requests.Load() != 1 {
+		t.Fatalf("两种令牌混用未拒绝: %v", err)
+	}
+}
+
 // TestPostJSONRejectsTrailingDocument 验证平台响应只能包含一个完整 JSON 文档。
 func TestPostJSONRejectsTrailingDocument(t *testing.T) {
 	server := httptest.NewServer(http.HandlerFunc(func(writer http.ResponseWriter, request *http.Request) {

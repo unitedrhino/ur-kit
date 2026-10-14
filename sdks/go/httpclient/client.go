@@ -15,12 +15,14 @@ import (
 
 // Client 保存平台地址、令牌、业务上下文与可替换的 HTTP 传输。
 type Client struct {
-	BaseURL    string
-	Token      string
-	TenantCode string
-	ProjectID  string
-	AppID      string
-	HTTP       *http.Client
+	BaseURL string
+	Token   string
+	// BearerToken 为平台访问令牌签发的 JWT；与 Token 二选一。
+	BearerToken string
+	TenantCode  string
+	ProjectID   string
+	AppID       string
+	HTTP        *http.Client
 	// TokenHeader 仅接受平台支持的两个令牌头；空值使用 ithings-token。
 	TokenHeader string
 	// ResponseLimit 限制响应字节数；空值使用 16 MiB，上限也是 16 MiB。
@@ -38,8 +40,8 @@ func (err *APIError) Error() string { return fmt.Sprintf("platform API status %d
 
 // PostJSON 向平台发送 JSON POST，并用 UseNumber 保留大整数与 ID 精度。
 func (client Client) PostJSON(ctx context.Context, path string, requestBody, responseBody any) error {
-	if strings.TrimSpace(client.Token) == "" {
-		return errors.New("platform token is required")
+	if (strings.TrimSpace(client.Token) == "") == (strings.TrimSpace(client.BearerToken) == "") {
+		return errors.New("exactly one platform token is required")
 	}
 	tokenHeader := client.TokenHeader
 	if tokenHeader == "" {
@@ -72,7 +74,11 @@ func (client Client) PostJSON(ctx context.Context, path string, requestBody, res
 		return err
 	}
 	request.Header.Set("Content-Type", "application/json")
-	request.Header.Set(tokenHeader, client.Token)
+	if client.BearerToken != "" {
+		request.Header.Set("Authorization", "Bearer "+client.BearerToken)
+	} else {
+		request.Header.Set(tokenHeader, client.Token)
+	}
 	if client.TenantCode != "" {
 		request.Header.Set("tenant-code", client.TenantCode)
 	}
