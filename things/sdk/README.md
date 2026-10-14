@@ -2,6 +2,8 @@
 
 `upstream/` 是 SaaS `backend/things/sdk` 固定提交的完整源码快照，包含 `protocol`、`deviceauth`、`seed`，由 `scripts/sync_things_sdk.py` 按 `contracts/manifest.json` 的来源 SHA 同步并写入逐文件哈希；`upstream/schema` 由 `scripts/sync_schema.py` 同步。SaaS 的 `shell/sync-ur-kit-contracts.sh` 在合同导出后调用这两个同步器。原始快照保留私有导入，仅供逐包解耦与对照；公开可编译 API 位于本目录其他包。更新后用 `python3 scripts/sync_things_sdk.py --saas <saas仓库> --sha <合同SHA> --check` 核对原始快照。
 
+`deviceauth.NewDeviceAuth` 保留原 SDK 构造入口名称，接收标准 `grpc.ClientConnInterface`；go-zero 调用方传入现有客户端的 `Conn()`。`LoginAuthReq`、`AccessAuthReq`、`DeviceRegisterReq`、`DeviceRegisterResp`、`Request` 和 `Response` 是公开 protobuf 消息别名，登录、访问认证与注册均可直接调用。连接及令牌元数据由接入方管理；本机真实 gRPC 往返测试覆盖三种方法。
+
 `protocol/tracking` 提供独立 MQTT 会话跟踪器，使用调用方注入的 Redis 客户端，并与原 `device:mqtt:*` 和 `device:lastActivity:*` 键及 JSON 消息字段兼容。`Sync`、`ClearClient` 和孤立记录清理在并发重连时只删除旧会话；`Touch`、`TouchMany` 只记录上行活动，不伪造在线状态。`ActiveByProduct` 按产品和时间窗查询活动设备，支持同毫秒大量设备分页；`ActiveAll` 按原协议会话索引汇总近三十天仍有 MQTT 会话的产品活动，不包含仅有活动时间而无 MQTT 会话的产品；`DeleteActivity` 删除活动记录而不修改会话映射。
 
 `protocol/core` 提供 Things protobuf 客户端注册/心跳、配置页、可选自注册 gRPC 服务、设备上行信封与下行主题；平台 RPC 入口可直接使用 `core.GRPCRegistry{Client: dm.NewProtocolManageClient(connection)}`。协议自有 RPC 在 `Options.RPCRegistrars` 中注册（例如生成的 `protocolSync.RegisterProtocolSyncServer`），同时指定 `RPCListenAddr`；`RPCServerOptions` 注入认证、权限和日志拦截器，反射仅在明确设置 `RPCReflection` 时开放。启动心跳报告实际 `RPCPort`，失败时释放监听端口；`AddStopHandle` 可在启动前后登记外部订阅和连接清理回调，`Stop` 等待内部服务退出后按注册顺序执行一次。非 MQTT 设备通过 `ReportConnection` 发布兼容的上下线事件，不写 MQTT 在线会话；调用方提供事件总线、注册 IP 与可选 Redis 活动记录，执行 `NewProtocol` 后调用 `Start`、`Publish`、`SubscribeDownlink` 和 `Stop`。
