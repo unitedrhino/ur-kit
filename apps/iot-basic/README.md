@@ -13,3 +13,22 @@ docker build -f apps/iot-basic/Dockerfile --build-arg VITE_GLOB_APPID=<平台应
 在 `apps/iot-basic/` 中通过 Compose 启动时，设置 `PLATFORM_URL` 为部署环境的平台 HTTP(S) 根地址、`VITE_GLOB_APPID` 为数字应用标识，并给 `IMAGE_VERSION` 设置不可变版本。`web/.env.production` 的数字 ID 是本地示例默认值，不能代替目标平台应用配置。运行镜像不含构建工具或移动端源码。移动端在 `mobile/` 内按其 `AGENTS.md` 独立构建。
 
 后端本机验证：`cd backend && go test ./...`。Web 构建与移动端验证见仓库根目录 `README.md`。
+
+## 真实平台浏览器冒烟
+
+在已授权的本机隔离平台准备一个开通了当前 Web 应用的企业、可登录成员及其有权访问的项目，再从仓库根目录运行 `pnpm --filter org-iot-client run test:e2e:real`。脚本直接访问已启动的单容器，不模拟接口；校验真实登录、应用可见性、项目列表请求的企业与应用头、组织前缀 dashboard，以及刷新后的项目上下文。
+
+运行前由本机测试环境注入下列变量，不把凭据写入仓库：
+
+| 变量 | 含义 |
+| --- | --- |
+| `UR_KIT_SMOKE_BASE_URL` | 单容器的 HTTP(S) 根地址 |
+| `UR_KIT_SMOKE_ORG_ID` | 企业路由 ID |
+| `UR_KIT_SMOKE_TENANT_CODE` | 企业代码，用于校验请求头与应用授权 |
+| `UR_KIT_SMOKE_USER`、`UR_KIT_SMOKE_PASSWORD` | 测试成员的登录凭据 |
+| `UR_KIT_SMOKE_PROJECT_ID` | 预期在列表中出现的项目 ID |
+| `UR_KIT_SMOKE_APP_ID` | 可选，默认 `600` |
+| `UR_KIT_SMOKE_ROUTER_MODE` | 可选，生产镜像默认 `hash`；开发服务用 `html5` |
+| `PLAYWRIGHT_EXECUTABLE_PATH` | 可选，指定已安装的 Chromium 可执行文件 |
+
+脚本只输出状态与项目数量，不输出凭据或令牌。目标企业需要在真实 `self/app/get-list` 中可见该应用；平台账号的 `platform` 企业与普通企业的应用菜单范围不同，不能用模拟授权响应代替此项验收。
