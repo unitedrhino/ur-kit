@@ -18,6 +18,20 @@ const APP_MANIFESTS = [
   path.join(ROOT, 'apps/iot-basic/web/package.json'),
   path.join(ROOT, 'apps/iot-basic/mobile/package.json'),
 ];
+// APP_ENV_FILES 列出 Web 各构建模式的应用身份配置，必须与共享登录路由约定一致。
+const APP_ENV_FILES = ['.env.development', '.env.test', '.env.production'];
+
+// verifyAppIdentity 防止构建模式覆盖应用名，使登录后组织前缀路由失效。
+async function verifyAppIdentity() {
+  for (const filename of APP_ENV_FILES) {
+    const envPath = path.join(ROOT, 'apps/iot-basic/web', filename);
+    const content = await readFile(envPath, 'utf8');
+    const appName = content.match(/^VITE_GLOB_APPNAME=(.*)$/m)?.[1]?.trim();
+    if (appName !== 'org-iot-client') {
+      throw new Error(`${envPath}: VITE_GLOB_APPNAME 必须是 org-iot-client`);
+    }
+  }
+}
 
 // verifyAppDependencies 禁止应用通过工作区浮动版本或仓外路径依赖 SaaS 源码。
 async function verifyAppDependencies() {
@@ -110,6 +124,7 @@ async function currentLock() {
 
 // main 输出当前锁或核对已提交锁；更新锁必须由开发者显式审阅并提交。
 async function main() {
+  await verifyAppIdentity();
   await verifyAppDependencies();
   const actual = await currentLock();
   const args = process.argv.slice(2);

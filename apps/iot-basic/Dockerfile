@@ -7,6 +7,7 @@ COPY web-shared/ ./web-shared/
 COPY contracts/manifest.json ./contracts/manifest.json
 COPY apps/iot-basic/ur-kit.lock.json ./apps/iot-basic/ur-kit.lock.json
 COPY apps/iot-basic/web/package.json ./apps/iot-basic/web/package.json
+COPY apps/iot-basic/web/.env.development apps/iot-basic/web/.env.test apps/iot-basic/web/.env.production ./apps/iot-basic/web/
 COPY apps/iot-basic/mobile/package.json ./apps/iot-basic/mobile/package.json
 COPY scripts/verify_iot_basic.mjs ./scripts/verify_iot_basic.mjs
 RUN node scripts/verify_iot_basic.mjs
