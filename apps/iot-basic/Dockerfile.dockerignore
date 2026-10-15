@@ -23,5 +23,7 @@
 !apps/iot-basic/backend/**
 !apps/iot-basic/web/
 !apps/iot-basic/web/**
+!apps/iot-basic/mobile/
+!apps/iot-basic/mobile/package.json
 **/node_modules
 **/dist

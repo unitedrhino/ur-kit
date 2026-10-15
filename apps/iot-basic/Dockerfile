@@ -6,9 +6,10 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY web-shared/ ./web-shared/
 COPY contracts/manifest.json ./contracts/manifest.json
 COPY apps/iot-basic/ur-kit.lock.json ./apps/iot-basic/ur-kit.lock.json
+COPY apps/iot-basic/web/package.json ./apps/iot-basic/web/package.json
+COPY apps/iot-basic/mobile/package.json ./apps/iot-basic/mobile/package.json
 COPY scripts/verify_iot_basic.mjs ./scripts/verify_iot_basic.mjs
 RUN node scripts/verify_iot_basic.mjs
-COPY apps/iot-basic/web/package.json ./apps/iot-basic/web/package.json
 RUN --mount=type=cache,id=ur-kit-basic-pnpm,target=/root/.local/share/pnpm/store \
     pnpm install --frozen-lockfile --prefer-offline && pnpm -r run stub --if-present
 COPY apps/iot-basic/web/ ./apps/iot-basic/web/
