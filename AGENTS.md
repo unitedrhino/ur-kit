@@ -15,7 +15,6 @@
 
 - 自定义协议：[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)，包括 MQTT、Modbus、云协议及属性上下行验收。
 - 前后端应用：[应用开发指南](.agents/skills/ur-kit-development/references/application-development.md)，包括 Web、uni-app、Go/Java/Node 后端及 Docker。
-- 通用业务：[页面与定时报告指南](.agents/skills/ur-kit-development/references/business-pages-and-reports.md)，覆盖计划、后台执行、Markdown/DOCX 与文件查看下载；项目/设备范围由业务决定。
 - 独立项目：[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)，复制骨架时带入技能参考文件并修正链接。
 
 新增业务代码不要求更新 SaaS 原始合同。基础后端只示范平台认证；业务授权、企业/项目数据隔离和数据库迁移由应用实现。开发前确认验收条件；交付区分本地模拟、真实平台和硬件测试，跳过不计为通过。
