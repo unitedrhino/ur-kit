@@ -15,7 +15,7 @@
 
 - 自定义协议：[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)，包括 MQTT、Modbus、云协议及属性上下行验收。
 - 前后端应用：[应用开发指南](.agents/skills/ur-kit-development/references/application-development.md)，包括 Web、uni-app、Go/Java/Node 后端及 Docker。
-- 平台接入：[注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)说明平台代理/Web 路由、应用、菜单及定时任务；[urops 指南](.agents/skills/ur-kit-development/references/urops-deployment.md)说明按自有 Compose 部署应用与协议网关。
+- 平台接入：[注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)说明平台代理/Web 路由、应用、菜单及定时任务；[urops 指南](.agents/skills/ur-kit-development/references/urops-deployment.md)说明 ur-kit 开发、ur API/技能和 urops TUI/Compose 部署如何配合。
 - 独立项目：[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)，复制骨架时带入技能参考文件并修正链接。
 
 新增业务代码不要求更新 SaaS 原始合同。基础后端只示范平台认证；业务授权、企业/项目数据隔离和数据库迁移由应用实现。开发前确认验收条件；交付区分本地模拟、真实平台和硬件测试，跳过不计为通过。

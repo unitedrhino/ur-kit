@@ -21,6 +21,20 @@ SDK 可独立使用，构建应用无需访问联犀 SaaS 私有源码。调用�
 | 用自己的配置部署应用或协议网关 | [urops 部署指南](.agents/skills/ur-kit-development/references/urops-deployment.md) |
 | 基于现成客户端开发自己的应用 | [IoT 基础应用](apps/iot-basic/README.md) |
 
+## ur-kit、ur 与 urops 如何配合
+
+| 工具 | 用途 | 使用时机 |
+| --- | --- | --- |
+| **ur-kit** | 公共 SDK、合同、中间件、缓存、协议组件、Web/移动端/后端模板与开发技能 | 开发和构建自己的应用、协议网关 |
+| **[ur CLI](https://github.com/unitedrhino/cli)** | 以授权身份调用平台 API、检查接入结果，下载 API 与开发技能 | AI 开发准备、平台注册和业务联调 |
+| **urops** | 在目标 Linux 主机按应用自己的 Compose 部署、更新、查看状态/日志和停止 | 应用或网关镜像构建完成后，TUI 或命令行运维 |
+
+推荐顺序：**取得技能 → 用 ur-kit 开发并测试 → 构建自己的镜像 → 用 ur 注册/核对平台对象 → 用 urops 部署 → 实际验证业务或设备消息**。平台代理路由的服务自注册 RPC、应用菜单和定时任务的消费者仍由服务按[注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)实现；ur 负责调用平台已开放的 HTTP API，不能替代尚未开放的 RPC 功能。
+
+开发时固定 SDK 标签与技能来源提交；部署时固定自己的镜像版本。技能指南可以独立更新，SDK 标签、技能提交、ur 版本和 urops 版本不要求同号。新增命令先用 `ur skills download --help`、`urops app --help` 核对本机支持；源码合并不会自动升级已安装的工具。
+
+在 urops TUI 中进入 **自定义应用与协议网关 → 部署新应用/协议网关**，输入名称、Compose 路径和可选变量文件路径，确认后部署。它消费已构建镜像；源码构建在自己的项目完成。完整流程见[工具协作与部署指南](.agents/skills/ur-kit-development/references/urops-deployment.md)。
+
 ## 获取与安装
 
 按 Git 标签固定版本，应用使用的 SDK 与接口合同保持同一版本。以下示例使用 `v0.2.36`。
