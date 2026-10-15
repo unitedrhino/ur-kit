@@ -27,6 +27,8 @@ pnpm --filter org-iot-client build
 
 Go、Java、Node HTTP 客户端共享 [合同用例](sdks/conformance/README.md)，覆盖大整数 ID、显式空值、毫秒时间戳、地址与路径校验。RPC 客户端均以本机服务验证实际往返；[Node 调用示例](sdks/node/README.md) 使用固定的 `protocolSync` 合同。修改客户端时在对应语言目录运行测试。
 
+Go 使用 [纯 RPC 客户端](sdks/go/rpcclient/README.md) 的公开 `NewXxxClient` 接入 Core/Things。公开包和模块依赖均不需要 SaaS 私有源码或权限；维护者同步合同与使用者构建应用是两个独立入口。`scripts/test_external_consumer.sh` 在仓外验证真实 RPC、大整数与认证，并检查全部公开 Go 包的依赖边界。
+
 Core/Things 的强类型 HTTP 操作与模型见 [生成客户端](sdks/openapi/README.md)。它们由锁定 SaaS 提交的 Swagger 生成，提供 Go、Java、Node 三种源码；Node 大整数 ID 列表使用新增字符串字段。
 
 IoT 基础应用的 Web 与 Go 可使用 [Dockerfile](apps/iot-basic/Dockerfile) 构建成一个容器；本机启动和端侧构建见 [应用说明](apps/iot-basic/README.md)。

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# 本脚本在临时仓外 Go 模块中测试公开缓存、Things SDK 与 Modbus 的依赖边界。
+# 本脚本在仓外 Go 模块中验证纯 RPC 客户端及全部公开 Go 包不依赖私有仓。
 set -euo pipefail
 
 repo_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -21,7 +21,7 @@ if ! command -v "$go_bin" >/dev/null 2>&1 && [[ -x /usr/local/go/bin/go ]]; then
   go_bin=/usr/local/go/bin/go
 fi
 
-cp "$repo_dir/tests/consumer/consumer_test.go" "$consumer_dir/consumer_test.go"
+cp "$repo_dir"/tests/consumer/*_test.go "$consumer_dir/"
 cd "$consumer_dir"
 GOWORK=off "$go_bin" mod init example.com/urkit-consumer >/dev/null
 if [[ -n "$version" ]]; then
@@ -31,8 +31,10 @@ else
 fi
 GOWORK=off "$go_bin" mod tidy
 GOWORK=off "$go_bin" test -count=1 ./...
-GOWORK=off "$go_bin" list -deps ./... > "$consumer_dir/dependencies.txt"
-if grep -E '^gitee\.com/unitedrhino(/|$)' "$consumer_dir/dependencies.txt"; then
+# 覆盖所有公开包和测试依赖；不能只验证示例恰好导入的子集。
+GOWORK=off "$go_bin" list -mod=mod -deps -test github.com/unitedrhino/ur-kit/... > "$consumer_dir/dependencies.txt"
+GOWORK=off "$go_bin" list -m all > "$consumer_dir/modules.txt"
+if grep -E '^(gitee\.com/unitedrhino(/|$)|github\.com/unitedrhino/(saas|core|things|share)(/|[[:space:]]|$))' "$consumer_dir/dependencies.txt" "$consumer_dir/modules.txt"; then
   echo '公开消费包意外依赖 SaaS 私有模块' >&2
   exit 1
 fi
