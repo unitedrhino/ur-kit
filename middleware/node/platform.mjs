@@ -1,5 +1,5 @@
 // 本文件使用平台用户与项目接口验证 Node 服务收到的令牌和选择上下文。
-import { createClient } from '../../sdks/node/index.mjs';
+import { createClient } from '@unitedrhino/ur-kit-node';
 
 // createPlatformAuthenticator 返回可直接注入 protectHTTP/protectRPC 的可信认证器。
 export function createPlatformAuthenticator({ baseUrl, fetchImpl = globalThis.fetch, timeoutMs = 5000 }) {

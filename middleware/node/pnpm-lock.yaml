@@ -11,6 +11,10 @@ importers:
       '@grpc/grpc-js':
         specifier: ^1.14.0
         version: 1.14.6
+    devDependencies:
+      '@unitedrhino/ur-kit-node':
+        specifier: file:../../sdks/node
+        version: file:../../sdks/node
 
 packages:
 
@@ -55,6 +59,9 @@ packages:
 
   '@types/node@26.6.5':
     resolution: {integrity: sha512-uMzsv9stDdofIZBx4UGh4Z9ZgXnGC9seRDscilBcTHAeOFk67MZg/k9bWVfO+bk4qZmG+l52hRnLwUiH2LnJTg==}
+
+  '@unitedrhino/ur-kit-node@file:../../sdks/node':
+    resolution: {directory: ../../sdks/node, type: directory}
 
   ansi-regex@5.0.1:
     resolution: {integrity: sha512-quJQXlTSUGL2LH9SUXo8VwsY4soanhgo6LNSm84E1LBcE8s3O0wpdiRzyR9z/ZZJMlMWv37qOOb9pdJlMUEKFQ==}
@@ -170,6 +177,11 @@ snapshots:
   '@types/node@26.6.5':
     dependencies:
       undici-types: 8.9.0
+
+  '@unitedrhino/ur-kit-node@file:../../sdks/node':
+    dependencies:
+      '@grpc/grpc-js': 1.14.6
+      '@grpc/proto-loader': 0.8.1
 
   ansi-regex@5.0.1: {}
 

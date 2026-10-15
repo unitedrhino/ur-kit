@@ -1,6 +1,7 @@
 // 本文件提供 Node HTTP 服务的可注入认证、权限与脱敏日志中间件。
 import { readToken, stripUntrustedIdentityHeaders } from './identity.mjs';
 export { createPlatformAuthenticator } from './platform.mjs';
+export { protectUnaryRPC } from './rpc.mjs';
 
 // protectHTTP 包装异步业务处理器；认证器必须验证令牌并返回可信身份。
 export function protectHTTP(handler, { authenticate, authorize, resource, action, logger } = {}) {
