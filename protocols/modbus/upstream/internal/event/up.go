@@ -1,3 +1,4 @@
+// 本文件负责 Modbus 设备连接、周期采集及点位读值。
 package event
 
 import (
@@ -5,24 +6,25 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"gitee.com/unitedrhino/protocol/modbus/internal/domain"
+	"gitee.com/unitedrhino/protocol/modbus/internal/svc"
 	"gitee.com/unitedrhino/share/ctxs"
 	"gitee.com/unitedrhino/share/def"
 	"gitee.com/unitedrhino/share/errors"
 	"gitee.com/unitedrhino/share/utils"
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/deviceMsg/msgThing"
 	"gitee.com/unitedrhino/things/share/domain/schema"
-	"github.com/simonvetter/modbus"
 	"github.com/spf13/cast"
+	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 	"github.com/zeromicro/go-zero/core/logx"
 	"math"
-	"gitee.com/unitedrhino/protocol/modbus/internal/domain"
-	"gitee.com/unitedrhino/protocol/modbus/internal/svc"
 	"strings"
 	"time"
 )
 
+// NewDeviceInfo 加载设备配置与点位，建立会话并启动周期采集。
 func NewDeviceInfo(ctx context.Context, svcCtx *svc.ServiceContext, di *dm.DeviceInfo) (*domain.DevInfo, error) {
 	cfg, err := svcCtx.Protocol.GetDevProtocolConf(ctx, di)
 	if err != nil {
@@ -45,13 +47,15 @@ func NewDeviceInfo(ctx context.Context, svcCtx *svc.ServiceContext, di *dm.Devic
 		return nil, err
 	}
 	Close, c := context.WithCancel(ctx)
-	var devInfo = domain.DevInfo{Di: di, Cli: cli, Close: Close, C: c, Duration: Duration, Point: BuildPoints(ctx, svcCtx, di, ss.Properties)}
+	var devInfo = domain.DevInfo{Di: di, Close: Close, C: c, Duration: Duration, Point: BuildPoints(ctx, svcCtx, di, ss.Properties)}
+	devInfo.SetSession(cli)
 	utils.Go(ctx, func() {
 		Timer(svcCtx, &devInfo)
 	})
 	return &devInfo, nil
 }
 
+// Timer 在设备生命周期内采集并按原有失败阈值重连，退出时释放会话。
 func Timer(svcCtx *svc.ServiceContext, info *domain.DevInfo) {
 	t := time.NewTicker(time.Duration(info.Duration) * time.Millisecond)
 	// 设备关闭后循环经 info.Close.Done() 退出;ticker 不 Stop 会随设备反复上下线
@@ -59,15 +63,15 @@ func Timer(svcCtx *svc.ServiceContext, info *domain.DevInfo) {
 	defer t.Stop()
 	run := func() {
 		ctx := ctxs.WithRoot(context.Background())
-		if info.Cli == nil {
+		if info.Client() == nil {
 			cli, err := ClientInit(ctx, svcCtx, devices.Core{ProductID: info.Di.ProductID, DeviceName: info.Di.DeviceName})
 			if err != nil {
 				logx.WithContext(ctx).Error(err.Error())
 				return
 			}
-			info.Cli = cli
+			info.SetSession(cli)
 		}
-		if info.Cli == nil {
+		if info.Client() == nil {
 			return
 		}
 		ret, err := ReadDev(ctx, info)
@@ -75,7 +79,7 @@ func Timer(svcCtx *svc.ServiceContext, info *domain.DevInfo) {
 			info.ErrCount++
 			logx.WithContext(ctx).Error(err.Error())
 			if info.ErrCount > 3 {
-				info.Cli = nil
+				info.SetSession(nil)
 				info.ErrCount = 0
 			}
 			return
@@ -105,13 +109,15 @@ func Timer(svcCtx *svc.ServiceContext, info *domain.DevInfo) {
 		case <-t.C:
 			run()
 		case <-info.Close.Done():
+			info.SetSession(nil)
 			return
 		}
 	}
 
 }
 
-func ClientInit(ctx context.Context, svcCtx *svc.ServiceContext, dev devices.Core) (*modbus.ModbusClient, error) {
+// ClientInit 从平台配置打开公开 SDK 会话，并保持原有上下线报告语义。
+func ClientInit(ctx context.Context, svcCtx *svc.ServiceContext, dev devices.Core) (*sdkmodbus.Session, error) {
 	di, err := svcCtx.Protocol.DeviceCache.GetData(ctx, dev)
 	if err != nil {
 		return nil, err
@@ -123,63 +129,31 @@ func ClientInit(ctx context.Context, svcCtx *svc.ServiceContext, dev devices.Cor
 	if cfg == nil {
 		return nil, errors.Parameter.AddMsgf("没有定义协议配置")
 	}
-	timeout := cast.ToUint(cfg["timeout"])
-	if timeout == 0 {
-		timeout = 1000
-	}
-	client, err := modbus.NewClient(&modbus.ClientConfiguration{
-		URL:      fmt.Sprintf("%s://%s", cfg["mode"], cfg["address"]),
-		Speed:    cast.ToUint(cfg["baudRate"]),
-		DataBits: cast.ToUint(cfg["dataBits"]),
-		Parity:   cast.ToUint(cfg["parity"]),
-		StopBits: cast.ToUint(cfg["stopBits"]),
-		Timeout:  time.Duration(timeout) * time.Millisecond,
-	})
+	client, err := clientConfig(cfg)
 	if err != nil {
 		if di.IsOnline == def.True {
-			err := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{
-				Timestamp:  time.Now().UnixMilli(),
-				Reason:     "设备下线",
-				Action:     devices.ActionDisconnected,
-				ProductID:  di.ProductID,
-				DeviceName: di.DeviceName,
-			})
-			if err != nil {
-				logx.WithContext(ctx).Error(err.Error())
+			if reportErr := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{Timestamp: time.Now().UnixMilli(), Reason: "设备下线", Action: devices.ActionDisconnected, ProductID: di.ProductID, DeviceName: di.DeviceName}); reportErr != nil {
+				logx.WithContext(ctx).Error(reportErr.Error())
 			}
 		}
 		return nil, err
 	}
-	err = client.Open()
+	session, err := client.OpenSession(ctx)
 	if err != nil {
 		if di.IsOnline == def.True {
-			err := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{
-				Timestamp:  time.Now().UnixMilli(),
-				Reason:     "设备连接失败",
-				Action:     devices.ActionDisconnected,
-				ProductID:  di.ProductID,
-				DeviceName: di.DeviceName,
-			})
-			if err != nil {
-				logx.WithContext(ctx).Error(err.Error())
+			if reportErr := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{Timestamp: time.Now().UnixMilli(), Reason: "设备连接失败", Action: devices.ActionDisconnected, ProductID: di.ProductID, DeviceName: di.DeviceName}); reportErr != nil {
+				logx.WithContext(ctx).Error(reportErr.Error())
 			}
 		}
 		return nil, nil
 	}
 	if di.IsOnline == def.False {
-		err := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{
-			Timestamp:  time.Now().UnixMilli(),
-			Action:     devices.ActionConnected,
-			ProductID:  di.ProductID,
-			DeviceName: di.DeviceName,
-		})
-		if err != nil {
-			logx.WithContext(ctx).Error(err.Error())
+		if reportErr := svcCtx.Protocol.ReportDevConn(ctx, devices.DevConn{Timestamp: time.Now().UnixMilli(), Action: devices.ActionConnected, ProductID: di.ProductID, DeviceName: di.DeviceName}); reportErr != nil {
+			logx.WithContext(ctx).Error(reportErr.Error())
 		}
 	}
-	return client, nil
+	return session, nil
 }
-
 func AddPoint(property schema.Property) (*domain.Point, error) {
 	var p domain.Point
 	err := json.Unmarshal([]byte(property.ExtendConfig), &p)
@@ -252,15 +226,10 @@ func ParsePointsJSON(properties []schema.Property, pointsJSON string) (map[strin
 	return points, nil
 }
 
-var (
-	RegMap = map[domain.RegisterType]modbus.RegType{
-		domain.HoldingRegister: modbus.HOLDING_REGISTER,
-		domain.InputRegister:   modbus.INPUT_REGISTER,
-	}
-)
-
+// ReadDev 读取设备所有配置点位，全部失败时返回采集错误。
 func ReadDev(ctx context.Context, dev *domain.DevInfo) (map[string]any, error) {
-	if dev.Cli == nil {
+	client := dev.Client()
+	if client == nil {
 		return nil, nil
 	}
 	var errCount int64
@@ -271,23 +240,23 @@ func ReadDev(ctx context.Context, dev *domain.DevInfo) (map[string]any, error) {
 		var value interface{}
 		switch p.RegisterType {
 		case domain.Coil:
-			val, err := dev.Cli.ReadCoil(p.Address)
+			values, err := client.ReadCoils(ctx, p.Address, 1)
 			if err != nil {
 				logx.WithContext(ctx).Error(err.Error())
 				errCount++
 				continue
 			}
-			value = val
+			value = values[0]
 		case domain.DiscreteInput:
-			val, err := dev.Cli.ReadDiscreteInput(p.Address)
+			values, err := client.ReadDiscreteInputs(ctx, p.Address, 1)
 			if err != nil {
 				logx.WithContext(ctx).Error(err.Error())
 				errCount++
 				continue
 			}
-			value = val
+			value = values[0]
 		case domain.InputRegister, domain.HoldingRegister:
-			values, err := dev.Cli.ReadRegisters(p.Address, p.Quantity, RegMap[p.RegisterType])
+			values, err := readRegisters(ctx, *client, p.Address, p.Quantity, p.RegisterType)
 			if err != nil {
 				errCount++
 				logx.WithContext(ctx).Error(err.Error())
@@ -402,4 +371,12 @@ func mergeBitsIntoUint16(num int, startPos, bitCount uint8, regValue uint16) uin
 	replacedValue := clearedValue | uint16(num<<startPos)
 
 	return replacedValue
+}
+
+// readRegisters 按点位类型选择公开 SDK 的功能码 3 或 4。
+func readRegisters(ctx context.Context, client sdkmodbus.Client, address, quantity uint16, registerType domain.RegisterType) ([]uint16, error) {
+	if registerType == domain.InputRegister {
+		return client.ReadInputRegisters(ctx, address, quantity)
+	}
+	return client.ReadHoldingRegisters(ctx, address, quantity)
 }

@@ -1,15 +1,26 @@
 {
   "files": {
-    "deviceauth/client/deviceAuth.go": "0753147b4501885c586b8402706d2ae4e8ca5da754494950baf0b3810147d43c",
+    "deviceauth/client/deviceAuth.go": "d1c978699370020131a1fa000d2bc2741aca51c47c79dc06d18f2d2f2d6ca71f",
+    "deviceauth/client/deviceAuth_public_pb_integration_test.go": "26acc64e91f1e74278ebbb975f018b563bbbfc887d1fe32b44244b7b3c600ddb",
     "deviceauth/pb/dg/dg.pb.go": "30f1aec4aabe87a8facf8290257e91f5813cad5494690d746727f6ed225bc0ab",
     "deviceauth/pb/dg/dg_grpc.pb.go": "b17c21cd5569e6371a652f1bbcd9a8ff5424496ed31152b7fcdafafa66bcfeb2",
-    "protocol/cloudProtocol.go": "72ae4d0a8c05789f0b67d9b7fe82fe2625cd848b8036446162e20a5fb492ba69",
-    "protocol/coreProtocol.go": "bae5827d4c13208dc7a261dc4c25f7bbef5936b737b4cdae20e9971854527bf6",
-    "protocol/coreProtocol_web_test.go": "597eb4af684ea22bc8ecbaa7805996eb62c0d8c69c1a3865b07c4fc51166b229",
+    "protocol/cloudProtocol.go": "df3d9b8c20031f5015081ca6efece4d12559d99f67022ff6e7e7af189b858e76",
+    "protocol/configselect_integration_test.go": "4080c436d7f8db83742f94acd53939486aeeafa01abda41af3c7b5c02045ebae",
+    "protocol/coreProtocol.go": "4a2bd6eb3321a41095ad2fbd0c6d0c9e6d08faafbf35c5d293c43fadce8c321e",
+    "protocol/coreProtocol_web_test.go": "c59bb7d26a492b2be07beea6a37fcdfe3fe7186c1355db720eeffff19ee8e25f",
     "protocol/default.go": "596cfd371d4b153e5a2819850877e90e31d31eba058d01a8790cb20228f503fd",
-    "protocol/mqttProtocol.go": "f95bf61181a883476fba94430187cd4994502186e49c682256d87252f3dfc56a",
+    "protocol/mqttProtocol.go": "792b713b0fad596395a2a843c8b276f69c058f7d74cb417f53101adaf3d109b0",
     "protocol/mqttProtocol_test.go": "4dfbf483357239e37fd5b81ee875acc7eaf18a966bee81b6e6017e56ef8c151e",
-    "protocol/mqtt_tracking.go": "e9111a94870633bba70287da7bc3a053657c4662e1177dca61b912faf0d766f8",
+    "protocol/mqtt_tracking.go": "ac3778c705f9946c622d5690670d7c93a240d2bc039cf3ced2d368694351066a",
+    "protocol/mqtt_tracking_integration_test.go": "fc4785c2a89e723e42156caef99513c4751f1549ce009954eea0d42db745c048",
+    "protocol/platformcore/core.go": "0ea6fb9aae5eb88ac26f850b2c4808c616093cca8179a5db78c683d7c93ab4f9",
+    "protocol/platformcore/core_test.go": "f73f9403a0c86dd6656f6d9a70db1020b7629a903b43a4d38bd8a73b6d799282",
+    "protocol/platformcore/mqtt.go": "d1653266d43a4f2e2bd05332c9865d685cbd05d4b5bceb27e2de82acde1ea96c",
+    "protocol/platformcore/platform.go": "dda498f180c7f739b5bd6da318eba2516144e43f2c76bf791aee5be1d199df8e",
+    "protocol/platformcore/platform_integration_test.go": "652c604730003226d182ea7bde8552f01f5ad328cf5e4e686f2fa80a6f245c99",
+    "protocol/platformcore/platform_test.go": "41d62e02c60d76c925788381476cec9f67f679982efad166785656841b49ba6a",
+    "protocol/platformcore/rpc_integration_test.go": "7b913ad47e920ce1fdc63c30d454f58640c323332ebdba8f740d660604889376",
+    "protocol/platformcore/timer.go": "af0f28872d24510829dbeff96a90ffef85c7b68f83ebc9db3e587c149ff5fbe0",
     "protocol/readme.md": "dba20d2b1d13c60699d235e06d1c7cb8ed9e21126138fc21062cc6db815c7369",
     "protocol/runtime_bootstrap.go": "ac5e1536c98221fbd907ea57517e3448d51edb50f477715152fb7b48481c7a4b",
     "protocol/runtimeconfig/devlink.go": "af89a6947f458fe802dd1c1d8a678627d6a52bad83d4ad68b1a114401020830f",
@@ -19,5 +30,5 @@
     "seed/ensure_test.go": "6126b541a118c29856e3e83a5983964d2d928a77ec743dee6ee62dd177915176",
     "seed/types.go": "caeb6a31e377c72fe5649672e6a310ef1a87b0d850487886183a28a2dd6f85cc"
   },
-  "saas_commit": "439f67f2a3e88203fa322400923a9e5b8b6bdffd"
+  "saas_commit": "4ec0134d217dd6934d1e2fc8de202c8b4f7fe273"
 }

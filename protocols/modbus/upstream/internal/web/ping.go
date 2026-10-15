@@ -6,6 +6,7 @@
 package web
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -13,8 +14,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/simonvetter/modbus"
 	"github.com/spf13/cast"
+	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
 	"github.com/zeromicro/go-zero/core/logx"
 )
 
@@ -122,10 +123,45 @@ func parsePingParams(r *http.Request) (*PingParams, error) {
 	return p, nil
 }
 
-// doPing 使用表单参数创建 modbus 客户端并尝试连接。
+// probeClient 把设备页参数映射为公开 SDK 的传输模式与串口参数。
+func probeClient(p *PingParams) (sdkmodbus.Client, error) {
+	client := sdkmodbus.Client{Address: p.Address, Timeout: time.Duration(p.Timeout) * time.Millisecond}
+	switch strings.ToLower(strings.TrimSpace(p.Mode)) {
+	case "", "tcp":
+	case "udp":
+		client.UDP = true
+	case "rtuovertcp":
+		client.RTUOverTCP = true
+	case "rtuoverudp":
+		client.RTUOverUDP = true
+	case "rtu":
+		parity := "N"
+		switch p.Parity {
+		case 0:
+			parity = "N"
+		case 1:
+			parity = "E"
+		case 2:
+			parity = "O"
+		default:
+			return client, fmt.Errorf("不支持的串口奇偶校验: %d", p.Parity)
+		}
+		stopBits := int(p.StopBits)
+		if stopBits == 0 && parity == "N" {
+			// 原驱动在无奇偶校验且未配置停止位时使用 8N2，需保持设备线缆一致。
+			stopBits = 2
+		}
+		client.Serial = &sdkmodbus.SerialConfig{BaudRate: int(p.BaudRate), DataBits: int(p.DataBits), StopBits: stopBits, Parity: parity}
+	default:
+		return client, fmt.Errorf("不支持的 Modbus 连接模式: %s", p.Mode)
+	}
+	return client, nil
+}
+
+// doPing 使用表单参数检查传输连接，不向设备发送 Modbus 功能码。
 // 连接成功返回 Success=true;失败(含参数非法、地址不可达、串口不存在等)返回
 // Success=false 与错误描述,不向上抛错,保证协议页总能拿到结构化结果。
-func doPing(p *PingParams) *PingResponse {
+func doPing(ctx context.Context, p *PingParams) *PingResponse {
 	start := time.Now()
 	resp := &PingResponse{}
 	// tcp+tls 模式需要客户端证书与 CA,页面暂不支持配置证书,直接提示
@@ -135,23 +171,15 @@ func doPing(p *PingParams) *PingResponse {
 		resp.ErrMsg = "tcp+tls 模式需要客户端证书,暂不支持页面连通测试"
 		return resp
 	}
-	client, err := modbus.NewClient(&modbus.ClientConfiguration{
-		URL:      fmt.Sprintf("%s://%s", p.Mode, p.Address),
-		Speed:    p.BaudRate,
-		DataBits: p.DataBits,
-		Parity:   p.Parity,
-		StopBits: p.StopBits,
-		Timeout:  time.Duration(p.Timeout) * time.Millisecond,
-	})
+	client, err := probeClient(p)
 	if err != nil {
 		resp.Success = false
 		resp.CostMs = time.Since(start).Milliseconds()
 		resp.ErrMsg = err.Error()
 		return resp
 	}
-	// 库内 Open 对网络模式使用 5s 拨号超时,对串口模式打开对应设备文件;
-	// 失败(地址不可达/串口不存在等)统一在此收敛为失败响应
-	err = client.Open()
+	// 公开 SDK 只打开并关闭传输，失败统一收敛为结构化响应。
+	err = client.Probe(ctx)
 	cost := time.Since(start).Milliseconds()
 	if err != nil {
 		resp.Success = false
@@ -159,7 +187,6 @@ func doPing(p *PingParams) *PingResponse {
 		resp.ErrMsg = err.Error()
 		return resp
 	}
-	defer func() { _ = client.Close() }()
 	resp.Success = true
 	resp.CostMs = cost
 	return resp
@@ -176,6 +203,6 @@ func HandlePing(w http.ResponseWriter, r *http.Request) {
 	}
 	logx.WithContext(r.Context()).Infof("modbus web ping addr:%s mode:%s timeout:%d",
 		p.Address, p.Mode, p.Timeout)
-	resp := doPing(p)
+	resp := doPing(r.Context(), p)
 	writeJSON(w, http.StatusOK, resp)
 }

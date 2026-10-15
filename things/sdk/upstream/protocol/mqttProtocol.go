@@ -1,3 +1,4 @@
+// 本文件实现 Things MQTT 传输，并将会话及活动记录委托公开协议 SDK。
 package protocol
 
 import (
@@ -12,12 +13,13 @@ import (
 	"gitee.com/unitedrhino/share/eventBus"
 	"gitee.com/unitedrhino/share/events/topics"
 	"gitee.com/unitedrhino/share/utils"
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/clients"
 	"gitee.com/unitedrhino/things/share/devices"
 	mqtt "github.com/eclipse/paho.mqtt.golang"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
+	trackinggozero "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking/gozero"
 	"github.com/zeromicro/go-zero/core/logx"
-	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/core/timex"
 
 	"strings"
@@ -134,11 +136,11 @@ type (
 )
 
 const (
-	DeviceMqttDevice            = "device:mqtt:device"
-	DeviceMqttClientID          = "device:mqtt:clientID"
-	DeviceLastActivity          = "device:lastActivity"
-	ActivitySmallSetThreshold   = 1000    // ZSET 小于此值直接全量查
-	ActivityKeyTTL              = 2592000 // 30 天，单位秒
+	DeviceMqttDevice          = "device:mqtt:device"
+	DeviceMqttClientID        = "device:mqtt:clientID"
+	DeviceLastActivity        = "device:lastActivity"
+	ActivitySmallSetThreshold = 1000    // ZSET 小于此值直接全量查
+	ActivityKeyTTL            = 2592000 // 30 天，单位秒
 )
 
 func GenDeviceTopicKey(dev devices.Core) string {
@@ -149,103 +151,76 @@ func genDeviceLastActivityKey(productID string) string {
 	return fmt.Sprintf("%s:%s", DeviceLastActivity, productID)
 }
 
+// UpdateDeviceActivity 通过公开协议 SDK 更新单台设备最近活动时间。
 func UpdateDeviceActivity(ctx context.Context, dev devices.Core) {
-	key := genDeviceLastActivityKey(dev.ProductID)
-	_, err := caches.GetStore().ZaddCtx(ctx, key, time.Now().UnixMilli(), GenDeviceTopicKey(dev))
-	if err != nil {
-		logx.WithContext(ctx).Info(err)
-		return
+	tracker, err := trackinggozero.NewTracker(caches.GetStore())
+	if err == nil {
+		err = tracker.Touch(ctx, tracking.Device{ProductID: dev.ProductID, DeviceName: dev.DeviceName}, time.Now())
 	}
-	if err := caches.GetStore().ExpireCtx(ctx, key, ActivityKeyTTL); err != nil {
+	if err != nil {
 		logx.WithContext(ctx).Info(err)
 	}
 }
 
+// UpdatesDeviceActivity 通过公开协议 SDK 批量更新设备活动时间。
 func UpdatesDeviceActivity(ctx context.Context, devs []devices.Core) {
 	if len(devs) == 0 {
 		return
 	}
-	now := time.Now().UnixMilli()
-	groups := make(map[string][]redis.Pair)
-	for _, v := range devs {
-		key := genDeviceLastActivityKey(v.ProductID)
-		groups[key] = append(groups[key], redis.Pair{
-			Key:   GenDeviceTopicKey(v),
-			Score: now,
-		})
+	tracker, err := trackinggozero.NewTracker(caches.GetStore())
+	if err == nil {
+		devicesToTouch := make([]tracking.Device, 0, len(devs))
+		for _, dev := range devs {
+			devicesToTouch = append(devicesToTouch, tracking.Device{ProductID: dev.ProductID, DeviceName: dev.DeviceName})
+		}
+		err = tracker.TouchMany(ctx, devicesToTouch, time.Now())
 	}
-	for key, ps := range groups {
-		_, err := caches.GetStore().ZaddsCtx(ctx, key, ps...)
-		if err != nil {
-			logx.WithContext(ctx).Info(err)
-			continue
-		}
-		if err := caches.GetStore().ExpireCtx(ctx, key, ActivityKeyTTL); err != nil {
-			logx.WithContext(ctx).Info(err)
-		}
+	if err != nil {
+		logx.WithContext(ctx).Info(err)
 	}
 }
 
-// Deprecated: GetActivityDevices 已废弃，请使用 GetActivityDevicesByProduct
+// GetActivityDevices 汇总旧 MQTT 会话索引对应的近三十天活动设备。
+// Deprecated: 使用 GetActivityDevicesByProduct 查询指定产品。
 func GetActivityDevices(ctx context.Context) (map[devices.Core]struct{}, error) {
-	deviceMap, err := caches.GetStore().HgetallCtx(ctx, DeviceMqttDevice)
+	tracker, err := trackinggozero.NewTracker(caches.GetStore())
 	if err != nil {
 		return nil, err
 	}
-	pidSet := make(map[string]struct{})
-	for devKey := range deviceMap {
-		ps := strings.Split(devKey, ":")
-		if len(ps) > 0 {
-			pidSet[ps[0]] = struct{}{}
-		}
+	current, err := tracker.ActiveAll(ctx, time.Now())
+	if err != nil {
+		return nil, err
 	}
-	ret := make(map[devices.Core]struct{})
-	for pid := range pidSet {
-		devs, err := GetActivityDevicesByProduct(ctx, pid, 30*24*time.Hour)
-		if err != nil {
-			return nil, err
-		}
-		for dev := range devs {
-			ret[dev] = struct{}{}
-		}
+	result := make(map[devices.Core]struct{}, len(current))
+	for dev := range current {
+		result[devices.Core{ProductID: dev.ProductID, DeviceName: dev.DeviceName}] = struct{}{}
 	}
-	return ret, nil
+	return result, nil
 }
 
+// GetActivityDevicesByProduct 查询指定产品时间窗内有活动记录的设备。
 func GetActivityDevicesByProduct(ctx context.Context, productID string, since time.Duration) (map[devices.Core]struct{}, error) {
-	key := genDeviceLastActivityKey(productID)
-	store := caches.GetStore()
-
-	minScore := time.Now().Add(-since).UnixMilli()
-	maxScore := time.Now().UnixMilli()
-	ret := make(map[devices.Core]struct{})
-
-	for {
-		pairs, err := store.ZrevrangebyscoreWithScoresAndLimitCtx(ctx, key, minScore, maxScore, 0, ActivitySmallSetThreshold)
-		if err != nil {
-			return nil, err
-		}
-		for _, p := range pairs {
-			ps := strings.Split(p.Key, ":")
-			if len(ps) != 2 {
-				continue
-			}
-			ret[devices.Core{ProductID: ps[0], DeviceName: ps[1]}] = struct{}{}
-		}
-		if len(pairs) < ActivitySmallSetThreshold {
-			break
-		}
-		maxScore = int64(pairs[len(pairs)-1].Score) - 1
-		if maxScore < minScore {
-			break
-		}
+	tracker, err := trackinggozero.NewTracker(caches.GetStore())
+	if err != nil {
+		return nil, err
 	}
-	return ret, nil
+	current, err := tracker.ActiveByProduct(ctx, productID, since, time.Now())
+	if err != nil {
+		return nil, err
+	}
+	result := make(map[devices.Core]struct{}, len(current))
+	for dev := range current {
+		result[devices.Core{ProductID: dev.ProductID, DeviceName: dev.DeviceName}] = struct{}{}
+	}
+	return result, nil
 }
 
+// DeleteDeviceActivity 删除旧活动索引而不改变设备会话映射。
 func DeleteDeviceActivity(ctx context.Context, dev devices.Core) {
-	key := genDeviceLastActivityKey(dev.ProductID)
-	_, err := caches.GetStore().ZremCtx(ctx, key, GenDeviceTopicKey(dev))
+	tracker, err := trackinggozero.NewTracker(caches.GetStore())
+	if err == nil {
+		err = tracker.DeleteActivity(ctx, tracking.Device{ProductID: dev.ProductID, DeviceName: dev.DeviceName})
+	}
 	if err != nil {
 		logx.WithContext(ctx).Info(err)
 	}

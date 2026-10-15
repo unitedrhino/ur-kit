@@ -14,8 +14,9 @@ import (
 	"strings"
 )
 
+// GenArray 使用公开 SDK 生成数组位置标识符。
 func GenArray(identifier string, num int) string {
-	return fmt.Sprintf("%s.%d", identifier, num)
+	return kitSchema.GenArray(identifier, num)
 }
 
 // WhereArray 将公开 SDK 的数组位置筛选应用于 GORM，保留单位置与范围查询语义。
@@ -42,16 +43,9 @@ func WhereArray2(db sq.SelectBuilder, identifier string, pos string) sq.SelectBu
     return db.Where(fmt.Sprintf("%s = ?", pos), int(filter.Values[0]))
 }
 
+// GetArray 使用公开 SDK 解析数组位置，保留旧 Things 的零前缀与符号兼容语义。
 func GetArray(identifier string) (ident string, num int, ok bool) {
-	arrs := strings.Split(identifier, ".")
-	if len(arrs) <= 1 {
-		return identifier, 0, false
-	}
-	num, err := utils.ToIntE(arrs[1])
-	if err != nil {
-		return arrs[0], 0, false
-	}
-	return arrs[0], utils.ToInt(arrs[1]), true
+	return kitSchema.GetArray(identifier)
 }
 
 type DataIDInfo struct {
@@ -128,13 +122,7 @@ func ParseDataID(identifier string) (*DataIDInfo, error) {
 
 // NormalizeArrayDataID 将物模型数组位置转换为无前导零的规范形式，并保留数组结构体字段。
 func NormalizeArrayDataID(identifier string) string {
-	info, err := ParseDataID(identifier)
-	if err != nil || len(info.Nums) != 1 || info.NumStr == "" || info.Nums[0] < 0 {
-		return identifier
-	}
-	parts := strings.Split(identifier, ".")
-	parts[1] = fmt.Sprintf("%d", info.Nums[0])
-	return strings.Join(parts, ".")
+	return kitSchema.NormalizeArrayDataID(identifier)
 }
 
 func GetDataName(m *Model, dataID string) string {

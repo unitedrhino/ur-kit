@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"

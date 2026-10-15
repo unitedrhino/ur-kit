@@ -1,13 +1,14 @@
+// 本文件装配 Modbus 协议平台适配器及设备连接表。
 package svc
 
 import (
 	"gitee.com/unitedrhino/protocol/modbus/internal/config"
 	"gitee.com/unitedrhino/protocol/modbus/internal/domain"
 	modbusweb "gitee.com/unitedrhino/protocol/modbus/internal/web"
-	"gitee.com/unitedrhino/things/sdk/protocol"
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/sdk/protocol/platformcore"
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/protocols"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"sync"
@@ -17,7 +18,7 @@ import (
 type ServiceContext struct {
 	MsgToken    atomic.Int64
 	Config      config.Config
-	Protocol    *protocol.CoreProtocol
+	Protocol    *platformcore.CoreProtocol
 	DevCliMutex sync.RWMutex
 	DevCli      map[devices.Core]*domain.DevInfo
 }
@@ -33,13 +34,13 @@ var DeviceFields = []*dm.ProtocolConfigField{
 }
 
 func NewServiceContext(c config.Config) *ServiceContext {
-	Protocol, err := protocol.NewCoreProtocol(&dm.ProtocolInfo{
+	Protocol, err := platformcore.NewCoreProtocol(platformcore.Options{Info: &dm.ProtocolInfo{
 		Name:          "modbus协议",
 		Code:          protocols.ProtocolCodeModbus,
 		TransProtocol: protocols.ProtocolOther,
 		EtcdKey:       c.Etcd.Key,
 		DeviceFields:  DeviceFields,
-	}, &protocol.CoreProtocolConf{
+	},
 		ServerName: c.Name,
 		DmClient:   zrpc.MustNewClient(c.DmRpc.Conf),
 		// WebDir:配置页静态文件目录(web/),SDK 启动时以随机端口自托管,端口随心跳上报,

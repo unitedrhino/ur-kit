@@ -4,3 +4,6 @@ things/sdk/upstream/schema/*.go whitespace=cr-at-eol
 # 保留 Core 缓存原始快照的 CRLF 字节，避免同步时改变来源哈希。
 cache/common/upstream/*.go whitespace=cr-at-eol
 cache/platform/upstream/*.go whitespace=cr-at-eol
+
+# 保留 Modbus 原服务源码的 CRLF 字节，校验和以源提交内容为准。
+protocols/modbus/upstream/** whitespace=cr-at-eol

@@ -1,3 +1,4 @@
+// 本文件定义 Modbus 设备会话、寄存器类型与点位编码配置。
 package domain
 
 import (
@@ -5,16 +6,20 @@ import (
 	"fmt"
 	"strings"
 
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/domain/schema"
-	"github.com/simonvetter/modbus"
 	"github.com/spf13/cast"
+	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"sync"
 )
 
+// DevInfo 保存设备采集生命周期、配置点位与可替换的公开 SDK 会话。
 type DevInfo struct {
 	Duration int64 //采集周期,单位毫秒 默认为10秒
 	Di       *dm.DeviceInfo
-	Cli      *modbus.ModbusClient
+	Cli      *sdkmodbus.Client // 当前会话绑定的设备读写客户端
+	Session  *sdkmodbus.Session // 当前持久连接；由 SetSession 负责释放
+	CliMutex sync.RWMutex // 保护采集与下行控制对会话指针的并发访问
 	Point    map[string]*Point
 	Cfg      map[string]string
 	Close    context.Context

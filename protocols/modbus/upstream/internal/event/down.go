@@ -1,3 +1,4 @@
+// 本文件把平台属性控制请求映射为公开 Modbus SDK 的设备写入。
 package event
 
 import (
@@ -5,20 +6,22 @@ import (
 	"encoding/binary"
 	"encoding/json"
 	"fmt"
+	"gitee.com/unitedrhino/protocol/modbus/internal/domain"
+	"gitee.com/unitedrhino/protocol/modbus/internal/svc"
 	"gitee.com/unitedrhino/share/errors"
 	"gitee.com/unitedrhino/share/utils"
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/deviceMsg/msgThing"
 	"github.com/spf13/cast"
+	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
 	"github.com/zeromicro/go-zero/core/logx"
 	"math"
-	"gitee.com/unitedrhino/protocol/modbus/internal/domain"
-	"gitee.com/unitedrhino/protocol/modbus/internal/svc"
 	"strconv"
 	"strings"
 	"time"
 )
 
+// MsgDown 校验设备会话与点位类型，执行线圈或保持寄存器写入。
 func MsgDown(ctx context.Context, svcCtx *svc.ServiceContext, info *devices.InnerPublish) error {
 	log := logx.WithContext(ctx)
 	log.Info(info)
@@ -35,11 +38,16 @@ func MsgDown(ctx context.Context, svcCtx *svc.ServiceContext, info *devices.Inne
 	}
 	dev := devices.Core{ProductID: info.ProductID, DeviceName: info.DeviceName}
 	c, ok := svcCtx.DevCli[dev]
-	if !ok || c.Cli == nil {
+	var client *sdkmodbus.Client
+	if ok {
+		client = c.Client()
+	}
+	if client == nil {
 		err = ErrResp(ctx, svcCtx, info, &req, errors.NotFind)
 		if err != nil {
 			return err
 		}
+		return nil
 	}
 	for k, value := range req.Params {
 		p := c.Point[k]
@@ -48,7 +56,7 @@ func MsgDown(ctx context.Context, svcCtx *svc.ServiceContext, info *devices.Inne
 		}
 		switch p.RegisterType {
 		case domain.Coil: // 线圈固定长度1
-			err := c.Cli.WriteCoil(p.Address, cast.ToBool(value))
+			err := client.WriteSingleCoil(ctx, p.Address, cast.ToBool(value))
 			if err != nil {
 				log.Error(err.Error())
 			}
@@ -70,7 +78,7 @@ func MsgDown(ctx context.Context, svcCtx *svc.ServiceContext, info *devices.Inne
 						}
 						var uint16s []uint16
 						var err error
-						uint16s, err = c.Cli.ReadRegisters(p.Address, p.Quantity, RegMap[p.RegisterType])
+						uint16s, err = readRegisters(ctx, *client, p.Address, p.Quantity, p.RegisterType)
 						if err != nil {
 							return fmt.Errorf("read original register error: %value", err)
 						}
@@ -250,7 +258,7 @@ func MsgDown(ctx context.Context, svcCtx *svc.ServiceContext, info *devices.Inne
 				return nil
 			}
 			if len(values) > 0 {
-				err := c.Cli.WriteRegisters(p.Address, values)
+				err := client.WriteMultipleRegisters(ctx, p.Address, values)
 				if err != nil {
 					return err
 				}

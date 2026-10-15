@@ -27,9 +27,10 @@ import (
 	"gitee.com/unitedrhino/things/service/dmsvr/client/productmanage"
 	"gitee.com/unitedrhino/things/service/dmsvr/client/protocolmanage"
 	"gitee.com/unitedrhino/things/service/dmsvr/dmExport"
-	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/devices"
 	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
+	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configselect"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/service"
 	storecache "github.com/zeromicro/go-zero/core/stores/cache"
@@ -413,22 +414,28 @@ func (p *CoreProtocol) GetUnitedRhinoProductIDs() []string {
 	return p.UnitedRhinoProductIDs
 }
 
+// GetProtocolConf 使用公开纯值规则选择产品的主协议或子协议配置。
 func (p *CoreProtocol) GetProtocolConf(pi *dm.ProductInfo) map[string]string {
-	if pi.SubProtocolCode != nil && pi.SubProtocolCode.GetValue() == p.Pi.Code {
-		return pi.SubProtocolConf
+	var subCode *string
+	if pi.SubProtocolCode != nil {
+		value := pi.SubProtocolCode.GetValue()
+		subCode = &value
 	}
-	return pi.ProtocolConf
+	return configselect.Select(p.Pi.Code, subCode, pi.ProtocolConf, pi.SubProtocolConf)
 }
 
+// GetDevProtocolConf 按设备所属产品的协议归属返回设备配置。
 func (p *CoreProtocol) GetDevProtocolConf(ctx context.Context, di *dm.DeviceInfo) (map[string]string, error) {
 	pi, err := p.ProductCache.GetData(ctx, di.ProductID)
 	if err != nil {
 		return nil, err
 	}
-	if pi.SubProtocolCode != nil && pi.SubProtocolCode.GetValue() == p.Pi.Code {
-		return di.SubProtocolConf, nil
+	var subCode *string
+	if pi.SubProtocolCode != nil {
+		value := pi.SubProtocolCode.GetValue()
+		subCode = &value
 	}
-	return di.ProtocolConf, nil
+	return configselect.Select(p.Pi.Code, subCode, di.ProtocolConf, di.SubProtocolConf), nil
 }
 
 func (p *CoreProtocol) ReportDevConn(ctx context.Context, conn devices.DevConn) (err error) {

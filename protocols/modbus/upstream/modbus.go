@@ -24,6 +24,7 @@ func main() {
 	utils.ConfMustLoad("etc/modbus.yaml", &c)
 	svcCtx := svc.NewServiceContext(c)
 	startup.Init(svcCtx)
+	defer svcCtx.Protocol.Stop()
 	s := services.MustNewServer(c.RpcServerConf, func(grpcServer *grpc.Server) {
 		modbus.RegisterModbusServer(grpcServer, modbusServer.NewModbusServer(svcCtx))
 

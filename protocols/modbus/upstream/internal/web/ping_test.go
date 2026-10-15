@@ -8,6 +8,7 @@ package web
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"io"
 	"net"
@@ -92,7 +93,7 @@ func TestParsePingParamsQueryString(t *testing.T) {
 
 // 连通测试失败路径:不存在的地址(本地保留端口)断言返回 Success=false 且含错误描述
 func TestDoPingUnreachableAddress(t *testing.T) {
-	resp := doPing(&PingParams{Address: "127.0.0.1:1", Mode: "tcp", Timeout: 500})
+	resp := doPing(context.Background(), &PingParams{Address: "127.0.0.1:1", Mode: "tcp", Timeout: 500})
 	if resp.Success {
 		t.Fatal("expect ping fail for unreachable address, got success")
 	}
@@ -106,7 +107,7 @@ func TestDoPingUnreachableAddress(t *testing.T) {
 
 // tcp+tls 模式无证书配置必须返回失败提示
 func TestDoPingTLSMode(t *testing.T) {
-	resp := doPing(&PingParams{Address: "127.0.0.1:502", Mode: "tcp+tls"})
+	resp := doPing(context.Background(), &PingParams{Address: "127.0.0.1:502", Mode: "tcp+tls"})
 	if resp.Success {
 		t.Fatal("expect tcp+tls ping fail without cert, got success")
 	}
@@ -133,9 +134,31 @@ func TestDoPingLocalListener(t *testing.T) {
 		}
 	}()
 	addr := ln.Addr().String()
-	resp := doPing(&PingParams{Address: addr, Mode: "tcp", Timeout: 500})
+	resp := doPing(context.Background(), &PingParams{Address: addr, Mode: "tcp", Timeout: 500})
 	if !resp.Success {
 		t.Fatalf("expect ping success against local listener, got fail: %s", resp.ErrMsg)
+	}
+}
+
+// TestProbeClientModes 验证设备页模式及数字奇偶校验按旧配置语义进入公开 SDK。
+func TestProbeClientModes(t *testing.T) {
+	serial, err := probeClient(&PingParams{Address: "/dev/example", Mode: "rtu", BaudRate: 9600, DataBits: 8, StopBits: 1, Parity: 2, Timeout: 700})
+	if err != nil || serial.Serial == nil || serial.Serial.Parity != "O" || serial.Serial.BaudRate != 9600 || serial.Timeout.Milliseconds() != 700 {
+		t.Fatalf("串口参数转换错误: %+v %v", serial, err)
+	}
+	defaultSerial, err := probeClient(&PingParams{Mode: "rtu"})
+	if err != nil || defaultSerial.Serial == nil || defaultSerial.Serial.Parity != "N" || defaultSerial.Serial.StopBits != 2 {
+		t.Fatalf("旧驱动默认 8N2 未保留: %+v %v", defaultSerial, err)
+	}
+	udp, err := probeClient(&PingParams{Address: "127.0.0.1:502", Mode: "rtuoverudp"})
+	if err != nil || !udp.RTUOverUDP || udp.Serial != nil {
+		t.Fatalf("RTU over UDP 模式转换错误: %+v %v", udp, err)
+	}
+	if _, err := probeClient(&PingParams{Mode: "rtu", Parity: 3}); err == nil {
+		t.Fatal("非法串口奇偶校验未拒绝")
+	}
+	if _, err := probeClient(&PingParams{Mode: "unknown"}); err == nil {
+		t.Fatal("未知连接模式未拒绝")
 	}
 }
 
