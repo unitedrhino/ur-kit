@@ -123,8 +123,8 @@ go run ./protocols/modbus/cmd/demo
 
 ## 使用 AI 开发
 
-使用支持 `AGENTS.md` 的开发工具打开本仓，先读取 [开发规范](AGENTS.md)，再加载 [应用接入技能](.agents/skills/ur-kit-development/SKILL.md#使用-ur-kit-开发应用)。其中说明 SDK 选择、认证与权限、缓存失效、协议装配及应用验证；维护套件的流程在同一技能的独立章节中。
+使用支持 `AGENTS.md` 的开发工具打开本仓，先读取 [开发规范](AGENTS.md)，再加载 [应用接入技能](.agents/skills/ur-kit-development/SKILL.md#使用-ur-kit-开发应用)。按任务加载[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)或[前后端应用指南](.agents/skills/ur-kit-development/references/application-development.md)，覆盖代码放置、组件装配、认证授权、实际消息链路与 Docker 验收。套件维护另见技能中的维护导航。
 
-自己的应用固定 SDK 标签，在应用仓的 `AGENTS.md` 中记录所用版本、业务边界及验证命令。协议接入使用公开 SDK 接口，平台 RPC、事件总线、存储和认证配置由应用提供。
+自己的应用固定 SDK 标签，按[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)在应用仓保留 `AGENTS.md`、所需技能和参考文件，记录所用版本、业务边界及验证命令。协议接入使用公开 SDK 接口，平台 RPC、事件总线、存储和认证配置由应用提供。
 
 参与套件维护、更新接口合同或发布版本，请阅读 [贡献与维护指南](CONTRIBUTING.md)。

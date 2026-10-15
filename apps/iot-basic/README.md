@@ -14,6 +14,10 @@ docker build -f apps/iot-basic/Dockerfile --build-arg VITE_GLOB_APPID=<平台应
 
 后端本机验证：`cd backend && go test ./...`。Web 构建与移动端验证见仓库根目录 `README.md`。
 
+## 开发自己的业务
+
+按[前后端应用指南](../../.agents/skills/ur-kit-development/references/application-development.md)扩展 Web、移动端与后端。指南包含文件位置、独立 module 的依赖调整、认证与业务授权、定向验证和镜像交付。现有 `ping` 只示范平台认证；自己的数据访问与资源动作权限需要在后端实现。
+
 ## 真实平台浏览器冒烟
 
 在已授权的本机隔离平台准备一个开通了当前 Web 应用的企业、可登录成员及其有权访问的项目，再从仓库根目录运行 `pnpm --filter org-iot-client run test:e2e:real`。脚本直接访问已启动的单容器，不模拟接口；校验真实登录、应用可见性、项目列表请求的企业与应用头、组织前缀 dashboard，以及刷新后的项目上下文。

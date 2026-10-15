@@ -1,4 +1,6 @@
-# Modbus 协议迁移
+# Modbus 客户端与模拟设备
+
+本包提供独立 Go 驱动、点位编解码和本地模拟器。开发接入平台的网关，按[协议开发指南](../../.agents/skills/ur-kit-development/references/protocol-development.md)另行装配注册、配置同步、采集和控制；驱动读写成功不等于平台消息链路已经接通。
 
 `Client{RTUOverTCP: true}` 使用 RTU 单元号、CRC16 和功能码响应长度，经 TCP 连接发送同一组读写操作；默认 `false` 仍使用 Modbus TCP 的 MBAP 帧。`Client{UDP: true}` 用 MBAP 数据报，`Client{RTUOverUDP: true}` 用带 CRC 的 RTU 数据报；两者均校验完整报文长度。`Client{TLS: &tls.Config{RootCAs: roots}}` 在 TCP 握手时校验设备证书并加密连接，也可与 RTU over TCP 帧组合；UDP 不支持 TLS。`Client{Address: "<serial-device>", UnitID: 1, Serial: &modbus.SerialConfig{BaudRate: 19200, DataBits: 8, StopBits: 1, Parity: "N"}}` 直接打开物理串口并收发相同的 RTU 帧；串口与网络模式、TLS 不能混用。串口参数零值采用 19200、8E1；使用 8N1 时须显式设置 `Parity: "N"`。同一串口的并发请求由接入服务串行化，调用取消和总超时会终止等待响应。
 
@@ -10,4 +12,4 @@
 
 从仓库根目录运行 `go run ./protocols/modbus/cmd/demo`，会在回环地址启动模拟设备，读取寄存器 10 的初始值 42，写入 258 并再次读取。运行 `go test -race ./protocols/modbus/...` 验证 TCP/UDP、物理串口伪终端与两类 RTU 网关帧的本机交互、TLS 证书拒绝与读写、批量线圈位序与回显、四类点位、位域、类型编解码、设备异常码及请求取消。示例不连接外部设备，也不需要平台配置；真实串口硬件与现场波特率仍需在设备端验收。
 
-`upstream/` 保留合同锁定 SaaS 提交中的 22 份 Modbus 原服务文件（排除两份环境 YAML）；`manifest.json` 记录来源和逐文件哈希。用 `python3 scripts/sync_modbus.py --saas <saas-repo> --sha <contracts/manifest.json 中的完整提交>` 同步，追加 `--check` 可只读核对。原服务仍依赖 Things 内部代码，且 `internal/svc/connector.go` 尚为占位实现；可独立运行的本机读写能力以根目录客户端和模拟器为准。协议服务的产品/设备同步和完整 Things 接入仍需迁移与测试。
+`upstream/` 保留合同锁定 SaaS 提交中的 22 份 Modbus 原服务文件（排除两份环境 YAML）；`manifest.json` 记录来源和逐文件哈希。用 `python3 scripts/sync_modbus.py --saas <saas-repo> --sha <contracts/manifest.json 中的完整提交>` 同步，追加 `--check` 可只读核对。该快照保留来源提交的服务内部依赖和占位实现，不是公开网关启动入口。可直接使用的 API 以本目录客户端、点位与模拟器为准；自己的网关按接入指南实现平台装配并验收。

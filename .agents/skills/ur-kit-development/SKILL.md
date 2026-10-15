@@ -1,41 +1,30 @@
 ---
 name: ur-kit-development
-description: 使用 ur-kit 开发应用、设备协议，或维护 SDK、合同、中间件和基础应用时使用。
+description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node 后端，或维护公共 SDK、合同和基础应用时使用。
 ---
 
 # ur-kit 开发
 
+先读[根开发规范](../../../AGENTS.md)和[使用说明](../../../README.md)。开发自己的应用或协议只依赖公开仓、固定版本合同和目标平台的授权接口。
+
 ## 使用 ur-kit 开发应用
 
-接入方先读 [使用说明](../../../README.md)，按需要选择 SDK 和应用入口；以下流程只使用公开仓库和目标平台的授权接口。
+按当前工作选择指南，不必加载全部参考材料：
 
-1. 固定 ur-kit Git 标签，Go 按标签安装模块；Java、Node 按同一标签的源码构建依赖。接口合同取该版本的 `contracts/source`，不要求接入方下载 SaaS 源仓或运行同步脚本。
-2. Go RPC 使用 `sdks/go/pb` 的 `NewXxxClient(connection)`，已有 go-zero 连接传入 `Conn()`；HTTP 使用 `sdks/go/httpclient` 或 `sdks/openapi`。Java、Node 按各自 SDK README 接入。地址、令牌和企业/项目上下文由应用配置注入，大整数 ID 保持字符串或语言原生的无损整数。
-3. 应用 HTTP/RPC 服务复用公开中间件，认证器校验可信身份，授权器判断资源动作。设备缓存按企业隔离，并接入真实变更事件执行失效；协议 RPC、事件总线、存储、调度与认证由应用装配。
-4. 基于 `apps/iot-basic/{web,mobile,backend}` 开发应用时，使用仓内已锁定的共享包和合同。按 [应用说明](../../../apps/iot-basic/README.md) 设置平台地址与应用标识；Web/Go 可构建为单容器，移动端单独构建。修改业务页面或后端逻辑不需要重新导出合同或改写来源锁。
-5. 设备协议按 [Things SDK](../../../things/sdk/README.md) 装配生命周期；Modbus 按 [协议说明](../../../protocols/modbus/README.md) 先用本地模拟设备验证，再使用目标设备参数。自己的应用仓在 `AGENTS.md` 记录 SDK 版本、平台边界和定向验证命令。
+| 当前任务 | 必读指南 |
+| --- | --- |
+| 自己的 MQTT、Modbus、TCP/串口或云协议 | [协议开发：目录、装配、上下行、验收](references/protocol-development.md) |
+| Web、移动端和 Go/Java/Node 业务后端 | [应用开发：骨架、鉴权、页面、测试、Docker](references/application-development.md) |
+| 把规则带入自己的独立仓、交付前自查 | [项目规范与 AI 入口](references/project-rules.md) |
+
+最短开发流程：
+
+1. 固定 SDK 标签及合同版本。Go 按标签引用；Java、Node 按同一标签源码构建，安装方式见各自 README。大整数 ID 使用无损类型。
+2. 确认业务/设备协议说明及目标平台提供的权限、连接方式。HTTP 应用令牌与可信服务间 RPC 认证分别配置；缺少平台接入条件时先完成本地模拟验证，并明确未验收项。
+3. 先跑现有样例，再增加自己的业务代码。使用公开接口注入 RPC、消息总线、存储和认证；禁止依赖 `upstream/` 或私有 SaaS 包。
+4. 认证身份从中间件上下文读取；企业/项目隔离和资源动作授权落实到服务端。协议验证属性上报与属性控制两条实际消息链路。
+5. 按专项指南执行定向测试、构建和容器验收，记录实际结果。自己的仓也提交 `AGENTS.md` 与相应技能参考文件，不能只保留指向开发机的链接。
 
 ## 维护 ur-kit 本身
 
-修改本套件的合同、生成器、共享源码或发布版本时，按 [维护指南](../../../CONTRIBUTING.md) 和下列专项规则执行。涉及 SaaS 来源同步的步骤由有源仓权限的维护者执行。
-
-1. 先读仓库根目录 `AGENTS.md`，核对 `contracts/manifest.json` 的 SaaS 来源提交。
-2. 从 SaaS 工作树运行 `bash shell/sync-ur-kit-contracts.sh --kit <ur-kit路径> --sha <full-sha>` 一次同步合同、Go pb、Things SDK、物模型、Modbus 和公共/平台缓存快照；该入口调用本仓 `sync_contracts.py` 等同步器，禁止手改快照。需重生服务时追加 `--build core:<服务>` 或 `--build things:<服务>`；`build.sh` 若改变生成物，先审查并提交，再用新 SaaS 提交导出。即使 Swagger 已有字段，也要核对生成的 Go HTTP 请求类型和实际 HTTP→RPC 转换；仅看 `.api` 或 Swagger 无法证明服务会接收并透传字段。重复运行总同步入口，确认第二次无差异。
-   Core/Things 强类型 HTTP 客户端通过 `python3 scripts/generate_http_clients.py` 从快照生成到 `sdks/openapi/`，固定 OpenAPI Generator 7.8.0；生成器只修正已核对的无效 Swagger 节点或会让同一客户端类出现重复方法的标签，源文件不改；标签去重须精确限定路由并断言原标签。Go 请求线缆测试放在 `sdks/openapi/go/contracttest/`，生成器替换目录时必须保留该测试目录。再次生成应无差异；分别验证 Go 包与请求集成测试、Node 编译及请求测试、Java 两个 Maven 项目。大整数列表使用新增字符串字段，保留旧数字字段的网关协议。
-3. `web-shared/` 只通过 `scripts/sync_web_shared.py` 按固定 SaaS 提交更新，随后运行 `scripts/configure_web_workspace.py`。每次更新合同 manifest 或共享 Web 快照，都用 `node scripts/verify_iot_basic.mjs --print` 审阅并更新 `apps/iot-basic/ur-kit.lock.json`，再运行 `node scripts/verify_iot_basic.mjs`、`pnpm install --frozen-lockfile`、`pnpm -r run stub --if-present` 和 `pnpm --filter org-iot-client build`；快照适配逻辑写回同步脚本。`verify_iot_basic.mjs` 还拒绝客户端依赖中的 `workspace:*` 与指向仓外的 `link:`/`file:`（含符号链接），仓内 `web-shared` 链接由快照摘要和 ur-kit 标签固定。Docker Web 构建与 mobile codegen 同样核对该锁，不在构建中自动更新；Dockerfile 执行校验前需提供 Web 与 mobile 的依赖清单。
-4. 先运行 `python3 scripts/generate_java_pb.py` 两次核对消息与 gRPC 服务 Stub 哈希，再验证 Go/Java/Node 的 HTTP、RPC 示例、Java Maven 编译、`things/sdk/seed` 幂等性及重复生成无差异，最后才发布标签。发布后运行 `bash scripts/test_external_consumer.sh --version <tag>`，确认公开 Go 包可由仓外模块直接下载、编译且依赖树不含 SaaS 私有模块；网络直连可显式设置 `GOPROXY=direct`。`sdks/node` 位于外层 pnpm workspace，独立安装使用 `pnpm install --ignore-workspace --frozen-lockfile`，避免把 38 个项目全装进 SDK 验证目录；RPC 消费入口为 `@unitedrhino/ur-kit-node/rpc`，修改包导出时运行 `node --test`，再 `pnpm pack` 并从临时仓外项目按包名导入 HTTP/RPC。Linux x86_64 的 gRPC Java 插件固定版本并校验 SHA-256；其他平台设置 `UR_KIT_GRPC_JAVA_PLUGIN`。迁移 SaaS Go pb 时，相同 `.proto` 的新旧生成包不能同进程加载；按服务入口执行 `go list -deps`，确认只剩一种生成包，标签发布后再验证脱离本地替换的普通构建。检查旧客户端 `apilegacy` 受影响字段与鉴权。
-   RPC 示例须用固定合同完成本机真实请求；Go/Node 的 `protocolSync` 往返用例位于 `sdks/go/rpcclient` 与 `sdks/node/rpc.test.mjs`，Java 用生成的服务 Stub。三语言空令牌均应在发送前拒绝，Node 的项目与应用 ID 使用十进制字符串或 `BigInt`。
-   Node 中间件也要独立打包验收：它通过 `@unitedrhino/ur-kit-node` 对等依赖调用平台 HTTP 客户端，先安装两个同标签生成的 tarball，再从仓外项目按包名导入 HTTP、平台认证器和 `./rpc`。具体命令见 `middleware/node/README.md`；不能仅靠仓内相对文件测试。HTTP 输入、ID、空值、时间与错误响应以 `sdks/conformance/README.md` 和共同样本为准；Go HTTP 接入旧 `token` 请求头时显式设置 `TokenHeader`，响应上限按接入服务所需设置 `ResponseLimit`，不能放松原有安全边界。三语言客户端改动后一起核对；平台访问令牌用 `sdks/conformance/open-token.json` 的共同样本验证 HS256、秒级 `exp` 和 Bearer 请求头，登录令牌与访问令牌不能混用。
-5. Web 和 mobile 位于 `apps/iot-basic/`，改动客户端请求时一起核对合同版本。迁仓后检查开发说明、脚本注释和命令是否仍指向 SaaS 旧目录；可在 Git 跟踪文件中检索 `apps/web/apps/org-iot-client`、`apps/mobile-uniapp` 与个人绝对路径。mobile 有独立锁文件，但位于外层 pnpm workspace 之下；在 `apps/iot-basic/mobile` 执行 `pnpm install --ignore-workspace --frozen-lockfile`，否则 pnpm 会安装外层 38 个项目而不创建 mobile 的 `node_modules`。`pnpm codegen` 先核对 `apps/iot-basic/ur-kit.lock.json` 与合同清单的 Swagger 哈希，再用锁定的 CLI/JAR 版本生成；失败不得删除旧客户端。uni-app 开发/构建由 Vite 配置复核同一应用锁。随后运行 `pnpm run tsc`、`pnpm run test:contract` 与目标端 `pnpm run build:mp-weixin`；构建时由环境注入 `VITE_MP_WEIXIN_APPID`。不要复制私有环境配置。
-6. `cache/common.LayeredCache` 通过 `LayeredOptions` 注入 Redis、事件总线和业务 loader，保留 `cache:<name>:<key>` 与 `server.cache.sync.<name>`；旧回源不能在失效后重新发布，事件广播必须在发布锁外。`cache/platform` 的企业 `tenant` Hash、在线状态和 IM 游标可注入 `cache/redis`；企业资料使用完整 JSON 并核对 Hash 字段与 JSON `code`，不要截断平台扩展字段。游标必须由 Redis 原子比较 64 位十进制 ID，不得经 Lua 浮点数转换。变更时运行 `go test -race ./cache/...`。`cache/{common,platform}/upstream` 通过 `python3 scripts/sync_cache.py --saas <saas-path> --sha <contracts/manifest.json 中的完整提交>` 从合同锁定的 SaaS 提交同步，随后以 `--check` 逐文件核对；含私有导入的原源码不得当作可发布 SDK。
-   SaaS Core 的企业资料旧入口由 `backend/core/share/caches/tenant_adapter.go` 接入公开 `TenantDirectory`，保持 `tenant` Hash 键和完整 JSON；适配 go-zero `HgetCtx` 时，空返回值须用 `HexistsCtx` 区分已存在的损坏空字段与未命中。升级 ur-kit 版本后需在 `backend/go.work` 下运行该缓存包测试及 AllInOne 入口初始化，核对 protobuf 仅注册一份。
-7. `apps/iot-basic/Dockerfile` 从仓库根上下文构建 Web 与 Go，运行阶段只包含静态页面和 Go 二进制。`web/.env.production` 提供可公开的本地构建默认值，目标平台数字应用 ID 必须在构建时通过 `VITE_GLOB_APPID` 覆盖；开发、测试和生产模式的 `VITE_GLOB_APPNAME` 均须为 `org-iot-client`，否则共享登录逻辑不会保留组织前缀。`verify_iot_basic.mjs` 会校验这三份受版本控制的环境文件；Docker 构建不得复制被忽略的开发机 `web/.env`。后端集成测试在 `apps/iot-basic/backend` 执行，镜像测试核对 Web 深层路径、样例业务接口、平台代理和健康检查；具备普通企业的真实授权与项目样本时按 `apps/iot-basic/README.md` 运行无接口模拟的 `test:e2e:real`。`mobile` 独立构建，不进入运行镜像。
-8. `things/sdk/README.md` 对照原 SDK 能力和公开接入路径；`things/sdk/protocol` 保留常用构造入口名称，资源仍由调用方注入。`things/sdk/protocol/{runtimeconfig,cloud,core,mqtt,tracking}` 是已解耦的启动配置读取/合并、云配置生命周期、配置/产品/设备分页 RPC、外部产品 ID 映射、设备主子协议配置选择、协议注册心跳、可注入周期调度、MQTT 收发与会话跟踪。`things/sdk/deviceauth.NewDeviceAuth` 保留原设备认证客户端入口名称，接受标准 gRPC 连接；go-zero 调用方传入 `Conn()`，三种 RPC 方法由本机往返测试覆盖。原 `backend/things/sdk` 的全部受版本控制源码由 `scripts/sync_things_sdk.py` 从合同锁定提交同步到 `things/sdk/upstream`，运行 `--check` 核对逐文件字节与清单；物模型原始源码由 `scripts/sync_schema.py` 单独维护。`tracking.ActiveAll` 沿旧协议会话索引汇总近三十天活动设备，只有活动记录而无 MQTT 会话的产品不进入结果。协议自有 gRPC 服务通过 `core.Options.RPCRegistrars` 注册，需同时设置 `RPCListenAddr`，并在 `RPCServerOptions` 注入身份认证、权限和日志拦截器；反射仅在明确设置 `RPCReflection` 时启用。既有 Things 服务使用 `protocol/tracking/gozero` 接入原 go-zero 分片 KV，保持旧键与 JSON 字段；新独立协议优先使用 `tracking.Tracker` 的单 Redis 客户端原子脚本，多键脚本不能直接用于分片 KV。非 MQTT 设备调用 `core.ReportConnection` 发布上下线，不写 MQTT 会话。外部资源通过 `core.AddStopHandle` 注册退出回调，协议停止后拒绝再注册。`runtimeconfig.Resolve` 的未找到和空配置保留本地默认值，其他 RPC 错误不能静默吞掉；运行配置与云配置 RPC 的身份上下文由接入方提供。分页未读完或解码失败不得提交部分配置或产品映射；`cloud.ForEachConfig` 拒绝产品空页、重复 ID 和总数变化，`cloud.GRPCDeviceSource.ForEachDevice` 按产品分页并检查跨产品、重复设备，单设备同步失败继续处理且汇总错误，但已执行的回调不会自动回滚。`core.Timer` 的同一任务下处理器逐个执行并汇总失败；`core.GRPCTimerScheduler` 用公开 timed pb 注册任务，接入方必须提供带授权的 RPC 客户端与真实事件总线。Paho 适配器先 `Connect` 再订阅，`ResumeSubs` 只恢复待确认的订阅，已确认订阅需在 OnConnect 重连回调重新订阅。修改时运行 `go test -race ./things/sdk/protocol/...` 和 `go vet ./things/sdk/protocol/...`。普通 NATS 接入可用 `protocol/natsbus`，调用方持有连接并指定队列组；该适配器不提供持久重投，要求持久消费时注入 JetStream/平台事件总线适配器。设置 `UR_KIT_TEST_NATS_URL` 可运行真实 NATS 往返。Broker 集成测试需设置 `UR_KIT_TEST_MQTT_BROKER`；原 `things/sdk/upstream/protocol` 尚有 SaaS 私有导入，平台联调未完成，不能仅凭子模块测试宣称完整协议 SDK 可发布。
-    旧 Things 服务若只需要配置 JSON 合并，应使用 `protocol/configmerge` 纯值包；`runtimeconfig` 同包含 `dm` RPC，旧服务直接导入会把 SaaS 和 ur-kit 两份同名 protobuf 注册到一个进程。先用 `go list -deps` 检查目标服务依赖，迁移须在包含纯值包的新标签发布后进行。
-9. `things/sdk/cache` 用公开 `dm` RPC 客户端封装产品与设备资料、产品/设备 TSL JSON 的 TTL 缓存。缓存键显式包含企业编码，接入方用匹配该企业的真实授权上下文发起查询，并在平台产品/设备变更事件中显式调用失效方法；资料响应若带不匹配的企业编码会被拒绝，返回的 protobuf/JSON 均为副本。`TSLCache` 按设备条目覆盖产品同名条目并保留扩展字段，产品变更失效已访问的设备模型。完整物模型纯值语义从合同锁定的 SaaS 提交通过 `python3 scripts/sync_schema.py --saas <saas-path> --sha <full-sha>` 同步到 `things/sdk/schema`，`upstream/schema` 留原始快照；同步两次必须哈希一致。原始快照可能含 CRLF，须保持源字节与校验和一致，`.gitattributes` 已为该路径配置 `whitespace=cr-at-eol`。`ProductModel` / `DeviceModel` 严格校验并构建索引，空或无效功能定义会报错；`schema/repo.go` 的接口类型已迁入，原私有设备标识替换为等形的 `schema/compat/devices.Core`，具体数据库实现仍待迁移；SaaS 数组位置查询已接入 `schema.ParseArrayPositionFilter`，其余调用点仍待迁移。修改时运行 `go test -race ./things/sdk/cache/... ./things/sdk/schema/... ./cache/common/...`，不得把未校验的 JSON 聚合结果直接替换内部模型。
-10. `protocols/modbus` 的独立样例提供四类点位、功能码 1/2/3/4/5/6/15/16、`Point` 原 JSON 字段映射及 `HoldingPoint` 类型编解码，`Simulator` 是仅供本地测试的 TCP 设备；运行 `go run ./protocols/modbus/cmd/demo` 验证基本读写，再运行 `go test -race ./protocols/modbus/...` 核对 TCP/UDP、伪串口 RTU、功能码、跨字节位序、位域、设备回显和异常码。位域写入是读改写，同设备多写入方由接入方串行化；`Client.RTUOverTCP` 与 `Client.RTUOverUDP` 分别使用 TCP 流和 UDP 数据报传输带单元号、CRC16 的 RTU 帧，`Client.Serial` 使用物理串口设备路径与显式串口参数收发同一 RTU 帧；`Client.UDP` 使用 MBAP 数据报，默认仍为 MBAP TCP。串口与网络模式、TLS 互斥。`Client.Probe` 只核对传输可打开，不发送功能码；UDP 探测不证明远端在线。持续采集使用 `Client.OpenSession` 与 `Session.Client` 复用连接；合法设备异常码保留连接并递增事务号，传输错误、无效帧或取消后必须重建会话，结束时关闭。原 Modbus 服务源码仍在 `upstream/` 对照，完整 Things 服务接入和尚未提供的现场串口硬件验收需后续完成，样例不等于完整服务迁移。
-    `Client.TLS` 可注入设备可信证书链，在 TCP 握手时校验证书，可与 MBAP 或 RTU over TCP 帧组合；默认明文 TCP。`tls_test.go` 在回环网络验证可信设备读写和不可信证书拒绝。原服务快照由 `scripts/sync_modbus.py` 从 `contracts/manifest.json` 锁定的 SaaS 提交同步并生成逐文件哈希，排除两份环境 YAML；同步后再以 `--check` 只读核对，不直接编辑快照。
-11. Go、Node、Java HTTP/RPC 中间件在认证前过滤平台内部身份字段 `ithings-user`、`ithings-user-role`、`ithings-tenant-code`、`ithings-project-id`、`ithings-meta`、`ithings-set-token`；Go/Java RPC 客户端转发已有元数据时也要过滤。`ithings-token`、`token`、`tenant-code`、`project-id` 是令牌和选择上下文，须保留并交认证器核验。JDK `HttpExchange` 原请求头不可修改，业务处理器只能收到过滤包装。修改时同时运行 Go、Node、Java 中间件与基本应用代理测试，并核对结构监测代理过滤列表。
-    通用 `Authorization` 只接受 Bearer 格式，不能把 Basic 或格式错误的数组/二进制值交给宽松认证器；Node HTTP/RPC 错误入口须稳定返回未认证而不在处理前抛异常。Node HTTP/RPC 的项目与应用 ID 请求头拒绝不安全 Number，JSON 请求体也拒绝嵌套的不安全整数和非有限值；超过安全整数范围的 ID 使用十进制字符串，头字段可用 BigInt。修改这类语义时先补失败用例，再对三语言共同样本检查。
-12. Go `PlatformAuthenticator`、Node `createPlatformAuthenticator` 与 Java `UrPlatformAuthenticator` 通过平台用户自身信息核验企业成员，带 `project-id` 时再核验项目列表的正授权；所有三语言 HTTP 客户端的令牌请求都拒绝重定向，Go 注入的自定义 `http.Client` 也不得覆盖此边界。Java 使用 `UrMiddleware.httpScoped` / `rpcScoped` 注入。三者只提供身份范围，不替代应用的资源动作授权器。Go 基础应用示例直接使用公共认证器，修改时连同示例运行竞态测试。
-13. 云协议入口用 `cloud.NewRuntime` 串接 `core.Protocol`、`GRPCConfigSource`、`ConfigManager`、可选更新订阅和 `core.Timer`：服务先注册，配置全量拉取成功后才订阅通知和注册周期任务；任何后续启动失败都释放已生效资源。设备同步先用 `cloud.RegisterDeviceSync` 将产品主/子协议配置选择及设备分页回调登记到 Timer，再启动 Runtime；每个设备失败后继续遍历并汇总错误，已执行的设备动作不会回滚。更新订阅必须提供取消函数。`Stop` 取消订阅、停止协议并等待当前定时处理器退出；平台调度任务是持久记录，其删除由接入方负责，停止后的残留触发不得再执行协议处理器。修改时运行 `go test -race ./things/sdk/protocol/...` 与 vet。
+合同同步、生成器、共享源码及标签发布按[维护指南](../../../CONTRIBUTING.md)和[维护细则](references/maintenance.md)执行。使用方开发业务不需要运行 SaaS 同步脚本；原始定义的变化由平台维护者同步并发布新版本。
