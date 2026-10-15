@@ -1,9 +1,23 @@
 ---
 name: ur-kit-development
-description: 开发 ur-kit 合同、SDK、中间件、缓存、协议及 IoT 基础应用时使用。
+description: 使用 ur-kit 开发应用、设备协议，或维护 SDK、合同、中间件和基础应用时使用。
 ---
 
 # ur-kit 开发
+
+## 使用 ur-kit 开发应用
+
+接入方先读 [使用说明](../../../README.md)，按需要选择 SDK 和应用入口；以下流程只使用公开仓库和目标平台的授权接口。
+
+1. 固定 ur-kit Git 标签，Go 按标签安装模块；Java、Node 按同一标签的源码构建依赖。接口合同取该版本的 `contracts/source`，不要求接入方下载 SaaS 源仓或运行同步脚本。
+2. Go RPC 使用 `sdks/go/pb` 的 `NewXxxClient(connection)`，已有 go-zero 连接传入 `Conn()`；HTTP 使用 `sdks/go/httpclient` 或 `sdks/openapi`。Java、Node 按各自 SDK README 接入。地址、令牌和企业/项目上下文由应用配置注入，大整数 ID 保持字符串或语言原生的无损整数。
+3. 应用 HTTP/RPC 服务复用公开中间件，认证器校验可信身份，授权器判断资源动作。设备缓存按企业隔离，并接入真实变更事件执行失效；协议 RPC、事件总线、存储、调度与认证由应用装配。
+4. 基于 `apps/iot-basic/{web,mobile,backend}` 开发应用时，使用仓内已锁定的共享包和合同。按 [应用说明](../../../apps/iot-basic/README.md) 设置平台地址与应用标识；Web/Go 可构建为单容器，移动端单独构建。修改业务页面或后端逻辑不需要重新导出合同或改写来源锁。
+5. 设备协议按 [Things SDK](../../../things/sdk/README.md) 装配生命周期；Modbus 按 [协议说明](../../../protocols/modbus/README.md) 先用本地模拟设备验证，再使用目标设备参数。自己的应用仓在 `AGENTS.md` 记录 SDK 版本、平台边界和定向验证命令。
+
+## 维护 ur-kit 本身
+
+修改本套件的合同、生成器、共享源码或发布版本时，按 [维护指南](../../../CONTRIBUTING.md) 和下列专项规则执行。涉及 SaaS 来源同步的步骤由有源仓权限的维护者执行。
 
 1. 先读仓库根目录 `AGENTS.md`，核对 `contracts/manifest.json` 的 SaaS 来源提交。
 2. 从 SaaS 工作树运行 `bash shell/sync-ur-kit-contracts.sh --kit <ur-kit路径> --sha <full-sha>` 一次同步合同、Go pb、Things SDK、物模型、Modbus 和公共/平台缓存快照；该入口调用本仓 `sync_contracts.py` 等同步器，禁止手改快照。需重生服务时追加 `--build core:<服务>` 或 `--build things:<服务>`；`build.sh` 若改变生成物，先审查并提交，再用新 SaaS 提交导出。即使 Swagger 已有字段，也要核对生成的 Go HTTP 请求类型和实际 HTTP→RPC 转换；仅看 `.api` 或 Swagger 无法证明服务会接收并透传字段。重复运行总同步入口，确认第二次无差异。

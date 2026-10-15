@@ -1,5 +1,7 @@
 # ur-kit 开发规范
 
+使用本套件开发应用时，从 [README](README.md) 和开发技能的「使用 ur-kit 开发应用」章节开始；平台能力通过公开 SDK、合同与可注入接口接入，无需访问 SaaS 私有源码。下述合同同步规则适用于维护 ur-kit 本身。
+
 本仓公开合同、SDK、中间件、缓存、协议与 IoT 基础应用。SaaS 的 `.api` 和 `.proto` 是合同来源；`contracts/source` 只由 `scripts/sync_contracts.py` 按固定提交生成，禁止直接修改。发布标签后消费者锁定版本，合同变更需记录兼容性和迁移方式。
 
 - `apps/iot-basic/web` 是公开 IoT 客户端；`mobile` 是 uni-app；`backend` 是可运行的最小后端。平台管理端不属于本仓。
