@@ -15,6 +15,8 @@ description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node �
 | --- | --- |
 | 自己的 MQTT、Modbus、TCP/串口或云协议 | [协议开发：目录、装配、上下行、验收](references/protocol-development.md) |
 | Web、移动端和 Go/Java/Node 业务后端 | [应用开发：骨架、鉴权、页面、测试、Docker](references/application-development.md) |
+| 注册平台代理/Web 路由、应用、菜单与定时任务 | [平台注册与验收](references/platform-registration.md) |
+| 用自己的配置部署应用或协议网关 | [urops 部署与运维](references/urops-deployment.md) |
 | 把规则带入自己的独立仓、交付前自查 | [项目规范与 AI 入口](references/project-rules.md) |
 
 最短开发流程：

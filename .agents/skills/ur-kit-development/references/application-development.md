@@ -72,6 +72,10 @@ pnpm run dev:h5
 
 三语言的认证器核验平台身份范围，资源动作仍由自己的授权器实现。Java 使用 `UrMiddleware.httpScoped` / `rpcScoped`，Node 使用 `createPlatformAuthenticator`；RPC 服务使用对应 RPC 中间件。Java 本地 Maven 安装、Node tarball 必须来自同一 Git 标签；尚无公共包仓发布时不能写成直接安装某个未发布版本。替换后端后同步修改 Dockerfile 的构建/运行阶段，保留代理、静态页和健康检查合同，并运行对应语言测试。
 
+## 平台入口与部署
+
+页面、平台代理、应用、菜单与任务按[平台注册指南](platform-registration.md)分别接入并验证。应用自带 Docker/Compose 配置可通过[urops 部署](urops-deployment.md)登记和运维；协议网关也采用相同部署入口，云页面只读展示。
+
 ## 4. 最小充分验证与单容器交付
 
 从 ur-kit 根目录选择受影响的验证：
