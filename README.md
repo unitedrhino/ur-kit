@@ -125,6 +125,18 @@ go run ./protocols/modbus/cmd/demo
 
 使用支持 `AGENTS.md` 的开发工具打开本仓，先读取 [开发规范](AGENTS.md)，再加载 [应用接入技能](.agents/skills/ur-kit-development/SKILL.md#使用-ur-kit-开发应用)。按任务加载[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)或[前后端应用指南](.agents/skills/ur-kit-development/references/application-development.md)，覆盖代码放置、组件装配、认证授权、实际消息链路与 Docker 验收。套件维护另见技能中的维护导航。
 
+### 通过 ur 下载开发技能
+
+支持 `--skill` 的 CLI 可下载独立开发技能包；先用 `ur skills download --help` 确认当前版本支持，再执行：
+
+```sh
+ur skills download --skill ur-kit-development --url <固定提交的开发技能ZIP地址> --json
+```
+
+将 JSON 返回的 `localPath` 目录整体复制到自己的项目 `.agents/skills/`，保留参考文件和来源清单，再在项目 `AGENTS.md` 写明技能入口。开发技能与 `ur-api` API 操作技能可以同时使用；`ur skills install/update` 目前只管理内置 `ur-api`。
+
+旧版 CLI 尚不支持 `--skill` 时，可检出本文指南所在的固定提交，复制 `.agents/skills/ur-kit-development/`，按项目规范模板修正离开源码树后的链接。维护者按[技能打包流程](CONTRIBUTING.md#打包独立开发技能)生成可供下载的 ZIP；包内源码链接已固定为公开提交链接。
+
 自己的应用固定 SDK 标签，按[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)在应用仓保留 `AGENTS.md`、所需技能和参考文件，记录所用版本、业务边界及验证命令。协议接入使用公开 SDK 接口，平台 RPC、事件总线、存储和认证配置由应用提供。
 
 参与套件维护、更新接口合同或发布版本，请阅读 [贡献与维护指南](CONTRIBUTING.md)。
