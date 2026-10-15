@@ -2,7 +2,11 @@
   "name": "@unitedrhino/ur-kit-node",
   "version": "0.1.0",
   "type": "module",
-  "exports": "./index.mjs",
+  "exports": {
+    ".": "./index.mjs",
+    "./rpc": "./rpc.mjs"
+  },
+  "files": ["index.mjs", "id.mjs", "open-token.mjs", "rpc.mjs", "README.md"],
   "scripts": { "test": "node --test" },
   "dependencies": {
     "@grpc/grpc-js": "^1.14.0",
