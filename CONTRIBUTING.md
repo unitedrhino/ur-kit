@@ -62,14 +62,6 @@ bash scripts/test_external_consumer.sh --version "<vX.Y.Z>"
 应用按 Git 标签锁定 SDK，合同版本与来源以 `contracts/manifest.json` 为准；不要把包内版本号当作合同版本。接口或行为变更应写清兼容性与迁移方式。
 
 
-## 打包独立开发技能
+## 维护开发技能
 
-技能源继续维护在 `.agents/skills/ur-kit-development/`；无需新建重复的顶层技能。从已审查的固定提交生成 ZIP：
-
-```sh
-python3 scripts/package_development_skill.py --ref <标签或完整提交SHA> --output .temp/skills
-```
-
-脚本只读取该提交的 Git 跟踪文件，包含完整参考文件和 `_meta.json` 来源清单。技能内导航保留相对路径；指向仓库源码、AGENTS 和 README 的链接会转换为公开 GitHub 固定提交链接。缺少来源或链接目标时打包失败，同一提交重复打包的 SHA256 应一致。
-
-将生成的 `ur-kit-development-<完整SHA>.zip` 及其 SHA256 随经授权的发布提供下载。使用支持 `--skill` 的 CLI，以 `ur skills download --skill ur-kit-development --url <该ZIP的固定地址> --json` 验收；核对实际解压目录、技能名、参考文件、来源提交和安装指引。开发技能发布不等于 CLI 已发布，新参数须随 CLI 正常发布流程交付后才能要求旧版用户使用。
+技能源统一维护在 `.agents/skills/ur-kit-development/`，随 ur-kit 提交更新。使用方直接读取仓内技能，或将完整目录复制到自己的项目并修正源码链接、记录来源提交。维护时核对入口、参考文件和链接；不增加与 ur CLI 发行相互依赖的开发技能下载链路。ur 的现有安装、认证、命令与 API 操作技能由其独立仓维护，本仓只说明能力和使用入口。

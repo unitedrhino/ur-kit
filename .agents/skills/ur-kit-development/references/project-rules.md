@@ -4,7 +4,7 @@
 
 `AGENTS.md` 是自动发现入口，技能正文按任务加载。复制应用骨架时，把 ur-kit 的 `.agents/skills/ur-kit-development/` 整个目录（含 `references/`）一并带入；不要只复制 `SKILL.md` 后留下断链，也不要依赖开发机上的 SaaS 路径。
 
-使用 `ur skills download --skill ur-kit-development --url <固定技能ZIP地址> --json` 下载维护者打包的技能时，按返回 `localPath` 复制整个目录；该命令需使用支持 `--skill` 的 CLI。包内源码链接已经固定到公开提交，可直接在新仓中使用。`ur skills install/update` 管理的是 API 操作技能，不会替你升级开发技能。
+开发技能从选定的 ur-kit 提交获取，复制 `.agents/skills/ur-kit-development/` 全部文件，保留内部参考导航。按目标项目布局修正源码链接；不能保留指向开发机的路径，外部源码链接可指向固定 ur-kit 提交。记录来源提交，后续从 ur-kit 更新；ur 的安装与 API 操作按[使用说明](../../../../README.md#安装-ur-辅助平台接入)。
 
 直接从源码复制时，指南中的相对源码链接按 ur-kit 原目录布局编写。改变布局或仅通过依赖使用 SDK 时，将它们改成**所固定标签**的 GitHub 文件链接，或自己仓内的对应文件；安装依赖不等于自动安装 AI 技能。维护细则可留作套件维护参考，应用开发不需要执行其中的 SaaS 同步流程。
 

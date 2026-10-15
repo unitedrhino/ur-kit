@@ -26,12 +26,12 @@ SDK 可独立使用，构建应用无需访问联犀 SaaS 私有源码。调用�
 | 工具 | 用途 | 使用时机 |
 | --- | --- | --- |
 | **ur-kit** | 公共 SDK、合同、中间件、缓存、协议组件、Web/移动端/后端模板与开发技能 | 开发和构建自己的应用、协议网关 |
-| **[ur CLI](https://github.com/unitedrhino/cli)** | 以授权身份调用平台 API、检查接入结果，下载 API 与开发技能 | AI 开发准备、平台注册和业务联调 |
+| **[ur CLI](https://github.com/unitedrhino/cli)** | 以授权身份调用平台 API、检查接入结果，使用其原有 API 操作技能 | AI 开发准备、平台注册和业务联调 |
 | **urops** | 在目标 Linux 主机按应用自己的 Compose 部署、更新、查看状态/日志和停止 | 应用或网关镜像构建完成后，TUI 或命令行运维 |
 
 推荐顺序：**取得技能 → 用 ur-kit 开发并测试 → 构建自己的镜像 → 用 ur 注册/核对平台对象 → 用 urops 部署 → 实际验证业务或设备消息**。平台代理路由的服务自注册 RPC、应用菜单和定时任务的消费者仍由服务按[注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)实现；ur 负责调用平台已开放的 HTTP API，不能替代尚未开放的 RPC 功能。
 
-开发时固定 SDK 标签与技能来源提交；部署时固定自己的镜像版本。技能指南可以独立更新，SDK 标签、技能提交、ur 版本和 urops 版本不要求同号。新增命令先用 `ur skills download --help`、`urops app --help` 核对本机支持；源码合并不会自动升级已安装的工具。
+开发时固定 SDK 标签与技能来源提交；部署时固定自己的镜像版本。技能指南可以独立更新，SDK 标签、技能提交、ur 版本和 urops 版本不要求同号。使用前用 `ur --help`、`urops app --help` 核对本机支持；源码合并不会自动升级已安装的工具。
 
 在 urops TUI 中进入 **自定义应用与协议网关 → 部署新应用/协议网关**，输入名称、Compose 路径和可选变量文件路径，确认后部署。它消费已构建镜像；源码构建在自己的项目完成。完整流程见[工具协作与部署指南](.agents/skills/ur-kit-development/references/urops-deployment.md)。
 
@@ -141,17 +141,20 @@ go run ./protocols/modbus/cmd/demo
 
 使用支持 `AGENTS.md` 的开发工具打开本仓，先读取 [开发规范](AGENTS.md)，再加载 [应用接入技能](.agents/skills/ur-kit-development/SKILL.md#使用-ur-kit-开发应用)。按任务加载[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)或[前后端应用指南](.agents/skills/ur-kit-development/references/application-development.md)，覆盖代码放置、组件装配、认证授权、实际消息链路与 Docker 验收。套件维护另见技能中的维护导航。
 
-### 通过 ur 下载开发技能
+### 获取开发技能
 
-支持 `--skill` 的 CLI 可下载独立开发技能包；先用 `ur skills download --help` 确认当前版本支持，再执行：
+开发技能随 ur-kit 源码维护在 [`.agents/skills/ur-kit-development/`](.agents/skills/ur-kit-development/SKILL.md)。直接打开本仓即可读取；在自己的项目使用时，从选定的 ur-kit 提交复制整个目录（包括 `references/`），按[项目规范](.agents/skills/ur-kit-development/references/project-rules.md)修正源码链接，并在项目 `AGENTS.md` 引用入口。记录技能源提交，后续从 ur-kit 更新。
+
+### 安装 ur 辅助平台接入
+
+需要查询设备、产品、项目，控制属性或核对平台注册结果时，按 [ur 安装指南](https://github.com/unitedrhino/cli#安装与快速开始)安装现有 CLI，完成其支持的登录/认证后使用：
 
 ```sh
-ur skills download --skill ur-kit-development --url <固定提交的开发技能ZIP地址> --json
+ur --help
+ur --app iot --help
 ```
 
-将 JSON 返回的 `localPath` 目录整体复制到自己的项目 `.agents/skills/`，保留参考文件和来源清单，再在项目 `AGENTS.md` 写明技能入口。开发技能与 `ur-api` API 操作技能可以同时使用；`ur skills install/update` 目前只管理内置 `ur-api`。
-
-旧版 CLI 尚不支持 `--skill` 时，可检出本文指南所在的固定提交，复制 `.agents/skills/ur-kit-development/`，按项目规范模板修正离开源码树后的链接。维护者按[技能打包流程](CONTRIBUTING.md#打包独立开发技能)生成可供下载的 ZIP；包内源码链接已固定为公开提交链接。
+具体命令、认证方式与原有 `ur-api` 操作技能以 [ur 使用说明](https://github.com/unitedrhino/cli)为准。应用开发指南和开发规范由 ur-kit 提供；使用 ur 进行 API 操作不需要为它增加开发技能下载功能。菜单、路由和定时任务的 HTTP/RPC 能力边界见[平台注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)。
 
 自己的应用固定 SDK 标签，按[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)在应用仓保留 `AGENTS.md`、所需技能和参考文件，记录所用版本、业务边界及验证命令。协议接入使用公开 SDK 接口，平台 RPC、事件总线、存储和认证配置由应用提供。
 
