@@ -2,14 +2,13 @@
 
 联犀公开开发套件：Core/Things 合同、跨语言客户端与中间件、IoT 基础应用、缓存及协议样例。
 
-合同来源写入 `contracts/manifest.json`；生成命令：
+合同来源写入 `contracts/manifest.json`。从 SaaS 的固定提交更新合同、Go pb、Things SDK、物模型、Modbus 和两类缓存快照时，在 SaaS 工作树运行总同步入口：
 
 ```sh
-python3 scripts/sync_contracts.py --saas <saas-repo> --sha <40位提交SHA>
-python3 scripts/sync_go_pb.py
+bash shell/sync-ur-kit-contracts.sh --kit <ur-kit仓库路径> --sha <40位SaaS提交SHA>
 ```
 
-SaaS 中 `.api` / `.proto` 为原始定义；本仓快照和客户端按标签锁定。公开示例仅使用本地占位配置。
+需要先核对服务生成物时可追加 `--build core:<服务名>` 或 `--build things:<服务名>`；若 `build.sh` 改变了生成物，先审查并提交 SaaS 结果，再用新提交 SHA 同步。总入口在同步前拒绝覆盖 ur-kit 中未提交的快照。SaaS 中 `.api` / `.proto` 为原始定义；本仓快照和客户端按标签锁定。公开示例仅使用本地占位配置。
 
 `web-shared/` 保存 IoT Web 与结构监测 Web 共同使用的共享包快照，来源提交在 `web-shared/source.json`。同步时必须在干净的 SaaS 工作树上运行：
 
@@ -36,6 +35,6 @@ IoT 基础应用的 Web 与 Go 可使用 [Dockerfile](apps/iot-basic/Dockerfile)
 
 - `sdks/{go,java,node}` 和 `middleware/{go,java,node}` 提供 HTTP/RPC 客户端及身份、权限、错误、日志和基础安全头适配；Java protobuf 消息需先运行 `python3 scripts/generate_java_pb.py`。
 - `cache/{common,platform,redis}` 提供独立 TTL、Redis/业务回源三级缓存与事件失效、业务缓存接口，以及与平台 `tenant` Hash 兼容的完整企业 JSON、Redis 在线状态与游标存储。`things/sdk/{seed,deviceauth,protocol,cache}` 提供独立种子、设备认证、配置/产品读取、协议注册、周期任务、MQTT 收发与会话跟踪，以及基于公开 Things RPC 的产品/设备资料 TTL 缓存。云协议可用 `cloud.NewRuntime` 组合 `core.Protocol`、配置来源、配置管理器、更新通知及周期任务；`cloud.RegisterDeviceSync` 将产品与设备分页接到周期任务，停止时等待在执行的定时处理器退出。`protocols/modbus` 有可运行的本地模拟设备。
-- `cache/*/upstream` 与 `things/sdk/upstream` 保留 SaaS 源码对照，其中仍有私有导入，不能作为独立依赖。使用方应固定 Git 标签与对应合同清单；`v0.2.12` 收录结构预警站内通知合同和 Go、Java、Node 强类型客户端，保留十进制字符串 ID 与服务认证头。原服务调用点迁移和真实平台联调尚未完成。
+- `cache/*/upstream` 与 `things/sdk/upstream` 保留 SaaS 源码对照，其中仍有私有导入，不能作为独立依赖。使用方应固定 Git 标签与对应合同清单；`v0.2.30` 包含结构预警站内通知合同、Go/Java/Node 强类型客户端、可编译缓存与协议入口，以及按来源提交校验的缓存源码快照。原服务调用点迁移和真实平台联调尚未完成。
 
 各目录的最短验证命令和接入约束见 [开发技能](.agents/skills/ur-kit-development/SKILL.md)。
