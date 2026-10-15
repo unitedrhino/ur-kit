@@ -17,6 +17,7 @@ SDK 可独立使用，构建应用无需访问联犀 SaaS 私有源码。调用�
 | 开发设备协议、MQTT 或云云对接 | [Things SDK](things/sdk/README.md) |
 | 读取和校验物模型、使用产品与设备缓存 | [物模型](things/sdk/schema)、[设备缓存](things/sdk/cache) |
 | 接入 Modbus TCP / UDP / RTU 设备 | [Modbus 客户端和模拟设备](protocols/modbus/README.md) |
+| 开发定时报告、文档与任务等通用页面 | [页面与 Markdown/DOCX 报告开发约定](.agents/skills/ur-kit-development/references/business-pages-and-reports.md) |
 | 基于现成客户端开发自己的应用 | [IoT 基础应用](apps/iot-basic/README.md) |
 
 ## 获取与安装
