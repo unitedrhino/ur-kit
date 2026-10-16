@@ -1,11 +1,48 @@
 #!/usr/bin/env python3
-"""从指定 SaaS 工作树导出两个公开 Web 应用实际依赖的共享包。"""
+"""从指定 SaaS 工作树导出公开 IoT 应用依赖的共享包及实时客户端入口。"""
 
 import argparse
 import json
 import shutil
 import subprocess
 from pathlib import Path
+
+
+def collect_shared_packages(web: Path) -> dict[str, Path]:
+    """收集 IoT Web 与构建工具的依赖闭包，不依赖已独立迁出的业务应用。"""
+    package_files = list(web.glob("packages/**/package.json")) + list(web.glob("internal/**/package.json"))
+    available = {json.loads(path.read_text())["name"]: path.parent for path in package_files}
+    queue = [web / name for name in (
+        "apps/org-iot-client", "internal/vite-config",
+        "internal/tailwind-config", "internal/tsconfig",
+    )]
+    selected: dict[str, Path] = {}
+    while queue:
+        directory = queue.pop()
+        metadata = json.loads((directory / "package.json").read_text())
+        name = metadata["name"]
+        if name in selected:
+            continue
+        selected[name] = directory
+        for kind in ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies"):
+            for dependency in metadata.get(kind, {}):
+                if dependency in available and dependency not in selected:
+                    queue.append(available[dependency])
+    return selected
+
+
+def configure_realtime_export(shared: Path) -> None:
+    """为无 UI 依赖的 WS 客户端添加窄导出，供同步和工作区初始化重复使用。"""
+    directory = shared / "packages/saas"
+    if not (directory / "src/hooks/ws-client.ts").is_file():
+        raise ValueError("共享快照缺少 WS 客户端，不能创建失效的公开入口")
+    manifest_path = directory / "package.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest.setdefault("exports", {})["./ws-client"] = {
+        "types": "./src/hooks/ws-client.ts",
+        "default": "./src/hooks/ws-client.ts",
+    }
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n")
 
 
 def main() -> None:
@@ -24,24 +61,7 @@ def main() -> None:
     if dirty:
         raise SystemExit("SaaS apps/web 存在未提交改动，禁止导出不受版本控制的快照")
     web = root / "apps/web"
-    package_files = list(web.glob("packages/**/package.json")) + list(web.glob("internal/**/package.json"))
-    available = {json.loads(path.read_text())["name"]: path.parent for path in package_files}
-    queue = [web / name for name in (
-        "apps/org-iot-client", "apps/org-structure-monitor", "internal/vite-config",
-        "internal/tailwind-config", "internal/tsconfig",
-    )]
-    selected: dict[str, Path] = {}
-    while queue:
-        directory = queue.pop()
-        metadata = json.loads((directory / "package.json").read_text())
-        name = metadata["name"]
-        if name in selected:
-            continue
-        selected[name] = directory
-        for kind in ("dependencies", "devDependencies", "peerDependencies", "optionalDependencies"):
-            for dependency in metadata.get(kind, {}):
-                if dependency in available and dependency not in selected:
-                    queue.append(available[dependency])
+    selected = collect_shared_packages(web)
     target = Path(__file__).resolve().parent.parent / "web-shared"
     if target.exists():
         shutil.rmtree(target)
@@ -90,13 +110,15 @@ def main() -> None:
         "import type { MenuRecordBadgeRaw } from '@vben-core/typings';",
         "import type { MenuRecordBadgeRaw } from '../../../../base/typings/src/menu-record';",
     ))
+    configure_realtime_export(target)
     shutil.copy2(web / "pnpm-workspace.yaml", target / "pnpm-workspace.yaml")
     (target / "source.json").write_text(json.dumps({
         "saasCommit": args.sha,
         "packages": {name: str(path.relative_to(web)) for name, path in sorted(selected.items())
                     if path.relative_to(web).parts[0] != "apps"},
     }, ensure_ascii=False, indent=2) + "\n")
-    print(f"已导出 {len(selected) - 2} 个共享包，来源 {args.sha}")
+    count = sum(path.relative_to(web).parts[0] != "apps" for path in selected.values())
+    print(f"已导出 {count} 个共享包，来源 {args.sha}")
 
 
 if __name__ == "__main__":

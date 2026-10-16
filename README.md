@@ -6,6 +6,8 @@ SDK 可独立使用，构建应用无需访问联犀 SaaS 私有源码。调用�
 
 **第一次使用：先读[从零准备开发环境](docs/development-setup.md)**，按需安装 Go、Node/pnpm、goctl 与 Proto 工具，初始化自己的 RPC 服务，再启动 Web、移动端与后端。
 
+先查阅[应用能力与接入边界](docs/application-capabilities.md)，确认已有客户端、公开合同及需要应用实现的部分。
+
 ## 选择你需要的能力
 
 | 你要做什么 | 使用入口 |
@@ -14,6 +16,7 @@ SDK 可独立使用，构建应用无需访问联犀 SaaS 私有源码。调用�
 | Java 后端调用平台 HTTP / RPC | [Java SDK](sdks/java/README.md) |
 | Node 后端调用平台 HTTP / RPC | [Node SDK](sdks/node/README.md) |
 | 使用 Core / Things 强类型 HTTP 接口 | [Go / Java / Node 生成客户端](sdks/openapi/README.md) |
+| 接收设备数据、上下线、告警与站内通知，发送业务通知 | [WebSocket 与消息接入](docs/realtime.md) |
 | 为自己的 HTTP / RPC 服务接入认证和权限 | [服务中间件](middleware/README.md) |
 | 复用公共缓存、企业权限缓存和 Redis 存储 | [缓存组件](cache/README.md) |
 | 开发设备协议、MQTT 或云云对接 | [Things SDK](things/sdk/README.md) |

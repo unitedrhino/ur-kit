@@ -16,6 +16,7 @@
 - 首次开发：[环境与代码生成](docs/development-setup.md)，含 Go、前端依赖、goctl/Proto 安装及自有 RPC 初始化；直接使用已生成的 SDK 无需重生成平台合同。
 - 自定义协议：[协议开发指南](.agents/skills/ur-kit-development/references/protocol-development.md)，包括 MQTT、Modbus、云协议及属性上下行验收。
 - 前后端应用：[应用开发指南](.agents/skills/ur-kit-development/references/application-development.md)，包括 Web、uni-app、Go/Java/Node 后端及 Docker。
+- 实时通信：[WS 与通知指南](docs/realtime.md)说明应用订阅、共享连接、认证、消息发送与代理；[能力清单](docs/application-capabilities.md)区分公开合同、现成客户端与需业务实现的部分。
 - 平台接入：[注册指南](.agents/skills/ur-kit-development/references/platform-registration.md)说明平台代理/Web 路由、应用、菜单及定时任务；[urops 指南](.agents/skills/ur-kit-development/references/urops-deployment.md)说明 ur-kit 开发、ur API 操作和 urops TUI/Compose 部署如何配合。
 - 独立项目：[项目规范模板](.agents/skills/ur-kit-development/references/project-rules.md)，复制骨架时带入技能参考文件并修正链接。
 

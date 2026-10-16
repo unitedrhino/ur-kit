@@ -145,6 +145,10 @@
     "./rule-engine": {
       "types": "./src/components/rule-engine/index.ts",
       "default": "./src/components/rule-engine/index.ts"
+    },
+    "./ws-client": {
+      "types": "./src/hooks/ws-client.ts",
+      "default": "./src/hooks/ws-client.ts"
     }
   },
   "dependencies": {

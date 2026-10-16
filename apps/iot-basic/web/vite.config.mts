@@ -1,3 +1,4 @@
+// 本文件定义公开 IoT Web 的构建、共享依赖与 HTTP/WS 开发代理。
 import { defineConfig } from '@vben/vite-config';
 import { resolve } from 'node:path';
 import { NodePackageImporter } from 'sass';
@@ -137,7 +138,8 @@ export default defineConfig(async (config) => {
             changeOrigin: true,
             // mock代理目标地址
             target: backendUrl,
-            // ws: true,
+            // 同源设备数据与通知推送也经过平台代理，必须保留 Upgrade。
+            ws: true,
           },
         },
       },
