@@ -4,6 +4,7 @@ package platformcore
 import (
 	"context"
 	"errors"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -78,7 +79,7 @@ func NewMqttProtocol(options Options, devLink conf.DevLinkConf) (*MqttProtocol, 
 	for _, broker := range config.Brokers {
 		clientOptions.AddBroker(broker)
 	}
-	transport, err := publicmqtt.NewPahoTransport(clientOptions, nil)
+	transport, err := publicmqtt.NewPahoTransport(clientOptions, slog.Default())
 	if err != nil {
 		return nil, err
 	}

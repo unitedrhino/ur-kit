@@ -23,11 +23,12 @@
     "internal/web/handler_test.go": "16ce19b9f214e381fb76706a3ed31ea787ee405c85e3b3eff60499f259dec796",
     "internal/web/ping.go": "fa91f7f356fea993947b0b50c6900dc326979ebf8154ae849c1f8f24558d43d7",
     "internal/web/ping_test.go": "1229564b61398246542d7cc411df5a2a669d2755e0cb1dee2e5ad6aabd42672d",
+    "live_integration_test.go": "9b4a7273957e676bc11b9c0cb73de3307a793e2bdbaea97c9d86c2692743a7cf",
     "modbus.go": "67d37cc43490317017bc50f3e72e4069dfd5eea05d2b9df1cc0f3f57e02d6eeb",
     "pb/modbus/modbus.pb.go": "6148360b8547400af26f9f7e10e4d3a7bea9e3dc264107d1918142041d535d22",
     "pb/modbus/modbus_grpc.pb.go": "2ec7fcd288467ece4a78337a0b28fde97f3c18439a060e250d39e7aa7b03b0c7",
     "proto/modbus.proto": "9161b2d83c399401465b92d82d4a1080db50a0323e4594592d10481b182e6e19",
     "web/index.html": "b9a2f517959cc3c91c04439c8118ad7d74b1e858caf1ce42d83ad776249d00ea"
   },
-  "saas_commit": "4ec0134d217dd6934d1e2fc8de202c8b4f7fe273"
+  "saas_commit": "36e516625a8ebc0deb2e853239eb90129a589ad6"
 }

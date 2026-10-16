@@ -41,7 +41,7 @@ type CloneTaskInfo {
 	repeatCompleted    int64  `json:"repeatCompleted,optional"` // 已完成次数
 	lastRunAt          int64  `json:"lastRunAt,optional"` // 最后执行时间
 	nextRunAt          int64  `json:"nextRunAt,optional"` // 下次执行时间
-	lastStatus         string `json:"lastStatus,optional"` // 最后状态 ok/error
+	lastStatus         string `json:"lastStatus,optional"` // 最后状态 running/ok/error
 	lastError          string `json:"lastError,optional"` // 最后错误信息
 	lastRunID          string `json:"lastRunID,optional"` // 最后执行记录ID
 	timeoutSeconds     int64  `json:"timeoutSeconds,optional"` // 执行超时(秒)
@@ -108,6 +108,14 @@ type CloneTaskGetListResp {
 	total int64               `json:"total"` // 总数
 }
 
+// CloneTaskRunFile 描述已核验的临时桶产物，文件内容沿用现有七天生命周期。
+type CloneTaskRunFile {
+	name string `json:"name"` // 下载文件名
+	fileUri string `json:"fileUri"` // 当前环境临时桶的相对文件地址
+	size int64 `json:"size"` // 对象实际字节数
+	expiresAt int64 `json:"expiresAt"` // 下载截止时间，毫秒时间戳
+}
+
 type CloneTaskRunInfo {
 	ID          int64  `json:"id,optional"` // 执行记录ID
 	taskID      int64  `json:"taskID,optional"` // 关联任务ID
@@ -118,6 +126,7 @@ type CloneTaskRunInfo {
 	endTime     int64  `json:"endTime,optional"` // 结束时间
 	durationMs  int64  `json:"durationMs,optional"` // 执行耗时(毫秒)
 	output      string `json:"output,optional"` // 执行结果
+	files []CloneTaskRunFile `json:"files,optional"` // 成功执行生成的文件列表；旧任务可省略
 	errorMsg    string `json:"errorMsg,optional"` // 错误信息
 	logs        string `json:"logs,optional"` // 执行日志
 	sessionID   string `json:"sessionID,optional"` // 使用的会话ID
