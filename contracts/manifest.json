@@ -1,9 +1,10 @@
 {
   "files": {
+    "backend/.swagger/cloud-headscale.json": "880663c6176e583c33f89882fa047e61c7f7d86cfe3ec7d7d194ab07890c4c52",
     "backend/.swagger/core-ai.json": "83b74ccf604538d2c1da125a0eedc1d2cf370c2aab59de1288b0616232094dc0",
     "backend/.swagger/core-api.json": "6f344f0cdec7ff20a4aff4a94f1059000997a9dc49b8c122a1f6f10cadb309fb",
     "backend/.swagger/core-data.json": "ae04c19a36dea0b5af796a833e558cc9658a96ff95964f462cdffa5413b45b4a",
-    "backend/.swagger/core-im.json": "9bcbc6121c39050906d29204f28f0d39b5e4bcb0e173c04930e8637c5d5801c2",
+    "backend/.swagger/core-im.json": "b86232b89ba442b1eb0ea6ea4a0489ab4222b5346638299dd3a45f1a4896807d",
     "backend/.swagger/energy-energy.json": "ddeff2aaaf8eed22d7fe3d39b70ec8d853a02ddb1ac15dc8d14ff82242df76be",
     "backend/.swagger/mall-mall.json": "9bbca0c456b17f691c788b10c70a595e698af63c8938e9b417d9da120720ebe9",
     "backend/.swagger/parksvr-parking.json": "b7a3bc531f5b88c5561f8bba855d8fd0f06e943df6e5d101b816e6084c51b8a6",
@@ -47,7 +48,7 @@
     "backend/core/service/aisvr/pb/ai/agentGroup.pb.go": "ec42557af22bf385983f8e22dea6e489f744b19e5d2106e5e73453ff7f17ad8e",
     "backend/core/service/aisvr/pb/ai/agentGroup_grpc.pb.go": "49995baa5948162189cdc43205e2f19e90166b2b2fb503e895744cf82421ca93",
     "backend/core/service/aisvr/pb/ai/agent_grpc.pb.go": "a82cfe747733f59991e39b034e32b923215e26b9d412d08b33ed4a975bc37110",
-    "backend/core/service/aisvr/pb/ai/agentaudio.pb.go": "629facae97959a9be25201ec51746fa18739b3fc8a9f256b8554cb8c096a4cff",
+    "backend/core/service/aisvr/pb/ai/agentaudio.pb.go": "d7f98121fa28d99f44abb26026bba95512419daf7ad1a0ffb84f9564e1d72b8b",
     "backend/core/service/aisvr/pb/ai/agentaudio_grpc.pb.go": "f84bea432abfee8f5b70e9ed89b2edaa5ffd69e734057ea9e6dad3254ab8c54b",
     "backend/core/service/aisvr/pb/ai/aiShare.pb.go": "c4f5cfb645b356013709f8aa5327e32acc0131f16ffb83f3a25f056af8702b0d",
     "backend/core/service/aisvr/pb/ai/bridge.pb.go": "4f3db580f1d01853d1a0cf9bfa7fbf1103a517f6dafd6f073a05c38e2dfcd9a2",
@@ -76,7 +77,7 @@
     "backend/core/service/aisvr/pb/ai/tool_grpc.pb.go": "ab94e22d81c791bde17551dc19e508b5e9944f6879ff8abccbcdec1a6a3175b3",
     "backend/core/service/aisvr/proto/agent.proto": "490ae96d4bf1130f1593edf5e00e8acf45599d16cd0946a5531a49bfcf789af7",
     "backend/core/service/aisvr/proto/agentGroup.proto": "e70f46913ff47e818300700690012af8faba7a2acd7bdcefcc2038eeafd70516",
-    "backend/core/service/aisvr/proto/agentaudio.proto": "cb3dd3af6806d1fd5f1c08801c25e5478989b0ec6b4b010755c001b0f10139aa",
+    "backend/core/service/aisvr/proto/agentaudio.proto": "97727bf6f0de65482f779b495111f4e1261db9e7113b809d4fa78997ee808c3c",
     "backend/core/service/aisvr/proto/aiShare.proto": "977496fb15a482efa0c16bd9c9ebaf4ed6ee34e0bfd1fd4c5733654d92faabe5",
     "backend/core/service/aisvr/proto/bridge.proto": "c27212b92f6112330e1bea6616e685affcb82d008ba5936419ee977ec81aad53",
     "backend/core/service/aisvr/proto/chat.proto": "f0bc8ac9bd43e579254ec85dedc12b06b88249a29016b1ec98ca0c985a0249e1",
@@ -166,7 +167,7 @@
     "backend/core/service/imsvr/http/im/interaction.api": "a0fbf40fcd80c301093d0a9a1018af2493b907f4f890aa7d26e2acee9562bffd",
     "backend/core/service/imsvr/http/im/moment.api": "d666a5e3168b595b989e7933fae5848b43a3c5e329bfe44e64da6bafa387d6e6",
     "backend/core/service/imsvr/http/im/types.api": "0b4d4001bcedb51e17218e778f694c1b5177ce11080c64d535169bb972a5151f",
-    "backend/core/service/imsvr/http/im/visionConsent.api": "822d86b6f882e47b0db645b8300cd24ae1a3b7e4f80dd9003d4333bde49d5924",
+    "backend/core/service/imsvr/http/im/visionConsent.api": "2d02dbfb5dcf94f5bea37fd6d39d5df3e605080cb3754c0990b198f90137a450",
     "backend/core/service/imsvr/pb/im/device_delivery.pb.go": "d6062f5ab2724ae1113de748e267c942728a07eb9a30dcdf8cd293346476dd74",
     "backend/core/service/imsvr/pb/im/device_delivery_grpc.pb.go": "6594f21317cffac8643f0a15caa56e587c0a3fe7780dbd4b8201a07b618c363d",
     "backend/core/service/imsvr/pb/im/device_signaling.pb.go": "2420423b5d32ccca437d9bd79f86977a9eee81265a97fce79d9aa72bb39f3588",
@@ -413,6 +414,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "36e516625a8ebc0deb2e853239eb90129a589ad6",
+  "saas_commit": "077c06471896b568e5f5372ba93c5a4df537a7b1",
   "schema": 1
 }

@@ -10,6 +10,6 @@
     "userAuthProject.go": "ec39ff7a22ee35a394f33f593a94ca7331cda7413322e51cf60da39b5d7850e7",
     "userOnline.go": "d5f5b430491602138a084db56a5642b9350e7562368513db4ca169f915e93193"
   },
-  "saas_commit": "36e516625a8ebc0deb2e853239eb90129a589ad6",
+  "saas_commit": "077c06471896b568e5f5372ba93c5a4df537a7b1",
   "source": "backend/core/share/caches/"
 }

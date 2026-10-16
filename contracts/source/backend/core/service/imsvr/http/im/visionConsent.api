@@ -15,6 +15,20 @@ type (
 		ConsentId string `json:"consentId"` // 本人原同意，不支持管理员代撤销。
 		ExpectedRevision uint64 `json:"expectedRevision"` // 原独立Consent修订。
 	}
+	ImVisionProcessorControlReq {
+		MsgToken string `json:"msgToken"` // 原本人命令幂等键。
+		SessionId string `json:"sessionId"` // 原活aiVision会话。
+		ProcessorId string `json:"processorId"` // 本人应用实例标识，detach须引用同实例。
+		Operation string `json:"operation"` // attach或detach。
+		SourceTrackIds []string `json:"sourceTrackIds"` // 仅一个原创建选择的视频逻辑轨。
+		ConsentIds []string `json:"consentIds"` // attach仅一个原cameraAI账本引用；detach必须为空。
+		Endpoint string `json:"endpoint,optional"` // 已注册应用端点；留空自动签发并返回。
+	}
+	ImVisionProcessorControlResp {
+		Response string `json:"response"` // 原处理器应答JSON（interaction.result）。
+		Replay bool `json:"replay"` // 原参数重放。
+		Endpoint string `json:"endpoint"` // 本次使用的应用端点（自动签发时新端点）。
+	}
 	ImVisionConsentMetadata {
 		ConsentId string `json:"consentId"` // 不透明同意引用，不赋予读帧权限。
 		Scope string `json:"scope"` // 固定cameraAI，不授权IPC/录像/人工分享。
@@ -81,4 +95,15 @@ service api {
 	)
 	@handler revoke
 	post /revoke (ImVisionConsentRevokeReq) returns (ImVisionConsentRevokeResp)
+	@doc (
+		summary: "本人视觉处理器attach/detach"
+		description: "签发本人应用端点并转发interaction.processorControl到活aiVision会话Owner；attach核原Consent后由Owner下发设备trackControl publish启动取帧，detach停止并回收。"
+		authType: "all"
+		group: "im/visionconsent"
+		resource: "im/visionconsent"
+		action: "update"
+		recordLogMode: "3"
+	)
+	@handler control
+	post /control (ImVisionProcessorControlReq) returns (ImVisionProcessorControlResp)
 }

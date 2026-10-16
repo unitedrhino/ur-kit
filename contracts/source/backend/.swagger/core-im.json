@@ -2636,6 +2636,78 @@
         ],
         "title": "ImVisionConsentRevokeResp",
         "type": "object"
+      },
+      "ImVisionProcessorControlReq": {
+        "properties": {
+          "consentIds": {
+            "description": " attach仅一个原cameraAI账本引用；detach必须为空。",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "endpoint": {
+            "description": " 已注册应用端点；留空自动签发并返回。",
+            "type": "string"
+          },
+          "msgToken": {
+            "description": " 原本人命令幂等键。",
+            "type": "string"
+          },
+          "operation": {
+            "description": " attach或detach。",
+            "type": "string"
+          },
+          "processorId": {
+            "description": " 本人应用实例标识，detach须引用同实例。",
+            "type": "string"
+          },
+          "sessionId": {
+            "description": " 原活aiVision会话。",
+            "type": "string"
+          },
+          "sourceTrackIds": {
+            "description": " 仅一个原创建选择的视频逻辑轨。",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "msgToken",
+          "sessionId",
+          "processorId",
+          "operation",
+          "sourceTrackIds",
+          "consentIds"
+        ],
+        "title": "ImVisionProcessorControlReq",
+        "type": "object"
+      },
+      "ImVisionProcessorControlResp": {
+        "properties": {
+          "endpoint": {
+            "description": " 本次使用的应用端点（自动签发时新端点）。",
+            "type": "string"
+          },
+          "replay": {
+            "description": " 原参数重放。",
+            "format": "boolean",
+            "type": "boolean"
+          },
+          "response": {
+            "description": " 原处理器应答JSON（interaction.result）。",
+            "type": "string"
+          }
+        },
+        "required": [
+          "response",
+          "replay",
+          "endpoint"
+        ],
+        "title": "ImVisionProcessorControlResp",
+        "type": "object"
       }
     },
     "securitySchemes": {
@@ -5241,6 +5313,60 @@
         "x-log-mode": "1",
         "x-oper-type": "execute",
         "x-resource": "im/moment"
+      }
+    },
+    "/api/v1/im/vision-consents/control": {
+      "post": {
+        "description": "签发本人应用端点并转发interaction.processorControl到活aiVision会话Owner；attach核原Consent后由Owner下发设备trackControl publish启动取帧，detach停止并回收。",
+        "operationId": "postApiV1ImVision-consentsControl",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ImVisionProcessorControlReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/ImVisionProcessorControlResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "本人视觉处理器attach/detach",
+        "tags": [
+          "im/visionconsent",
+          "imVisionconsent"
+        ],
+        "x-action": "update",
+        "x-auth-type": "all",
+        "x-group": "im/visionconsent",
+        "x-log-mode": "3",
+        "x-oper-type": "update",
+        "x-resource": "im/visionconsent"
       }
     },
     "/api/v1/im/vision-consents/create": {

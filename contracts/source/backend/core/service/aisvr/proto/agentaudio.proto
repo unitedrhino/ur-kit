@@ -115,9 +115,9 @@ message AgentClientToolResult {
 // AgentAudioControl 为单会话有序内部控制；不包含设备鉴权信息。
 message AgentAudioControl {
   string request_id = 1; // 内部请求关联键，调用者已做持久幂等。
-  string method = 2; // audioStart/audioStop/respCancel。
-  string response_id = 3; // respCancel 必填，其他命令必须为空。
-  string input_id = 4; // audioStart/audioStop 必填，固定采集段；respCancel 必须为空。
+  string method = 2; // audioStart/audioStop/respCancel；mediaLost 为源→模型的媒体事实上报。
+  string response_id = 3; // respCancel/mediaLost 必填，其他命令必须为空。
+  string input_id = 4; // audioStart/audioStop 必填，固定采集段；respCancel/mediaLost 必须为空。
 }
 
 // AgentContentPart 仅传文字或已经登记的原件引用，原件字节由 AISVR 私有存储回读，不传 URL 或鉴权身份。
@@ -162,6 +162,7 @@ message AgentAudioNegotiated {
   AgentCameraBinding camera_binding = 6; // 仅实际串联图像模型确认的原视觉绑定，不广告普通附件输入。
   bool udp_reply_start_receipt = 7; // 精确回显实际装配，忽略新能力不得视为协商成功。
   bool session_retention = 8; // 仅已安装可信固定截止的内部流支持；不向设备广告或授予媒体权限。
+  bool media_loss_reports = 9; // 源宣告能受理"媒体帧被断链抑制"内部上报；旧源省略时上报方不得发送。
 }
 
 // AgentSessionRetention 只由已核权Owner发送，不属于设备信令方法；同原流内请求键独立关联。

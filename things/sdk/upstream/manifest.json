@@ -31,5 +31,5 @@
     "seed/ensure_test.go": "6126b541a118c29856e3e83a5983964d2d928a77ec743dee6ee62dd177915176",
     "seed/types.go": "caeb6a31e377c72fe5649672e6a310ef1a87b0d850487886183a28a2dd6f85cc"
   },
-  "saas_commit": "36e516625a8ebc0deb2e853239eb90129a589ad6"
+  "saas_commit": "077c06471896b568e5f5372ba93c5a4df537a7b1"
 }
