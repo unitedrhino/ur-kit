@@ -692,14 +692,17 @@ func (x *DeviceDeliveryResponse) GetBrokerAccepted() bool {
 
 // IPCPreflightRequest 查询指定源及用途的准入；操作者取可信上下文，不能从正文指定用户。
 type IPCPreflightRequest struct {
-	state         protoimpl.MessageState `protogen:"open.v1"`
-	Subject       string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                             // 已验证格式的device:productID:deviceName，不接受任意Topic。
-	CameraId      string                 `protobuf:"bytes,2,opt,name=camera_id,json=cameraId,proto3" json:"camera_id,omitempty"`           // 设备声明的物理源，不能用trackId代替。
-	ListenAudio   bool                   `protobuf:"varint,3,opt,name=listen_audio,json=listenAudio,proto3" json:"listen_audio,omitempty"` // 是否请求显式mic监听能力，不授权反向对讲。
-	Purpose       string                 `protobuf:"bytes,4,opt,name=purpose,proto3" json:"purpose,omitempty"`                             // ipcLiveView/ipcTalk/humanCall/recordPlayback分别预检；历史不授权实时采集，未传保留预览语义。
-	CallType      string                 `protobuf:"bytes,5,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`           // 仅humanCall允许voice/video；空保持旧视频语义，voice必须无camera/listenAudio。
-	unknownFields protoimpl.UnknownFields
-	sizeCache     protoimpl.SizeCache
+	state                      protoimpl.MessageState `protogen:"open.v1"`
+	Subject                    string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                                                           // 已验证格式的device:productID:deviceName，不接受任意Topic。
+	CameraId                   string                 `protobuf:"bytes,2,opt,name=camera_id,json=cameraId,proto3" json:"camera_id,omitempty"`                                                         // 设备声明的物理源，不能用trackId代替。
+	ListenAudio                bool                   `protobuf:"varint,3,opt,name=listen_audio,json=listenAudio,proto3" json:"listen_audio,omitempty"`                                               // 是否请求显式mic监听能力，不授权反向对讲。
+	Purpose                    string                 `protobuf:"bytes,4,opt,name=purpose,proto3" json:"purpose,omitempty"`                                                                           // ipcLiveView/ipcTalk/humanCall/recordPlayback分别预检；历史不授权实时采集，未传保留预览语义。
+	CallType                   string                 `protobuf:"bytes,5,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`                                                         // 仅humanCall允许voice/video；空保持旧视频语义，voice必须无camera/listenAudio。
+	RequireCurrentInstance     bool                   `protobuf:"varint,6,opt,name=require_current_instance,json=requireCurrentInstance,proto3" json:"require_current_instance,omitempty"`            // 仅humanCall/voice显式申请真实socket首尾旁证；false保持旧准入。
+	ExpectedConnectionEpoch    int64                  `protobuf:"varint,7,opt,name=expected_connection_epoch,json=expectedConnectionEpoch,proto3" json:"expected_connection_epoch,omitempty"`         // 新旁证成对为空用于发现；非空必须精确复验原连接。
+	ExpectedConnectionInstance string                 `protobuf:"bytes,8,opt,name=expected_connection_instance,json=expectedConnectionInstance,proto3" json:"expected_connection_instance,omitempty"` // 真实物理对象随机实例，不是业务会话或设备自报身份。
+	unknownFields              protoimpl.UnknownFields
+	sizeCache                  protoimpl.SizeCache
 }
 
 func (x *IPCPreflightRequest) Reset() {
@@ -767,18 +770,40 @@ func (x *IPCPreflightRequest) GetCallType() string {
 	return ""
 }
 
+func (x *IPCPreflightRequest) GetRequireCurrentInstance() bool {
+	if x != nil {
+		return x.RequireCurrentInstance
+	}
+	return false
+}
+
+func (x *IPCPreflightRequest) GetExpectedConnectionEpoch() int64 {
+	if x != nil {
+		return x.ExpectedConnectionEpoch
+	}
+	return 0
+}
+
+func (x *IPCPreflightRequest) GetExpectedConnectionInstance() string {
+	if x != nil {
+		return x.ExpectedConnectionInstance
+	}
+	return ""
+}
+
 // IPCPreflightResponse 是短期准入快照，不等于授权永久有效或媒体已经连接。
 type IPCPreflightResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Subject          string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                           // 必须与请求相同。
-	OwnerUserId      int64                  `protobuf:"varint,2,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`             // 当前设备主人，与调用上下文用户一致。
-	ConnectionEpoch  int64                  `protobuf:"varint,3,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`   // 本次连接时间，设备重连后旧快照不得复用。
-	CapabilityReport []byte                 `protobuf:"bytes,4,opt,name=capability_report,json=capabilityReport,proto3" json:"capability_report,omitempty"` // 已验证的完整capabilityReport信封，不含供应商凭据。
-	ExpiresAt        int64                  `protobuf:"varint,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`                     // 快照截止Unix毫秒；正式投递仍独立复核设备能力和归属。
-	Purpose          string                 `protobuf:"bytes,6,opt,name=purpose,proto3" json:"purpose,omitempty"`                                           // 已实际校验的用途；对讲与人际呼叫必须精确回执，避免旧节点忽略新请求字段。
-	CallType         string                 `protobuf:"bytes,7,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`                         // 精确回读原humanCall请求类型；空保持旧客户端响应，不以未知类型推断voice。
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Subject            string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                                 // 必须与请求相同。
+	OwnerUserId        int64                  `protobuf:"varint,2,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`                   // 当前设备主人，与调用上下文用户一致。
+	ConnectionEpoch    int64                  `protobuf:"varint,3,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`         // 本次连接时间，设备重连后旧快照不得复用。
+	CapabilityReport   []byte                 `protobuf:"bytes,4,opt,name=capability_report,json=capabilityReport,proto3" json:"capability_report,omitempty"`       // 已验证的完整capabilityReport信封，不含供应商凭据。
+	ExpiresAt          int64                  `protobuf:"varint,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`                           // 快照截止Unix毫秒；正式投递仍独立复核设备能力和归属。
+	Purpose            string                 `protobuf:"bytes,6,opt,name=purpose,proto3" json:"purpose,omitempty"`                                                 // 已实际校验的用途；对讲与人际呼叫必须精确回执，避免旧节点忽略新请求字段。
+	CallType           string                 `protobuf:"bytes,7,opt,name=call_type,json=callType,proto3" json:"call_type,omitempty"`                               // 精确回读原humanCall请求类型；空保持旧客户端响应，不以未知类型推断voice。
+	ConnectionInstance string                 `protobuf:"bytes,8,opt,name=connection_instance,json=connectionInstance,proto3" json:"connection_instance,omitempty"` // 仅显式新旁证成功时回写；旧节点空值不能被核心补造。
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *IPCPreflightResponse) Reset() {
@@ -856,6 +881,13 @@ func (x *IPCPreflightResponse) GetPurpose() string {
 func (x *IPCPreflightResponse) GetCallType() string {
 	if x != nil {
 		return x.CallType
+	}
+	return ""
+}
+
+func (x *IPCPreflightResponse) GetConnectionInstance() string {
+	if x != nil {
+		return x.ConnectionInstance
 	}
 	return ""
 }
@@ -1146,12 +1178,13 @@ func (x *LivePreflightResponse) GetLiveInvite() []byte {
 
 // FocusPreflightRequest 核验原连接完整管理组，不授权某业务、抢占资源或证明设备实际空闲。
 type FocusPreflightRequest struct {
-	state           protoimpl.MessageState `protogen:"open.v1"`
-	Subject         string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                         // 已鉴权device主体，用户/企业来自内部上下文。
-	ConnectionEpoch int64                  `protobuf:"varint,2,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"` // 原连接代次，设备重连后不能改用新连接维持旧Owner。
-	Resources       []string               `protobuf:"bytes,3,rep,name=resources,proto3" json:"resources,omitempty"`                                     // 首次实际证明的完整资源组，不允许部分满足或隐式扩大。
-	unknownFields   protoimpl.UnknownFields
-	sizeCache       protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Subject            string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                                 // 已鉴权device主体，用户/企业来自内部上下文。
+	ConnectionEpoch    int64                  `protobuf:"varint,2,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`         // 原连接代次，设备重连后不能改用新连接维持旧Owner。
+	Resources          []string               `protobuf:"bytes,3,rep,name=resources,proto3" json:"resources,omitempty"`                                             // 首次实际证明的完整资源组，不允许部分满足或隐式扩大。
+	ConnectionInstance string                 `protobuf:"bytes,4,opt,name=connection_instance,json=connectionInstance,proto3" json:"connection_instance,omitempty"` // 新原人际焦点可选精确socket实例；空保持旧预检，非空必须首尾核实际来源。
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *FocusPreflightRequest) Reset() {
@@ -1205,17 +1238,25 @@ func (x *FocusPreflightRequest) GetResources() []string {
 	return nil
 }
 
+func (x *FocusPreflightRequest) GetConnectionInstance() string {
+	if x != nil {
+		return x.ConnectionInstance
+	}
+	return ""
+}
+
 // FocusPreflightResponse 仅提供短期在线/主人/能力快照，不能代替实际focusState或原业务许可。
 type FocusPreflightResponse struct {
-	state            protoimpl.MessageState `protogen:"open.v1"`
-	Subject          string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                           // 精确回执请求主体。
-	OwnerUserId      int64                  `protobuf:"varint,2,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`             // 当前鉴权设备主人，不接受请求自报。
-	ConnectionEpoch  int64                  `protobuf:"varint,3,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`   // 精确回执已核实的原连接代次。
-	CapabilityReport []byte                 `protobuf:"bytes,4,opt,name=capability_report,json=capabilityReport,proto3" json:"capability_report,omitempty"` // 当前完整能力，不能从播放器模态补造资源。
-	ExpiresAt        int64                  `protobuf:"varint,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`                     // 最多两秒Unix毫秒截止，仅Owner预检，不是资源许可续期。
-	Resources        []string               `protobuf:"bytes,6,rep,name=resources,proto3" json:"resources,omitempty"`                                       // 全组已核验，保留原请求集合，不返回其他未请求资源。
-	unknownFields    protoimpl.UnknownFields
-	sizeCache        protoimpl.SizeCache
+	state              protoimpl.MessageState `protogen:"open.v1"`
+	Subject            string                 `protobuf:"bytes,1,opt,name=subject,proto3" json:"subject,omitempty"`                                                 // 精确回执请求主体。
+	OwnerUserId        int64                  `protobuf:"varint,2,opt,name=owner_user_id,json=ownerUserId,proto3" json:"owner_user_id,omitempty"`                   // 当前鉴权设备主人，不接受请求自报。
+	ConnectionEpoch    int64                  `protobuf:"varint,3,opt,name=connection_epoch,json=connectionEpoch,proto3" json:"connection_epoch,omitempty"`         // 精确回执已核实的原连接代次。
+	CapabilityReport   []byte                 `protobuf:"bytes,4,opt,name=capability_report,json=capabilityReport,proto3" json:"capability_report,omitempty"`       // 当前完整能力，不能从播放器模态补造资源。
+	ExpiresAt          int64                  `protobuf:"varint,5,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"`                           // 最多两秒Unix毫秒截止，仅Owner预检，不是资源许可续期。
+	Resources          []string               `protobuf:"bytes,6,rep,name=resources,proto3" json:"resources,omitempty"`                                             // 全组已核验，保留原请求集合，不返回其他未请求资源。
+	ConnectionInstance string                 `protobuf:"bytes,7,opt,name=connection_instance,json=connectionInstance,proto3" json:"connection_instance,omitempty"` // 仅请求原实例已实际核实时精确回写；旧空值不能作为新原实例旁证。
+	unknownFields      protoimpl.UnknownFields
+	sizeCache          protoimpl.SizeCache
 }
 
 func (x *FocusPreflightResponse) Reset() {
@@ -1288,6 +1329,13 @@ func (x *FocusPreflightResponse) GetResources() []string {
 		return x.Resources
 	}
 	return nil
+}
+
+func (x *FocusPreflightResponse) GetConnectionInstance() string {
+	if x != nil {
+		return x.ConnectionInstance
+	}
+	return ""
 }
 
 // DeviceContentPreflightRequest 只查询原连接的离散附件输入能力，不指定企业、主人或模型。
@@ -2246,13 +2294,16 @@ const file_device_delivery_proto_rawDesc = "" +
 	"\x16DeviceDeliveryResponse\x12\x1f\n" +
 	"\vdelivery_id\x18\x01 \x01(\tR\n" +
 	"deliveryId\x12'\n" +
-	"\x0fbroker_accepted\x18\x02 \x01(\bR\x0ebrokerAccepted\"\xa6\x01\n" +
+	"\x0fbroker_accepted\x18\x02 \x01(\bR\x0ebrokerAccepted\"\xde\x02\n" +
 	"\x13IPCPreflightRequest\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12\x1b\n" +
 	"\tcamera_id\x18\x02 \x01(\tR\bcameraId\x12!\n" +
 	"\flisten_audio\x18\x03 \x01(\bR\vlistenAudio\x12\x18\n" +
 	"\apurpose\x18\x04 \x01(\tR\apurpose\x12\x1b\n" +
-	"\tcall_type\x18\x05 \x01(\tR\bcallType\"\x82\x02\n" +
+	"\tcall_type\x18\x05 \x01(\tR\bcallType\x128\n" +
+	"\x18require_current_instance\x18\x06 \x01(\bR\x16requireCurrentInstance\x12:\n" +
+	"\x19expected_connection_epoch\x18\a \x01(\x03R\x17expectedConnectionEpoch\x12@\n" +
+	"\x1cexpected_connection_instance\x18\b \x01(\tR\x1aexpectedConnectionInstance\"\xb3\x02\n" +
 	"\x14IPCPreflightResponse\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12\"\n" +
 	"\rowner_user_id\x18\x02 \x01(\x03R\vownerUserId\x12)\n" +
@@ -2261,7 +2312,8 @@ const file_device_delivery_proto_rawDesc = "" +
 	"\n" +
 	"expires_at\x18\x05 \x01(\x03R\texpiresAt\x12\x18\n" +
 	"\apurpose\x18\x06 \x01(\tR\apurpose\x12\x1b\n" +
-	"\tcall_type\x18\a \x01(\tR\bcallType\"a\n" +
+	"\tcall_type\x18\a \x01(\tR\bcallType\x12/\n" +
+	"\x13connection_instance\x18\b \x01(\tR\x12connectionInstance\"a\n" +
 	"\x18PlaybackPreflightRequest\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12+\n" +
 	"\x11output_modalities\x18\x02 \x03(\tR\x10outputModalities\"\xfd\x01\n" +
@@ -2286,11 +2338,12 @@ const file_device_delivery_proto_rawDesc = "" +
 	"\n" +
 	"expires_at\x18\x05 \x01(\x03R\texpiresAt\x12\x1f\n" +
 	"\vlive_invite\x18\x06 \x01(\fR\n" +
-	"liveInvite\"z\n" +
+	"liveInvite\"\xab\x01\n" +
 	"\x15FocusPreflightRequest\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12)\n" +
 	"\x10connection_epoch\x18\x02 \x01(\x03R\x0fconnectionEpoch\x12\x1c\n" +
-	"\tresources\x18\x03 \x03(\tR\tresources\"\xeb\x01\n" +
+	"\tresources\x18\x03 \x03(\tR\tresources\x12/\n" +
+	"\x13connection_instance\x18\x04 \x01(\tR\x12connectionInstance\"\x9c\x02\n" +
 	"\x16FocusPreflightResponse\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12\"\n" +
 	"\rowner_user_id\x18\x02 \x01(\x03R\vownerUserId\x12)\n" +
@@ -2298,7 +2351,8 @@ const file_device_delivery_proto_rawDesc = "" +
 	"\x11capability_report\x18\x04 \x01(\fR\x10capabilityReport\x12\x1d\n" +
 	"\n" +
 	"expires_at\x18\x05 \x01(\x03R\texpiresAt\x12\x1c\n" +
-	"\tresources\x18\x06 \x03(\tR\tresources\"\x8b\x01\n" +
+	"\tresources\x18\x06 \x03(\tR\tresources\x12/\n" +
+	"\x13connection_instance\x18\a \x01(\tR\x12connectionInstance\"\x8b\x01\n" +
 	"\x1dDeviceContentPreflightRequest\x12\x18\n" +
 	"\asubject\x18\x01 \x01(\tR\asubject\x12)\n" +
 	"\x10connection_epoch\x18\x02 \x01(\x03R\x0fconnectionEpoch\x12%\n" +

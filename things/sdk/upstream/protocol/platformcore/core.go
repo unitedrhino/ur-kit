@@ -12,15 +12,9 @@ import (
 	"gitee.com/unitedrhino/share/eventBus"
 	"gitee.com/unitedrhino/share/interceptors"
 	"gitee.com/unitedrhino/share/services"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/deviceinteract"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/devicemanage"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/devicemsg"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/productmanage"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/protocolmanage"
+
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/schema"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configselect"
 	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
@@ -28,18 +22,21 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
+
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
 )
 
-// Options 保存协议基础配置、可选直连客户端和 Web 配置页；直连客户端优先于 DmClient。
+// Options 保存协议配置、公开 RPC 接口和 Web 配置页；显式注入的接口优先于 DmClient。
 type Options struct {
 	Info           *dm.ProtocolInfo
 	ServerName     string
 	DmClient       zrpc.Client
-	ProtocolM      protocolmanage.ProtocolManage
-	ProductM       productmanage.ProductManage
-	DeviceM        devicemanage.DeviceManage
-	DeviceMsg      devicemsg.DeviceMsg
-	DeviceInteract deviceinteract.DeviceInteract
+	ProtocolM      dm.ProtocolManageClient
+	ProductM       dm.ProductManageClient
+	DeviceM        dm.DeviceManageClient
+	DeviceMsg      dm.DeviceMsgClient
+	DeviceInteract dm.DeviceInteractClient
 	NodeID         int64
 	FastEvent      *eventBus.FastEvent
 	Event          conf.EventConf
@@ -53,11 +50,11 @@ type Options struct {
 // CoreProtocol 保留现有协议服务所需的调用入口，实际生命周期和消息编码交给公开核心。
 type CoreProtocol struct {
 	Pi             *dm.ProtocolInfo
-	DeviceM        devicemanage.DeviceManage
-	DeviceInteract deviceinteract.DeviceInteract
-	DeviceMsg      devicemsg.DeviceMsg
-	ProductM       productmanage.ProductManage
-	ProtocolM      protocolmanage.ProtocolManage
+	DeviceM        dm.DeviceManageClient
+	DeviceInteract dm.DeviceInteractClient
+	DeviceMsg      dm.DeviceMsgClient
+	ProductM       dm.ProductManageClient
+	ProtocolM      dm.ProtocolManageClient
 	DeviceCache    DeviceReader
 	ProductCache   ProductReader
 	SchemaCache    SchemaReader

@@ -41,6 +41,13 @@ message AgentAudioSignaling {
   AgentCameraBinding camera_binding = 11; // 原aiVision摄像头绑定；缺省不允许摄像头消费，不借附件权限。
   bool udp_reply_start_receipt = 12; // 仅原已核UDP安装链装配为true，旧缺省不等待。
   AgentReplyOutputBinding reply_output_binding = 13; // 仅明确选定时携原已鉴权物理实例，不借模型nonce。
+  int64 retention_deadline = 14; // IM创建时固定的原会话/焦点授权最短绝对截止（Unix毫秒）；0保持旧流不支持私有保持。
+  AgentParentMediaTools parent_media_tools = 15; // 仅IM已核平台装配与原设备能力的私有范围；缺省保持旧目录，不来自设备JSON或模型参数。
+}
+
+// AgentParentMediaTools 只收窄内置隐式原AI父设备工具，不授予节目、焦点或其他设备权限，也不发给设备。
+message AgentParentMediaTools {
+  bool live_broadcast_available = 1; // 平台实际Live运行时与当前原设备liveReceive能力交集；false不得广告原父Live三工具。
 }
 
 // AgentCameraBinding 固定原唯一摄像头视频轨和两种能力代次，不承载用户或授予取帧同意。
@@ -154,6 +161,21 @@ message AgentAudioNegotiated {
   repeated string output_modalities = 5; // 明确输出模态；能力不替代权限。
   AgentCameraBinding camera_binding = 6; // 仅实际串联图像模型确认的原视觉绑定，不广告普通附件输入。
   bool udp_reply_start_receipt = 7; // 精确回显实际装配，忽略新能力不得视为协商成功。
+  bool session_retention = 8; // 仅已安装可信固定截止的内部流支持；不向设备广告或授予媒体权限。
+}
+
+// AgentSessionRetention 只由已核权Owner发送，不属于设备信令方法；同原流内请求键独立关联。
+message AgentSessionRetention {
+  string request_id = 1; // 内部请求键，重复原键不得改写保持/恢复事实。
+  int64 expires_at = 2; // Unix毫秒绝对截止，0解除保持；不得超过原retention_deadline。
+  bool resume = 3; // 仅expires_at=0使用：true恢复剩余计时但不开麦，false结束/撤权不能复活。
+}
+
+// AgentSessionRetentionAck 仅证明同原模型实际安装策略；有效截止可因原ctx/MaxSession收窄。
+message AgentSessionRetentionAck {
+  string request_id = 1; // 原内部请求键；不流入设备回复。
+  int64 expires_at = 2; // 实际安装的Unix毫秒截止，解除为0。
+  bool resume = 3; // 原恢复计时标志，不表示输入/焦点已恢复。
 }
 
 // AgentAudioUp agent 端点音频流上行消息（imsvr → agent）
@@ -170,6 +192,7 @@ message AgentAudioUp {
     AgentClientToolResult client_tool_result = 5; // 独立工具回执，旧字段编号不变。
     AgentModelControlBinding control_binding = 6; // 原模型有序控制范围CAS；不重写init或切换Provider。
     AgentReplyOutputAdmission reply_output_admission = 7; // 独立原回复门决定，不作为输入控制或设备请求。
+    AgentSessionRetention session_retention = 8; // 原Owner私有模型保持，不接收设备自报保持截止。
   }
 }
 
@@ -189,6 +212,7 @@ message AgentAudioDown {
     AgentModelControlBindingAck control_binding_ack = 7; // 已核IM当前提交/DMS并持久CAS后的精确回执。
     AgentReplyOutputAdmission reply_output_admission_ack = 8; // 原关联逐字段回显，仅确认源实际收录决定。
     AgentReplyOutputGate reply_output_gate_expired = 9; // 原固定安装期限实际到期；取消或scope退休不得伪作超时。
+    AgentSessionRetentionAck retention_ack = 10; // 私有保持策略实际确认，不冒充模型内容或输入停止。
   }
 }
 

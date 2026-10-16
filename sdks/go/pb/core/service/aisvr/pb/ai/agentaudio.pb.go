@@ -156,6 +156,8 @@ type AgentAudioSignaling struct {
 	CameraBinding             *AgentCameraBinding            `protobuf:"bytes,11,opt,name=camera_binding,json=cameraBinding,proto3" json:"camera_binding,omitempty"`                                      // 原aiVision摄像头绑定；缺省不允许摄像头消费，不借附件权限。
 	UdpReplyStartReceipt      bool                           `protobuf:"varint,12,opt,name=udp_reply_start_receipt,json=udpReplyStartReceipt,proto3" json:"udp_reply_start_receipt,omitempty"`            // 仅原已核UDP安装链装配为true，旧缺省不等待。
 	ReplyOutputBinding        *AgentReplyOutputBinding       `protobuf:"bytes,13,opt,name=reply_output_binding,json=replyOutputBinding,proto3" json:"reply_output_binding,omitempty"`                     // 仅明确选定时携原已鉴权物理实例，不借模型nonce。
+	RetentionDeadline         int64                          `protobuf:"varint,14,opt,name=retention_deadline,json=retentionDeadline,proto3" json:"retention_deadline,omitempty"`                         // IM创建时固定的原会话/焦点授权最短绝对截止（Unix毫秒）；0保持旧流不支持私有保持。
+	ParentMediaTools          *AgentParentMediaTools         `protobuf:"bytes,15,opt,name=parent_media_tools,json=parentMediaTools,proto3" json:"parent_media_tools,omitempty"`                           // 仅IM已核平台装配与原设备能力的私有范围；缺省保持旧目录，不来自设备JSON或模型参数。
 	unknownFields             protoimpl.UnknownFields
 	sizeCache                 protoimpl.SizeCache
 }
@@ -281,6 +283,65 @@ func (x *AgentAudioSignaling) GetReplyOutputBinding() *AgentReplyOutputBinding {
 	return nil
 }
 
+func (x *AgentAudioSignaling) GetRetentionDeadline() int64 {
+	if x != nil {
+		return x.RetentionDeadline
+	}
+	return 0
+}
+
+func (x *AgentAudioSignaling) GetParentMediaTools() *AgentParentMediaTools {
+	if x != nil {
+		return x.ParentMediaTools
+	}
+	return nil
+}
+
+// AgentParentMediaTools 只收窄内置隐式原AI父设备工具，不授予节目、焦点或其他设备权限，也不发给设备。
+type AgentParentMediaTools struct {
+	state                  protoimpl.MessageState `protogen:"open.v1"`
+	LiveBroadcastAvailable bool                   `protobuf:"varint,1,opt,name=live_broadcast_available,json=liveBroadcastAvailable,proto3" json:"live_broadcast_available,omitempty"` // 平台实际Live运行时与当前原设备liveReceive能力交集；false不得广告原父Live三工具。
+	unknownFields          protoimpl.UnknownFields
+	sizeCache              protoimpl.SizeCache
+}
+
+func (x *AgentParentMediaTools) Reset() {
+	*x = AgentParentMediaTools{}
+	mi := &file_agentaudio_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentParentMediaTools) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentParentMediaTools) ProtoMessage() {}
+
+func (x *AgentParentMediaTools) ProtoReflect() protoreflect.Message {
+	mi := &file_agentaudio_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentParentMediaTools.ProtoReflect.Descriptor instead.
+func (*AgentParentMediaTools) Descriptor() ([]byte, []int) {
+	return file_agentaudio_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *AgentParentMediaTools) GetLiveBroadcastAvailable() bool {
+	if x != nil {
+		return x.LiveBroadcastAvailable
+	}
+	return false
+}
+
 // AgentCameraBinding 固定原唯一摄像头视频轨和两种能力代次，不承载用户或授予取帧同意。
 type AgentCameraBinding struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
@@ -294,7 +355,7 @@ type AgentCameraBinding struct {
 
 func (x *AgentCameraBinding) Reset() {
 	*x = AgentCameraBinding{}
-	mi := &file_agentaudio_proto_msgTypes[2]
+	mi := &file_agentaudio_proto_msgTypes[3]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -306,7 +367,7 @@ func (x *AgentCameraBinding) String() string {
 func (*AgentCameraBinding) ProtoMessage() {}
 
 func (x *AgentCameraBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[2]
+	mi := &file_agentaudio_proto_msgTypes[3]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -319,7 +380,7 @@ func (x *AgentCameraBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraBinding.ProtoReflect.Descriptor instead.
 func (*AgentCameraBinding) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{2}
+	return file_agentaudio_proto_rawDescGZIP(), []int{3}
 }
 
 func (x *AgentCameraBinding) GetCameraId() string {
@@ -366,7 +427,7 @@ type AgentCameraFrameIdentity struct {
 
 func (x *AgentCameraFrameIdentity) Reset() {
 	*x = AgentCameraFrameIdentity{}
-	mi := &file_agentaudio_proto_msgTypes[3]
+	mi := &file_agentaudio_proto_msgTypes[4]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -378,7 +439,7 @@ func (x *AgentCameraFrameIdentity) String() string {
 func (*AgentCameraFrameIdentity) ProtoMessage() {}
 
 func (x *AgentCameraFrameIdentity) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[3]
+	mi := &file_agentaudio_proto_msgTypes[4]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -391,7 +452,7 @@ func (x *AgentCameraFrameIdentity) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraFrameIdentity.ProtoReflect.Descriptor instead.
 func (*AgentCameraFrameIdentity) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{3}
+	return file_agentaudio_proto_rawDescGZIP(), []int{4}
 }
 
 func (x *AgentCameraFrameIdentity) GetSessionKey() string {
@@ -457,7 +518,7 @@ type AgentCameraFrameRequest struct {
 
 func (x *AgentCameraFrameRequest) Reset() {
 	*x = AgentCameraFrameRequest{}
-	mi := &file_agentaudio_proto_msgTypes[4]
+	mi := &file_agentaudio_proto_msgTypes[5]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -469,7 +530,7 @@ func (x *AgentCameraFrameRequest) String() string {
 func (*AgentCameraFrameRequest) ProtoMessage() {}
 
 func (x *AgentCameraFrameRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[4]
+	mi := &file_agentaudio_proto_msgTypes[5]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -482,7 +543,7 @@ func (x *AgentCameraFrameRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraFrameRequest.ProtoReflect.Descriptor instead.
 func (*AgentCameraFrameRequest) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{4}
+	return file_agentaudio_proto_rawDescGZIP(), []int{5}
 }
 
 func (x *AgentCameraFrameRequest) GetIdentity() *AgentCameraFrameIdentity {
@@ -532,7 +593,7 @@ type AgentCameraFrameResponse struct {
 
 func (x *AgentCameraFrameResponse) Reset() {
 	*x = AgentCameraFrameResponse{}
-	mi := &file_agentaudio_proto_msgTypes[5]
+	mi := &file_agentaudio_proto_msgTypes[6]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -544,7 +605,7 @@ func (x *AgentCameraFrameResponse) String() string {
 func (*AgentCameraFrameResponse) ProtoMessage() {}
 
 func (x *AgentCameraFrameResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[5]
+	mi := &file_agentaudio_proto_msgTypes[6]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -557,7 +618,7 @@ func (x *AgentCameraFrameResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraFrameResponse.ProtoReflect.Descriptor instead.
 func (*AgentCameraFrameResponse) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{5}
+	return file_agentaudio_proto_rawDescGZIP(), []int{6}
 }
 
 func (x *AgentCameraFrameResponse) GetIdentity() *AgentCameraFrameIdentity {
@@ -591,7 +652,7 @@ type AgentCameraFrameStopRequest struct {
 
 func (x *AgentCameraFrameStopRequest) Reset() {
 	*x = AgentCameraFrameStopRequest{}
-	mi := &file_agentaudio_proto_msgTypes[6]
+	mi := &file_agentaudio_proto_msgTypes[7]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -603,7 +664,7 @@ func (x *AgentCameraFrameStopRequest) String() string {
 func (*AgentCameraFrameStopRequest) ProtoMessage() {}
 
 func (x *AgentCameraFrameStopRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[6]
+	mi := &file_agentaudio_proto_msgTypes[7]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -616,7 +677,7 @@ func (x *AgentCameraFrameStopRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraFrameStopRequest.ProtoReflect.Descriptor instead.
 func (*AgentCameraFrameStopRequest) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{6}
+	return file_agentaudio_proto_rawDescGZIP(), []int{7}
 }
 
 func (x *AgentCameraFrameStopRequest) GetIdentity() *AgentCameraFrameIdentity {
@@ -637,7 +698,7 @@ type AgentCameraFrameStopResponse struct {
 
 func (x *AgentCameraFrameStopResponse) Reset() {
 	*x = AgentCameraFrameStopResponse{}
-	mi := &file_agentaudio_proto_msgTypes[7]
+	mi := &file_agentaudio_proto_msgTypes[8]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -649,7 +710,7 @@ func (x *AgentCameraFrameStopResponse) String() string {
 func (*AgentCameraFrameStopResponse) ProtoMessage() {}
 
 func (x *AgentCameraFrameStopResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[7]
+	mi := &file_agentaudio_proto_msgTypes[8]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -662,7 +723,7 @@ func (x *AgentCameraFrameStopResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentCameraFrameStopResponse.ProtoReflect.Descriptor instead.
 func (*AgentCameraFrameStopResponse) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{7}
+	return file_agentaudio_proto_rawDescGZIP(), []int{8}
 }
 
 func (x *AgentCameraFrameStopResponse) GetIdentity() *AgentCameraFrameIdentity {
@@ -691,7 +752,7 @@ type AgentFrontendToolCapability struct {
 
 func (x *AgentFrontendToolCapability) Reset() {
 	*x = AgentFrontendToolCapability{}
-	mi := &file_agentaudio_proto_msgTypes[8]
+	mi := &file_agentaudio_proto_msgTypes[9]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -703,7 +764,7 @@ func (x *AgentFrontendToolCapability) String() string {
 func (*AgentFrontendToolCapability) ProtoMessage() {}
 
 func (x *AgentFrontendToolCapability) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[8]
+	mi := &file_agentaudio_proto_msgTypes[9]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -716,7 +777,7 @@ func (x *AgentFrontendToolCapability) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentFrontendToolCapability.ProtoReflect.Descriptor instead.
 func (*AgentFrontendToolCapability) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{8}
+	return file_agentaudio_proto_rawDescGZIP(), []int{9}
 }
 
 func (x *AgentFrontendToolCapability) GetName() string {
@@ -754,7 +815,7 @@ type AgentClientToolResult struct {
 
 func (x *AgentClientToolResult) Reset() {
 	*x = AgentClientToolResult{}
-	mi := &file_agentaudio_proto_msgTypes[9]
+	mi := &file_agentaudio_proto_msgTypes[10]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -766,7 +827,7 @@ func (x *AgentClientToolResult) String() string {
 func (*AgentClientToolResult) ProtoMessage() {}
 
 func (x *AgentClientToolResult) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[9]
+	mi := &file_agentaudio_proto_msgTypes[10]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -779,7 +840,7 @@ func (x *AgentClientToolResult) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentClientToolResult.ProtoReflect.Descriptor instead.
 func (*AgentClientToolResult) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{9}
+	return file_agentaudio_proto_rawDescGZIP(), []int{10}
 }
 
 func (x *AgentClientToolResult) GetRequestId() string {
@@ -830,7 +891,7 @@ type AgentAudioControl struct {
 
 func (x *AgentAudioControl) Reset() {
 	*x = AgentAudioControl{}
-	mi := &file_agentaudio_proto_msgTypes[10]
+	mi := &file_agentaudio_proto_msgTypes[11]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -842,7 +903,7 @@ func (x *AgentAudioControl) String() string {
 func (*AgentAudioControl) ProtoMessage() {}
 
 func (x *AgentAudioControl) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[10]
+	mi := &file_agentaudio_proto_msgTypes[11]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -855,7 +916,7 @@ func (x *AgentAudioControl) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentAudioControl.ProtoReflect.Descriptor instead.
 func (*AgentAudioControl) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{10}
+	return file_agentaudio_proto_rawDescGZIP(), []int{11}
 }
 
 func (x *AgentAudioControl) GetRequestId() string {
@@ -899,7 +960,7 @@ type AgentContentPart struct {
 
 func (x *AgentContentPart) Reset() {
 	*x = AgentContentPart{}
-	mi := &file_agentaudio_proto_msgTypes[11]
+	mi := &file_agentaudio_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -911,7 +972,7 @@ func (x *AgentContentPart) String() string {
 func (*AgentContentPart) ProtoMessage() {}
 
 func (x *AgentContentPart) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[11]
+	mi := &file_agentaudio_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -924,7 +985,7 @@ func (x *AgentContentPart) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentContentPart.ProtoReflect.Descriptor instead.
 func (*AgentContentPart) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{11}
+	return file_agentaudio_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *AgentContentPart) GetType() string {
@@ -970,7 +1031,7 @@ type AgentContentInput struct {
 
 func (x *AgentContentInput) Reset() {
 	*x = AgentContentInput{}
-	mi := &file_agentaudio_proto_msgTypes[12]
+	mi := &file_agentaudio_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -982,7 +1043,7 @@ func (x *AgentContentInput) String() string {
 func (*AgentContentInput) ProtoMessage() {}
 
 func (x *AgentContentInput) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[12]
+	mi := &file_agentaudio_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -995,7 +1056,7 @@ func (x *AgentContentInput) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentContentInput.ProtoReflect.Descriptor instead.
 func (*AgentContentInput) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{12}
+	return file_agentaudio_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *AgentContentInput) GetRequestId() string {
@@ -1046,7 +1107,7 @@ type AgentAudioEvent struct {
 
 func (x *AgentAudioEvent) Reset() {
 	*x = AgentAudioEvent{}
-	mi := &file_agentaudio_proto_msgTypes[13]
+	mi := &file_agentaudio_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1058,7 +1119,7 @@ func (x *AgentAudioEvent) String() string {
 func (*AgentAudioEvent) ProtoMessage() {}
 
 func (x *AgentAudioEvent) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[13]
+	mi := &file_agentaudio_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1071,7 +1132,7 @@ func (x *AgentAudioEvent) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentAudioEvent.ProtoReflect.Descriptor instead.
 func (*AgentAudioEvent) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{13}
+	return file_agentaudio_proto_rawDescGZIP(), []int{14}
 }
 
 func (x *AgentAudioEvent) GetMethod() string {
@@ -1113,7 +1174,7 @@ type AgentResponseAudio struct {
 
 func (x *AgentResponseAudio) Reset() {
 	*x = AgentResponseAudio{}
-	mi := &file_agentaudio_proto_msgTypes[14]
+	mi := &file_agentaudio_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1125,7 +1186,7 @@ func (x *AgentResponseAudio) String() string {
 func (*AgentResponseAudio) ProtoMessage() {}
 
 func (x *AgentResponseAudio) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[14]
+	mi := &file_agentaudio_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1138,7 +1199,7 @@ func (x *AgentResponseAudio) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentResponseAudio.ProtoReflect.Descriptor instead.
 func (*AgentResponseAudio) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{14}
+	return file_agentaudio_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *AgentResponseAudio) GetResponseId() string {
@@ -1165,13 +1226,14 @@ type AgentAudioNegotiated struct {
 	OutputModalities          []string               `protobuf:"bytes,5,rep,name=output_modalities,json=outputModalities,proto3" json:"output_modalities,omitempty"`                  // 明确输出模态；能力不替代权限。
 	CameraBinding             *AgentCameraBinding    `protobuf:"bytes,6,opt,name=camera_binding,json=cameraBinding,proto3" json:"camera_binding,omitempty"`                           // 仅实际串联图像模型确认的原视觉绑定，不广告普通附件输入。
 	UdpReplyStartReceipt      bool                   `protobuf:"varint,7,opt,name=udp_reply_start_receipt,json=udpReplyStartReceipt,proto3" json:"udp_reply_start_receipt,omitempty"` // 精确回显实际装配，忽略新能力不得视为协商成功。
+	SessionRetention          bool                   `protobuf:"varint,8,opt,name=session_retention,json=sessionRetention,proto3" json:"session_retention,omitempty"`                 // 仅已安装可信固定截止的内部流支持；不向设备广告或授予媒体权限。
 	unknownFields             protoimpl.UnknownFields
 	sizeCache                 protoimpl.SizeCache
 }
 
 func (x *AgentAudioNegotiated) Reset() {
 	*x = AgentAudioNegotiated{}
-	mi := &file_agentaudio_proto_msgTypes[15]
+	mi := &file_agentaudio_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1183,7 +1245,7 @@ func (x *AgentAudioNegotiated) String() string {
 func (*AgentAudioNegotiated) ProtoMessage() {}
 
 func (x *AgentAudioNegotiated) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[15]
+	mi := &file_agentaudio_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1196,7 +1258,7 @@ func (x *AgentAudioNegotiated) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentAudioNegotiated.ProtoReflect.Descriptor instead.
 func (*AgentAudioNegotiated) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{15}
+	return file_agentaudio_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *AgentAudioNegotiated) GetInteractionMode() string {
@@ -1248,6 +1310,135 @@ func (x *AgentAudioNegotiated) GetUdpReplyStartReceipt() bool {
 	return false
 }
 
+func (x *AgentAudioNegotiated) GetSessionRetention() bool {
+	if x != nil {
+		return x.SessionRetention
+	}
+	return false
+}
+
+// AgentSessionRetention 只由已核权Owner发送，不属于设备信令方法；同原流内请求键独立关联。
+type AgentSessionRetention struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`  // 内部请求键，重复原键不得改写保持/恢复事实。
+	ExpiresAt     int64                  `protobuf:"varint,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"` // Unix毫秒绝对截止，0解除保持；不得超过原retention_deadline。
+	Resume        bool                   `protobuf:"varint,3,opt,name=resume,proto3" json:"resume,omitempty"`                        // 仅expires_at=0使用：true恢复剩余计时但不开麦，false结束/撤权不能复活。
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AgentSessionRetention) Reset() {
+	*x = AgentSessionRetention{}
+	mi := &file_agentaudio_proto_msgTypes[17]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentSessionRetention) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentSessionRetention) ProtoMessage() {}
+
+func (x *AgentSessionRetention) ProtoReflect() protoreflect.Message {
+	mi := &file_agentaudio_proto_msgTypes[17]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentSessionRetention.ProtoReflect.Descriptor instead.
+func (*AgentSessionRetention) Descriptor() ([]byte, []int) {
+	return file_agentaudio_proto_rawDescGZIP(), []int{17}
+}
+
+func (x *AgentSessionRetention) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *AgentSessionRetention) GetExpiresAt() int64 {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return 0
+}
+
+func (x *AgentSessionRetention) GetResume() bool {
+	if x != nil {
+		return x.Resume
+	}
+	return false
+}
+
+// AgentSessionRetentionAck 仅证明同原模型实际安装策略；有效截止可因原ctx/MaxSession收窄。
+type AgentSessionRetentionAck struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	RequestId     string                 `protobuf:"bytes,1,opt,name=request_id,json=requestId,proto3" json:"request_id,omitempty"`  // 原内部请求键；不流入设备回复。
+	ExpiresAt     int64                  `protobuf:"varint,2,opt,name=expires_at,json=expiresAt,proto3" json:"expires_at,omitempty"` // 实际安装的Unix毫秒截止，解除为0。
+	Resume        bool                   `protobuf:"varint,3,opt,name=resume,proto3" json:"resume,omitempty"`                        // 原恢复计时标志，不表示输入/焦点已恢复。
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *AgentSessionRetentionAck) Reset() {
+	*x = AgentSessionRetentionAck{}
+	mi := &file_agentaudio_proto_msgTypes[18]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *AgentSessionRetentionAck) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*AgentSessionRetentionAck) ProtoMessage() {}
+
+func (x *AgentSessionRetentionAck) ProtoReflect() protoreflect.Message {
+	mi := &file_agentaudio_proto_msgTypes[18]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use AgentSessionRetentionAck.ProtoReflect.Descriptor instead.
+func (*AgentSessionRetentionAck) Descriptor() ([]byte, []int) {
+	return file_agentaudio_proto_rawDescGZIP(), []int{18}
+}
+
+func (x *AgentSessionRetentionAck) GetRequestId() string {
+	if x != nil {
+		return x.RequestId
+	}
+	return ""
+}
+
+func (x *AgentSessionRetentionAck) GetExpiresAt() int64 {
+	if x != nil {
+		return x.ExpiresAt
+	}
+	return 0
+}
+
+func (x *AgentSessionRetentionAck) GetResume() bool {
+	if x != nil {
+		return x.Resume
+	}
+	return false
+}
+
 // AgentAudioUp agent 端点音频流上行消息（imsvr → agent）
 type AgentAudioUp struct {
 	state protoimpl.MessageState `protogen:"open.v1"`
@@ -1260,6 +1451,7 @@ type AgentAudioUp struct {
 	//	*AgentAudioUp_ClientToolResult
 	//	*AgentAudioUp_ControlBinding
 	//	*AgentAudioUp_ReplyOutputAdmission
+	//	*AgentAudioUp_SessionRetention
 	Body          isAgentAudioUp_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1267,7 +1459,7 @@ type AgentAudioUp struct {
 
 func (x *AgentAudioUp) Reset() {
 	*x = AgentAudioUp{}
-	mi := &file_agentaudio_proto_msgTypes[16]
+	mi := &file_agentaudio_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1279,7 +1471,7 @@ func (x *AgentAudioUp) String() string {
 func (*AgentAudioUp) ProtoMessage() {}
 
 func (x *AgentAudioUp) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[16]
+	mi := &file_agentaudio_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1292,7 +1484,7 @@ func (x *AgentAudioUp) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentAudioUp.ProtoReflect.Descriptor instead.
 func (*AgentAudioUp) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{16}
+	return file_agentaudio_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *AgentAudioUp) GetBody() isAgentAudioUp_Body {
@@ -1365,6 +1557,15 @@ func (x *AgentAudioUp) GetReplyOutputAdmission() *AgentReplyOutputAdmission {
 	return nil
 }
 
+func (x *AgentAudioUp) GetSessionRetention() *AgentSessionRetention {
+	if x != nil {
+		if x, ok := x.Body.(*AgentAudioUp_SessionRetention); ok {
+			return x.SessionRetention
+		}
+	}
+	return nil
+}
+
 type isAgentAudioUp_Body interface {
 	isAgentAudioUp_Body()
 }
@@ -1401,6 +1602,10 @@ type AgentAudioUp_ReplyOutputAdmission struct {
 	ReplyOutputAdmission *AgentReplyOutputAdmission `protobuf:"bytes,7,opt,name=reply_output_admission,json=replyOutputAdmission,proto3,oneof"` // 独立原回复门决定，不作为输入控制或设备请求。
 }
 
+type AgentAudioUp_SessionRetention struct {
+	SessionRetention *AgentSessionRetention `protobuf:"bytes,8,opt,name=session_retention,json=sessionRetention,proto3,oneof"` // 原Owner私有模型保持，不接收设备自报保持截止。
+}
+
 func (*AgentAudioUp_Init) isAgentAudioUp_Body() {}
 
 func (*AgentAudioUp_Audio) isAgentAudioUp_Body() {}
@@ -1414,6 +1619,8 @@ func (*AgentAudioUp_ClientToolResult) isAgentAudioUp_Body() {}
 func (*AgentAudioUp_ControlBinding) isAgentAudioUp_Body() {}
 
 func (*AgentAudioUp_ReplyOutputAdmission) isAgentAudioUp_Body() {}
+
+func (*AgentAudioUp_SessionRetention) isAgentAudioUp_Body() {}
 
 // AgentAudioDown agent 端点音频流下行消息（agent → imsvr → 设备）
 type AgentAudioDown struct {
@@ -1429,6 +1636,7 @@ type AgentAudioDown struct {
 	//	*AgentAudioDown_ControlBindingAck
 	//	*AgentAudioDown_ReplyOutputAdmissionAck
 	//	*AgentAudioDown_ReplyOutputGateExpired
+	//	*AgentAudioDown_RetentionAck
 	Body          isAgentAudioDown_Body `protobuf_oneof:"body"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
@@ -1436,7 +1644,7 @@ type AgentAudioDown struct {
 
 func (x *AgentAudioDown) Reset() {
 	*x = AgentAudioDown{}
-	mi := &file_agentaudio_proto_msgTypes[17]
+	mi := &file_agentaudio_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1448,7 +1656,7 @@ func (x *AgentAudioDown) String() string {
 func (*AgentAudioDown) ProtoMessage() {}
 
 func (x *AgentAudioDown) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[17]
+	mi := &file_agentaudio_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1461,7 +1669,7 @@ func (x *AgentAudioDown) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentAudioDown.ProtoReflect.Descriptor instead.
 func (*AgentAudioDown) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{17}
+	return file_agentaudio_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *AgentAudioDown) GetBody() isAgentAudioDown_Body {
@@ -1552,6 +1760,15 @@ func (x *AgentAudioDown) GetReplyOutputGateExpired() *AgentReplyOutputGate {
 	return nil
 }
 
+func (x *AgentAudioDown) GetRetentionAck() *AgentSessionRetentionAck {
+	if x != nil {
+		if x, ok := x.Body.(*AgentAudioDown_RetentionAck); ok {
+			return x.RetentionAck
+		}
+	}
+	return nil
+}
+
 type isAgentAudioDown_Body interface {
 	isAgentAudioDown_Body()
 }
@@ -1596,6 +1813,10 @@ type AgentAudioDown_ReplyOutputGateExpired struct {
 	ReplyOutputGateExpired *AgentReplyOutputGate `protobuf:"bytes,9,opt,name=reply_output_gate_expired,json=replyOutputGateExpired,proto3,oneof"` // 原固定安装期限实际到期；取消或scope退休不得伪作超时。
 }
 
+type AgentAudioDown_RetentionAck struct {
+	RetentionAck *AgentSessionRetentionAck `protobuf:"bytes,10,opt,name=retention_ack,json=retentionAck,proto3,oneof"` // 私有保持策略实际确认，不冒充模型内容或输入停止。
+}
+
 func (*AgentAudioDown_Audio) isAgentAudioDown_Body() {}
 
 func (*AgentAudioDown_Error) isAgentAudioDown_Body() {}
@@ -1613,6 +1834,8 @@ func (*AgentAudioDown_ControlBindingAck) isAgentAudioDown_Body() {}
 func (*AgentAudioDown_ReplyOutputAdmissionAck) isAgentAudioDown_Body() {}
 
 func (*AgentAudioDown_ReplyOutputGateExpired) isAgentAudioDown_Body() {}
+
+func (*AgentAudioDown_RetentionAck) isAgentAudioDown_Body() {}
 
 // AgentModelControlBinding 只由原IM Owner发送；AISVR仍回查正式IM授权，不能信任流自报权限。
 type AgentModelControlBinding struct {
@@ -1632,7 +1855,7 @@ type AgentModelControlBinding struct {
 
 func (x *AgentModelControlBinding) Reset() {
 	*x = AgentModelControlBinding{}
-	mi := &file_agentaudio_proto_msgTypes[18]
+	mi := &file_agentaudio_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1644,7 +1867,7 @@ func (x *AgentModelControlBinding) String() string {
 func (*AgentModelControlBinding) ProtoMessage() {}
 
 func (x *AgentModelControlBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[18]
+	mi := &file_agentaudio_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1657,7 +1880,7 @@ func (x *AgentModelControlBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentModelControlBinding.ProtoReflect.Descriptor instead.
 func (*AgentModelControlBinding) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{18}
+	return file_agentaudio_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *AgentModelControlBinding) GetRequestId() string {
@@ -1738,7 +1961,7 @@ type AgentModelControlBindingAck struct {
 
 func (x *AgentModelControlBindingAck) Reset() {
 	*x = AgentModelControlBindingAck{}
-	mi := &file_agentaudio_proto_msgTypes[19]
+	mi := &file_agentaudio_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1750,7 +1973,7 @@ func (x *AgentModelControlBindingAck) String() string {
 func (*AgentModelControlBindingAck) ProtoMessage() {}
 
 func (x *AgentModelControlBindingAck) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[19]
+	mi := &file_agentaudio_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1763,7 +1986,7 @@ func (x *AgentModelControlBindingAck) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentModelControlBindingAck.ProtoReflect.Descriptor instead.
 func (*AgentModelControlBindingAck) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{19}
+	return file_agentaudio_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *AgentModelControlBindingAck) GetRequestId() string {
@@ -1823,7 +2046,7 @@ type AgentReplyOutputBinding struct {
 
 func (x *AgentReplyOutputBinding) Reset() {
 	*x = AgentReplyOutputBinding{}
-	mi := &file_agentaudio_proto_msgTypes[20]
+	mi := &file_agentaudio_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1835,7 +2058,7 @@ func (x *AgentReplyOutputBinding) String() string {
 func (*AgentReplyOutputBinding) ProtoMessage() {}
 
 func (x *AgentReplyOutputBinding) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[20]
+	mi := &file_agentaudio_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1848,7 +2071,7 @@ func (x *AgentReplyOutputBinding) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentReplyOutputBinding.ProtoReflect.Descriptor instead.
 func (*AgentReplyOutputBinding) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{20}
+	return file_agentaudio_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *AgentReplyOutputBinding) GetSubject() string {
@@ -1906,7 +2129,7 @@ type AgentReplyOutputGate struct {
 
 func (x *AgentReplyOutputGate) Reset() {
 	*x = AgentReplyOutputGate{}
-	mi := &file_agentaudio_proto_msgTypes[21]
+	mi := &file_agentaudio_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1918,7 +2141,7 @@ func (x *AgentReplyOutputGate) String() string {
 func (*AgentReplyOutputGate) ProtoMessage() {}
 
 func (x *AgentReplyOutputGate) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[21]
+	mi := &file_agentaudio_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1931,7 +2154,7 @@ func (x *AgentReplyOutputGate) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentReplyOutputGate.ProtoReflect.Descriptor instead.
 func (*AgentReplyOutputGate) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{21}
+	return file_agentaudio_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *AgentReplyOutputGate) GetGateId() string {
@@ -1981,7 +2204,7 @@ type AgentReplyOutputAdmission struct {
 
 func (x *AgentReplyOutputAdmission) Reset() {
 	*x = AgentReplyOutputAdmission{}
-	mi := &file_agentaudio_proto_msgTypes[22]
+	mi := &file_agentaudio_proto_msgTypes[25]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1993,7 +2216,7 @@ func (x *AgentReplyOutputAdmission) String() string {
 func (*AgentReplyOutputAdmission) ProtoMessage() {}
 
 func (x *AgentReplyOutputAdmission) ProtoReflect() protoreflect.Message {
-	mi := &file_agentaudio_proto_msgTypes[22]
+	mi := &file_agentaudio_proto_msgTypes[25]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -2006,7 +2229,7 @@ func (x *AgentReplyOutputAdmission) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use AgentReplyOutputAdmission.ProtoReflect.Descriptor instead.
 func (*AgentReplyOutputAdmission) Descriptor() ([]byte, []int) {
-	return file_agentaudio_proto_rawDescGZIP(), []int{22}
+	return file_agentaudio_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *AgentReplyOutputAdmission) GetGateId() string {
@@ -2096,7 +2319,7 @@ const file_agentaudio_proto_rawDesc = "" +
 	"\rowner_user_id\x18\x06 \x01(\x03R\vownerUserId\x12\x19\n" +
 	"\bagent_id\x18\a \x01(\x03R\aagentId\x12\x19\n" +
 	"\bclone_id\x18\b \x01(\x03R\acloneId\x125\n" +
-	"\tsignaling\x18\t \x01(\v2\x17.ai.AgentAudioSignalingR\tsignaling\"\x82\x05\n" +
+	"\tsignaling\x18\t \x01(\v2\x17.ai.AgentAudioSignalingR\tsignaling\"\xfa\x05\n" +
 	"\x13AgentAudioSignaling\x12\x1f\n" +
 	"\vsample_rate\x18\x01 \x01(\x05R\n" +
 	"sampleRate\x12\x1a\n" +
@@ -2112,7 +2335,11 @@ const file_agentaudio_proto_rawDesc = "" +
 	" \x01(\x03R\x0fconnectionEpoch\x12=\n" +
 	"\x0ecamera_binding\x18\v \x01(\v2\x16.ai.AgentCameraBindingR\rcameraBinding\x125\n" +
 	"\x17udp_reply_start_receipt\x18\f \x01(\bR\x14udpReplyStartReceipt\x12M\n" +
-	"\x14reply_output_binding\x18\r \x01(\v2\x1b.ai.AgentReplyOutputBindingR\x12replyOutputBinding\"\xa4\x01\n" +
+	"\x14reply_output_binding\x18\r \x01(\v2\x1b.ai.AgentReplyOutputBindingR\x12replyOutputBinding\x12-\n" +
+	"\x12retention_deadline\x18\x0e \x01(\x03R\x11retentionDeadline\x12G\n" +
+	"\x12parent_media_tools\x18\x0f \x01(\v2\x19.ai.AgentParentMediaToolsR\x10parentMediaTools\"Q\n" +
+	"\x15AgentParentMediaTools\x128\n" +
+	"\x18live_broadcast_available\x18\x01 \x01(\bR\x16liveBroadcastAvailable\"\xa4\x01\n" +
 	"\x12AgentCameraBinding\x12\x1b\n" +
 	"\tcamera_id\x18\x01 \x01(\tR\bcameraId\x12\x19\n" +
 	"\btrack_id\x18\x02 \x01(\tR\atrackId\x12%\n" +
@@ -2190,7 +2417,7 @@ const file_agentaudio_proto_rawDesc = "" +
 	"\x12AgentResponseAudio\x12\x1f\n" +
 	"\vresponse_id\x18\x01 \x01(\tR\n" +
 	"responseId\x12\x14\n" +
-	"\x05audio\x18\x02 \x01(\fR\x05audio\"\xeb\x02\n" +
+	"\x05audio\x18\x02 \x01(\fR\x05audio\"\x98\x03\n" +
 	"\x14AgentAudioNegotiated\x12)\n" +
 	"\x10interaction_mode\x18\x01 \x01(\tR\x0finteractionMode\x12\x1a\n" +
 	"\bpipeline\x18\x02 \x01(\tR\bpipeline\x12>\n" +
@@ -2198,7 +2425,20 @@ const file_agentaudio_proto_rawDesc = "" +
 	"\x10input_modalities\x18\x04 \x03(\tR\x0finputModalities\x12+\n" +
 	"\x11output_modalities\x18\x05 \x03(\tR\x10outputModalities\x12=\n" +
 	"\x0ecamera_binding\x18\x06 \x01(\v2\x16.ai.AgentCameraBindingR\rcameraBinding\x125\n" +
-	"\x17udp_reply_start_receipt\x18\a \x01(\bR\x14udpReplyStartReceipt\"\xb4\x03\n" +
+	"\x17udp_reply_start_receipt\x18\a \x01(\bR\x14udpReplyStartReceipt\x12+\n" +
+	"\x11session_retention\x18\b \x01(\bR\x10sessionRetention\"m\n" +
+	"\x15AgentSessionRetention\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x02 \x01(\x03R\texpiresAt\x12\x16\n" +
+	"\x06resume\x18\x03 \x01(\bR\x06resume\"p\n" +
+	"\x18AgentSessionRetentionAck\x12\x1d\n" +
+	"\n" +
+	"request_id\x18\x01 \x01(\tR\trequestId\x12\x1d\n" +
+	"\n" +
+	"expires_at\x18\x02 \x01(\x03R\texpiresAt\x12\x16\n" +
+	"\x06resume\x18\x03 \x01(\bR\x06resume\"\xfe\x03\n" +
 	"\fAgentAudioUp\x12(\n" +
 	"\x04init\x18\x01 \x01(\v2\x12.ai.AgentAudioInitH\x00R\x04init\x12\x16\n" +
 	"\x05audio\x18\x02 \x01(\fH\x00R\x05audio\x121\n" +
@@ -2206,8 +2446,9 @@ const file_agentaudio_proto_rawDesc = "" +
 	"\rcontent_input\x18\x04 \x01(\v2\x15.ai.AgentContentInputH\x00R\fcontentInput\x12I\n" +
 	"\x12client_tool_result\x18\x05 \x01(\v2\x19.ai.AgentClientToolResultH\x00R\x10clientToolResult\x12G\n" +
 	"\x0fcontrol_binding\x18\x06 \x01(\v2\x1c.ai.AgentModelControlBindingH\x00R\x0econtrolBinding\x12U\n" +
-	"\x16reply_output_admission\x18\a \x01(\v2\x1d.ai.AgentReplyOutputAdmissionH\x00R\x14replyOutputAdmissionB\x06\n" +
-	"\x04body\"\x92\x04\n" +
+	"\x16reply_output_admission\x18\a \x01(\v2\x1d.ai.AgentReplyOutputAdmissionH\x00R\x14replyOutputAdmission\x12H\n" +
+	"\x11session_retention\x18\b \x01(\v2\x19.ai.AgentSessionRetentionH\x00R\x10sessionRetentionB\x06\n" +
+	"\x04body\"\xd7\x04\n" +
 	"\x0eAgentAudioDown\x12\x16\n" +
 	"\x05audio\x18\x01 \x01(\fH\x00R\x05audio\x12\x16\n" +
 	"\x05error\x18\x02 \x01(\tH\x00R\x05error\x12\x16\n" +
@@ -2219,7 +2460,9 @@ const file_agentaudio_proto_rawDesc = "" +
 	"negotiated\x12Q\n" +
 	"\x13control_binding_ack\x18\a \x01(\v2\x1f.ai.AgentModelControlBindingAckH\x00R\x11controlBindingAck\x12\\\n" +
 	"\x1areply_output_admission_ack\x18\b \x01(\v2\x1d.ai.AgentReplyOutputAdmissionH\x00R\x17replyOutputAdmissionAck\x12U\n" +
-	"\x19reply_output_gate_expired\x18\t \x01(\v2\x18.ai.AgentReplyOutputGateH\x00R\x16replyOutputGateExpiredB\x06\n" +
+	"\x19reply_output_gate_expired\x18\t \x01(\v2\x18.ai.AgentReplyOutputGateH\x00R\x16replyOutputGateExpired\x12C\n" +
+	"\rretention_ack\x18\n" +
+	" \x01(\v2\x1c.ai.AgentSessionRetentionAckH\x00R\fretentionAckB\x06\n" +
 	"\x04body\"\x99\x03\n" +
 	"\x18AgentModelControlBinding\x12\x1d\n" +
 	"\n" +
@@ -2290,70 +2533,76 @@ func file_agentaudio_proto_rawDescGZIP() []byte {
 	return file_agentaudio_proto_rawDescData
 }
 
-var file_agentaudio_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_agentaudio_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_agentaudio_proto_goTypes = []any{
 	(*AgentAudioInit)(nil),               // 0: ai.AgentAudioInit
 	(*AgentAudioSignaling)(nil),          // 1: ai.AgentAudioSignaling
-	(*AgentCameraBinding)(nil),           // 2: ai.AgentCameraBinding
-	(*AgentCameraFrameIdentity)(nil),     // 3: ai.AgentCameraFrameIdentity
-	(*AgentCameraFrameRequest)(nil),      // 4: ai.AgentCameraFrameRequest
-	(*AgentCameraFrameResponse)(nil),     // 5: ai.AgentCameraFrameResponse
-	(*AgentCameraFrameStopRequest)(nil),  // 6: ai.AgentCameraFrameStopRequest
-	(*AgentCameraFrameStopResponse)(nil), // 7: ai.AgentCameraFrameStopResponse
-	(*AgentFrontendToolCapability)(nil),  // 8: ai.AgentFrontendToolCapability
-	(*AgentClientToolResult)(nil),        // 9: ai.AgentClientToolResult
-	(*AgentAudioControl)(nil),            // 10: ai.AgentAudioControl
-	(*AgentContentPart)(nil),             // 11: ai.AgentContentPart
-	(*AgentContentInput)(nil),            // 12: ai.AgentContentInput
-	(*AgentAudioEvent)(nil),              // 13: ai.AgentAudioEvent
-	(*AgentResponseAudio)(nil),           // 14: ai.AgentResponseAudio
-	(*AgentAudioNegotiated)(nil),         // 15: ai.AgentAudioNegotiated
-	(*AgentAudioUp)(nil),                 // 16: ai.AgentAudioUp
-	(*AgentAudioDown)(nil),               // 17: ai.AgentAudioDown
-	(*AgentModelControlBinding)(nil),     // 18: ai.AgentModelControlBinding
-	(*AgentModelControlBindingAck)(nil),  // 19: ai.AgentModelControlBindingAck
-	(*AgentReplyOutputBinding)(nil),      // 20: ai.AgentReplyOutputBinding
-	(*AgentReplyOutputGate)(nil),         // 21: ai.AgentReplyOutputGate
-	(*AgentReplyOutputAdmission)(nil),    // 22: ai.AgentReplyOutputAdmission
+	(*AgentParentMediaTools)(nil),        // 2: ai.AgentParentMediaTools
+	(*AgentCameraBinding)(nil),           // 3: ai.AgentCameraBinding
+	(*AgentCameraFrameIdentity)(nil),     // 4: ai.AgentCameraFrameIdentity
+	(*AgentCameraFrameRequest)(nil),      // 5: ai.AgentCameraFrameRequest
+	(*AgentCameraFrameResponse)(nil),     // 6: ai.AgentCameraFrameResponse
+	(*AgentCameraFrameStopRequest)(nil),  // 7: ai.AgentCameraFrameStopRequest
+	(*AgentCameraFrameStopResponse)(nil), // 8: ai.AgentCameraFrameStopResponse
+	(*AgentFrontendToolCapability)(nil),  // 9: ai.AgentFrontendToolCapability
+	(*AgentClientToolResult)(nil),        // 10: ai.AgentClientToolResult
+	(*AgentAudioControl)(nil),            // 11: ai.AgentAudioControl
+	(*AgentContentPart)(nil),             // 12: ai.AgentContentPart
+	(*AgentContentInput)(nil),            // 13: ai.AgentContentInput
+	(*AgentAudioEvent)(nil),              // 14: ai.AgentAudioEvent
+	(*AgentResponseAudio)(nil),           // 15: ai.AgentResponseAudio
+	(*AgentAudioNegotiated)(nil),         // 16: ai.AgentAudioNegotiated
+	(*AgentSessionRetention)(nil),        // 17: ai.AgentSessionRetention
+	(*AgentSessionRetentionAck)(nil),     // 18: ai.AgentSessionRetentionAck
+	(*AgentAudioUp)(nil),                 // 19: ai.AgentAudioUp
+	(*AgentAudioDown)(nil),               // 20: ai.AgentAudioDown
+	(*AgentModelControlBinding)(nil),     // 21: ai.AgentModelControlBinding
+	(*AgentModelControlBindingAck)(nil),  // 22: ai.AgentModelControlBindingAck
+	(*AgentReplyOutputBinding)(nil),      // 23: ai.AgentReplyOutputBinding
+	(*AgentReplyOutputGate)(nil),         // 24: ai.AgentReplyOutputGate
+	(*AgentReplyOutputAdmission)(nil),    // 25: ai.AgentReplyOutputAdmission
 }
 var file_agentaudio_proto_depIdxs = []int32{
 	1,  // 0: ai.AgentAudioInit.signaling:type_name -> ai.AgentAudioSignaling
-	8,  // 1: ai.AgentAudioSignaling.frontend_tools:type_name -> ai.AgentFrontendToolCapability
-	2,  // 2: ai.AgentAudioSignaling.camera_binding:type_name -> ai.AgentCameraBinding
-	20, // 3: ai.AgentAudioSignaling.reply_output_binding:type_name -> ai.AgentReplyOutputBinding
-	2,  // 4: ai.AgentCameraFrameIdentity.camera_binding:type_name -> ai.AgentCameraBinding
-	3,  // 5: ai.AgentCameraFrameRequest.identity:type_name -> ai.AgentCameraFrameIdentity
-	3,  // 6: ai.AgentCameraFrameResponse.identity:type_name -> ai.AgentCameraFrameIdentity
-	3,  // 7: ai.AgentCameraFrameStopRequest.identity:type_name -> ai.AgentCameraFrameIdentity
-	3,  // 8: ai.AgentCameraFrameStopResponse.identity:type_name -> ai.AgentCameraFrameIdentity
-	11, // 9: ai.AgentContentInput.parts:type_name -> ai.AgentContentPart
-	21, // 10: ai.AgentAudioEvent.reply_output_gate:type_name -> ai.AgentReplyOutputGate
-	2,  // 11: ai.AgentAudioNegotiated.camera_binding:type_name -> ai.AgentCameraBinding
-	0,  // 12: ai.AgentAudioUp.init:type_name -> ai.AgentAudioInit
-	10, // 13: ai.AgentAudioUp.control:type_name -> ai.AgentAudioControl
-	12, // 14: ai.AgentAudioUp.content_input:type_name -> ai.AgentContentInput
-	9,  // 15: ai.AgentAudioUp.client_tool_result:type_name -> ai.AgentClientToolResult
-	18, // 16: ai.AgentAudioUp.control_binding:type_name -> ai.AgentModelControlBinding
-	22, // 17: ai.AgentAudioUp.reply_output_admission:type_name -> ai.AgentReplyOutputAdmission
-	13, // 18: ai.AgentAudioDown.event:type_name -> ai.AgentAudioEvent
-	14, // 19: ai.AgentAudioDown.response_audio:type_name -> ai.AgentResponseAudio
-	15, // 20: ai.AgentAudioDown.negotiated:type_name -> ai.AgentAudioNegotiated
-	19, // 21: ai.AgentAudioDown.control_binding_ack:type_name -> ai.AgentModelControlBindingAck
-	22, // 22: ai.AgentAudioDown.reply_output_admission_ack:type_name -> ai.AgentReplyOutputAdmission
-	21, // 23: ai.AgentAudioDown.reply_output_gate_expired:type_name -> ai.AgentReplyOutputGate
-	20, // 24: ai.AgentReplyOutputGate.binding:type_name -> ai.AgentReplyOutputBinding
-	20, // 25: ai.AgentReplyOutputAdmission.binding:type_name -> ai.AgentReplyOutputBinding
-	16, // 26: ai.AgentAudio.Stream:input_type -> ai.AgentAudioUp
-	4,  // 27: ai.AgentAudio.AnalyzeCameraFrame:input_type -> ai.AgentCameraFrameRequest
-	6,  // 28: ai.AgentAudio.StopCameraFrame:input_type -> ai.AgentCameraFrameStopRequest
-	17, // 29: ai.AgentAudio.Stream:output_type -> ai.AgentAudioDown
-	5,  // 30: ai.AgentAudio.AnalyzeCameraFrame:output_type -> ai.AgentCameraFrameResponse
-	7,  // 31: ai.AgentAudio.StopCameraFrame:output_type -> ai.AgentCameraFrameStopResponse
-	29, // [29:32] is the sub-list for method output_type
-	26, // [26:29] is the sub-list for method input_type
-	26, // [26:26] is the sub-list for extension type_name
-	26, // [26:26] is the sub-list for extension extendee
-	0,  // [0:26] is the sub-list for field type_name
+	9,  // 1: ai.AgentAudioSignaling.frontend_tools:type_name -> ai.AgentFrontendToolCapability
+	3,  // 2: ai.AgentAudioSignaling.camera_binding:type_name -> ai.AgentCameraBinding
+	23, // 3: ai.AgentAudioSignaling.reply_output_binding:type_name -> ai.AgentReplyOutputBinding
+	2,  // 4: ai.AgentAudioSignaling.parent_media_tools:type_name -> ai.AgentParentMediaTools
+	3,  // 5: ai.AgentCameraFrameIdentity.camera_binding:type_name -> ai.AgentCameraBinding
+	4,  // 6: ai.AgentCameraFrameRequest.identity:type_name -> ai.AgentCameraFrameIdentity
+	4,  // 7: ai.AgentCameraFrameResponse.identity:type_name -> ai.AgentCameraFrameIdentity
+	4,  // 8: ai.AgentCameraFrameStopRequest.identity:type_name -> ai.AgentCameraFrameIdentity
+	4,  // 9: ai.AgentCameraFrameStopResponse.identity:type_name -> ai.AgentCameraFrameIdentity
+	12, // 10: ai.AgentContentInput.parts:type_name -> ai.AgentContentPart
+	24, // 11: ai.AgentAudioEvent.reply_output_gate:type_name -> ai.AgentReplyOutputGate
+	3,  // 12: ai.AgentAudioNegotiated.camera_binding:type_name -> ai.AgentCameraBinding
+	0,  // 13: ai.AgentAudioUp.init:type_name -> ai.AgentAudioInit
+	11, // 14: ai.AgentAudioUp.control:type_name -> ai.AgentAudioControl
+	13, // 15: ai.AgentAudioUp.content_input:type_name -> ai.AgentContentInput
+	10, // 16: ai.AgentAudioUp.client_tool_result:type_name -> ai.AgentClientToolResult
+	21, // 17: ai.AgentAudioUp.control_binding:type_name -> ai.AgentModelControlBinding
+	25, // 18: ai.AgentAudioUp.reply_output_admission:type_name -> ai.AgentReplyOutputAdmission
+	17, // 19: ai.AgentAudioUp.session_retention:type_name -> ai.AgentSessionRetention
+	14, // 20: ai.AgentAudioDown.event:type_name -> ai.AgentAudioEvent
+	15, // 21: ai.AgentAudioDown.response_audio:type_name -> ai.AgentResponseAudio
+	16, // 22: ai.AgentAudioDown.negotiated:type_name -> ai.AgentAudioNegotiated
+	22, // 23: ai.AgentAudioDown.control_binding_ack:type_name -> ai.AgentModelControlBindingAck
+	25, // 24: ai.AgentAudioDown.reply_output_admission_ack:type_name -> ai.AgentReplyOutputAdmission
+	24, // 25: ai.AgentAudioDown.reply_output_gate_expired:type_name -> ai.AgentReplyOutputGate
+	18, // 26: ai.AgentAudioDown.retention_ack:type_name -> ai.AgentSessionRetentionAck
+	23, // 27: ai.AgentReplyOutputGate.binding:type_name -> ai.AgentReplyOutputBinding
+	23, // 28: ai.AgentReplyOutputAdmission.binding:type_name -> ai.AgentReplyOutputBinding
+	19, // 29: ai.AgentAudio.Stream:input_type -> ai.AgentAudioUp
+	5,  // 30: ai.AgentAudio.AnalyzeCameraFrame:input_type -> ai.AgentCameraFrameRequest
+	7,  // 31: ai.AgentAudio.StopCameraFrame:input_type -> ai.AgentCameraFrameStopRequest
+	20, // 32: ai.AgentAudio.Stream:output_type -> ai.AgentAudioDown
+	6,  // 33: ai.AgentAudio.AnalyzeCameraFrame:output_type -> ai.AgentCameraFrameResponse
+	8,  // 34: ai.AgentAudio.StopCameraFrame:output_type -> ai.AgentCameraFrameStopResponse
+	32, // [32:35] is the sub-list for method output_type
+	29, // [29:32] is the sub-list for method input_type
+	29, // [29:29] is the sub-list for extension type_name
+	29, // [29:29] is the sub-list for extension extendee
+	0,  // [0:29] is the sub-list for field type_name
 }
 
 func init() { file_agentaudio_proto_init() }
@@ -2361,7 +2610,7 @@ func file_agentaudio_proto_init() {
 	if File_agentaudio_proto != nil {
 		return
 	}
-	file_agentaudio_proto_msgTypes[16].OneofWrappers = []any{
+	file_agentaudio_proto_msgTypes[19].OneofWrappers = []any{
 		(*AgentAudioUp_Init)(nil),
 		(*AgentAudioUp_Audio)(nil),
 		(*AgentAudioUp_Control)(nil),
@@ -2369,8 +2618,9 @@ func file_agentaudio_proto_init() {
 		(*AgentAudioUp_ClientToolResult)(nil),
 		(*AgentAudioUp_ControlBinding)(nil),
 		(*AgentAudioUp_ReplyOutputAdmission)(nil),
+		(*AgentAudioUp_SessionRetention)(nil),
 	}
-	file_agentaudio_proto_msgTypes[17].OneofWrappers = []any{
+	file_agentaudio_proto_msgTypes[20].OneofWrappers = []any{
 		(*AgentAudioDown_Audio)(nil),
 		(*AgentAudioDown_Error)(nil),
 		(*AgentAudioDown_Ready)(nil),
@@ -2380,6 +2630,7 @@ func file_agentaudio_proto_init() {
 		(*AgentAudioDown_ControlBindingAck)(nil),
 		(*AgentAudioDown_ReplyOutputAdmissionAck)(nil),
 		(*AgentAudioDown_ReplyOutputGateExpired)(nil),
+		(*AgentAudioDown_RetentionAck)(nil),
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -2387,7 +2638,7 @@ func file_agentaudio_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_agentaudio_proto_rawDesc), len(file_agentaudio_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   23,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
