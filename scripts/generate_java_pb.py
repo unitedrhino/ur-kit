@@ -31,6 +31,34 @@ PROTO_DIRS = (
 # GRPC_PLUGIN 固定生成器版本和校验值，避免下载内容变化影响发布产物。
 GRPC_PLUGIN_VERSION = "1.75.0"
 GRPC_PLUGIN_SHA256 = "59366fb58a19efd4e3674c1568e94ef167816151acfaad02fa4ef04bbcab293d"
+# WELL_KNOWN_HASHES 核验25.6官方标准定义；避免独立编译器误用系统旧include。
+WELL_KNOWN_HASHES = {
+    "google/protobuf/wrappers.proto": "a26c1d6ec73a592ac31796289a61ceffe2db2453ff427dfdd7697aac50844280",
+    "google/protobuf/descriptor.proto": "a39cb2a57423cf1e83a00dc7bcca4b1b74bcbebc28e95586977dbc2af636fabc",
+}
+
+
+def java_protoc() -> str:
+    """取得Java专用编译器并在改写产物前核验版本；允许显式路径而不更改Go工具链。"""
+    requested = os.environ.get("UR_KIT_JAVA_PROTOC", "protoc")
+    executable = shutil.which(requested)
+    if executable is None:
+        raise SystemExit("需要 protoc 25.6；可设置 UR_KIT_JAVA_PROTOC 为独立编译器路径")
+    version = subprocess.check_output([executable, "--version"], text=True).strip()
+    if version != "libprotoc 25.6":
+        raise SystemExit("Java生成需 libprotoc 25.6，与 protobuf-java 3.25.6 匹配；禁止使用旧gencode安全绕过")
+    return executable
+
+
+def java_include(protoc: str) -> Path:
+    """取得匹配编译器的标准定义目录；显式覆盖或完整发行包include均须匹配固定摘要。"""
+    override = os.environ.get("UR_KIT_JAVA_PROTOC_INCLUDE")
+    include = Path(override).resolve() if override else Path(protoc).resolve().parent.parent / "include"
+    for relative, expected in WELL_KNOWN_HASHES.items():
+        source = include / relative
+        if not source.is_file() or hashlib.sha256(source.read_bytes()).hexdigest() != expected:
+            raise SystemExit("缺少匹配25.6的标准Proto定义；请按Java SDK说明设置 UR_KIT_JAVA_PROTOC_INCLUDE")
+    return include
 
 
 def grpc_plugin() -> Path:
@@ -69,8 +97,8 @@ def tree_digest(directory: Path) -> str:
 
 def main() -> None:
     """校验 proto 与 protoc，完整生成消息及服务 Stub 后替换 Java 生成目录。"""
-    if shutil.which("protoc") is None:
-        raise SystemExit("需要安装 protoc 才能生成 Java protobuf 消息代码")
+    protoc = java_protoc()
+    include = java_include(protoc)
     plugin = grpc_plugin()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix="java-pb-", dir=OUTPUT.parent))
@@ -82,7 +110,7 @@ def main() -> None:
             if not files:
                 raise SystemExit(f"合同缺少 proto: {relative}")
             subprocess.run(
-                ["protoc", "-I", str(source), f"--java_out={temporary}",
+                [protoc, "-I", str(source), "-I", str(include), f"--java_out={temporary}",
                  f"--plugin=protoc-gen-grpc-java={plugin}", f"--grpc-java_out={temporary}",
                  *(str(file) for file in files)],
                 check=True,

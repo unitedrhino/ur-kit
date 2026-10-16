@@ -168,7 +168,7 @@ pnpm run dev:h5
 ## 5. 按需构建与排障
 
 - Docker：先按 [Docker 官方安装说明](https://docs.docker.com/get-started/get-docker/)装好 Engine/Desktop 和 Compose v2，确认 `docker version`、`docker compose version`；之后按 [IoT 基础应用](../apps/iot-basic/README.md)构建单容器，再按 [urops 指南](../.agents/skills/ur-kit-development/references/urops-deployment.md)部署。Docker 并非安装 Go/前端开发依赖的前置条件。
-- Java：先安装 JDK 17、Maven、Python 3 和本指南 protoc，确认 `java -version`、`mvn -version`、`python3 --version`；生成和本地安装顺序见 [Java SDK](../sdks/java/README.md)。Node 后端打包另见 [Node SDK](../sdks/node/README.md)。
+- Java：先安装 JDK 17、Maven、Python 3；Java SDK 另固定 libprotoc 25.6，通过 `UR_KIT_JAVA_PROTOC` 指定独立路径，不套用本指南 Go 示例的 protoc 3.21.12。确认 `java -version`、`mvn -version`、`python3 --version`；编译器校验、生成和本地安装顺序见 [Java SDK](../sdks/java/README.md)。Node 后端打包另见 [Node SDK](../sdks/node/README.md)。
 - `goctl` / 插件找不到：核对 `go env GOPATH GOBIN` 和 PATH，重新打开终端；`protoc` 与插件是三个不同程序。
 - Go 依赖下载失败：先核对网络与 `go env GOPROXY`；公共 SDK 不要求私仓凭据，不通过导入 SaaS 私包解决。
 - Web 提示 Node 版本不支持：在**当前终端**检查 `node --version`，至少 22.12；不要删 engines 或降低依赖版本掩盖问题。
