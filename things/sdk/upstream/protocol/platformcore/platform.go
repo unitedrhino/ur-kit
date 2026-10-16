@@ -13,13 +13,8 @@ import (
 	shareerrors "gitee.com/unitedrhino/share/errors"
 	"gitee.com/unitedrhino/share/eventBus"
 	"gitee.com/unitedrhino/share/utils"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/deviceinteract"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/devicemanage"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/devicemsg"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/productmanage"
-	"gitee.com/unitedrhino/things/service/dmsvr/client/protocolmanage"
-	"gitee.com/unitedrhino/things/service/dmsvr/dmExport"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+
+	"gitee.com/unitedrhino/things/share/rpccache"
 	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/runtimeconfig"
 	trackinggozero "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking/gozero"
@@ -27,6 +22,8 @@ import (
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"google.golang.org/grpc"
+
+	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
 )
 
 // runtimeOptions 保持原协议服务的运行时配置 JSON 字段。
@@ -58,7 +55,7 @@ func resolveRuntime(ctx context.Context, code string, base runtimeOptions, reade
 }
 
 // platformRegistry 使用现有 Things 服务身份登记协议并上报心跳。
-type platformRegistry struct{ client protocolmanage.ProtocolManage }
+type platformRegistry struct{ client dm.ProtocolManageClient }
 
 // Register 将重复登记当作成功，保持协议进程重启幂等。
 func (registry platformRegistry) Register(ctx context.Context, info *dm.ProtocolInfo) error {
@@ -100,21 +97,21 @@ func NewCoreProtocol(options Options) (*CoreProtocol, error) {
 	}
 	protocolClient := options.ProtocolM
 	if protocolClient == nil && options.DmClient != nil {
-		protocolClient = protocolmanage.NewProtocolManage(options.DmClient)
+		protocolClient = dm.NewProtocolManageClient(options.DmClient.Conn())
 	}
 	productM, deviceM, deviceMsg, deviceInteract := options.ProductM, options.DeviceM, options.DeviceMsg, options.DeviceInteract
 	if options.DmClient != nil {
 		if productM == nil {
-			productM = productmanage.NewProductManage(options.DmClient)
+			productM = dm.NewProductManageClient(options.DmClient.Conn())
 		}
 		if deviceM == nil {
-			deviceM = devicemanage.NewDeviceManage(options.DmClient)
+			deviceM = dm.NewDeviceManageClient(options.DmClient.Conn())
 		}
 		if deviceMsg == nil {
-			deviceMsg = devicemsg.NewDeviceMsg(options.DmClient)
+			deviceMsg = dm.NewDeviceMsgClient(options.DmClient.Conn())
 		}
 		if deviceInteract == nil {
-			deviceInteract = deviceinteract.NewDeviceInteract(options.DmClient)
+			deviceInteract = dm.NewDeviceInteractClient(options.DmClient.Conn())
 		}
 	}
 	if protocolClient == nil || productM == nil || deviceM == nil || deviceMsg == nil || deviceInteract == nil {
@@ -143,19 +140,19 @@ func NewCoreProtocol(options Options) (*CoreProtocol, error) {
 			return nil, err
 		}
 	}
-	productCache, err := dmExport.NewProductInfoCache(productM, event)
+	productCache, err := rpccache.NewProductInfoCache(productM, event)
 	if err != nil {
 		return nil, err
 	}
-	deviceCache, err := dmExport.NewDeviceInfoCache(deviceM, event)
+	deviceCache, err := rpccache.NewDeviceInfoCache(deviceM, event)
 	if err != nil {
 		return nil, err
 	}
-	productSchema, err := dmExport.NewProductSchemaCache(productM, event)
+	productSchema, err := rpccache.NewProductSchemaCache(productM, event)
 	if err != nil {
 		return nil, err
 	}
-	deviceSchema, err := dmExport.NewDeviceSchemaCache(deviceM, productSchema, event)
+	deviceSchema, err := rpccache.NewDeviceSchemaCache(deviceM, productSchema, event)
 	if err != nil {
 		return nil, err
 	}

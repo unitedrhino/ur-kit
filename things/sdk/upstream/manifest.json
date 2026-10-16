@@ -13,12 +13,13 @@
     "protocol/mqttProtocol_test.go": "4dfbf483357239e37fd5b81ee875acc7eaf18a966bee81b6e6017e56ef8c151e",
     "protocol/mqtt_tracking.go": "ac3778c705f9946c622d5690670d7c93a240d2bc039cf3ced2d368694351066a",
     "protocol/mqtt_tracking_integration_test.go": "fc4785c2a89e723e42156caef99513c4751f1549ce009954eea0d42db745c048",
-    "protocol/platformcore/core.go": "0ea6fb9aae5eb88ac26f850b2c4808c616093cca8179a5db78c683d7c93ab4f9",
+    "protocol/platformcore/core.go": "361ac986a7de34eb3f6b5d99e0ddbd3681036e9ddebeff9acf0eaa78ad1d7602",
     "protocol/platformcore/core_test.go": "f73f9403a0c86dd6656f6d9a70db1020b7629a903b43a4d38bd8a73b6d799282",
-    "protocol/platformcore/mqtt.go": "d1653266d43a4f2e2bd05332c9865d685cbd05d4b5bceb27e2de82acde1ea96c",
-    "protocol/platformcore/platform.go": "dda498f180c7f739b5bd6da318eba2516144e43f2c76bf791aee5be1d199df8e",
+    "protocol/platformcore/mqtt.go": "77381ca154eb878a74f651c1f590a6965eecfc09517a52333069ed350102b060",
+    "protocol/platformcore/platform.go": "1542857fce8a150c69479094b4a08cb1f4a6c614c75022857f2be385bde8eace",
     "protocol/platformcore/platform_integration_test.go": "652c604730003226d182ea7bde8552f01f5ad328cf5e4e686f2fa80a6f245c99",
     "protocol/platformcore/platform_test.go": "41d62e02c60d76c925788381476cec9f67f679982efad166785656841b49ba6a",
+    "protocol/platformcore/pure_rpc_integration_test.go": "362c2474d887c0c1c4f22a8f0105f203231d93980339b57bc26005ce56c9d07e",
     "protocol/platformcore/rpc_integration_test.go": "7b913ad47e920ce1fdc63c30d454f58640c323332ebdba8f740d660604889376",
     "protocol/platformcore/timer.go": "af0f28872d24510829dbeff96a90ffef85c7b68f83ebc9db3e587c149ff5fbe0",
     "protocol/readme.md": "dba20d2b1d13c60699d235e06d1c7cb8ed9e21126138fc21062cc6db815c7369",
@@ -30,5 +31,5 @@
     "seed/ensure_test.go": "6126b541a118c29856e3e83a5983964d2d928a77ec743dee6ee62dd177915176",
     "seed/types.go": "caeb6a31e377c72fe5649672e6a310ef1a87b0d850487886183a28a2dd6f85cc"
   },
-  "saas_commit": "4ec0134d217dd6934d1e2fc8de202c8b4f7fe273"
+  "saas_commit": "36e516625a8ebc0deb2e853239eb90129a589ad6"
 }

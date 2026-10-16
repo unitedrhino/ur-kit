@@ -89,6 +89,9 @@ message IPCPreflightRequest {
   bool listen_audio = 3; // 是否请求显式mic监听能力，不授权反向对讲。
   string purpose = 4; // ipcLiveView/ipcTalk/humanCall/recordPlayback分别预检；历史不授权实时采集，未传保留预览语义。
   string call_type = 5; // 仅humanCall允许voice/video；空保持旧视频语义，voice必须无camera/listenAudio。
+  bool require_current_instance = 6; // 仅humanCall/voice显式申请真实socket首尾旁证；false保持旧准入。
+  int64 expected_connection_epoch = 7; // 新旁证成对为空用于发现；非空必须精确复验原连接。
+  string expected_connection_instance = 8; // 真实物理对象随机实例，不是业务会话或设备自报身份。
 }
 
 // IPCPreflightResponse 是短期准入快照，不等于授权永久有效或媒体已经连接。
@@ -100,6 +103,7 @@ message IPCPreflightResponse {
   int64 expires_at = 5; // 快照截止Unix毫秒；正式投递仍独立复核设备能力和归属。
   string purpose = 6; // 已实际校验的用途；对讲与人际呼叫必须精确回执，避免旧节点忽略新请求字段。
   string call_type = 7; // 精确回读原humanCall请求类型；空保持旧客户端响应，不以未知类型推断voice。
+  string connection_instance = 8; // 仅显式新旁证成功时回写；旧节点空值不能被核心补造。
 }
 
 // PlaybackPreflightRequest 只申请文件输出能力，不授权摄像头、采集或任意内容URL。
@@ -140,6 +144,7 @@ message FocusPreflightRequest {
   string subject = 1; // 已鉴权device主体，用户/企业来自内部上下文。
   int64 connection_epoch = 2; // 原连接代次，设备重连后不能改用新连接维持旧Owner。
   repeated string resources = 3; // 首次实际证明的完整资源组，不允许部分满足或隐式扩大。
+  string connection_instance = 4; // 新原人际焦点可选精确socket实例；空保持旧预检，非空必须首尾核实际来源。
 }
 
 // FocusPreflightResponse 仅提供短期在线/主人/能力快照，不能代替实际focusState或原业务许可。
@@ -150,6 +155,7 @@ message FocusPreflightResponse {
   bytes capability_report = 4; // 当前完整能力，不能从播放器模态补造资源。
   int64 expires_at = 5; // 最多两秒Unix毫秒截止，仅Owner预检，不是资源许可续期。
   repeated string resources = 6; // 全组已核验，保留原请求集合，不返回其他未请求资源。
+  string connection_instance = 7; // 仅请求原实例已实际核实时精确回写；旧空值不能作为新原实例旁证。
 }
 
 // DeviceContentPreflightRequest 只查询原连接的离散附件输入能力，不指定企业、主人或模型。
