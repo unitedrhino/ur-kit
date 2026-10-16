@@ -1,10 +1,10 @@
 {
   "files": {
-    "backend/.swagger/core-ai.json": "38dee77034f8a165937ac635b14a6ea5a03f5043955d76a80aee7b5a71a005f1",
-    "backend/.swagger/core-api.json": "6f344f0cdec7ff20a4aff4a94f1059000997a9dc49b8c122a1f6f10cadb309fb",
+    "backend/.swagger/core-ai.json": "83b74ccf604538d2c1da125a0eedc1d2cf370c2aab59de1288b0616232094dc0",
+    "backend/.swagger/core-api.json": "c6fb15c08165e8ce9e528860b3a690e6b3c792be4b5c118b43da25e1ba122676",
     "backend/.swagger/core-data.json": "ae04c19a36dea0b5af796a833e558cc9658a96ff95964f462cdffa5413b45b4a",
     "backend/.swagger/core-im.json": "9bcbc6121c39050906d29204f28f0d39b5e4bcb0e173c04930e8637c5d5801c2",
-    "backend/.swagger/energy-energy.json": "37989d9d6af1d6116c7fe0bd80d49ed31c1cf84970b5742de7d42351e84fa7f3",
+    "backend/.swagger/energy-energy.json": "ddeff2aaaf8eed22d7fe3d39b70ec8d853a02ddb1ac15dc8d14ff82242df76be",
     "backend/.swagger/mall-mall.json": "9bbca0c456b17f691c788b10c70a595e698af63c8938e9b417d9da120720ebe9",
     "backend/.swagger/parksvr-parking.json": "b7a3bc531f5b88c5561f8bba855d8fd0f06e943df6e5d101b816e6084c51b8a6",
     "backend/.swagger/protocol-mjcz.json": "8f5ce075ef965dc424d1f088d0783df1fbe3697248367e8beb969e2cb4e427d8",
@@ -30,7 +30,7 @@
     "backend/core/service/aisvr/http/chatExport.api": "d727fa6923649e2e5e34e5b6a4bfd493aa9080d0370a75ece214f8c5d49e9e85",
     "backend/core/service/aisvr/http/clone.api": "3c0ea6f7bf0a5a89a0358f32ef6ef7d08911eeab373cb1ed557353325fefd14c",
     "backend/core/service/aisvr/http/cloneGroup.api": "f66a608e8daafaff374852f4e786be008239114984ca4af36450e425d91cb88b",
-    "backend/core/service/aisvr/http/cloneTask.api": "fdecfd99d320340ef8f1419dc73f1b02b36d2d0eb8a79b1e80b6433d3d60a3ba",
+    "backend/core/service/aisvr/http/cloneTask.api": "859399d64a98d4bfb52044d4ad035e951fe53ac3d90b6c1b5128af97a96be6f1",
     "backend/core/service/aisvr/http/common.api": "acdb4f33b0363de32ae5cab3972fe954c61490addc3e089c4f1285d1b67cc521",
     "backend/core/service/aisvr/http/config.api": "ed87d138bcfdb61dc2f125853a446342d68adc1778ee5551944f154addca4348",
     "backend/core/service/aisvr/http/control.api": "d1547e5d43601c0f90a9d7ede0a5066cc140e0bf3d04f36ac105e036c50e1887",
@@ -102,7 +102,7 @@
     "backend/core/service/apisvr/http/system/app/role.api": "0512f081ec65f252ccc41354bbdc15247456dcc29a3c849c7e8218c767670aa8",
     "backend/core/service/apisvr/http/system/checkIn.api": "0e2ba548cbeb3714608276f8ffb59dd57400c6eb3fff94e245e33733e57120b7",
     "backend/core/service/apisvr/http/system/client-debug.api": "48186125cce8dd605c9325beb4ab0f70baebf13d837f28c75976175cd1211ca6",
-    "backend/core/service/apisvr/http/system/common.api": "6ed441c3f89f83d9b11cb0836499d8c3b52cf3ffb9fca24fae51cc44edce7c4b",
+    "backend/core/service/apisvr/http/system/common.api": "e33b344684e2c445b6d2d552e829ac81b4ba74cfec89d4338c6e65e442aedef5",
     "backend/core/service/apisvr/http/system/dept.api": "d75371ec5cea7e534b19c5d77923adb514e90a31bedf1cb4620d7f5522f60c51",
     "backend/core/service/apisvr/http/system/dict.api": "91cab0ba7b28503b7616c186f40eb0bab45b8d72bdc08e6b233837fcd686aa62",
     "backend/core/service/apisvr/http/system/dict/detail.api": "51c1114e590d34847228d7efc70c1d32ee847e9a4f21322e8b0f974babe47205",
@@ -182,7 +182,7 @@
     "backend/core/service/syssvr/pb/sys/authcode_grpc.pb.go": "b76f2a54e1fb43a663234d11384ce0167da9cb1d8deba713e7a8cb75515ab307",
     "backend/core/service/syssvr/pb/sys/checkIn.pb.go": "4eb4b03d3b6172235f2733025d00495ad61f48098d75dd6088d3b0d5fd61453a",
     "backend/core/service/syssvr/pb/sys/checkIn_grpc.pb.go": "ae9b2b5e0390ccb2cd7d44e0ae222e4db3a2a2e2d4b1c2f75f169795bcfaaad0",
-    "backend/core/service/syssvr/pb/sys/common.pb.go": "61aaf62e05d9832a6e90aab8c0a52e47b86b7f06ee3fbfd2d491f7fe8b6ddce4",
+    "backend/core/service/syssvr/pb/sys/common.pb.go": "6a6ff0665909759b2c95a1d5845835f6f44a70c9d0614d7f35f13fb9a426af06",
     "backend/core/service/syssvr/pb/sys/common_grpc.pb.go": "14f0d3972c8047a2cd9b3a971fef1c3b3bdd098ae03e7afe9dd19b1f1d596f3a",
     "backend/core/service/syssvr/pb/sys/department.pb.go": "83d8ed6a6ab2d3224c7b468e32397371d572c35335bd4b913a2154c6837eb553",
     "backend/core/service/syssvr/pb/sys/department_grpc.pb.go": "b8ed830dff1ceebcf36f9b76c2a76320f1a83d35d5ebb8424ad3d13530e900ac",
@@ -213,7 +213,7 @@
     "backend/core/service/syssvr/pb/sys/user_grpc.pb.go": "08bebcddd5f39be7a37948c24fa691a4b4cb0198010f3a343807c7d88b41eeb0",
     "backend/core/service/syssvr/proto/app.proto": "222692e936d356a199972bca951cb8a5236234bbd033508dba2f2a92e7180446",
     "backend/core/service/syssvr/proto/checkIn.proto": "ca6692d3e7e70756929a8107f8ff79fd41ac60bdf89e03b604f4e8a2969c198f",
-    "backend/core/service/syssvr/proto/common.proto": "4ac44308bb60df54bffb000c385d443caad027bb5b9e2441201ce4273c358afd",
+    "backend/core/service/syssvr/proto/common.proto": "702161ae1616f4bb8525c79f7d02380fd9cd52b97e8cee99ef4517d2ecc74751",
     "backend/core/service/syssvr/proto/department.proto": "045f62de2f0aeb19088e72403e2966b2ba7774962841ab8de631b300d59ea180",
     "backend/core/service/syssvr/proto/dict.proto": "e6512eb3a1c8fda1482a1557ba171d10964c4730da718bb029635336433e6cb1",
     "backend/core/service/syssvr/proto/flowmanage.proto": "0914ac3a5b911932819686b0bf8e5471387247bfc306c0f6fb684b01bd785a25",
@@ -413,6 +413,6 @@
     "backend/things/share/rpcs/protocolSync/pb/protocolSync/protocolSync_grpc.pb.go": "a0abfb727574367072211a2ada44a8917330bd8387181d2d07b20e9ca0607b70",
     "backend/things/share/rpcs/protocolSync/proto/protocolSync.proto": "a8527e186c9af110b3be4e6361a1be2786cd28314d8c166e944882cd9d11023c"
   },
-  "saas_commit": "4ec0134d217dd6934d1e2fc8de202c8b4f7fe273",
+  "saas_commit": "fb5617d92e6e53f6e366f507cbe81e1b9762b678",
   "schema": 1
 }

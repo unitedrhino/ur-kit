@@ -1137,9 +1137,9 @@
           "inspectionCycle": {
             "description": " 巡检周期：day=日 week=周 month=月",
             "enum": [
-              "[day",
+              "day",
               "week",
-              "month]"
+              "month"
             ],
             "type": "string"
           },

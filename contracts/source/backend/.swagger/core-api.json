@@ -7707,6 +7707,11 @@
           "config": {
             "$ref": "#/components/schemas/SysConfigInfo"
           },
+          "createTenant": {
+            "description": " 是否同时创建企业，未传时不创建",
+            "format": "boolean",
+            "type": "boolean"
+          },
           "ownerUser": {
             "$ref": "#/components/schemas/UserCreate"
           }

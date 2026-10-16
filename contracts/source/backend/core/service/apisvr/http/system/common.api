@@ -410,6 +410,7 @@ type (
     SystemInitReq {
         Config    SysConfigInfo `json:"config"`    // 系统初始化配置（其中 oem.title 必填）
         OwnerUser UserCreate           `json:"ownerUser"` // 所有者用户信息
+        CreateTenant bool `json:"createTenant,optional"` // 是否同时创建企业，未传时不创建
     }
 
     UserCreate {
