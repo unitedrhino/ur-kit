@@ -13,6 +13,7 @@ description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node �
 
 | 当前任务 | 必读指南 |
 | --- | --- |
+| 首次安装 Go、goctl、Proto 或前端依赖，初始化自己的 RPC 服务 | [环境安装与首次运行](../../../docs/development-setup.md) |
 | 自己的 MQTT、Modbus、TCP/串口或云协议 | [协议开发：目录、装配、上下行、验收](references/protocol-development.md) |
 | Web、移动端和 Go/Java/Node 业务后端 | [应用开发：骨架、鉴权、页面、测试、Docker](references/application-development.md) |
 | 注册平台代理/Web 路由、应用、菜单与定时任务 | [平台注册与验收](references/platform-registration.md) |

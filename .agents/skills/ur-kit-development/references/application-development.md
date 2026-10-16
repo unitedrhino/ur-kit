@@ -2,6 +2,8 @@
 
 源码路径相对 ur-kit 根目录。使用 [IoT 基础应用](../../../../apps/iot-basic/README.md) 前，准备平台开通的数字应用标识、企业、成员及项目权限；接入自己的业务无需下载 SaaS 源仓。
 
+首次开发先按[环境安装与 Proto 初始化](../../../../docs/development-setup.md)安装 Go、Node/pnpm 及按需使用的 goctl/protoc。已有样例可直接运行；只有新增自己的 RPC 合同时才生成新服务。
+
 ## 1. 选择复用方式与目录
 
 建议先保留套件目录结构，在自己的仓开发 `apps/iot-basic/{web,mobile,backend}`；共享目录和锁文件保持同一来源。只复制 `web/` 或 `mobile/` 会丢失仓内依赖及合同校验脚本。
