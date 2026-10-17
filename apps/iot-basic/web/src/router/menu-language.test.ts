@@ -39,6 +39,10 @@ describe('客户端注册清单的多语言显示', () => {
   it('四端名称、描述与 23 个菜单在 14 种语言下均可用真实翻译渲染', () => {
     expect(locales).toHaveLength(14);
     expect(definitions[0].menus).toHaveLength(23);
+    // 菜单模板已归本仓维护，保留仪表盘路由、组件和原可见性契约。
+    expect(definitions[0].menus.find((menu: { path: string }) => menu.path === '/dashboard')).toMatchObject({
+      defaultName: '概要', component: 'dashboard/index', defaultIsHideInMenu: 2,
+    });
     for (const locale of locales) {
       loadMessages(locale);
       for (const menu of definitions[0].menus) {
