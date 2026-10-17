@@ -47,6 +47,8 @@ docker compose -f apps/iot-basic/compose.yaml -f apps/iot-basic/compose.secret.y
 
 后端本机验证：`cd backend && go test ./...`。Web 构建与移动端验证见仓库根目录 `README.md`。
 
+默认应用名称和菜单由前端按当前语言显示，企业自行改名后保留原文。完成前端依赖安装后，在仓库根运行 `pnpm --filter org-iot-client test:menu-i18n`，可验证内嵌注册模板的 23 个菜单及四端名称、描述与 14 种语言资源一致；该检查不代替具体业务页面的显示验收。
+
 ## 开发自己的业务
 
 按[前后端应用指南](../../.agents/skills/ur-kit-development/references/application-development.md)扩展 Web、移动端与后端。指南包含文件位置、独立 module 的依赖调整、认证与业务授权、定向验证和镜像交付。现有 `ping` 只示范平台认证；自己的数据访问与资源动作权限需要在后端实现。
