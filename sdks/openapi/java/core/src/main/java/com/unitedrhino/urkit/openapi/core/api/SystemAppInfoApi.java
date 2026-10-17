@@ -20,6 +20,7 @@ import com.unitedrhino.urkit.openapi.core.client.Pair;
 import com.unitedrhino.urkit.openapi.core.model.AppInfo;
 import com.unitedrhino.urkit.openapi.core.model.AppInfoGetListReq;
 import com.unitedrhino.urkit.openapi.core.model.AppInfoGetOneReq;
+import com.unitedrhino.urkit.openapi.core.model.AppMenuBatchImportReq;
 import com.unitedrhino.urkit.openapi.core.model.AppWxMiniGetUrlLinkReq;
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemAgreementCreate200Response;
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemAgreementDelete200Response;
@@ -88,6 +89,162 @@ public class SystemAppInfoApi {
       body = "[no body]";
     }
     return operationId + " call failed with: " + statusCode + " - " + body;
+  }
+
+  /**
+   * 幂等注册应用与菜单
+   * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+   * @param appMenuBatchImportReq  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。 (required)
+   * @return PostApiV1SystemAgreementCreate200Response
+   * @throws ApiException if fails to make API call
+   */
+  public PostApiV1SystemAgreementCreate200Response postApiV1SystemAppInfoBatchImport(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    ApiResponse<PostApiV1SystemAgreementCreate200Response> localVarResponse = postApiV1SystemAppInfoBatchImportWithHttpInfo(appMenuBatchImportReq);
+    return localVarResponse.getData();
+  }
+
+  /**
+   * 幂等注册应用与菜单
+   * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+   * @param appMenuBatchImportReq  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。 (required)
+   * @return ApiResponse&lt;PostApiV1SystemAgreementCreate200Response&gt;
+   * @throws ApiException if fails to make API call
+   */
+  public ApiResponse<PostApiV1SystemAgreementCreate200Response> postApiV1SystemAppInfoBatchImportWithHttpInfo(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = postApiV1SystemAppInfoBatchImportRequestBuilder(appMenuBatchImportReq);
+    try {
+      HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
+          localVarRequestBuilder.build(),
+          HttpResponse.BodyHandlers.ofInputStream());
+      if (memberVarResponseInterceptor != null) {
+        memberVarResponseInterceptor.accept(localVarResponse);
+      }
+      try {
+        if (localVarResponse.statusCode()/ 100 != 2) {
+          throw getApiException("postApiV1SystemAppInfoBatchImport", localVarResponse);
+        }
+        return new ApiResponse<PostApiV1SystemAgreementCreate200Response>(
+          localVarResponse.statusCode(),
+          localVarResponse.headers().map(),
+          localVarResponse.body() == null ? null : memberVarObjectMapper.readValue(localVarResponse.body(), new TypeReference<PostApiV1SystemAgreementCreate200Response>() {}) // closes the InputStream
+        );
+      } finally {
+      }
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private HttpRequest.Builder postApiV1SystemAppInfoBatchImportRequestBuilder(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    // verify the required parameter 'appMenuBatchImportReq' is set
+    if (appMenuBatchImportReq == null) {
+      throw new ApiException(400, "Missing the required parameter 'appMenuBatchImportReq' when calling postApiV1SystemAppInfoBatchImport");
+    }
+
+    HttpRequest.Builder localVarRequestBuilder = HttpRequest.newBuilder();
+
+    String localVarPath = "/api/v1/system/app/info/batch-import";
+
+    localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
+
+    localVarRequestBuilder.header("Content-Type", "application/json");
+    localVarRequestBuilder.header("Accept", "application/json");
+
+    try {
+      byte[] localVarPostBody = memberVarObjectMapper.writeValueAsBytes(appMenuBatchImportReq);
+      localVarRequestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(localVarPostBody));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    if (memberVarReadTimeout != null) {
+      localVarRequestBuilder.timeout(memberVarReadTimeout);
+    }
+    if (memberVarInterceptor != null) {
+      memberVarInterceptor.accept(localVarRequestBuilder);
+    }
+    return localVarRequestBuilder;
+  }
+
+  /**
+   * 幂等注册应用与菜单
+   * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+   * @param appMenuBatchImportReq  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。 (required)
+   * @return PostApiV1SystemAgreementCreate200Response
+   * @throws ApiException if fails to make API call
+   */
+  public PostApiV1SystemAgreementCreate200Response postApiV1SystemAppInfoBatchImport_0(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    ApiResponse<PostApiV1SystemAgreementCreate200Response> localVarResponse = postApiV1SystemAppInfoBatchImport_0WithHttpInfo(appMenuBatchImportReq);
+    return localVarResponse.getData();
+  }
+
+  /**
+   * 幂等注册应用与菜单
+   * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+   * @param appMenuBatchImportReq  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。 (required)
+   * @return ApiResponse&lt;PostApiV1SystemAgreementCreate200Response&gt;
+   * @throws ApiException if fails to make API call
+   */
+  public ApiResponse<PostApiV1SystemAgreementCreate200Response> postApiV1SystemAppInfoBatchImport_0WithHttpInfo(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = postApiV1SystemAppInfoBatchImport_0RequestBuilder(appMenuBatchImportReq);
+    try {
+      HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
+          localVarRequestBuilder.build(),
+          HttpResponse.BodyHandlers.ofInputStream());
+      if (memberVarResponseInterceptor != null) {
+        memberVarResponseInterceptor.accept(localVarResponse);
+      }
+      try {
+        if (localVarResponse.statusCode()/ 100 != 2) {
+          throw getApiException("postApiV1SystemAppInfoBatchImport_0", localVarResponse);
+        }
+        return new ApiResponse<PostApiV1SystemAgreementCreate200Response>(
+          localVarResponse.statusCode(),
+          localVarResponse.headers().map(),
+          localVarResponse.body() == null ? null : memberVarObjectMapper.readValue(localVarResponse.body(), new TypeReference<PostApiV1SystemAgreementCreate200Response>() {}) // closes the InputStream
+        );
+      } finally {
+      }
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private HttpRequest.Builder postApiV1SystemAppInfoBatchImport_0RequestBuilder(AppMenuBatchImportReq appMenuBatchImportReq) throws ApiException {
+    // verify the required parameter 'appMenuBatchImportReq' is set
+    if (appMenuBatchImportReq == null) {
+      throw new ApiException(400, "Missing the required parameter 'appMenuBatchImportReq' when calling postApiV1SystemAppInfoBatchImport_0");
+    }
+
+    HttpRequest.Builder localVarRequestBuilder = HttpRequest.newBuilder();
+
+    String localVarPath = "/api/v1/system/app/info/batch-import";
+
+    localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
+
+    localVarRequestBuilder.header("Content-Type", "application/json");
+    localVarRequestBuilder.header("Accept", "application/json");
+
+    try {
+      byte[] localVarPostBody = memberVarObjectMapper.writeValueAsBytes(appMenuBatchImportReq);
+      localVarRequestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(localVarPostBody));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    if (memberVarReadTimeout != null) {
+      localVarRequestBuilder.timeout(memberVarReadTimeout);
+    }
+    if (memberVarInterceptor != null) {
+      memberVarInterceptor.accept(localVarRequestBuilder);
+    }
+    return localVarRequestBuilder;
   }
 
   /**

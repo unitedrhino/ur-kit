@@ -19,11 +19,12 @@
 公开定义见 [应用 HTTP 合同](../../../../contracts/source/backend/core/service/apisvr/http/system/app/info.api)、[菜单 HTTP 合同](../../../../contracts/source/backend/core/service/apisvr/http/system/app/menu.api) 和 [应用 RPC 合同](../../../../contracts/source/backend/core/service/syssvr/proto/app.proto)。
 
 1. 取得分配给自己应用的固定数字 ID，确定 `name`、`useBy`（客户端或管理端）、`type`（Web/移动端类型）、入口 `url`、状态和菜单策略。不要沿用基础应用示例 ID，也不要在每次启动时重新分配 ID。
-2. 平台管理 HTTP 入口为 `/api/v1/system/app/info/create|get-one|update|get-list`，菜单入口为 `/api/v1/system/app/menu/create|get-list|update`。按固定 ID 或明确的自然键先查询，存在时按自己拥有的字段更新，缺失才创建；重复初始化不得重复菜单或覆盖企业已有的个性化配置。
-3. 具备平台批准的服务身份时，可用 `sys.NewAppManageClient(connection).AppMenuBatchImport` 传入 `sys.AppMenuBatchImportReq{App: ..., Menus: ...}`，以固定应用 ID 幂等导入应用与菜单。该入口是 **RPC**，当前 HTTP 合同没有 `/batch-import`，不要编造 HTTP 路径。`things/sdk/seed` 的 Ensure 方法面向产品等 Things 数据，不能替代 Core 应用和菜单注册。
-4. 菜单记录包含 `appID`、`parentID`、`path`、`component`、`defaultName`、`defaultIcon`、`defaultSort`、类型和角色范围。父项先建立，子项使用实际父 ID；`component` 必须匹配当前宿主的页面映射，`path` 必须与 Web 路由一致。隐藏详情页仍归属于有权菜单，不能通过隐藏选项绕过权限。
-5. 按应用的 `useBy` 及平台策略开通企业应用、角色与菜单权限。管理端应用绑定可用 [企业应用合同](../../../../contracts/source/backend/core/service/apisvr/http/system/tenant/app.api) 的 `/api/v1/system/tenant/app/create|update`，不要假定客户端与管理端的开通策略相同。
-6. 用实际成员调用 `/api/v1/system/user/self/app/get-list`、`/api/v1/system/user/self/menu/get-list` 验收可见范围。平台应用列表可见不能代替当前成员已经有权访问。
+2. 基础客户端直接使用[后端内嵌清单和启动注册](../../../../apps/iot-basic/README.md#启动时自动注册)，默认注册四端应用与 23 个 Web 菜单。自己的应用维护自己的稳定 ID、入口和完整菜单清单，不依赖平台 Things 的种子。
+3. 平台管理 HTTP 入口为 `/api/v1/system/app/info/create|get-one|update|get-list`，菜单入口为 `/api/v1/system/app/menu/create|get-list|update`。这些入口用于有权管理员的日常维护；应用初始化使用下一项的完整模板批量导入，不以逐条 create 替代幂等注册。
+4. 支持启动注册的平台提供 `POST /api/v1/system/app/info/batch-import`，需要真实平台超级管理员身份；Go 用 [appseed.Register](../../../../sdks/go/appseed/README.md)，Java/Node 使用各自 HTTP 客户端发送 `{app, menus}` 并核验业务码与响应 ID。旧平台返回缺少入口时先升级平台，禁止退回逐条 create 来伪装幂等注册。具备平台批准的服务身份时，也可用 `sys.NewAppManageClient(connection).AppMenuBatchImport` 传入 `sys.AppMenuBatchImportReq{App: ..., Menus: ...}`，以固定应用 ID 幂等导入应用与菜单。RPC 与新增 HTTP 入口复用同一幂等导入逻辑；HTTP 随后回填已开通企业缺少的菜单，不自动授予成员权限。`things/sdk/seed` 的 Ensure 方法面向产品等 Things 数据，不能替代 Core 应用和菜单注册。
+5. 菜单记录包含 `appID`、`parentID`、`path`、`component`、`defaultName`、`defaultIcon`、`defaultSort`、类型和角色范围。父项先建立，子项使用实际父 ID；`component` 必须匹配当前宿主的页面映射，`path` 必须与 Web 路由一致。隐藏详情页仍归属于有权菜单，不能通过隐藏选项绕过权限。
+6. 按应用的 `useBy` 及平台策略开通企业应用、角色与菜单权限。管理端应用绑定可用 [企业应用合同](../../../../contracts/source/backend/core/service/apisvr/http/system/tenant/app.api) 的 `/api/v1/system/tenant/app/create|update`，不要假定客户端与管理端的开通策略相同。
+7. 用实际成员调用 `/api/v1/system/user/self/app/get-list`、`/api/v1/system/user/self/menu/get-list` 验收可见范围。平台应用列表可见不能代替当前成员已经有权访问。
 
 前端构建的 `VITE_GLOB_APPID`、后端请求的应用上下文、菜单所属应用 ID 必须一致。移动端以对应端的应用配置接入；AppID 与小程序厂商 AppID 是不同标识。
 

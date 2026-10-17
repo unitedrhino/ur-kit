@@ -19,6 +19,18 @@ info(
 
 service api {
     @doc(
+        summary: "幂等注册应用与菜单"
+        description: "业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。"
+        authType: "platform"
+        group: "system/app/info"
+        resource: "system/app/info"
+        action: "import"
+        recordLogMode: "1"
+    )
+    @handler batchImport
+    post /batch-import (AppMenuBatchImportReq) returns (WithID)
+
+    @doc(
         summary: "添加应用"
         description: "业务说明：创建新的应用配置，包括应用名称、类型（web/小程序/原生）、使用对象、试用时长等。应用是平台的功能模块单元，租户可通过绑定应用获取相应功能权限。"
         authType: "platform"
@@ -111,6 +123,11 @@ service api {
 
 
 type (
+    // AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。
+    AppMenuBatchImportReq {
+        App *AppInfo `json:"app"` // 当前应用模板，必须使用稳定的应用 ID
+        Menus []*MenuInfo `json:"menus"` // 当前应用的完整菜单模板，父节点必须先于子节点
+    }
 //    AppPolicyGetOneReq{
 //        AppID int64 `json:"appID,string"`
 //        Code string `json:"code"`

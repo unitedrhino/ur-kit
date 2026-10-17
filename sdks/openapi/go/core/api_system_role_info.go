@@ -480,7 +480,7 @@ func (r ApiPostApiV1SystemRoleInfoGetListRequest) Execute() (*PostApiV1SystemRol
 /*
 PostApiV1SystemRoleInfoGetList 获取角色列表
 
-业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemRoleInfoGetListRequest
@@ -590,7 +590,7 @@ func (r ApiPostApiV1SystemRoleInfoGetList_0Request) Execute() (*PostApiV1SystemR
 /*
 PostApiV1SystemRoleInfoGetList_0 获取角色列表
 
-业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
 
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemRoleInfoGetList_0Request

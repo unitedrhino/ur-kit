@@ -400,7 +400,7 @@ public class SystemRoleInfoApi {
 
   /**
    * 获取角色列表
-   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
    * @param roleInfoGetListReq  (required)
    * @return PostApiV1SystemRoleInfoGetList200Response
    * @throws ApiException if fails to make API call
@@ -412,7 +412,7 @@ public class SystemRoleInfoApi {
 
   /**
    * 获取角色列表
-   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
    * @param roleInfoGetListReq  (required)
    * @return ApiResponse&lt;PostApiV1SystemRoleInfoGetList200Response&gt;
    * @throws ApiException if fails to make API call
@@ -478,7 +478,7 @@ public class SystemRoleInfoApi {
 
   /**
    * 获取角色列表
-   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
    * @param roleInfoGetListReq  (required)
    * @return PostApiV1SystemRoleInfoGetList200Response
    * @throws ApiException if fails to make API call
@@ -490,7 +490,7 @@ public class SystemRoleInfoApi {
 
   /**
    * 获取角色列表
-   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+   * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
    * @param roleInfoGetListReq  (required)
    * @return ApiResponse&lt;PostApiV1SystemRoleInfoGetList200Response&gt;
    * @throws ApiException if fails to make API call

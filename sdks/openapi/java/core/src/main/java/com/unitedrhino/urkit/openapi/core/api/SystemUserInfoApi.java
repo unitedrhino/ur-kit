@@ -18,9 +18,11 @@ import com.unitedrhino.urkit.openapi.core.client.ApiResponse;
 import com.unitedrhino.urkit.openapi.core.client.Pair;
 
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemAgreementDelete200Response;
+import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemUserInfoBatchCreate200Response;
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemUserInfoCreate200Response;
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemUserInfoGetList200Response;
 import com.unitedrhino.urkit.openapi.core.model.PostApiV1SystemUserInfoGetOne200Response;
+import com.unitedrhino.urkit.openapi.core.model.UserInfoBatchCreateReq;
 import com.unitedrhino.urkit.openapi.core.model.UserInfoCreateReq;
 import com.unitedrhino.urkit.openapi.core.model.UserInfoDeleteReq;
 import com.unitedrhino.urkit.openapi.core.model.UserInfoGetListReq;
@@ -88,6 +90,162 @@ public class SystemUserInfoApi {
       body = "[no body]";
     }
     return operationId + " call failed with: " + statusCode + " - " + body;
+  }
+
+  /**
+   * 批量创建用户
+   * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+   * @param userInfoBatchCreateReq  (required)
+   * @return PostApiV1SystemUserInfoBatchCreate200Response
+   * @throws ApiException if fails to make API call
+   */
+  public PostApiV1SystemUserInfoBatchCreate200Response postApiV1SystemUserInfoBatchCreate(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response> localVarResponse = postApiV1SystemUserInfoBatchCreateWithHttpInfo(userInfoBatchCreateReq);
+    return localVarResponse.getData();
+  }
+
+  /**
+   * 批量创建用户
+   * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+   * @param userInfoBatchCreateReq  (required)
+   * @return ApiResponse&lt;PostApiV1SystemUserInfoBatchCreate200Response&gt;
+   * @throws ApiException if fails to make API call
+   */
+  public ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response> postApiV1SystemUserInfoBatchCreateWithHttpInfo(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = postApiV1SystemUserInfoBatchCreateRequestBuilder(userInfoBatchCreateReq);
+    try {
+      HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
+          localVarRequestBuilder.build(),
+          HttpResponse.BodyHandlers.ofInputStream());
+      if (memberVarResponseInterceptor != null) {
+        memberVarResponseInterceptor.accept(localVarResponse);
+      }
+      try {
+        if (localVarResponse.statusCode()/ 100 != 2) {
+          throw getApiException("postApiV1SystemUserInfoBatchCreate", localVarResponse);
+        }
+        return new ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response>(
+          localVarResponse.statusCode(),
+          localVarResponse.headers().map(),
+          localVarResponse.body() == null ? null : memberVarObjectMapper.readValue(localVarResponse.body(), new TypeReference<PostApiV1SystemUserInfoBatchCreate200Response>() {}) // closes the InputStream
+        );
+      } finally {
+      }
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private HttpRequest.Builder postApiV1SystemUserInfoBatchCreateRequestBuilder(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    // verify the required parameter 'userInfoBatchCreateReq' is set
+    if (userInfoBatchCreateReq == null) {
+      throw new ApiException(400, "Missing the required parameter 'userInfoBatchCreateReq' when calling postApiV1SystemUserInfoBatchCreate");
+    }
+
+    HttpRequest.Builder localVarRequestBuilder = HttpRequest.newBuilder();
+
+    String localVarPath = "/api/v1/system/user/info/batch-create";
+
+    localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
+
+    localVarRequestBuilder.header("Content-Type", "application/json");
+    localVarRequestBuilder.header("Accept", "application/json");
+
+    try {
+      byte[] localVarPostBody = memberVarObjectMapper.writeValueAsBytes(userInfoBatchCreateReq);
+      localVarRequestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(localVarPostBody));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    if (memberVarReadTimeout != null) {
+      localVarRequestBuilder.timeout(memberVarReadTimeout);
+    }
+    if (memberVarInterceptor != null) {
+      memberVarInterceptor.accept(localVarRequestBuilder);
+    }
+    return localVarRequestBuilder;
+  }
+
+  /**
+   * 批量创建用户
+   * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+   * @param userInfoBatchCreateReq  (required)
+   * @return PostApiV1SystemUserInfoBatchCreate200Response
+   * @throws ApiException if fails to make API call
+   */
+  public PostApiV1SystemUserInfoBatchCreate200Response postApiV1SystemUserInfoBatchCreate_0(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response> localVarResponse = postApiV1SystemUserInfoBatchCreate_0WithHttpInfo(userInfoBatchCreateReq);
+    return localVarResponse.getData();
+  }
+
+  /**
+   * 批量创建用户
+   * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+   * @param userInfoBatchCreateReq  (required)
+   * @return ApiResponse&lt;PostApiV1SystemUserInfoBatchCreate200Response&gt;
+   * @throws ApiException if fails to make API call
+   */
+  public ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response> postApiV1SystemUserInfoBatchCreate_0WithHttpInfo(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    HttpRequest.Builder localVarRequestBuilder = postApiV1SystemUserInfoBatchCreate_0RequestBuilder(userInfoBatchCreateReq);
+    try {
+      HttpResponse<InputStream> localVarResponse = memberVarHttpClient.send(
+          localVarRequestBuilder.build(),
+          HttpResponse.BodyHandlers.ofInputStream());
+      if (memberVarResponseInterceptor != null) {
+        memberVarResponseInterceptor.accept(localVarResponse);
+      }
+      try {
+        if (localVarResponse.statusCode()/ 100 != 2) {
+          throw getApiException("postApiV1SystemUserInfoBatchCreate_0", localVarResponse);
+        }
+        return new ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response>(
+          localVarResponse.statusCode(),
+          localVarResponse.headers().map(),
+          localVarResponse.body() == null ? null : memberVarObjectMapper.readValue(localVarResponse.body(), new TypeReference<PostApiV1SystemUserInfoBatchCreate200Response>() {}) // closes the InputStream
+        );
+      } finally {
+      }
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    catch (InterruptedException e) {
+      Thread.currentThread().interrupt();
+      throw new ApiException(e);
+    }
+  }
+
+  private HttpRequest.Builder postApiV1SystemUserInfoBatchCreate_0RequestBuilder(UserInfoBatchCreateReq userInfoBatchCreateReq) throws ApiException {
+    // verify the required parameter 'userInfoBatchCreateReq' is set
+    if (userInfoBatchCreateReq == null) {
+      throw new ApiException(400, "Missing the required parameter 'userInfoBatchCreateReq' when calling postApiV1SystemUserInfoBatchCreate_0");
+    }
+
+    HttpRequest.Builder localVarRequestBuilder = HttpRequest.newBuilder();
+
+    String localVarPath = "/api/v1/system/user/info/batch-create";
+
+    localVarRequestBuilder.uri(URI.create(memberVarBaseUri + localVarPath));
+
+    localVarRequestBuilder.header("Content-Type", "application/json");
+    localVarRequestBuilder.header("Accept", "application/json");
+
+    try {
+      byte[] localVarPostBody = memberVarObjectMapper.writeValueAsBytes(userInfoBatchCreateReq);
+      localVarRequestBuilder.method("POST", HttpRequest.BodyPublishers.ofByteArray(localVarPostBody));
+    } catch (IOException e) {
+      throw new ApiException(e);
+    }
+    if (memberVarReadTimeout != null) {
+      localVarRequestBuilder.timeout(memberVarReadTimeout);
+    }
+    if (memberVarInterceptor != null) {
+      memberVarInterceptor.accept(localVarRequestBuilder);
+    }
+    return localVarRequestBuilder;
   }
 
   /**

@@ -16,6 +16,7 @@ message UserEmpty{
 }
 
 service UserManage {
+  rpc userInfoBatchCreate(UserInfoBatchCreateReq) returns(UserInfoBatchCreateResp);//批量创建用户并分配企业角色
   rpc userInfoCreate(UserInfoCreateReq) returns(UserCreateResp);//创建用户信息
   rpc userInfoGetList(UserInfoGetListReq) returns(UserInfoGetListResp);//获取用户列表（支持分页和过滤）
   rpc userInfoUpdate(userInfoUpdateReq) returns(UserEmpty);//更新用户基本数据
@@ -108,6 +109,7 @@ message UserCreateResp{
 message UserInfoCreateReq{
   UserInfo info = 1;
   repeated int64 roleIDs =2;
+  repeated UserCreateTenantBinding tenantBindings = 3; // 创建时加入的企业及其角色
 }
 message UserInfoGetListReq{
   PageInfo page       = 1;//分页信息 只获取一个则不填 搜索的字段: userID:用户id userName:登录用户名  email:邮箱  phone:手机号
@@ -437,4 +439,40 @@ message UserAccessTokenCreateInternalResp {
   string accessKey = 2;                      // 访问密钥标识
   string accessSecret = 3;                   // 访问密钥（完整值，仅此一次返回）
   int64 expTime = 4;                         // 过期时间（毫秒时间戳）
+}
+
+// UserCreateTenantBinding 指定用户加入的企业及该企业的角色。
+message UserCreateTenantBinding {
+  string tenantCode = 1; // 企业编码
+  repeated int64 roleIDs = 2; // 企业角色ID
+}
+// UserImportRow 是不含密码的导入行。
+message UserImportRow {
+  int64 row = 1; // 表格原始行号
+  string userName = 2; // 登录名
+  string nickName = 3; // 昵称
+  string phone = 4; // 手机号
+  string email = 5; // 邮箱
+  int64 sex = 6; // 性别：0未知、1男、2女
+}
+// UserInfoBatchCreateReq 用统一密码和授权配置创建至多20个用户。
+message UserInfoBatchCreateReq {
+  repeated UserImportRow users = 1; // 导入行
+  string password = 2; // 统一初始密码，沿用管理员创建的明文口径
+  repeated int64 roleIDs = 3; // 平台角色ID
+  repeated UserCreateTenantBinding tenantBindings = 4; // 企业及其角色
+}
+// UserImportResult 是单行创建结果，不回传密码或请求正文。
+message UserImportResult {
+  int64 row = 1; // 原始行号
+  string status = 2; // success成功、skipped重复跳过、failed失败
+  int64 userID = 3; // 成功创建的用户ID
+  string message = 4; // 结果说明
+}
+// UserInfoBatchCreateResp 汇总当前批次的逐行结果。
+message UserInfoBatchCreateResp {
+  repeated UserImportResult list = 1; // 逐行结果
+  int64 successCount = 2; // 成功数量
+  int64 skipCount = 3; // 跳过数量
+  int64 failCount = 4; // 失败数量
 }

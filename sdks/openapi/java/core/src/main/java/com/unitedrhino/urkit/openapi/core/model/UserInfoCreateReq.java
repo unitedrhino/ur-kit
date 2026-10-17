@@ -24,6 +24,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonTypeName;
 import com.fasterxml.jackson.annotation.JsonValue;
+import com.unitedrhino.urkit.openapi.core.model.UserCreateTenantBinding;
 import com.unitedrhino.urkit.openapi.core.model.UserInfo;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,7 +38,8 @@ import com.unitedrhino.urkit.openapi.core.client.ApiClient;
  */
 @JsonPropertyOrder({
   UserInfoCreateReq.JSON_PROPERTY_INFO,
-  UserInfoCreateReq.JSON_PROPERTY_ROLE_I_DS
+  UserInfoCreateReq.JSON_PROPERTY_ROLE_I_DS,
+  UserInfoCreateReq.JSON_PROPERTY_TENANT_BINDINGS
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.8.0")
 public class UserInfoCreateReq {
@@ -46,6 +48,9 @@ public class UserInfoCreateReq {
 
   public static final String JSON_PROPERTY_ROLE_I_DS = "roleIDs";
   private List<String> roleIDs = new ArrayList<>();
+
+  public static final String JSON_PROPERTY_TENANT_BINDINGS = "tenantBindings";
+  private List<UserCreateTenantBinding> tenantBindings = new ArrayList<>();
 
   public UserInfoCreateReq() {
   }
@@ -106,6 +111,38 @@ public class UserInfoCreateReq {
   }
 
 
+  public UserInfoCreateReq tenantBindings(List<UserCreateTenantBinding> tenantBindings) {
+    this.tenantBindings = tenantBindings;
+    return this;
+  }
+
+  public UserInfoCreateReq addTenantBindingsItem(UserCreateTenantBinding tenantBindingsItem) {
+    if (this.tenantBindings == null) {
+      this.tenantBindings = new ArrayList<>();
+    }
+    this.tenantBindings.add(tenantBindingsItem);
+    return this;
+  }
+
+  /**
+   *  创建时加入的企业及其角色
+   * @return tenantBindings
+   */
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_TENANT_BINDINGS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public List<UserCreateTenantBinding> getTenantBindings() {
+    return tenantBindings;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_TENANT_BINDINGS)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setTenantBindings(List<UserCreateTenantBinding> tenantBindings) {
+    this.tenantBindings = tenantBindings;
+  }
+
+
   /**
    * Return true if this UserInfoCreateReq object is equal to o.
    */
@@ -119,12 +156,13 @@ public class UserInfoCreateReq {
     }
     UserInfoCreateReq userInfoCreateReq = (UserInfoCreateReq) o;
     return Objects.equals(this.info, userInfoCreateReq.info) &&
-        Objects.equals(this.roleIDs, userInfoCreateReq.roleIDs);
+        Objects.equals(this.roleIDs, userInfoCreateReq.roleIDs) &&
+        Objects.equals(this.tenantBindings, userInfoCreateReq.tenantBindings);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(info, roleIDs);
+    return Objects.hash(info, roleIDs, tenantBindings);
   }
 
   @Override
@@ -133,6 +171,7 @@ public class UserInfoCreateReq {
     sb.append("class UserInfoCreateReq {\n");
     sb.append("    info: ").append(toIndentedString(info)).append("\n");
     sb.append("    roleIDs: ").append(toIndentedString(roleIDs)).append("\n");
+    sb.append("    tenantBindings: ").append(toIndentedString(tenantBindings)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -191,6 +230,16 @@ public class UserInfoCreateReq {
         joiner.add(String.format("%sroleIDs%s%s=%s", prefix, suffix,
             "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix),
             URLEncoder.encode(ApiClient.valueToString(getRoleIDs().get(i)), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+      }
+    }
+
+    // add `tenantBindings` to the URL query string
+    if (getTenantBindings() != null) {
+      for (int i = 0; i < getTenantBindings().size(); i++) {
+        if (getTenantBindings().get(i) != null) {
+          joiner.add(getTenantBindings().get(i).toUrlQueryString(String.format("%stenantBindings%s%s", prefix, suffix,
+          "".equals(suffix) ? "" : String.format("%s%d%s", containerPrefix, i, containerSuffix))));
+        }
       }
     }
 

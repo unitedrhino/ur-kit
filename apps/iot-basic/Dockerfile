@@ -1,4 +1,4 @@
-# 本文件构建 IoT 基础 Web 与 Go 示例服务，并在单容器提供页面、样例 API 和平台代理。
+# 本文件构建 IoT 基础 Web 与内嵌注册清单的 Go 服务，启动注册成功后提供单容器页面与 API。
 FROM node:22-bookworm-slim AS web-build
 RUN corepack enable
 WORKDIR /src

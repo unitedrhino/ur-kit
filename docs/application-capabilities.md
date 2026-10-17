@@ -13,7 +13,7 @@
 | 企业/项目权限 | [平台权限缓存](../cache/README.md)、项目公开合同 | 用户、角色与资源范围同时检查，应用数据自行隔离 |
 | 缓存与 Redis | [cache](../cache/README.md) | 本地/共享缓存、幂等 loader 和失效；平台私有对象不作为依赖 |
 | 文件上传与下载 | [core-api 合同](../contracts/source/backend/.swagger/core-api.json) 中 common 上传接口 | 使用签名 URL 或上传接口，保留临时确认和私有访问边界 |
-| 路由、应用、菜单 | [平台注册](../.agents/skills/ur-kit-development/references/platform-registration.md) | handler、代理、页面、应用授权分别配置 |
+| 路由、应用、菜单 | [平台注册](../.agents/skills/ur-kit-development/references/platform-registration.md) | iot-basic 启动注册四端应用与 Web 菜单；handler、代理、页面和成员权限分别接入 |
 | 定时/延时任务 | [任务注册与消费](../.agents/skills/ur-kit-development/references/platform-registration.md#5-注册任务组定时任务与处理器) | 管理合同 + 授权的消息消费者；创建记录不会自动执行代码 |
 | Hook 与第三方事件 | [接入与验签](../.agents/skills/ur-kit-development/references/application-development.md#平台入口与部署) | 标准 HTTP 回调，独立校验 HMAC，按请求 ID 幂等 |
 | 数据分析 | [core-data 合同](../contracts/source/backend/.swagger/core-data.json) | 管理员配置数据源/查询，应用以有权身份执行查询 |

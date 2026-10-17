@@ -18,6 +18,7 @@ import type {
   AppInfo,
   AppInfoGetListReq,
   AppInfoGetOneReq,
+  AppMenuBatchImportReq,
   AppWxMiniGetUrlLinkReq,
   PostApiV1SystemAgreementCreate200Response,
   PostApiV1SystemAgreementDelete200Response,
@@ -33,6 +34,8 @@ import {
     AppInfoGetListReqToJSON,
     AppInfoGetOneReqFromJSON,
     AppInfoGetOneReqToJSON,
+    AppMenuBatchImportReqFromJSON,
+    AppMenuBatchImportReqToJSON,
     AppWxMiniGetUrlLinkReqFromJSON,
     AppWxMiniGetUrlLinkReqToJSON,
     PostApiV1SystemAgreementCreate200ResponseFromJSON,
@@ -48,6 +51,14 @@ import {
     WithIDFromJSON,
     WithIDToJSON,
 } from '../models/index';
+
+export interface PostApiV1SystemAppInfoBatchImportRequest {
+    appMenuBatchImportReq: AppMenuBatchImportReq;
+}
+
+export interface PostApiV1SystemAppInfoBatchImport0Request {
+    appMenuBatchImportReq: AppMenuBatchImportReq;
+}
 
 export interface PostApiV1SystemAppInfoCreateRequest {
     appInfo: AppInfo;
@@ -103,6 +114,82 @@ export interface PostApiV1SystemAppInfoWxMiniGetUrlLink0Request {
 export class SystemAppInfoApi extends runtime.BaseAPI {
 
     /**
+     * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+     * 幂等注册应用与菜单
+     */
+    async postApiV1SystemAppInfoBatchImportRaw(requestParameters: PostApiV1SystemAppInfoBatchImportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementCreate200Response>> {
+        if (requestParameters['appMenuBatchImportReq'] == null) {
+            throw new runtime.RequiredError(
+                'appMenuBatchImportReq',
+                'Required parameter "appMenuBatchImportReq" was null or undefined when calling postApiV1SystemAppInfoBatchImport().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/system/app/info/batch-import`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AppMenuBatchImportReqToJSON(requestParameters['appMenuBatchImportReq']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PostApiV1SystemAgreementCreate200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+     * 幂等注册应用与菜单
+     */
+    async postApiV1SystemAppInfoBatchImport(requestParameters: PostApiV1SystemAppInfoBatchImportRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementCreate200Response> {
+        const response = await this.postApiV1SystemAppInfoBatchImportRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+     * 幂等注册应用与菜单
+     */
+    async postApiV1SystemAppInfoBatchImport_1Raw(requestParameters: PostApiV1SystemAppInfoBatchImport0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementCreate200Response>> {
+        if (requestParameters['appMenuBatchImportReq'] == null) {
+            throw new runtime.RequiredError(
+                'appMenuBatchImportReq',
+                'Required parameter "appMenuBatchImportReq" was null or undefined when calling postApiV1SystemAppInfoBatchImport_1().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/system/app/info/batch-import`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: AppMenuBatchImportReqToJSON(requestParameters['appMenuBatchImportReq']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PostApiV1SystemAgreementCreate200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+     * 幂等注册应用与菜单
+     */
+    async postApiV1SystemAppInfoBatchImport_1(requestParameters: PostApiV1SystemAppInfoBatchImport0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementCreate200Response> {
+        const response = await this.postApiV1SystemAppInfoBatchImport_1Raw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * 业务说明：创建新的应用配置，包括应用名称、类型（web/小程序/原生）、使用对象、试用时长等。应用是平台的功能模块单元，租户可通过绑定应用获取相应功能权限。
      * 添加应用
      */
@@ -144,11 +231,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：创建新的应用配置，包括应用名称、类型（web/小程序/原生）、使用对象、试用时长等。应用是平台的功能模块单元，租户可通过绑定应用获取相应功能权限。
      * 添加应用
      */
-    async postApiV1SystemAppInfoCreate_1Raw(requestParameters: PostApiV1SystemAppInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementCreate200Response>> {
+    async postApiV1SystemAppInfoCreate_2Raw(requestParameters: PostApiV1SystemAppInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementCreate200Response>> {
         if (requestParameters['appInfo'] == null) {
             throw new runtime.RequiredError(
                 'appInfo',
-                'Required parameter "appInfo" was null or undefined when calling postApiV1SystemAppInfoCreate_1().'
+                'Required parameter "appInfo" was null or undefined when calling postApiV1SystemAppInfoCreate_2().'
             );
         }
 
@@ -173,8 +260,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：创建新的应用配置，包括应用名称、类型（web/小程序/原生）、使用对象、试用时长等。应用是平台的功能模块单元，租户可通过绑定应用获取相应功能权限。
      * 添加应用
      */
-    async postApiV1SystemAppInfoCreate_1(requestParameters: PostApiV1SystemAppInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementCreate200Response> {
-        const response = await this.postApiV1SystemAppInfoCreate_1Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoCreate_2(requestParameters: PostApiV1SystemAppInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementCreate200Response> {
+        const response = await this.postApiV1SystemAppInfoCreate_2Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -220,11 +307,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：删除指定应用，删除后租户无法再绑定该应用。删除前需确认无租户已绑定该应用，避免影响已开通的功能。通常用于清理废弃的应用配置。
      * 删除应用
      */
-    async postApiV1SystemAppInfoDelete_2Raw(requestParameters: PostApiV1SystemAppInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
+    async postApiV1SystemAppInfoDelete_3Raw(requestParameters: PostApiV1SystemAppInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
         if (requestParameters['withID'] == null) {
             throw new runtime.RequiredError(
                 'withID',
-                'Required parameter "withID" was null or undefined when calling postApiV1SystemAppInfoDelete_2().'
+                'Required parameter "withID" was null or undefined when calling postApiV1SystemAppInfoDelete_3().'
             );
         }
 
@@ -249,8 +336,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：删除指定应用，删除后租户无法再绑定该应用。删除前需确认无租户已绑定该应用，避免影响已开通的功能。通常用于清理废弃的应用配置。
      * 删除应用
      */
-    async postApiV1SystemAppInfoDelete_2(requestParameters: PostApiV1SystemAppInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
-        const response = await this.postApiV1SystemAppInfoDelete_2Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoDelete_3(requestParameters: PostApiV1SystemAppInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
+        const response = await this.postApiV1SystemAppInfoDelete_3Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -296,11 +383,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：查询平台应用列表，支持按名称、类型、状态、租户绑定状态等条件筛选。用于应用管理页面的列表展示，平台管理员可查看所有应用及租户绑定情况。
      * 获取应用列表
      */
-    async postApiV1SystemAppInfoGetList_3Raw(requestParameters: PostApiV1SystemAppInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppInfoGetList200Response>> {
+    async postApiV1SystemAppInfoGetList_4Raw(requestParameters: PostApiV1SystemAppInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppInfoGetList200Response>> {
         if (requestParameters['appInfoGetListReq'] == null) {
             throw new runtime.RequiredError(
                 'appInfoGetListReq',
-                'Required parameter "appInfoGetListReq" was null or undefined when calling postApiV1SystemAppInfoGetList_3().'
+                'Required parameter "appInfoGetListReq" was null or undefined when calling postApiV1SystemAppInfoGetList_4().'
             );
         }
 
@@ -325,8 +412,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：查询平台应用列表，支持按名称、类型、状态、租户绑定状态等条件筛选。用于应用管理页面的列表展示，平台管理员可查看所有应用及租户绑定情况。
      * 获取应用列表
      */
-    async postApiV1SystemAppInfoGetList_3(requestParameters: PostApiV1SystemAppInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppInfoGetList200Response> {
-        const response = await this.postApiV1SystemAppInfoGetList_3Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoGetList_4(requestParameters: PostApiV1SystemAppInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppInfoGetList200Response> {
+        const response = await this.postApiV1SystemAppInfoGetList_4Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -372,11 +459,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：查询单个应用的完整配置信息，包括基本信息、试用策略、状态等。用于应用编辑页面加载初始数据，或查看应用详细配置。
      * 获取应用详情
      */
-    async postApiV1SystemAppInfoGetOne_4Raw(requestParameters: PostApiV1SystemAppInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppCoreGetOne200Response>> {
+    async postApiV1SystemAppInfoGetOne_5Raw(requestParameters: PostApiV1SystemAppInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppCoreGetOne200Response>> {
         if (requestParameters['appInfoGetOneReq'] == null) {
             throw new runtime.RequiredError(
                 'appInfoGetOneReq',
-                'Required parameter "appInfoGetOneReq" was null or undefined when calling postApiV1SystemAppInfoGetOne_4().'
+                'Required parameter "appInfoGetOneReq" was null or undefined when calling postApiV1SystemAppInfoGetOne_5().'
             );
         }
 
@@ -401,8 +488,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：查询单个应用的完整配置信息，包括基本信息、试用策略、状态等。用于应用编辑页面加载初始数据，或查看应用详细配置。
      * 获取应用详情
      */
-    async postApiV1SystemAppInfoGetOne_4(requestParameters: PostApiV1SystemAppInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppCoreGetOne200Response> {
-        const response = await this.postApiV1SystemAppInfoGetOne_4Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoGetOne_5(requestParameters: PostApiV1SystemAppInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppCoreGetOne200Response> {
+        const response = await this.postApiV1SystemAppInfoGetOne_5Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -448,11 +535,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：修改应用配置，包括名称、类型、试用时长、状态等，支持部分更新。应用上架/下架通过状态字段控制，上架后租户可申请绑定。
      * 更新应用
      */
-    async postApiV1SystemAppInfoUpdate_5Raw(requestParameters: PostApiV1SystemAppInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
+    async postApiV1SystemAppInfoUpdate_6Raw(requestParameters: PostApiV1SystemAppInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
         if (requestParameters['appInfo'] == null) {
             throw new runtime.RequiredError(
                 'appInfo',
-                'Required parameter "appInfo" was null or undefined when calling postApiV1SystemAppInfoUpdate_5().'
+                'Required parameter "appInfo" was null or undefined when calling postApiV1SystemAppInfoUpdate_6().'
             );
         }
 
@@ -477,8 +564,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：修改应用配置，包括名称、类型、试用时长、状态等，支持部分更新。应用上架/下架通过状态字段控制，上架后租户可申请绑定。
      * 更新应用
      */
-    async postApiV1SystemAppInfoUpdate_5(requestParameters: PostApiV1SystemAppInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
-        const response = await this.postApiV1SystemAppInfoUpdate_5Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoUpdate_6(requestParameters: PostApiV1SystemAppInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
+        const response = await this.postApiV1SystemAppInfoUpdate_6Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -524,11 +611,11 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：根据平台应用 ID 动态调用微信服务端接口生成小程序 URL Link，用于微信外扫码或 H5 页面拉起小程序。
      * 获取微信小程序 URL Link
      */
-    async postApiV1SystemAppInfoWxMiniGetUrlLink_6Raw(requestParameters: PostApiV1SystemAppInfoWxMiniGetUrlLink0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppInfoWxMiniGetUrlLink200Response>> {
+    async postApiV1SystemAppInfoWxMiniGetUrlLink_7Raw(requestParameters: PostApiV1SystemAppInfoWxMiniGetUrlLink0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAppInfoWxMiniGetUrlLink200Response>> {
         if (requestParameters['appWxMiniGetUrlLinkReq'] == null) {
             throw new runtime.RequiredError(
                 'appWxMiniGetUrlLinkReq',
-                'Required parameter "appWxMiniGetUrlLinkReq" was null or undefined when calling postApiV1SystemAppInfoWxMiniGetUrlLink_6().'
+                'Required parameter "appWxMiniGetUrlLinkReq" was null or undefined when calling postApiV1SystemAppInfoWxMiniGetUrlLink_7().'
             );
         }
 
@@ -553,8 +640,8 @@ export class SystemAppInfoApi extends runtime.BaseAPI {
      * 业务说明：根据平台应用 ID 动态调用微信服务端接口生成小程序 URL Link，用于微信外扫码或 H5 页面拉起小程序。
      * 获取微信小程序 URL Link
      */
-    async postApiV1SystemAppInfoWxMiniGetUrlLink_6(requestParameters: PostApiV1SystemAppInfoWxMiniGetUrlLink0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppInfoWxMiniGetUrlLink200Response> {
-        const response = await this.postApiV1SystemAppInfoWxMiniGetUrlLink_6Raw(requestParameters, initOverrides);
+    async postApiV1SystemAppInfoWxMiniGetUrlLink_7(requestParameters: PostApiV1SystemAppInfoWxMiniGetUrlLink0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAppInfoWxMiniGetUrlLink200Response> {
+        const response = await this.postApiV1SystemAppInfoWxMiniGetUrlLink_7Raw(requestParameters, initOverrides);
         return await response.value();
     }
 

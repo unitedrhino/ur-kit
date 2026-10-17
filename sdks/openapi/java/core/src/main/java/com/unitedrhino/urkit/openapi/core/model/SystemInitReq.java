@@ -36,12 +36,16 @@ import com.unitedrhino.urkit.openapi.core.client.ApiClient;
  */
 @JsonPropertyOrder({
   SystemInitReq.JSON_PROPERTY_CONFIG,
+  SystemInitReq.JSON_PROPERTY_CREATE_TENANT,
   SystemInitReq.JSON_PROPERTY_OWNER_USER
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.8.0")
 public class SystemInitReq {
   public static final String JSON_PROPERTY_CONFIG = "config";
   private SysConfigInfo config;
+
+  public static final String JSON_PROPERTY_CREATE_TENANT = "createTenant";
+  private Boolean createTenant;
 
   public static final String JSON_PROPERTY_OWNER_USER = "ownerUser";
   private UserCreate ownerUser;
@@ -70,6 +74,30 @@ public class SystemInitReq {
   @JsonInclude(value = JsonInclude.Include.ALWAYS)
   public void setConfig(SysConfigInfo config) {
     this.config = config;
+  }
+
+
+  public SystemInitReq createTenant(Boolean createTenant) {
+    this.createTenant = createTenant;
+    return this;
+  }
+
+  /**
+   *  是否同时创建企业，未传时不创建
+   * @return createTenant
+   */
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_CREATE_TENANT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public Boolean getCreateTenant() {
+    return createTenant;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_CREATE_TENANT)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setCreateTenant(Boolean createTenant) {
+    this.createTenant = createTenant;
   }
 
 
@@ -110,12 +138,13 @@ public class SystemInitReq {
     }
     SystemInitReq systemInitReq = (SystemInitReq) o;
     return Objects.equals(this.config, systemInitReq.config) &&
+        Objects.equals(this.createTenant, systemInitReq.createTenant) &&
         Objects.equals(this.ownerUser, systemInitReq.ownerUser);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(config, ownerUser);
+    return Objects.hash(config, createTenant, ownerUser);
   }
 
   @Override
@@ -123,6 +152,7 @@ public class SystemInitReq {
     StringBuilder sb = new StringBuilder();
     sb.append("class SystemInitReq {\n");
     sb.append("    config: ").append(toIndentedString(config)).append("\n");
+    sb.append("    createTenant: ").append(toIndentedString(createTenant)).append("\n");
     sb.append("    ownerUser: ").append(toIndentedString(ownerUser)).append("\n");
     sb.append("}");
     return sb.toString();
@@ -174,6 +204,11 @@ public class SystemInitReq {
     // add `config` to the URL query string
     if (getConfig() != null) {
       joiner.add(getConfig().toUrlQueryString(prefix + "config" + suffix));
+    }
+
+    // add `createTenant` to the URL query string
+    if (getCreateTenant() != null) {
+      joiner.add(String.format("%screateTenant%s=%s", prefix, suffix, URLEncoder.encode(ApiClient.valueToString(getCreateTenant()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
     }
 
     // add `ownerUser` to the URL query string

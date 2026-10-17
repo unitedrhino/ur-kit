@@ -125,9 +125,11 @@ def main() -> None:
                 destination = staging / relative
                 destination.parent.mkdir(parents=True, exist_ok=True)
                 shutil.copy2(source, destination)
-        java_tests = output / "java/things/src/test/java"
-        if java_tests.is_dir():
-            shutil.copytree(java_tests, staging / "java/things/src/test/java")
+        # 三语言注册验收属于手写合同测试，重复生成时与已有 Things 测试一起保留。
+        for module in ("core", "things"):
+            java_tests = output / f"java/{module}/src/test/java"
+            if java_tests.is_dir():
+                shutil.copytree(java_tests, staging / f"java/{module}/src/test/java")
         go_contract_tests = output / "go/contracttest"
         if go_contract_tests.is_dir():
             shutil.copytree(go_contract_tests, staging / "go/contracttest")

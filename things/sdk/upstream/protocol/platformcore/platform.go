@@ -15,15 +15,15 @@ import (
 	"gitee.com/unitedrhino/share/utils"
 
 	"gitee.com/unitedrhino/things/share/rpccache"
-	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
-	"github.com/unitedrhino/ur-kit/things/sdk/protocol/runtimeconfig"
+	publiccore "gitee.com/unitedrhino/things/sdk/protocol/core"
+	"gitee.com/unitedrhino/things/sdk/protocol/runtimeconfig"
 	trackinggozero "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking/gozero"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"google.golang.org/grpc"
 
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 )
 
 // runtimeOptions 保持原协议服务的运行时配置 JSON 字段。

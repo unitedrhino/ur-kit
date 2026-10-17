@@ -29,7 +29,7 @@ service api {
 
 	@doc(
 	    summary: "获取角色列表"
-	    description: "业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。"
+	    description: "业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。"
 	    authType: "admin"
 	    group: "system/role/info"
 	    resource: "system/role/info"
@@ -167,6 +167,7 @@ type (
 		Total  int64    `json:"total"` //App列表总数
 	}
 	RoleInfoGetListReq {
+        TenantCode string `json:"tenantCode,optional"` // 平台管理员可指定目标企业；省略时查询当前企业
 		Page   *PageInfo `json:"page,optional"` //分页信息,只获取一个则不填
 		Name   string    `json:"name,optional"` //按名称查找角色
 		Status int64     `json:"status,optional"` //按状态查找角色

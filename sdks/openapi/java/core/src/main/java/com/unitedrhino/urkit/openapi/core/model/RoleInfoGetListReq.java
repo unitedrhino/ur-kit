@@ -40,7 +40,8 @@ import com.unitedrhino.urkit.openapi.core.client.ApiClient;
   RoleInfoGetListReq.JSON_PROPERTY_IDS,
   RoleInfoGetListReq.JSON_PROPERTY_NAME,
   RoleInfoGetListReq.JSON_PROPERTY_PAGE,
-  RoleInfoGetListReq.JSON_PROPERTY_STATUS
+  RoleInfoGetListReq.JSON_PROPERTY_STATUS,
+  RoleInfoGetListReq.JSON_PROPERTY_TENANT_CODE
 })
 @javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", comments = "Generator version: 7.8.0")
 public class RoleInfoGetListReq {
@@ -58,6 +59,9 @@ public class RoleInfoGetListReq {
 
   public static final String JSON_PROPERTY_STATUS = "status";
   private Long status;
+
+  public static final String JSON_PROPERTY_TENANT_CODE = "tenantCode";
+  private String tenantCode;
 
   public RoleInfoGetListReq() {
   }
@@ -198,6 +202,30 @@ public class RoleInfoGetListReq {
   }
 
 
+  public RoleInfoGetListReq tenantCode(String tenantCode) {
+    this.tenantCode = tenantCode;
+    return this;
+  }
+
+  /**
+   *  平台管理员可指定目标企业；省略时查询当前企业
+   * @return tenantCode
+   */
+  @javax.annotation.Nullable
+  @JsonProperty(JSON_PROPERTY_TENANT_CODE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public String getTenantCode() {
+    return tenantCode;
+  }
+
+
+  @JsonProperty(JSON_PROPERTY_TENANT_CODE)
+  @JsonInclude(value = JsonInclude.Include.USE_DEFAULTS)
+  public void setTenantCode(String tenantCode) {
+    this.tenantCode = tenantCode;
+  }
+
+
   /**
    * Return true if this RoleInfoGetListReq object is equal to o.
    */
@@ -214,12 +242,13 @@ public class RoleInfoGetListReq {
         Objects.equals(this.ids, roleInfoGetListReq.ids) &&
         Objects.equals(this.name, roleInfoGetListReq.name) &&
         Objects.equals(this.page, roleInfoGetListReq.page) &&
-        Objects.equals(this.status, roleInfoGetListReq.status);
+        Objects.equals(this.status, roleInfoGetListReq.status) &&
+        Objects.equals(this.tenantCode, roleInfoGetListReq.tenantCode);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(codes, ids, name, page, status);
+    return Objects.hash(codes, ids, name, page, status, tenantCode);
   }
 
   @Override
@@ -231,6 +260,7 @@ public class RoleInfoGetListReq {
     sb.append("    name: ").append(toIndentedString(name)).append("\n");
     sb.append("    page: ").append(toIndentedString(page)).append("\n");
     sb.append("    status: ").append(toIndentedString(status)).append("\n");
+    sb.append("    tenantCode: ").append(toIndentedString(tenantCode)).append("\n");
     sb.append("}");
     return sb.toString();
   }
@@ -309,6 +339,11 @@ public class RoleInfoGetListReq {
     // add `status` to the URL query string
     if (getStatus() != null) {
       joiner.add(String.format("%sstatus%s=%s", prefix, suffix, URLEncoder.encode(ApiClient.valueToString(getStatus()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
+    }
+
+    // add `tenantCode` to the URL query string
+    if (getTenantCode() != null) {
+      joiner.add(String.format("%stenantCode%s=%s", prefix, suffix, URLEncoder.encode(ApiClient.valueToString(getTenantCode()), StandardCharsets.UTF_8).replaceAll("\\+", "%20")));
     }
 
     return joiner.toString();

@@ -15,7 +15,7 @@ type Config struct {
 }
 
 // MergeConfigJSON 将显式提供的 JSON 字段应用到基础配置，非空覆写时返回独立副本。
-func MergeConfigJSON(base Config, configJSON string) (Config, error) {
+func MergeConfigJSON[T any](base T, configJSON string) (T, error) {
 	return configmerge.MergeConfigJSON(base, configJSON)
 }
 

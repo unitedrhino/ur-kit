@@ -22,6 +22,228 @@ import (
 // SystemAppInfoAPIService SystemAppInfoAPI service
 type SystemAppInfoAPIService service
 
+type ApiPostApiV1SystemAppInfoBatchImportRequest struct {
+	ctx context.Context
+	ApiService *SystemAppInfoAPIService
+	appMenuBatchImportReq *AppMenuBatchImportReq
+}
+
+//  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。
+func (r ApiPostApiV1SystemAppInfoBatchImportRequest) AppMenuBatchImportReq(appMenuBatchImportReq AppMenuBatchImportReq) ApiPostApiV1SystemAppInfoBatchImportRequest {
+	r.appMenuBatchImportReq = &appMenuBatchImportReq
+	return r
+}
+
+func (r ApiPostApiV1SystemAppInfoBatchImportRequest) Execute() (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
+	return r.ApiService.PostApiV1SystemAppInfoBatchImportExecute(r)
+}
+
+/*
+PostApiV1SystemAppInfoBatchImport 幂等注册应用与菜单
+
+业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1SystemAppInfoBatchImportRequest
+*/
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoBatchImport(ctx context.Context) ApiPostApiV1SystemAppInfoBatchImportRequest {
+	return ApiPostApiV1SystemAppInfoBatchImportRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return PostApiV1SystemAgreementCreate200Response
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoBatchImportExecute(r ApiPostApiV1SystemAppInfoBatchImportRequest) (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PostApiV1SystemAgreementCreate200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoBatchImport")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/system/app/info/batch-import"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.appMenuBatchImportReq == nil {
+		return localVarReturnValue, nil, reportError("appMenuBatchImportReq is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.appMenuBatchImportReq
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostApiV1SystemAppInfoBatchImport_0Request struct {
+	ctx context.Context
+	ApiService *SystemAppInfoAPIService
+	appMenuBatchImportReq *AppMenuBatchImportReq
+}
+
+//  AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。
+func (r ApiPostApiV1SystemAppInfoBatchImport_0Request) AppMenuBatchImportReq(appMenuBatchImportReq AppMenuBatchImportReq) ApiPostApiV1SystemAppInfoBatchImport_0Request {
+	r.appMenuBatchImportReq = &appMenuBatchImportReq
+	return r
+}
+
+func (r ApiPostApiV1SystemAppInfoBatchImport_0Request) Execute() (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
+	return r.ApiService.PostApiV1SystemAppInfoBatchImport_1Execute(r)
+}
+
+/*
+PostApiV1SystemAppInfoBatchImport_0 幂等注册应用与菜单
+
+业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1SystemAppInfoBatchImport_0Request
+*/
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoBatchImport_1(ctx context.Context) ApiPostApiV1SystemAppInfoBatchImport_0Request {
+	return ApiPostApiV1SystemAppInfoBatchImport_0Request{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return PostApiV1SystemAgreementCreate200Response
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoBatchImport_1Execute(r ApiPostApiV1SystemAppInfoBatchImport_0Request) (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PostApiV1SystemAgreementCreate200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoBatchImport_1")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/system/app/info/batch-import"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.appMenuBatchImportReq == nil {
+		return localVarReturnValue, nil, reportError("appMenuBatchImportReq is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.appMenuBatchImportReq
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostApiV1SystemAppInfoCreateRequest struct {
 	ctx context.Context
 	ApiService *SystemAppInfoAPIService
@@ -144,7 +366,7 @@ func (r ApiPostApiV1SystemAppInfoCreate_0Request) AppInfo(appInfo AppInfo) ApiPo
 }
 
 func (r ApiPostApiV1SystemAppInfoCreate_0Request) Execute() (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoCreate_1Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoCreate_2Execute(r)
 }
 
 /*
@@ -155,7 +377,7 @@ PostApiV1SystemAppInfoCreate_0 添加应用
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoCreate_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_1(ctx context.Context) ApiPostApiV1SystemAppInfoCreate_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_2(ctx context.Context) ApiPostApiV1SystemAppInfoCreate_0Request {
 	return ApiPostApiV1SystemAppInfoCreate_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -164,7 +386,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_1(ctx context.Con
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementCreate200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_1Execute(r ApiPostApiV1SystemAppInfoCreate_0Request) (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_2Execute(r ApiPostApiV1SystemAppInfoCreate_0Request) (*PostApiV1SystemAgreementCreate200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -172,7 +394,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoCreate_1Execute(r ApiPos
 		localVarReturnValue  *PostApiV1SystemAgreementCreate200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoCreate_1")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoCreate_2")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -364,7 +586,7 @@ func (r ApiPostApiV1SystemAppInfoDelete_0Request) WithID(withID WithID) ApiPostA
 }
 
 func (r ApiPostApiV1SystemAppInfoDelete_0Request) Execute() (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoDelete_2Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoDelete_3Execute(r)
 }
 
 /*
@@ -375,7 +597,7 @@ PostApiV1SystemAppInfoDelete_0 删除应用
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoDelete_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_2(ctx context.Context) ApiPostApiV1SystemAppInfoDelete_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_3(ctx context.Context) ApiPostApiV1SystemAppInfoDelete_0Request {
 	return ApiPostApiV1SystemAppInfoDelete_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -384,7 +606,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_2(ctx context.Con
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementDelete200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_2Execute(r ApiPostApiV1SystemAppInfoDelete_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_3Execute(r ApiPostApiV1SystemAppInfoDelete_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -392,7 +614,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoDelete_2Execute(r ApiPos
 		localVarReturnValue  *PostApiV1SystemAgreementDelete200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoDelete_2")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoDelete_3")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -586,7 +808,7 @@ func (r ApiPostApiV1SystemAppInfoGetList_0Request) AppInfoGetListReq(appInfoGetL
 }
 
 func (r ApiPostApiV1SystemAppInfoGetList_0Request) Execute() (*PostApiV1SystemAppInfoGetList200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoGetList_3Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoGetList_4Execute(r)
 }
 
 /*
@@ -597,7 +819,7 @@ PostApiV1SystemAppInfoGetList_0 获取应用列表
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoGetList_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_3(ctx context.Context) ApiPostApiV1SystemAppInfoGetList_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_4(ctx context.Context) ApiPostApiV1SystemAppInfoGetList_0Request {
 	return ApiPostApiV1SystemAppInfoGetList_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -606,7 +828,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_3(ctx context.Co
 
 // Execute executes the request
 //  @return PostApiV1SystemAppInfoGetList200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_3Execute(r ApiPostApiV1SystemAppInfoGetList_0Request) (*PostApiV1SystemAppInfoGetList200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_4Execute(r ApiPostApiV1SystemAppInfoGetList_0Request) (*PostApiV1SystemAppInfoGetList200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -614,7 +836,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetList_3Execute(r ApiPo
 		localVarReturnValue  *PostApiV1SystemAppInfoGetList200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoGetList_3")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoGetList_4")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -806,7 +1028,7 @@ func (r ApiPostApiV1SystemAppInfoGetOne_0Request) AppInfoGetOneReq(appInfoGetOne
 }
 
 func (r ApiPostApiV1SystemAppInfoGetOne_0Request) Execute() (*PostApiV1SystemAppCoreGetOne200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoGetOne_4Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoGetOne_5Execute(r)
 }
 
 /*
@@ -817,7 +1039,7 @@ PostApiV1SystemAppInfoGetOne_0 获取应用详情
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoGetOne_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_4(ctx context.Context) ApiPostApiV1SystemAppInfoGetOne_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_5(ctx context.Context) ApiPostApiV1SystemAppInfoGetOne_0Request {
 	return ApiPostApiV1SystemAppInfoGetOne_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -826,7 +1048,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_4(ctx context.Con
 
 // Execute executes the request
 //  @return PostApiV1SystemAppCoreGetOne200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_4Execute(r ApiPostApiV1SystemAppInfoGetOne_0Request) (*PostApiV1SystemAppCoreGetOne200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_5Execute(r ApiPostApiV1SystemAppInfoGetOne_0Request) (*PostApiV1SystemAppCoreGetOne200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -834,7 +1056,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoGetOne_4Execute(r ApiPos
 		localVarReturnValue  *PostApiV1SystemAppCoreGetOne200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoGetOne_4")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoGetOne_5")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -1026,7 +1248,7 @@ func (r ApiPostApiV1SystemAppInfoUpdate_0Request) AppInfo(appInfo AppInfo) ApiPo
 }
 
 func (r ApiPostApiV1SystemAppInfoUpdate_0Request) Execute() (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoUpdate_5Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoUpdate_6Execute(r)
 }
 
 /*
@@ -1037,7 +1259,7 @@ PostApiV1SystemAppInfoUpdate_0 更新应用
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoUpdate_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_5(ctx context.Context) ApiPostApiV1SystemAppInfoUpdate_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_6(ctx context.Context) ApiPostApiV1SystemAppInfoUpdate_0Request {
 	return ApiPostApiV1SystemAppInfoUpdate_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -1046,7 +1268,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_5(ctx context.Con
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementDelete200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_5Execute(r ApiPostApiV1SystemAppInfoUpdate_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_6Execute(r ApiPostApiV1SystemAppInfoUpdate_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -1054,7 +1276,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoUpdate_5Execute(r ApiPos
 		localVarReturnValue  *PostApiV1SystemAgreementDelete200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoUpdate_5")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoUpdate_6")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -1246,7 +1468,7 @@ func (r ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request) AppWxMiniGetUrlLinkR
 }
 
 func (r ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request) Execute() (*PostApiV1SystemAppInfoWxMiniGetUrlLink200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemAppInfoWxMiniGetUrlLink_6Execute(r)
+	return r.ApiService.PostApiV1SystemAppInfoWxMiniGetUrlLink_7Execute(r)
 }
 
 /*
@@ -1257,7 +1479,7 @@ PostApiV1SystemAppInfoWxMiniGetUrlLink_0 获取微信小程序 URL Link
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request
 */
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_6(ctx context.Context) ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_7(ctx context.Context) ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request {
 	return ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -1266,7 +1488,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_6(ctx c
 
 // Execute executes the request
 //  @return PostApiV1SystemAppInfoWxMiniGetUrlLink200Response
-func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_6Execute(r ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request) (*PostApiV1SystemAppInfoWxMiniGetUrlLink200Response, *http.Response, error) {
+func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_7Execute(r ApiPostApiV1SystemAppInfoWxMiniGetUrlLink_0Request) (*PostApiV1SystemAppInfoWxMiniGetUrlLink200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -1274,7 +1496,7 @@ func (a *SystemAppInfoAPIService) PostApiV1SystemAppInfoWxMiniGetUrlLink_6Execut
 		localVarReturnValue  *PostApiV1SystemAppInfoWxMiniGetUrlLink200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoWxMiniGetUrlLink_6")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemAppInfoAPIService.PostApiV1SystemAppInfoWxMiniGetUrlLink_7")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
