@@ -27,6 +27,8 @@ type RoleInfoGetListReq struct {
 	Page *PageInfo `json:"page,omitempty"`
 	// 按状态查找角色
 	Status *int64 `json:"status,omitempty"`
+	//  平台管理员可指定目标企业；省略时查询当前企业
+	TenantCode *string `json:"tenantCode,omitempty"`
 }
 
 // NewRoleInfoGetListReq instantiates a new RoleInfoGetListReq object
@@ -206,6 +208,38 @@ func (o *RoleInfoGetListReq) SetStatus(v int64) {
 	o.Status = &v
 }
 
+// GetTenantCode returns the TenantCode field value if set, zero value otherwise.
+func (o *RoleInfoGetListReq) GetTenantCode() string {
+	if o == nil || IsNil(o.TenantCode) {
+		var ret string
+		return ret
+	}
+	return *o.TenantCode
+}
+
+// GetTenantCodeOk returns a tuple with the TenantCode field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *RoleInfoGetListReq) GetTenantCodeOk() (*string, bool) {
+	if o == nil || IsNil(o.TenantCode) {
+		return nil, false
+	}
+	return o.TenantCode, true
+}
+
+// HasTenantCode returns a boolean if a field has been set.
+func (o *RoleInfoGetListReq) HasTenantCode() bool {
+	if o != nil && !IsNil(o.TenantCode) {
+		return true
+	}
+
+	return false
+}
+
+// SetTenantCode gets a reference to the given string and assigns it to the TenantCode field.
+func (o *RoleInfoGetListReq) SetTenantCode(v string) {
+	o.TenantCode = &v
+}
+
 func (o RoleInfoGetListReq) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -230,6 +264,9 @@ func (o RoleInfoGetListReq) ToMap() (map[string]interface{}, error) {
 	}
 	if !IsNil(o.Status) {
 		toSerialize["status"] = o.Status
+	}
+	if !IsNil(o.TenantCode) {
+		toSerialize["tenantCode"] = o.TenantCode
 	}
 	return toSerialize, nil
 }

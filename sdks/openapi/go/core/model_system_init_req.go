@@ -22,6 +22,8 @@ var _ MappedNullable = &SystemInitReq{}
 // SystemInitReq struct for SystemInitReq
 type SystemInitReq struct {
 	Config SysConfigInfo `json:"config"`
+	//  是否同时创建企业，未传时不创建
+	CreateTenant *bool `json:"createTenant,omitempty"`
 	OwnerUser UserCreate `json:"ownerUser"`
 }
 
@@ -70,6 +72,38 @@ func (o *SystemInitReq) SetConfig(v SysConfigInfo) {
 	o.Config = v
 }
 
+// GetCreateTenant returns the CreateTenant field value if set, zero value otherwise.
+func (o *SystemInitReq) GetCreateTenant() bool {
+	if o == nil || IsNil(o.CreateTenant) {
+		var ret bool
+		return ret
+	}
+	return *o.CreateTenant
+}
+
+// GetCreateTenantOk returns a tuple with the CreateTenant field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *SystemInitReq) GetCreateTenantOk() (*bool, bool) {
+	if o == nil || IsNil(o.CreateTenant) {
+		return nil, false
+	}
+	return o.CreateTenant, true
+}
+
+// HasCreateTenant returns a boolean if a field has been set.
+func (o *SystemInitReq) HasCreateTenant() bool {
+	if o != nil && !IsNil(o.CreateTenant) {
+		return true
+	}
+
+	return false
+}
+
+// SetCreateTenant gets a reference to the given bool and assigns it to the CreateTenant field.
+func (o *SystemInitReq) SetCreateTenant(v bool) {
+	o.CreateTenant = &v
+}
+
 // GetOwnerUser returns the OwnerUser field value
 func (o *SystemInitReq) GetOwnerUser() UserCreate {
 	if o == nil {
@@ -105,6 +139,9 @@ func (o SystemInitReq) MarshalJSON() ([]byte, error) {
 func (o SystemInitReq) ToMap() (map[string]interface{}, error) {
 	toSerialize := map[string]interface{}{}
 	toSerialize["config"] = o.Config
+	if !IsNil(o.CreateTenant) {
+		toSerialize["createTenant"] = o.CreateTenant
+	}
 	toSerialize["ownerUser"] = o.OwnerUser
 	return toSerialize, nil
 }

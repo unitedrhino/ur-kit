@@ -22,6 +22,226 @@ import (
 // SystemUserInfoAPIService SystemUserInfoAPI service
 type SystemUserInfoAPIService service
 
+type ApiPostApiV1SystemUserInfoBatchCreateRequest struct {
+	ctx context.Context
+	ApiService *SystemUserInfoAPIService
+	userInfoBatchCreateReq *UserInfoBatchCreateReq
+}
+
+func (r ApiPostApiV1SystemUserInfoBatchCreateRequest) UserInfoBatchCreateReq(userInfoBatchCreateReq UserInfoBatchCreateReq) ApiPostApiV1SystemUserInfoBatchCreateRequest {
+	r.userInfoBatchCreateReq = &userInfoBatchCreateReq
+	return r
+}
+
+func (r ApiPostApiV1SystemUserInfoBatchCreateRequest) Execute() (*PostApiV1SystemUserInfoBatchCreate200Response, *http.Response, error) {
+	return r.ApiService.PostApiV1SystemUserInfoBatchCreateExecute(r)
+}
+
+/*
+PostApiV1SystemUserInfoBatchCreate 批量创建用户
+
+业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1SystemUserInfoBatchCreateRequest
+*/
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoBatchCreate(ctx context.Context) ApiPostApiV1SystemUserInfoBatchCreateRequest {
+	return ApiPostApiV1SystemUserInfoBatchCreateRequest{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return PostApiV1SystemUserInfoBatchCreate200Response
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoBatchCreateExecute(r ApiPostApiV1SystemUserInfoBatchCreateRequest) (*PostApiV1SystemUserInfoBatchCreate200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PostApiV1SystemUserInfoBatchCreate200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoBatchCreate")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/system/user/info/batch-create"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.userInfoBatchCreateReq == nil {
+		return localVarReturnValue, nil, reportError("userInfoBatchCreateReq is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.userInfoBatchCreateReq
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
+type ApiPostApiV1SystemUserInfoBatchCreate_0Request struct {
+	ctx context.Context
+	ApiService *SystemUserInfoAPIService
+	userInfoBatchCreateReq *UserInfoBatchCreateReq
+}
+
+func (r ApiPostApiV1SystemUserInfoBatchCreate_0Request) UserInfoBatchCreateReq(userInfoBatchCreateReq UserInfoBatchCreateReq) ApiPostApiV1SystemUserInfoBatchCreate_0Request {
+	r.userInfoBatchCreateReq = &userInfoBatchCreateReq
+	return r
+}
+
+func (r ApiPostApiV1SystemUserInfoBatchCreate_0Request) Execute() (*PostApiV1SystemUserInfoBatchCreate200Response, *http.Response, error) {
+	return r.ApiService.PostApiV1SystemUserInfoBatchCreate_1Execute(r)
+}
+
+/*
+PostApiV1SystemUserInfoBatchCreate_0 批量创建用户
+
+业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+
+ @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
+ @return ApiPostApiV1SystemUserInfoBatchCreate_0Request
+*/
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoBatchCreate_1(ctx context.Context) ApiPostApiV1SystemUserInfoBatchCreate_0Request {
+	return ApiPostApiV1SystemUserInfoBatchCreate_0Request{
+		ApiService: a,
+		ctx: ctx,
+	}
+}
+
+// Execute executes the request
+//  @return PostApiV1SystemUserInfoBatchCreate200Response
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoBatchCreate_1Execute(r ApiPostApiV1SystemUserInfoBatchCreate_0Request) (*PostApiV1SystemUserInfoBatchCreate200Response, *http.Response, error) {
+	var (
+		localVarHTTPMethod   = http.MethodPost
+		localVarPostBody     interface{}
+		formFiles            []formFile
+		localVarReturnValue  *PostApiV1SystemUserInfoBatchCreate200Response
+	)
+
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoBatchCreate_1")
+	if err != nil {
+		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
+	}
+
+	localVarPath := localBasePath + "/api/v1/system/user/info/batch-create"
+
+	localVarHeaderParams := make(map[string]string)
+	localVarQueryParams := url.Values{}
+	localVarFormParams := url.Values{}
+	if r.userInfoBatchCreateReq == nil {
+		return localVarReturnValue, nil, reportError("userInfoBatchCreateReq is required and must be specified")
+	}
+
+	// to determine the Content-Type header
+	localVarHTTPContentTypes := []string{"application/json"}
+
+	// set Content-Type header
+	localVarHTTPContentType := selectHeaderContentType(localVarHTTPContentTypes)
+	if localVarHTTPContentType != "" {
+		localVarHeaderParams["Content-Type"] = localVarHTTPContentType
+	}
+
+	// to determine the Accept header
+	localVarHTTPHeaderAccepts := []string{"application/json"}
+
+	// set Accept header
+	localVarHTTPHeaderAccept := selectHeaderAccept(localVarHTTPHeaderAccepts)
+	if localVarHTTPHeaderAccept != "" {
+		localVarHeaderParams["Accept"] = localVarHTTPHeaderAccept
+	}
+	// body params
+	localVarPostBody = r.userInfoBatchCreateReq
+	req, err := a.client.prepareRequest(r.ctx, localVarPath, localVarHTTPMethod, localVarPostBody, localVarHeaderParams, localVarQueryParams, localVarFormParams, formFiles)
+	if err != nil {
+		return localVarReturnValue, nil, err
+	}
+
+	localVarHTTPResponse, err := a.client.callAPI(req)
+	if err != nil || localVarHTTPResponse == nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	localVarBody, err := io.ReadAll(localVarHTTPResponse.Body)
+	localVarHTTPResponse.Body.Close()
+	localVarHTTPResponse.Body = io.NopCloser(bytes.NewBuffer(localVarBody))
+	if err != nil {
+		return localVarReturnValue, localVarHTTPResponse, err
+	}
+
+	if localVarHTTPResponse.StatusCode >= 300 {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: localVarHTTPResponse.Status,
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	err = a.client.decode(&localVarReturnValue, localVarBody, localVarHTTPResponse.Header.Get("Content-Type"))
+	if err != nil {
+		newErr := &GenericOpenAPIError{
+			body:  localVarBody,
+			error: err.Error(),
+		}
+		return localVarReturnValue, localVarHTTPResponse, newErr
+	}
+
+	return localVarReturnValue, localVarHTTPResponse, nil
+}
+
 type ApiPostApiV1SystemUserInfoCreateRequest struct {
 	ctx context.Context
 	ApiService *SystemUserInfoAPIService
@@ -144,7 +364,7 @@ func (r ApiPostApiV1SystemUserInfoCreate_0Request) UserInfoCreateReq(userInfoCre
 }
 
 func (r ApiPostApiV1SystemUserInfoCreate_0Request) Execute() (*PostApiV1SystemUserInfoCreate200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoCreate_1Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoCreate_2Execute(r)
 }
 
 /*
@@ -155,7 +375,7 @@ PostApiV1SystemUserInfoCreate_0 创建用户信息
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoCreate_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_1(ctx context.Context) ApiPostApiV1SystemUserInfoCreate_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_2(ctx context.Context) ApiPostApiV1SystemUserInfoCreate_0Request {
 	return ApiPostApiV1SystemUserInfoCreate_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -164,7 +384,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_1(ctx context.C
 
 // Execute executes the request
 //  @return PostApiV1SystemUserInfoCreate200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_1Execute(r ApiPostApiV1SystemUserInfoCreate_0Request) (*PostApiV1SystemUserInfoCreate200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_2Execute(r ApiPostApiV1SystemUserInfoCreate_0Request) (*PostApiV1SystemUserInfoCreate200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -172,7 +392,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoCreate_1Execute(r ApiP
 		localVarReturnValue  *PostApiV1SystemUserInfoCreate200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoCreate_1")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoCreate_2")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -364,7 +584,7 @@ func (r ApiPostApiV1SystemUserInfoDelete_0Request) UserInfoDeleteReq(userInfoDel
 }
 
 func (r ApiPostApiV1SystemUserInfoDelete_0Request) Execute() (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoDelete_2Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoDelete_3Execute(r)
 }
 
 /*
@@ -375,7 +595,7 @@ PostApiV1SystemUserInfoDelete_0 刪除用户
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoDelete_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_2(ctx context.Context) ApiPostApiV1SystemUserInfoDelete_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_3(ctx context.Context) ApiPostApiV1SystemUserInfoDelete_0Request {
 	return ApiPostApiV1SystemUserInfoDelete_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -384,7 +604,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_2(ctx context.C
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementDelete200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_2Execute(r ApiPostApiV1SystemUserInfoDelete_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_3Execute(r ApiPostApiV1SystemUserInfoDelete_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -392,7 +612,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoDelete_2Execute(r ApiP
 		localVarReturnValue  *PostApiV1SystemAgreementDelete200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoDelete_2")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoDelete_3")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -584,7 +804,7 @@ func (r ApiPostApiV1SystemUserInfoGetList_0Request) UserInfoGetListReq(userInfoG
 }
 
 func (r ApiPostApiV1SystemUserInfoGetList_0Request) Execute() (*PostApiV1SystemUserInfoGetList200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoGetList_3Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoGetList_4Execute(r)
 }
 
 /*
@@ -595,7 +815,7 @@ PostApiV1SystemUserInfoGetList_0 查询用户信息列表
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoGetList_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_3(ctx context.Context) ApiPostApiV1SystemUserInfoGetList_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_4(ctx context.Context) ApiPostApiV1SystemUserInfoGetList_0Request {
 	return ApiPostApiV1SystemUserInfoGetList_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -604,7 +824,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_3(ctx context.
 
 // Execute executes the request
 //  @return PostApiV1SystemUserInfoGetList200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_3Execute(r ApiPostApiV1SystemUserInfoGetList_0Request) (*PostApiV1SystemUserInfoGetList200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_4Execute(r ApiPostApiV1SystemUserInfoGetList_0Request) (*PostApiV1SystemUserInfoGetList200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -612,7 +832,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetList_3Execute(r Api
 		localVarReturnValue  *PostApiV1SystemUserInfoGetList200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoGetList_3")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoGetList_4")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -804,7 +1024,7 @@ func (r ApiPostApiV1SystemUserInfoGetOne_0Request) UserInfoGetOneReq(userInfoGet
 }
 
 func (r ApiPostApiV1SystemUserInfoGetOne_0Request) Execute() (*PostApiV1SystemUserInfoGetOne200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoGetOne_4Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoGetOne_5Execute(r)
 }
 
 /*
@@ -815,7 +1035,7 @@ PostApiV1SystemUserInfoGetOne_0 获取用户信息
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoGetOne_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_4(ctx context.Context) ApiPostApiV1SystemUserInfoGetOne_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_5(ctx context.Context) ApiPostApiV1SystemUserInfoGetOne_0Request {
 	return ApiPostApiV1SystemUserInfoGetOne_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -824,7 +1044,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_4(ctx context.C
 
 // Execute executes the request
 //  @return PostApiV1SystemUserInfoGetOne200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_4Execute(r ApiPostApiV1SystemUserInfoGetOne_0Request) (*PostApiV1SystemUserInfoGetOne200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_5Execute(r ApiPostApiV1SystemUserInfoGetOne_0Request) (*PostApiV1SystemUserInfoGetOne200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -832,7 +1052,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoGetOne_4Execute(r ApiP
 		localVarReturnValue  *PostApiV1SystemUserInfoGetOne200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoGetOne_4")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoGetOne_5")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -1024,7 +1244,7 @@ func (r ApiPostApiV1SystemUserInfoResetPwd_0Request) UserInfoResetPwdReq(userInf
 }
 
 func (r ApiPostApiV1SystemUserInfoResetPwd_0Request) Execute() (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoResetPwd_5Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoResetPwd_6Execute(r)
 }
 
 /*
@@ -1035,7 +1255,7 @@ PostApiV1SystemUserInfoResetPwd_0 重置用户密码
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoResetPwd_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_5(ctx context.Context) ApiPostApiV1SystemUserInfoResetPwd_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_6(ctx context.Context) ApiPostApiV1SystemUserInfoResetPwd_0Request {
 	return ApiPostApiV1SystemUserInfoResetPwd_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -1044,7 +1264,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_5(ctx context
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementDelete200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_5Execute(r ApiPostApiV1SystemUserInfoResetPwd_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_6Execute(r ApiPostApiV1SystemUserInfoResetPwd_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -1052,7 +1272,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoResetPwd_5Execute(r Ap
 		localVarReturnValue  *PostApiV1SystemAgreementDelete200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoResetPwd_5")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoResetPwd_6")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}
@@ -1246,7 +1466,7 @@ func (r ApiPostApiV1SystemUserInfoUpdate_0Request) UserInfoUpdateReq(userInfoUpd
 }
 
 func (r ApiPostApiV1SystemUserInfoUpdate_0Request) Execute() (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
-	return r.ApiService.PostApiV1SystemUserInfoUpdate_6Execute(r)
+	return r.ApiService.PostApiV1SystemUserInfoUpdate_7Execute(r)
 }
 
 /*
@@ -1257,7 +1477,7 @@ PostApiV1SystemUserInfoUpdate_0 更新用户基本数据
  @param ctx context.Context - for authentication, logging, cancellation, deadlines, tracing, etc. Passed from http.Request or context.Background().
  @return ApiPostApiV1SystemUserInfoUpdate_0Request
 */
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_6(ctx context.Context) ApiPostApiV1SystemUserInfoUpdate_0Request {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_7(ctx context.Context) ApiPostApiV1SystemUserInfoUpdate_0Request {
 	return ApiPostApiV1SystemUserInfoUpdate_0Request{
 		ApiService: a,
 		ctx: ctx,
@@ -1266,7 +1486,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_6(ctx context.C
 
 // Execute executes the request
 //  @return PostApiV1SystemAgreementDelete200Response
-func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_6Execute(r ApiPostApiV1SystemUserInfoUpdate_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
+func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_7Execute(r ApiPostApiV1SystemUserInfoUpdate_0Request) (*PostApiV1SystemAgreementDelete200Response, *http.Response, error) {
 	var (
 		localVarHTTPMethod   = http.MethodPost
 		localVarPostBody     interface{}
@@ -1274,7 +1494,7 @@ func (a *SystemUserInfoAPIService) PostApiV1SystemUserInfoUpdate_6Execute(r ApiP
 		localVarReturnValue  *PostApiV1SystemAgreementDelete200Response
 	)
 
-	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoUpdate_6")
+	localBasePath, err := a.client.cfg.ServerURLWithContext(r.ctx, "SystemUserInfoAPIService.PostApiV1SystemUserInfoUpdate_7")
 	if err != nil {
 		return localVarReturnValue, nil, &GenericOpenAPIError{error: err.Error()}
 	}

@@ -13,7 +13,7 @@ import (
 	"gitee.com/unitedrhino/things/service/dmsvr/client/productmanage"
 	"gitee.com/unitedrhino/things/service/dmsvr/client/protocolmanage"
 	"github.com/stretchr/testify/require"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"google.golang.org/grpc"
 )
 

@@ -20,8 +20,8 @@ import (
 	"github.com/google/uuid"
 	"github.com/nats-io/nats.go"
 	"github.com/stretchr/testify/require"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/core/service/timedsvr/pb/timed"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/core/service/timedsvr/pb/timed"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/redis"
 	"github.com/zeromicro/go-zero/zrpc"
@@ -36,7 +36,7 @@ type protocolRuntimeServer struct {
 	service    chan *dm.ProtocolService
 }
 
-// timerRuntimeServer 记录通过公开 protobuf 注册到 timedsvr 的任务。
+// timerRuntimeServer 记录通过本仓 protobuf 注册到 timedsvr 的任务。
 type timerRuntimeServer struct {
 	timed.UnimplementedTaskGroupManageServer
 	timed.UnimplementedTaskInfoManageServer

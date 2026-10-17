@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"gitee.com/unitedrhino/share/caches"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"github.com/alicebob/miniredis/v2"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/kv"

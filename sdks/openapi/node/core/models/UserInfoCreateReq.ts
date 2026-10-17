@@ -13,6 +13,12 @@
  */
 
 import { mapValues } from '../runtime';
+import type { UserCreateTenantBinding } from './UserCreateTenantBinding';
+import {
+    UserCreateTenantBindingFromJSON,
+    UserCreateTenantBindingFromJSONTyped,
+    UserCreateTenantBindingToJSON,
+} from './UserCreateTenantBinding';
 import type { UserInfo } from './UserInfo';
 import {
     UserInfoFromJSON,
@@ -38,6 +44,12 @@ export interface UserInfoCreateReq {
      * @memberof UserInfoCreateReq
      */
     roleIDs?: Array<string>;
+    /**
+     *  创建时加入的企业及其角色
+     * @type {Array<UserCreateTenantBinding>}
+     * @memberof UserInfoCreateReq
+     */
+    tenantBindings?: Array<UserCreateTenantBinding>;
 }
 
 /**
@@ -60,6 +72,7 @@ export function UserInfoCreateReqFromJSONTyped(json: any, ignoreDiscriminator: b
 
         'info': UserInfoFromJSON(json['info']),
         'roleIDs': json['roleIDs'] == null ? undefined : json['roleIDs'],
+        'tenantBindings': json['tenantBindings'] == null ? undefined : ((json['tenantBindings'] as Array<any>).map(UserCreateTenantBindingFromJSON)),
     };
 }
 
@@ -71,5 +84,6 @@ export function UserInfoCreateReqToJSON(value?: UserInfoCreateReq | null): any {
 
         'info': UserInfoToJSON(value['info']),
         'roleIDs': value['roleIDs'],
+        'tenantBindings': value['tenantBindings'] == null ? undefined : ((value['tenantBindings'] as Array<any>).map(UserCreateTenantBindingToJSON)),
     };
 }

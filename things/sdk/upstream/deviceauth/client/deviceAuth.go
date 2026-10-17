@@ -3,7 +3,7 @@ package deviceauth
 import (
 	"context"
 
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/sdk/deviceauth/pb/dg"
+	"gitee.com/unitedrhino/things/sdk/deviceauth/pb/dg"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 )

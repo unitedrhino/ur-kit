@@ -11,9 +11,9 @@ import (
 
 	"gitee.com/unitedrhino/share/eventBus"
 	"github.com/stretchr/testify/require"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
-	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/share/rpcs/protocolSync/pb/protocolSync"
+	publiccore "gitee.com/unitedrhino/things/sdk/protocol/core"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/codes"

@@ -24,3 +24,9 @@
     通用 `Authorization` 只接受 Bearer 格式，不能把 Basic 或格式错误的数组/二进制值交给宽松认证器；Node HTTP/RPC 错误入口须稳定返回未认证而不在处理前抛异常。Node HTTP/RPC 的项目与应用 ID 请求头拒绝不安全 Number，JSON 请求体也拒绝嵌套的不安全整数和非有限值；超过安全整数范围的 ID 使用十进制字符串，头字段可用 BigInt。修改这类语义时先补失败用例，再对三语言共同样本检查。
 12. Go `PlatformAuthenticator`、Node `createPlatformAuthenticator` 与 Java `UrPlatformAuthenticator` 通过平台用户自身信息核验企业成员，带 `project-id` 时再核验项目列表的正授权；所有三语言 HTTP 客户端的令牌请求都拒绝重定向，Go 注入的自定义 `http.Client` 也不得覆盖此边界。Java 使用 `UrMiddleware.httpScoped` / `rpcScoped` 注入。三者只提供身份范围，不替代应用的资源动作授权器。Go 基础应用示例直接使用公共认证器，修改时连同示例运行竞态测试。
 13. 云协议入口用 `cloud.NewRuntime` 串接 `core.Protocol`、`GRPCConfigSource`、`ConfigManager`、可选更新订阅和 `core.Timer`：服务先注册，配置全量拉取成功后才订阅通知和注册周期任务；任何后续启动失败都释放已生效资源。设备同步先用 `cloud.RegisterDeviceSync` 将产品主/子协议配置选择及设备分页回调登记到 Timer，再启动 Runtime；每个设备失败后继续遍历并汇总错误，已执行的设备动作不会回滚。更新订阅必须提供取消函数。`Stop` 取消订阅、停止协议并等待当前定时处理器退出；平台调度任务是持久记录，其删除由接入方负责，停止后的残留触发不得再执行协议处理器。修改时运行 `go test -race ./things/sdk/protocol/...` 与 vet。
+
+## 客户端应用与菜单模板
+
+`apps/iot-basic/backend/bootstrap/client.json` 是客户端种子的维护入口，后端内嵌后通过 `sdks/go/appseed` 和受平台 root 鉴权保护的 HTTP 入口同步。平台 Things 仅维护管理端应用 200，不再重复下发客户端模板。菜单使用稳定 ID 和扁平父子顺序，保留隐藏页；不要用演示截图的菜单反推默认模板。
+
+修改模板时运行 `go test ./sdks/go/appseed` 与 `(cd apps/iot-basic/backend && go test ./...)`，并在平台集成测试中检查重复导入、旧 ID/层级、企业自定义展示、软删除和登录配置保留。跨仓验收设置 `UR_KIT_CLIENT_MANIFEST` 为本清单路径，执行平台 `TestAppMenuBatchImportKitManifest`；不能只用 HTTP mock 的请求次数证明实际幂等。平台注册入口先于应用镜像发布，模板同步失败不能报告就绪。

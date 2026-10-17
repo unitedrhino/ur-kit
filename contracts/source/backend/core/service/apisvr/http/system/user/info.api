@@ -34,6 +34,18 @@ service api {
 	post /create (UserInfoCreateReq) returns (UserCreateResp)
 
 	@doc(
+        summary: "批量创建用户"
+        description: "业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。"
+        authType: "platform"
+        group: "system/user/info"
+        resource: "system/user/info"
+        action: "import"
+        recordLogMode: "1"
+    )
+    @handler batchCreate
+    post /batch-create (UserInfoBatchCreateReq) returns (UserInfoBatchCreateResp)
+
+	@doc(
 	    summary: "查询用户信息列表"
 	    description: "业务说明：分页查询用户列表，支持按用户名、手机号、邮箱、昵称等条件过滤。用于用户管理界面的列表展示、用户搜索等场景。返回用户基本信息及所属租户列表。"
 	    authType: "admin"
@@ -195,6 +207,7 @@ UserTenant  {
 	 UserInfoCreateReq{
 	 	Info *UserInfo `json:"info"`
 	 	RoleIDs 		[]int64 `json:"roleIDs,string,optional,range=(0:120]"` //平台的角色编号列表
+        TenantBindings []*UserCreateTenantBinding `json:"tenantBindings,optional"` // 创建时加入的企业及其角色
 	 }
 	UserInfoGetListReq {
 		Page *PageInfo `json:"page,optional"` //分页信息
@@ -233,3 +246,39 @@ UserTenant  {
 	}
 )
 
+
+// UserCreateTenantBinding 是创建时的企业角色配置。
+type UserCreateTenantBinding {
+    TenantCode string `json:"tenantCode"` // 企业编码
+    RoleIDs []int64 `json:"roleIDs,string"` // 企业角色ID列表
+}
+// UserImportRow 是不含密码的导入行。
+type UserImportRow {
+    Row int64 `json:"row"` // 表格原始行号
+    UserName string `json:"userName"` // 登录名
+    NickName string `json:"nickName,optional"` // 昵称
+    Phone string `json:"phone,optional"` // 手机号
+    Email string `json:"email,optional"` // 邮箱
+    Sex int64 `json:"sex,optional"` // 性别：0未知、1男、2女
+}
+// UserInfoBatchCreateReq 指定本批用户与统一授权、初始密码。
+type UserInfoBatchCreateReq {
+    Users []*UserImportRow `json:"users"` // 最多20行用户
+    Password string `json:"password"` // 统一初始密码，沿用管理员创建的明文口径
+    RoleIDs []int64 `json:"roleIDs,string,optional"` // 平台角色ID列表
+    TenantBindings []*UserCreateTenantBinding `json:"tenantBindings,optional"` // 企业及其角色
+}
+// UserImportResult 不包含密码或用户请求正文。
+type UserImportResult {
+    Row int64 `json:"row"` // 表格原始行号
+    Status string `json:"status"` // success成功、skipped重复跳过、failed失败
+    UserID int64 `json:"userID,string,optional"` // 创建成功的用户ID
+    Message string `json:"message,optional"` // 结果说明
+}
+// UserInfoBatchCreateResp 汇总本批导入结果。
+type UserInfoBatchCreateResp {
+    List []*UserImportResult `json:"list"` // 逐行结果
+    SuccessCount int64 `json:"successCount"` // 成功数量
+    SkipCount int64 `json:"skipCount"` // 跳过数量
+    FailCount int64 `json:"failCount"` // 失败数量
+}

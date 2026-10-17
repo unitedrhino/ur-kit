@@ -17,7 +17,7 @@ import (
 	"gitee.com/unitedrhino/things/share/domain/schema"
 	"github.com/spf13/cast"
 	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"github.com/zeromicro/go-zero/core/logx"
 	"math"
 	"strings"
