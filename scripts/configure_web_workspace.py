@@ -4,6 +4,8 @@
 import json
 from pathlib import Path
 
+from sync_web_shared import configure_realtime_export
+
 
 ROOT = Path(__file__).resolve().parent.parent
 SHARED = ROOT / "web-shared"
@@ -31,6 +33,7 @@ def configure_app(directory: Path, shared_prefix: str) -> None:
 
 def main() -> None:
     """使仓库根目录和 iot-basic Web 具备独立安装条件。"""
+    configure_realtime_export(SHARED)
     configure_app(ROOT / "apps/iot-basic/web", "../../../web-shared")
     workspace = (SHARED / "pnpm-workspace.yaml").read_text()
     workspace = workspace.replace("  - apps/*", "  - apps/iot-basic/web")

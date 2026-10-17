@@ -74,6 +74,18 @@ pnpm run dev:h5
 
 三语言的认证器核验平台身份范围，资源动作仍由自己的授权器实现。Java 使用 `UrMiddleware.httpScoped` / `rpcScoped`，Node 使用 `createPlatformAuthenticator`；RPC 服务使用对应 RPC 中间件。Java 本地 Maven 安装、Node tarball 必须来自同一 Git 标签；尚无公共包仓发布时不能写成直接安装某个未发布版本。替换后端后同步修改 Dockerfile 的构建/运行阶段，保留代理、静态页和健康检查合同，并运行对应语言测试。
 
+## 复用实时推送与其他平台能力
+
+WS 不限于平台内部页面，独立 Web/uni-app 和后端都可订阅平台公开频道。先读[WS 与站内通知](../../../../docs/realtime.md)：Web 使用无 UI 依赖的窄入口，移动端复用既有 provider/service，Go/Java/Node 按公共频道协议接入。区分 listen 与 subscribe，连接/身份变化、退订与释放归壳层统一管理；开发代理必须启用 WS Upgrade。
+
+发送业务通知使用平台公开通知合同和被授予的服务权限，不导入私有 Hub。上传、字典、查询、权限、缓存等入口和当前缺少的封装见[应用能力清单](../../../../docs/application-capabilities.md)，不能因某能力有平台开发章节就判定独立应用不可使用。
+
+### Hook 回调验签
+
+平台调用应用后端时使用 Hook 协议，不使用普通用户 token 中间件来验签。HMAC 模式读取原始 body 与秒级 X-Hook-Timestamp，以 secret 对 `timestamp + "." + rawBody` 计算 HMAC-SHA256 十六进制摘要，常量时间比较 X-Hook-Signature 的 `hmac-sha256=` 部分，并检查时间窗。鉴权通过后再读取 method/data/userCtx，业务按 X-Hook-Request-Id 去重。
+
+服务/能力注册及 failPolicy 在目标平台由有权管理员配置；kind 不能单独改变调用点的同步/异步语义。仅增加 code 名称不会自动产生平台事件。HTTP/RPC SDK 提供合同调用，尚无通用三语言 Hook 验签封装，应用应按本协议实现并测试签名错误、过期、重投和业务错误。
+
 ## 平台入口与部署
 
 页面、平台代理、应用、菜单与任务按[平台注册指南](platform-registration.md)分别接入并验证。应用自带 Docker/Compose 配置可通过[urops 部署](urops-deployment.md)登记和运维；协议网关也采用相同部署入口，云页面只读展示。

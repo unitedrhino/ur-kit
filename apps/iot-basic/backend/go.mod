@@ -2,7 +2,10 @@ module github.com/unitedrhino/ur-kit/apps/iot-basic/backend
 
 go 1.25.0
 
-require github.com/unitedrhino/ur-kit v0.0.0
+require (
+	github.com/gorilla/websocket v1.5.3
+	github.com/unitedrhino/ur-kit v0.0.0
+)
 
 require (
 	golang.org/x/net v0.53.0 // indirect

@@ -51,6 +51,19 @@ pnpm --filter org-iot-client build
 - Web 本地回归使用 `pnpm --filter org-iot-client test:unit` 与 `pnpm --filter org-iot-client test:e2e`；移动端在自己的目录独立安装与验证。
 - 基础应用的 Go 测试在 `apps/iot-basic/backend` 执行 `go test ./...`；镜像需验证健康检查、深层页面、认证接口及平台代理。
 
+WS 窄入口由 `sync_web_shared.py` 与工作区配置脚本共同适配。同步共享包只从公开 IoT 客户端和构建工具计算依赖闭包，不要求已迁出的结构监测仍留在 SaaS。
+
+修改共享导出/实时接入后，额外执行：
+
+```sh
+python3 scripts/test_sync_web_shared.py
+node --experimental-strip-types --test scripts/test_realtime.mjs
+node --experimental-vm-modules scripts/test_vite_ws.mjs
+(cd apps/iot-basic/backend && go test -run TestWebSocketProxyIntegration -v .)
+```
+
+客户端测试要求 Node 22.13+；用快照内容更新应用锁前审查差异，连续运行配置脚本两次确认无漂移。客户端、代理测试是本机验证，不能代替目标平台身份与实际设备验收。
+
 发布标签前按开发技能完成合同生成和语言验证。发布后执行：
 
 ```sh
