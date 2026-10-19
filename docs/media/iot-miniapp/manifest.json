@@ -1,0 +1,55 @@
+{
+  "providedAt": "2026-10-19",
+  "source": "维护者提供的联犀演示环境微信小程序截图",
+  "imageEdits": false,
+  "images": [
+    {
+      "file": "miniapp-home.jpg",
+      "title": "设备列表",
+      "width": 1264,
+      "height": 2736,
+      "sha256": "a2d14f2f2c732035342f8254183be5580d44a9b2812af1dceec1153067accb79",
+      "usedOnSites": true
+    },
+    {
+      "file": "miniapp-history.jpg",
+      "title": "属性数据分析",
+      "width": 1264,
+      "height": 3570,
+      "sha256": "9c1a06b46eb655b2c43b6aa4082ad68b969674bfc498c0b399deb7a0b4d2ff69",
+      "usedOnSites": true
+    },
+    {
+      "file": "miniapp-automation.jpg",
+      "title": "自动化触发条件",
+      "width": 1264,
+      "height": 2736,
+      "sha256": "7c55aebc38398989e0aa46dd28216b56a72f486bcbd3bc41000aa3f816da2df2",
+      "usedOnSites": true
+    },
+    {
+      "file": "miniapp-settings.jpg",
+      "title": "设备设置",
+      "width": 1264,
+      "height": 2736,
+      "sha256": "322b19c25e1f250b371e69121e77fd5cb05778564ba1b1af98c7e55dfd3978ef",
+      "usedOnSites": false
+    },
+    {
+      "file": "miniapp-properties.jpg",
+      "title": "设备属性与控制入口",
+      "width": 1264,
+      "height": 6159,
+      "sha256": "b90a53655f7d55b9aa0c83aa455618bec13e48cd1396b35b1bf18a75fe370213",
+      "usedOnSites": false
+    },
+    {
+      "file": "miniapp-account.jpg",
+      "title": "组织与项目切换",
+      "width": 1264,
+      "height": 2736,
+      "sha256": "3e94d6ed30f37b877e8cf9977f0ddb1e11f062316dbdefb06cab41ef760adf15",
+      "usedOnSites": false
+    }
+  ]
+}
