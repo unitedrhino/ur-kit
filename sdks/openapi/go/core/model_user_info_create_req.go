@@ -24,6 +24,8 @@ type UserInfoCreateReq struct {
 	Info UserInfo `json:"info"`
 	// 平台的角色编号列表
 	RoleIDs []string `json:"roleIDs,omitempty"`
+	//  创建时加入的企业及其角色
+	TenantBindings []UserCreateTenantBinding `json:"tenantBindings,omitempty"`
 }
 
 type _UserInfoCreateReq UserInfoCreateReq
@@ -102,6 +104,38 @@ func (o *UserInfoCreateReq) SetRoleIDs(v []string) {
 	o.RoleIDs = v
 }
 
+// GetTenantBindings returns the TenantBindings field value if set, zero value otherwise.
+func (o *UserInfoCreateReq) GetTenantBindings() []UserCreateTenantBinding {
+	if o == nil || IsNil(o.TenantBindings) {
+		var ret []UserCreateTenantBinding
+		return ret
+	}
+	return o.TenantBindings
+}
+
+// GetTenantBindingsOk returns a tuple with the TenantBindings field value if set, nil otherwise
+// and a boolean to check if the value has been set.
+func (o *UserInfoCreateReq) GetTenantBindingsOk() ([]UserCreateTenantBinding, bool) {
+	if o == nil || IsNil(o.TenantBindings) {
+		return nil, false
+	}
+	return o.TenantBindings, true
+}
+
+// HasTenantBindings returns a boolean if a field has been set.
+func (o *UserInfoCreateReq) HasTenantBindings() bool {
+	if o != nil && !IsNil(o.TenantBindings) {
+		return true
+	}
+
+	return false
+}
+
+// SetTenantBindings gets a reference to the given []UserCreateTenantBinding and assigns it to the TenantBindings field.
+func (o *UserInfoCreateReq) SetTenantBindings(v []UserCreateTenantBinding) {
+	o.TenantBindings = v
+}
+
 func (o UserInfoCreateReq) MarshalJSON() ([]byte, error) {
 	toSerialize,err := o.ToMap()
 	if err != nil {
@@ -115,6 +149,9 @@ func (o UserInfoCreateReq) ToMap() (map[string]interface{}, error) {
 	toSerialize["info"] = o.Info
 	if !IsNil(o.RoleIDs) {
 		toSerialize["roleIDs"] = o.RoleIDs
+	}
+	if !IsNil(o.TenantBindings) {
+		toSerialize["tenantBindings"] = o.TenantBindings
 	}
 	return toSerialize, nil
 }

@@ -78,3 +78,22 @@ test('Things 结构事件通知接口保留两个大整数 ID 且只生成一个
   ]]);
   assert.equal('postApiV1ThingsProjectAlarmSourceStructureNotify_1' in api, false);
 });
+
+test('Core 应用注册保持应用、菜单与父节点字符串 ID', async () => {
+  const { Configuration, SystemAppInfoApi } = require('./dist/core/index.js');
+  const request = {app: {id: '9007199254740993'}, menus: [{id: '9007199254740994', appID: '9007199254740993', parentID: '1'}]};
+  let called = false;
+  const api = new SystemAppInfoApi(new Configuration({
+    basePath: 'http://local.test', headers: {'ithings-token': 'bootstrap-admin'},
+    fetchApi: async (url, init) => {
+      called = true;
+      assert.equal(url, 'http://local.test/api/v1/system/app/info/batch-import');
+      assert.equal(init.method, 'POST');
+      assert.equal(init.headers['ithings-token'], 'bootstrap-admin');
+      assert.deepEqual(JSON.parse(init.body), request);
+      return new Response(JSON.stringify({code: 200, data: {id: request.app.id}}), {status: 200, headers: {'Content-Type': 'application/json'}});
+    },
+  }));
+  await api.postApiV1SystemAppInfoBatchImport({appMenuBatchImportReq: request});
+  assert.equal(called, true);
+});

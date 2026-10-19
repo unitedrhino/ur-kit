@@ -1,4 +1,4 @@
-// 本文件把 SaaS 的 MQTT 运行配置、设备结构与公开 ur-kit 传输层接线。
+// 本文件把 SaaS 的 MQTT 运行配置、设备结构与本仓协议传输层接线。
 package platformcore
 
 import (
@@ -12,7 +12,7 @@ import (
 	"gitee.com/unitedrhino/things/share/devices"
 	"github.com/eclipse/paho.mqtt.golang"
 	"github.com/google/uuid"
-	publicmqtt "github.com/unitedrhino/ur-kit/things/sdk/protocol/mqtt"
+	publicmqtt "gitee.com/unitedrhino/things/sdk/protocol/mqtt"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
 	trackinggozero "github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking/gozero"
 	"github.com/zeromicro/go-zero/core/logx"

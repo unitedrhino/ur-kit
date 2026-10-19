@@ -9,8 +9,8 @@ import (
 	"gitee.com/unitedrhino/share/ctxs"
 	"gitee.com/unitedrhino/things/share/devices"
 	"github.com/stretchr/testify/require"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
-	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	publiccore "gitee.com/unitedrhino/things/sdk/protocol/core"
 	"google.golang.org/protobuf/types/known/wrapperspb"
 )
 

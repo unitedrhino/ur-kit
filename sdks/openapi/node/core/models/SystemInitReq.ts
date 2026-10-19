@@ -39,6 +39,12 @@ export interface SystemInitReq {
      */
     config: SysConfigInfo;
     /**
+     *  是否同时创建企业，未传时不创建
+     * @type {boolean}
+     * @memberof SystemInitReq
+     */
+    createTenant?: boolean;
+    /**
      *
      * @type {UserCreate}
      * @memberof SystemInitReq
@@ -66,6 +72,7 @@ export function SystemInitReqFromJSONTyped(json: any, ignoreDiscriminator: boole
     return {
 
         'config': SysConfigInfoFromJSON(json['config']),
+        'createTenant': json['createTenant'] == null ? undefined : json['createTenant'],
         'ownerUser': UserCreateFromJSON(json['ownerUser']),
     };
 }
@@ -77,6 +84,7 @@ export function SystemInitReqToJSON(value?: SystemInitReq | null): any {
     return {
 
         'config': SysConfigInfoToJSON(value['config']),
+        'createTenant': value['createTenant'],
         'ownerUser': UserCreateToJSON(value['ownerUser']),
     };
 }

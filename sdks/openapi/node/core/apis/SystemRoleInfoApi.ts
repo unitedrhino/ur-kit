@@ -227,7 +227,7 @@ export class SystemRoleInfoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
      * 获取角色列表
      */
     async postApiV1SystemRoleInfoGetListRaw(requestParameters: PostApiV1SystemRoleInfoGetListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemRoleInfoGetList200Response>> {
@@ -256,7 +256,7 @@ export class SystemRoleInfoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
      * 获取角色列表
      */
     async postApiV1SystemRoleInfoGetList(requestParameters: PostApiV1SystemRoleInfoGetListRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemRoleInfoGetList200Response> {
@@ -265,7 +265,7 @@ export class SystemRoleInfoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
      * 获取角色列表
      */
     async postApiV1SystemRoleInfoGetList_3Raw(requestParameters: PostApiV1SystemRoleInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemRoleInfoGetList200Response>> {
@@ -294,7 +294,7 @@ export class SystemRoleInfoApi extends runtime.BaseAPI {
     }
 
     /**
-     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
+     * 业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。
      * 获取角色列表
      */
     async postApiV1SystemRoleInfoGetList_3(requestParameters: PostApiV1SystemRoleInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemRoleInfoGetList200Response> {

@@ -2,6 +2,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -17,9 +18,15 @@ import (
 	middleware "github.com/unitedrhino/ur-kit/middleware/go"
 )
 
-// main 启动健康检查与经平台令牌验证的样例端点。
+// main 在客户端模板注册成功后启动健康检查、Web 页面与经平台令牌验证的样例端点。
 func main() {
 	platform := os.Getenv("PLATFORM_URL")
+	registrationCtx, cancelRegistration := context.WithTimeout(context.Background(), time.Minute)
+	registrationErr := registerClientApps(registrationCtx, platform, os.Getenv)
+	cancelRegistration()
+	if registrationErr != nil {
+		log.Fatal(registrationErr)
+	}
 	handler, err := newHandler(platform, os.Getenv("WEB_DIR"))
 	if err != nil {
 		log.Fatal(err)

@@ -1,4 +1,4 @@
-// 本文件验证旧设备认证客户端包装层通过公开 protobuf 完成真实 gRPC 往返。
+// 本文件验证旧设备认证客户端包装层通过本仓 protobuf 完成真实 gRPC 往返。
 package deviceauth
 
 import (
@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	dg "github.com/unitedrhino/ur-kit/sdks/go/pb/things/sdk/deviceauth/pb/dg"
+	dg "gitee.com/unitedrhino/things/sdk/deviceauth/pb/dg"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/test/bufconn"
@@ -19,7 +19,7 @@ type deviceAuthTestClient struct{ connection *grpc.ClientConn }
 // Conn 返回测试用的 gRPC 连接。
 func (client deviceAuthTestClient) Conn() *grpc.ClientConn { return client.connection }
 
-// deviceAuthTestServer 记录经公开 protobuf 解码后的登录请求。
+// deviceAuthTestServer 记录经本仓 protobuf 解码后的登录请求。
 type deviceAuthTestServer struct {
 	dg.UnimplementedDeviceAuthServer
 	request chan *dg.LoginAuthReq

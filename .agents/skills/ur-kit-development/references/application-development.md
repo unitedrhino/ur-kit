@@ -25,7 +25,7 @@
 
 ### Go 与 Web
 
-从 ur-kit 根目录打开两个终端，先设置本机已授权平台根地址 `PLATFORM_URL` 与数字应用标识 `VITE_GLOB_APPID`：
+从 ur-kit 根目录打开两个终端，先按[自动注册配置](../../../../apps/iot-basic/README.md#启动时自动注册)提供平台地址、管理员注册令牌、Web 入口和 `APP_ID`；Web 开发终端的 `VITE_GLOB_APPID` 与 `APP_ID` 一致：
 
 ```sh
 # 终端一：Go 样例监听 8080，平台根地址由环境变量注入。
@@ -108,7 +108,7 @@ pnpm --filter org-iot-client build
 
 只运行涉及的端和包；若基线检查已有失败，记录原有失败与本次差异，不能删断言当作通过。新增后端业务至少覆盖有效请求、空/坏令牌、跨企业/项目越权、资源动作拒绝、非法参数与依赖故障。
 
-镜像与 Compose 都在根目录执行（准备 `PLATFORM_URL`、`VITE_GLOB_APPID`、不可变 `IMAGE_VERSION`）：
+镜像与 Compose 都在根目录执行（准备自动注册配置、`APP_ID`、不可变 `IMAGE_VERSION`）：
 
 ```sh
 docker compose -f apps/iot-basic/compose.yaml config -q

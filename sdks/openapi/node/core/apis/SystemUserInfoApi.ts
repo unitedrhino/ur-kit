@@ -16,9 +16,11 @@
 import * as runtime from '../runtime';
 import type {
   PostApiV1SystemAgreementDelete200Response,
+  PostApiV1SystemUserInfoBatchCreate200Response,
   PostApiV1SystemUserInfoCreate200Response,
   PostApiV1SystemUserInfoGetList200Response,
   PostApiV1SystemUserInfoGetOne200Response,
+  UserInfoBatchCreateReq,
   UserInfoCreateReq,
   UserInfoDeleteReq,
   UserInfoGetListReq,
@@ -29,12 +31,16 @@ import type {
 import {
     PostApiV1SystemAgreementDelete200ResponseFromJSON,
     PostApiV1SystemAgreementDelete200ResponseToJSON,
+    PostApiV1SystemUserInfoBatchCreate200ResponseFromJSON,
+    PostApiV1SystemUserInfoBatchCreate200ResponseToJSON,
     PostApiV1SystemUserInfoCreate200ResponseFromJSON,
     PostApiV1SystemUserInfoCreate200ResponseToJSON,
     PostApiV1SystemUserInfoGetList200ResponseFromJSON,
     PostApiV1SystemUserInfoGetList200ResponseToJSON,
     PostApiV1SystemUserInfoGetOne200ResponseFromJSON,
     PostApiV1SystemUserInfoGetOne200ResponseToJSON,
+    UserInfoBatchCreateReqFromJSON,
+    UserInfoBatchCreateReqToJSON,
     UserInfoCreateReqFromJSON,
     UserInfoCreateReqToJSON,
     UserInfoDeleteReqFromJSON,
@@ -48,6 +54,14 @@ import {
     UserInfoUpdateReqFromJSON,
     UserInfoUpdateReqToJSON,
 } from '../models/index';
+
+export interface PostApiV1SystemUserInfoBatchCreateRequest {
+    userInfoBatchCreateReq: UserInfoBatchCreateReq;
+}
+
+export interface PostApiV1SystemUserInfoBatchCreate0Request {
+    userInfoBatchCreateReq: UserInfoBatchCreateReq;
+}
 
 export interface PostApiV1SystemUserInfoCreateRequest {
     userInfoCreateReq: UserInfoCreateReq;
@@ -103,6 +117,82 @@ export interface PostApiV1SystemUserInfoUpdate0Request {
 export class SystemUserInfoApi extends runtime.BaseAPI {
 
     /**
+     * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+     * 批量创建用户
+     */
+    async postApiV1SystemUserInfoBatchCreateRaw(requestParameters: PostApiV1SystemUserInfoBatchCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response>> {
+        if (requestParameters['userInfoBatchCreateReq'] == null) {
+            throw new runtime.RequiredError(
+                'userInfoBatchCreateReq',
+                'Required parameter "userInfoBatchCreateReq" was null or undefined when calling postApiV1SystemUserInfoBatchCreate().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/system/user/info/batch-create`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UserInfoBatchCreateReqToJSON(requestParameters['userInfoBatchCreateReq']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PostApiV1SystemUserInfoBatchCreate200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+     * 批量创建用户
+     */
+    async postApiV1SystemUserInfoBatchCreate(requestParameters: PostApiV1SystemUserInfoBatchCreateRequest, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoBatchCreate200Response> {
+        const response = await this.postApiV1SystemUserInfoBatchCreateRaw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
+     * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+     * 批量创建用户
+     */
+    async postApiV1SystemUserInfoBatchCreate_1Raw(requestParameters: PostApiV1SystemUserInfoBatchCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoBatchCreate200Response>> {
+        if (requestParameters['userInfoBatchCreateReq'] == null) {
+            throw new runtime.RequiredError(
+                'userInfoBatchCreateReq',
+                'Required parameter "userInfoBatchCreateReq" was null or undefined when calling postApiV1SystemUserInfoBatchCreate_1().'
+            );
+        }
+
+        const queryParameters: any = {};
+
+        const headerParameters: runtime.HTTPHeaders = {};
+
+        headerParameters['Content-Type'] = 'application/json';
+
+        const response = await this.request({
+            path: `/api/v1/system/user/info/batch-create`,
+            method: 'POST',
+            headers: headerParameters,
+            query: queryParameters,
+            body: UserInfoBatchCreateReqToJSON(requestParameters['userInfoBatchCreateReq']),
+        }, initOverrides);
+
+        return new runtime.JSONApiResponse(response, (jsonValue) => PostApiV1SystemUserInfoBatchCreate200ResponseFromJSON(jsonValue));
+    }
+
+    /**
+     * 业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。
+     * 批量创建用户
+     */
+    async postApiV1SystemUserInfoBatchCreate_1(requestParameters: PostApiV1SystemUserInfoBatchCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoBatchCreate200Response> {
+        const response = await this.postApiV1SystemUserInfoBatchCreate_1Raw(requestParameters, initOverrides);
+        return await response.value();
+    }
+
+    /**
      * 业务说明：管理员创建新用户账号，设置用户名、密码、邮箱、手机号等基本信息，并可为用户分配角色。创建成功后返回用户ID。用于平台管理员或租户管理员添加新用户。
      * 创建用户信息
      */
@@ -144,11 +234,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：管理员创建新用户账号，设置用户名、密码、邮箱、手机号等基本信息，并可为用户分配角色。创建成功后返回用户ID。用于平台管理员或租户管理员添加新用户。
      * 创建用户信息
      */
-    async postApiV1SystemUserInfoCreate_1Raw(requestParameters: PostApiV1SystemUserInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoCreate200Response>> {
+    async postApiV1SystemUserInfoCreate_2Raw(requestParameters: PostApiV1SystemUserInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoCreate200Response>> {
         if (requestParameters['userInfoCreateReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoCreateReq',
-                'Required parameter "userInfoCreateReq" was null or undefined when calling postApiV1SystemUserInfoCreate_1().'
+                'Required parameter "userInfoCreateReq" was null or undefined when calling postApiV1SystemUserInfoCreate_2().'
             );
         }
 
@@ -173,8 +263,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：管理员创建新用户账号，设置用户名、密码、邮箱、手机号等基本信息，并可为用户分配角色。创建成功后返回用户ID。用于平台管理员或租户管理员添加新用户。
      * 创建用户信息
      */
-    async postApiV1SystemUserInfoCreate_1(requestParameters: PostApiV1SystemUserInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoCreate200Response> {
-        const response = await this.postApiV1SystemUserInfoCreate_1Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoCreate_2(requestParameters: PostApiV1SystemUserInfoCreate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoCreate200Response> {
+        const response = await this.postApiV1SystemUserInfoCreate_2Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -220,11 +310,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：删除指定用户账号。删除后用户无法登录，相关数据（租户归属、角色绑定等）同步清理。用于用户账号注销、离职员工账号清理等场景。需确认用户无重要业务数据关联后再执行。
      * 刪除用户
      */
-    async postApiV1SystemUserInfoDelete_2Raw(requestParameters: PostApiV1SystemUserInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
+    async postApiV1SystemUserInfoDelete_3Raw(requestParameters: PostApiV1SystemUserInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
         if (requestParameters['userInfoDeleteReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoDeleteReq',
-                'Required parameter "userInfoDeleteReq" was null or undefined when calling postApiV1SystemUserInfoDelete_2().'
+                'Required parameter "userInfoDeleteReq" was null or undefined when calling postApiV1SystemUserInfoDelete_3().'
             );
         }
 
@@ -249,8 +339,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：删除指定用户账号。删除后用户无法登录，相关数据（租户归属、角色绑定等）同步清理。用于用户账号注销、离职员工账号清理等场景。需确认用户无重要业务数据关联后再执行。
      * 刪除用户
      */
-    async postApiV1SystemUserInfoDelete_2(requestParameters: PostApiV1SystemUserInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
-        const response = await this.postApiV1SystemUserInfoDelete_2Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoDelete_3(requestParameters: PostApiV1SystemUserInfoDelete0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
+        const response = await this.postApiV1SystemUserInfoDelete_3Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -296,11 +386,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：分页查询用户列表，支持按用户名、手机号、邮箱、昵称等条件过滤。用于用户管理界面的列表展示、用户搜索等场景。返回用户基本信息及所属租户列表。
      * 查询用户信息列表
      */
-    async postApiV1SystemUserInfoGetList_3Raw(requestParameters: PostApiV1SystemUserInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoGetList200Response>> {
+    async postApiV1SystemUserInfoGetList_4Raw(requestParameters: PostApiV1SystemUserInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoGetList200Response>> {
         if (requestParameters['userInfoGetListReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoGetListReq',
-                'Required parameter "userInfoGetListReq" was null or undefined when calling postApiV1SystemUserInfoGetList_3().'
+                'Required parameter "userInfoGetListReq" was null or undefined when calling postApiV1SystemUserInfoGetList_4().'
             );
         }
 
@@ -325,8 +415,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：分页查询用户列表，支持按用户名、手机号、邮箱、昵称等条件过滤。用于用户管理界面的列表展示、用户搜索等场景。返回用户基本信息及所属租户列表。
      * 查询用户信息列表
      */
-    async postApiV1SystemUserInfoGetList_3(requestParameters: PostApiV1SystemUserInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoGetList200Response> {
-        const response = await this.postApiV1SystemUserInfoGetList_3Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoGetList_4(requestParameters: PostApiV1SystemUserInfoGetList0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoGetList200Response> {
+        const response = await this.postApiV1SystemUserInfoGetList_4Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -372,11 +462,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：获取单个用户的详细信息，包括用户基本信息、所属租户列表、绑定的第三方账号等。可指定是否同时返回租户详情。用于用户详情页、用户编辑前的数据加载等场景。
      * 获取用户信息
      */
-    async postApiV1SystemUserInfoGetOne_4Raw(requestParameters: PostApiV1SystemUserInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoGetOne200Response>> {
+    async postApiV1SystemUserInfoGetOne_5Raw(requestParameters: PostApiV1SystemUserInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemUserInfoGetOne200Response>> {
         if (requestParameters['userInfoGetOneReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoGetOneReq',
-                'Required parameter "userInfoGetOneReq" was null or undefined when calling postApiV1SystemUserInfoGetOne_4().'
+                'Required parameter "userInfoGetOneReq" was null or undefined when calling postApiV1SystemUserInfoGetOne_5().'
             );
         }
 
@@ -401,8 +491,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：获取单个用户的详细信息，包括用户基本信息、所属租户列表、绑定的第三方账号等。可指定是否同时返回租户详情。用于用户详情页、用户编辑前的数据加载等场景。
      * 获取用户信息
      */
-    async postApiV1SystemUserInfoGetOne_4(requestParameters: PostApiV1SystemUserInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoGetOne200Response> {
-        const response = await this.postApiV1SystemUserInfoGetOne_4Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoGetOne_5(requestParameters: PostApiV1SystemUserInfoGetOne0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemUserInfoGetOne200Response> {
+        const response = await this.postApiV1SystemUserInfoGetOne_5Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -448,11 +538,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：平台管理员为任意用户重置登录密码，用于忘记密码的兜底处理与账号安全管理。入参password为原始密码明文（与管理员创建用户接口同口径，HTTPS内传输），后端按系统配置等级对明文做真实强度校验后以bcrypt(SHA256)存储，重置成功后清除该用户全部登录态强制重新登录。仅平台管理员可操作，租户管理员与普通用户无权限。
      * 重置用户密码
      */
-    async postApiV1SystemUserInfoResetPwd_5Raw(requestParameters: PostApiV1SystemUserInfoResetPwd0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
+    async postApiV1SystemUserInfoResetPwd_6Raw(requestParameters: PostApiV1SystemUserInfoResetPwd0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
         if (requestParameters['userInfoResetPwdReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoResetPwdReq',
-                'Required parameter "userInfoResetPwdReq" was null or undefined when calling postApiV1SystemUserInfoResetPwd_5().'
+                'Required parameter "userInfoResetPwdReq" was null or undefined when calling postApiV1SystemUserInfoResetPwd_6().'
             );
         }
 
@@ -477,8 +567,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：平台管理员为任意用户重置登录密码，用于忘记密码的兜底处理与账号安全管理。入参password为原始密码明文（与管理员创建用户接口同口径，HTTPS内传输），后端按系统配置等级对明文做真实强度校验后以bcrypt(SHA256)存储，重置成功后清除该用户全部登录态强制重新登录。仅平台管理员可操作，租户管理员与普通用户无权限。
      * 重置用户密码
      */
-    async postApiV1SystemUserInfoResetPwd_5(requestParameters: PostApiV1SystemUserInfoResetPwd0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
-        const response = await this.postApiV1SystemUserInfoResetPwd_5Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoResetPwd_6(requestParameters: PostApiV1SystemUserInfoResetPwd0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
+        const response = await this.postApiV1SystemUserInfoResetPwd_6Raw(requestParameters, initOverrides);
         return await response.value();
     }
 
@@ -524,11 +614,11 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：管理员更新用户的基本信息，包括用户名、昵称、邮箱、手机号、性别、头像等。平台管理员可修改敏感字段（用户名、邮箱、手机号），普通租户管理员权限受限。支持部分更新，未传字段保持原值。
      * 更新用户基本数据
      */
-    async postApiV1SystemUserInfoUpdate_6Raw(requestParameters: PostApiV1SystemUserInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
+    async postApiV1SystemUserInfoUpdate_7Raw(requestParameters: PostApiV1SystemUserInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<runtime.ApiResponse<PostApiV1SystemAgreementDelete200Response>> {
         if (requestParameters['userInfoUpdateReq'] == null) {
             throw new runtime.RequiredError(
                 'userInfoUpdateReq',
-                'Required parameter "userInfoUpdateReq" was null or undefined when calling postApiV1SystemUserInfoUpdate_6().'
+                'Required parameter "userInfoUpdateReq" was null or undefined when calling postApiV1SystemUserInfoUpdate_7().'
             );
         }
 
@@ -553,8 +643,8 @@ export class SystemUserInfoApi extends runtime.BaseAPI {
      * 业务说明：管理员更新用户的基本信息，包括用户名、昵称、邮箱、手机号、性别、头像等。平台管理员可修改敏感字段（用户名、邮箱、手机号），普通租户管理员权限受限。支持部分更新，未传字段保持原值。
      * 更新用户基本数据
      */
-    async postApiV1SystemUserInfoUpdate_6(requestParameters: PostApiV1SystemUserInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
-        const response = await this.postApiV1SystemUserInfoUpdate_6Raw(requestParameters, initOverrides);
+    async postApiV1SystemUserInfoUpdate_7(requestParameters: PostApiV1SystemUserInfoUpdate0Request, initOverrides?: RequestInit | runtime.InitOverrideFunction): Promise<PostApiV1SystemAgreementDelete200Response> {
+        const response = await this.postApiV1SystemUserInfoUpdate_7Raw(requestParameters, initOverrides);
         return await response.value();
     }
 

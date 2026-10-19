@@ -56,6 +56,12 @@ export interface RoleInfoGetListReq {
      * @memberof RoleInfoGetListReq
      */
     status?: number;
+    /**
+     *  平台管理员可指定目标企业；省略时查询当前企业
+     * @type {string}
+     * @memberof RoleInfoGetListReq
+     */
+    tenantCode?: string;
 }
 
 /**
@@ -80,6 +86,7 @@ export function RoleInfoGetListReqFromJSONTyped(json: any, ignoreDiscriminator: 
         'name': json['name'] == null ? undefined : json['name'],
         'page': json['page'] == null ? undefined : PageInfoFromJSON(json['page']),
         'status': json['status'] == null ? undefined : json['status'],
+        'tenantCode': json['tenantCode'] == null ? undefined : json['tenantCode'],
     };
 }
 
@@ -94,5 +101,6 @@ export function RoleInfoGetListReqToJSON(value?: RoleInfoGetListReq | null): any
         'name': value['name'],
         'page': PageInfoToJSON(value['page']),
         'status': value['status'],
+        'tenantCode': value['tenantCode'],
     };
 }

@@ -15,7 +15,7 @@ import (
 	"gitee.com/unitedrhino/share/ctxs"
 	"github.com/stretchr/testify/require"
 	sdkmodbus "github.com/unitedrhino/ur-kit/protocols/modbus"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/grpc/metadata"

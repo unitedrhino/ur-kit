@@ -132,11 +132,15 @@ pnpm -r run stub --if-present
 node scripts/verify_iot_basic.mjs
 ```
 
-准备平台管理员分配的 HTTP 根地址 `PLATFORM_URL`、数字应用标识 `VITE_GLOB_APPID`、有权成员与项目。在两个终端分别运行：
+先按[启动自动注册](../apps/iot-basic/README.md#启动时自动注册)准备平台根地址、平台管理员注册令牌与 Web 入口。后端会在监听前同步四端应用及完整 Web 菜单；企业、成员与项目仍需真实授权。`APP_ID` 与 Web 的 `VITE_GLOB_APPID` 保持一致。在两个终端分别运行：
 
 ```sh
 # 终端一，起点为 ur-kit 根目录；替换为已授权的平台地址。
 export PLATFORM_URL='https://<platform-host>'
+export APP_ID='600'
+export APP_PUBLIC_URL='https://<application-host>/'
+# 令牌文件由运行环境提供；文件不进 Git，勿将令牌写到前端变量。
+export PLATFORM_BOOTSTRAP_TOKEN_FILE='<token-file>'
 cd apps/iot-basic/backend
 go mod download
 go run .

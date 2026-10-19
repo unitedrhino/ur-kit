@@ -8,7 +8,7 @@ import (
 	"gitee.com/unitedrhino/things/sdk/protocol/platformcore"
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/protocols"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
 	"sync"

@@ -3,7 +3,7 @@ package startup
 import (
 	"context"
 	"gitee.com/unitedrhino/share/ctxs"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/devices"
 	"github.com/zeromicro/go-zero/core/logx"
 	"gitee.com/unitedrhino/protocol/modbus/internal/event"

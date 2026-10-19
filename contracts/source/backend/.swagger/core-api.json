@@ -818,6 +818,26 @@
         "title": "AppInfoGetOneReq",
         "type": "object"
       },
+      "AppMenuBatchImportReq": {
+        "properties": {
+          "app": {
+            "$ref": "#/components/schemas/AppInfo"
+          },
+          "menus": {
+            "description": " 当前应用的完整菜单模板，父节点必须先于子节点",
+            "items": {
+              "$ref": "#/components/schemas/MenuInfo"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "app",
+          "menus"
+        ],
+        "title": "AppMenuBatchImportReq",
+        "type": "object"
+      },
       "AppRoleApp": {
         "properties": {
           "appID": {
@@ -6659,6 +6679,10 @@
             "description": "按状态查找角色",
             "format": "int64",
             "type": "integer"
+          },
+          "tenantCode": {
+            "description": " 平台管理员可指定目标企业；省略时查询当前企业",
+            "type": "string"
           }
         },
         "title": "RoleInfoGetListReq",
@@ -7706,6 +7730,11 @@
         "properties": {
           "config": {
             "$ref": "#/components/schemas/SysConfigInfo"
+          },
+          "createTenant": {
+            "description": " 是否同时创建企业，未传时不创建",
+            "format": "boolean",
+            "type": "boolean"
           },
           "ownerUser": {
             "$ref": "#/components/schemas/UserCreate"
@@ -9808,6 +9837,27 @@
         "title": "UserCreateResp",
         "type": "object"
       },
+      "UserCreateTenantBinding": {
+        "properties": {
+          "roleIDs": {
+            "description": " 企业角色ID列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tenantCode": {
+            "description": " 企业编码",
+            "type": "string"
+          }
+        },
+        "required": [
+          "tenantCode",
+          "roleIDs"
+        ],
+        "title": "UserCreateTenantBinding",
+        "type": "object"
+      },
       "UserDataAreaGetListReq": {
         "properties": {
           "page": {
@@ -9960,6 +10010,69 @@
         "title": "UserForgetPwdReq",
         "type": "object"
       },
+      "UserImportResult": {
+        "properties": {
+          "message": {
+            "description": " 结果说明",
+            "type": "string"
+          },
+          "row": {
+            "description": " 表格原始行号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "status": {
+            "description": " success成功、skipped重复跳过、failed失败",
+            "type": "string"
+          },
+          "userID": {
+            "description": " 创建成功的用户ID",
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "status"
+        ],
+        "title": "UserImportResult",
+        "type": "object"
+      },
+      "UserImportRow": {
+        "properties": {
+          "email": {
+            "description": " 邮箱",
+            "type": "string"
+          },
+          "nickName": {
+            "description": " 昵称",
+            "type": "string"
+          },
+          "phone": {
+            "description": " 手机号",
+            "type": "string"
+          },
+          "row": {
+            "description": " 表格原始行号",
+            "format": "int64",
+            "type": "integer"
+          },
+          "sex": {
+            "description": " 性别：0未知、1男、2女",
+            "format": "int64",
+            "type": "integer"
+          },
+          "userName": {
+            "description": " 登录名",
+            "type": "string"
+          }
+        },
+        "required": [
+          "row",
+          "userName"
+        ],
+        "title": "UserImportRow",
+        "type": "object"
+      },
       "UserInfo": {
         "properties": {
           "avatar": {
@@ -10047,6 +10160,75 @@
         "title": "UserInfo",
         "type": "object"
       },
+      "UserInfoBatchCreateReq": {
+        "properties": {
+          "password": {
+            "description": " 统一初始密码，沿用管理员创建的明文口径",
+            "type": "string"
+          },
+          "roleIDs": {
+            "description": " 平台角色ID列表",
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "tenantBindings": {
+            "description": " 企业及其角色",
+            "items": {
+              "$ref": "#/components/schemas/UserCreateTenantBinding"
+            },
+            "type": "array"
+          },
+          "users": {
+            "description": " 最多20行用户",
+            "items": {
+              "$ref": "#/components/schemas/UserImportRow"
+            },
+            "type": "array"
+          }
+        },
+        "required": [
+          "users",
+          "password"
+        ],
+        "title": "UserInfoBatchCreateReq",
+        "type": "object"
+      },
+      "UserInfoBatchCreateResp": {
+        "properties": {
+          "failCount": {
+            "description": " 失败数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "list": {
+            "description": " 逐行结果",
+            "items": {
+              "$ref": "#/components/schemas/UserImportResult"
+            },
+            "type": "array"
+          },
+          "skipCount": {
+            "description": " 跳过数量",
+            "format": "int64",
+            "type": "integer"
+          },
+          "successCount": {
+            "description": " 成功数量",
+            "format": "int64",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "list",
+          "successCount",
+          "skipCount",
+          "failCount"
+        ],
+        "title": "UserInfoBatchCreateResp",
+        "type": "object"
+      },
       "UserInfoCreateReq": {
         "properties": {
           "info": {
@@ -10056,6 +10238,13 @@
             "description": "平台的角色编号列表",
             "items": {
               "type": "string"
+            },
+            "type": "array"
+          },
+          "tenantBindings": {
+            "description": " 创建时加入的企业及其角色",
+            "items": {
+              "$ref": "#/components/schemas/UserCreateTenantBinding"
             },
             "type": "array"
           }
@@ -12218,6 +12407,61 @@
         "x-log-mode": "1",
         "x-oper-type": "update",
         "x-resource": "system/app/group"
+      }
+    },
+    "/api/v1/system/app/info/batch-import": {
+      "post": {
+        "description": "业务说明：供独立应用启动时，以平台超级管理员身份同步应用及完整菜单模板，并为已开通企业补齐缺失菜单。保留存量菜单标识、企业自定义展示和软删除状态；不自动授予成员权限。",
+        "operationId": "postApiV1SystemAppInfoBatch-import",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AppMenuBatchImportReq"
+              }
+            }
+          },
+          "description": " AppMenuBatchImportReq 携带应用自己维护的稳定应用标识与完整菜单模板。",
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/WithID"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "幂等注册应用与菜单",
+        "tags": [
+          "system/app/info",
+          "systemAppInfo"
+        ],
+        "x-action": "import",
+        "x-auth-type": "platform",
+        "x-group": "system/app/info",
+        "x-log-mode": "1",
+        "x-oper-type": "import",
+        "x-resource": "system/app/info"
       }
     },
     "/api/v1/system/app/info/create": {
@@ -22991,7 +23235,7 @@
     },
     "/api/v1/system/role/info/get-list": {
       "post": {
-        "description": "业务说明：查询角色列表，支持按名称、状态、编码筛选。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。",
+        "description": "业务说明：查询角色列表，支持按名称、状态、编码筛选。平台管理员可用tenantCode指定目标企业，普通管理员只能查询当前企业。用于角色选择器、权限配置页面、用户授权等场景。返回分页结果包含角色基本信息。",
         "operationId": "postApiV1SystemRoleInfoGet-list",
         "requestBody": {
           "content": {
@@ -25670,6 +25914,60 @@
         "x-log-mode": "1",
         "x-oper-type": "delete",
         "x-resource": "system/user/dept"
+      }
+    },
+    "/api/v1/system/user/info/batch-create": {
+      "post": {
+        "description": "业务说明：仅平台管理员可使用统一初始密码、平台角色和多企业角色配置，按行原子创建最多20个用户。重复账号跳过，其他失败不影响有效行，返回原始行号与逐行结果，不返回密码。",
+        "operationId": "postApiV1SystemUserInfoBatch-create",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserInfoBatchCreateReq"
+              }
+            }
+          },
+          "required": true,
+          "x-originalParamName": "body"
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "properties": {
+                    "code": {
+                      "default": "200",
+                      "title": "返回code",
+                      "type": "integer"
+                    },
+                    "data": {
+                      "$ref": "#/components/schemas/UserInfoBatchCreateResp"
+                    },
+                    "msg": {
+                      "title": "返回的消息",
+                      "type": "string"
+                    }
+                  },
+                  "type": "object"
+                }
+              }
+            },
+            "description": "A successful response."
+          }
+        },
+        "summary": "批量创建用户",
+        "tags": [
+          "system/user/info",
+          "systemUserInfo"
+        ],
+        "x-action": "import",
+        "x-auth-type": "platform",
+        "x-group": "system/user/info",
+        "x-log-mode": "1",
+        "x-oper-type": "import",
+        "x-resource": "system/user/info"
       }
     },
     "/api/v1/system/user/info/create": {

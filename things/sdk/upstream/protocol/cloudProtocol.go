@@ -10,7 +10,7 @@ import (
 	timedSDK "gitee.com/unitedrhino/core/share/domain/timed"
 	"gitee.com/unitedrhino/share/conf"
 	"gitee.com/unitedrhino/share/ctxs"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/topics"
 	"github.com/mitchellh/mapstructure"
 	"github.com/zeromicro/go-zero/core/logx"

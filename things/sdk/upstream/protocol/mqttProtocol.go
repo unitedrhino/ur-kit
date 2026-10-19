@@ -13,7 +13,7 @@ import (
 	"gitee.com/unitedrhino/share/eventBus"
 	"gitee.com/unitedrhino/share/events/topics"
 	"gitee.com/unitedrhino/share/utils"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
 	"gitee.com/unitedrhino/things/share/clients"
 	"gitee.com/unitedrhino/things/share/devices"
 	mqtt "github.com/eclipse/paho.mqtt.golang"

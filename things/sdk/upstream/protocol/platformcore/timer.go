@@ -8,8 +8,8 @@ import (
 
 	"gitee.com/unitedrhino/share/ctxs"
 	"gitee.com/unitedrhino/share/def"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/core/service/timedsvr/pb/timed"
-	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
+	"gitee.com/unitedrhino/core/service/timedsvr/pb/timed"
+	publiccore "gitee.com/unitedrhino/things/sdk/protocol/core"
 	"github.com/zeromicro/go-zero/core/logx"
 	"github.com/zeromicro/go-zero/zrpc"
 )

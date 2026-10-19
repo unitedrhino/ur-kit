@@ -16,15 +16,15 @@ import (
 	"gitee.com/unitedrhino/things/share/devices"
 	"gitee.com/unitedrhino/things/share/domain/schema"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/configselect"
-	publiccore "github.com/unitedrhino/ur-kit/things/sdk/protocol/core"
+	publiccore "gitee.com/unitedrhino/things/sdk/protocol/core"
 	"github.com/unitedrhino/ur-kit/things/sdk/protocol/tracking"
 	"github.com/zeromicro/go-zero/core/stores/cache"
 	"github.com/zeromicro/go-zero/core/stores/kv"
 	"github.com/zeromicro/go-zero/zrpc"
 	"google.golang.org/grpc"
 
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/service/dmsvr/pb/dm"
-	"github.com/unitedrhino/ur-kit/sdks/go/pb/things/share/rpcs/protocolSync/pb/protocolSync"
+	"gitee.com/unitedrhino/things/service/dmsvr/pb/dm"
+	"gitee.com/unitedrhino/things/share/rpcs/protocolSync/pb/protocolSync"
 )
 
 // Options 保存协议配置、公开 RPC 接口和 Web 配置页；显式注入的接口优先于 DmClient。
