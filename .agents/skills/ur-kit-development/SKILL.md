@@ -1,6 +1,6 @@
 ---
 name: ur-kit-development
-description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node 后端，或维护公共 SDK、合同和基础应用时使用。
+description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node 后端，部署初始化与运维，或维护公共 SDK、合同和基础应用时使用。
 ---
 
 # ur-kit 开发
@@ -18,7 +18,7 @@ description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node �
 | Web、移动端和 Go/Java/Node 业务后端 | [应用开发：骨架、鉴权、页面、测试、Docker](references/application-development.md) |
 | WS 推送、消息中心、站内通知、Hook、上传或数据分析接入 | [公开能力清单](../../../docs/application-capabilities.md)、[WS 与通知](../../../docs/realtime.md) |
 | 注册平台代理/Web 路由、应用、菜单与定时任务 | [平台注册与验收](references/platform-registration.md) |
-| 协同 ur-kit/ur/urops 开发、接入和部署 | [工具协作、urops 部署与运维](references/urops-deployment.md) |
+| 协同 ur-kit/ur/urops 开发、平台接入、首次初始化和日常运维 | [工具协作、urops 部署与运维](references/urops-deployment.md) |
 | 把规则带入自己的独立仓、交付前自查 | [项目规范与 AI 入口](references/project-rules.md) |
 
 最短开发流程：
@@ -28,6 +28,7 @@ description: 使用 ur-kit 开发设备协议、Web、uni-app 和 Go/Java/Node �
 3. 先跑现有样例，再增加自己的业务代码。使用公开接口注入 RPC、消息总线、存储和认证；禁止依赖 `upstream/` 或私有 SaaS 包。
 4. 认证身份从中间件上下文读取；企业/项目隔离和资源动作授权落实到服务端。协议验证属性上报与属性控制两条实际消息链路。
 5. 按专项指南执行定向测试、构建和容器验收，记录实际结果。自己的仓也提交 `AGENTS.md` 与相应技能参考文件，不能只保留指向开发机的链接。
+6. 部署时按 urops 指南准备目标主机和运行配置，完成应用迁移、注册与成员授权，再验证真实业务；将初始化、备份、更新与回滚入口写入自己的项目资料。
 
 ## 维护 ur-kit 本身
 
