@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view v-if="visible" class="sp-overlay">
   <view class="sp-panel" @tap.stop="">
@@ -236,7 +237,7 @@ async function handleSubmit() {
   width: 85%;
   max-width: 640rpx;
   background: var(--card-bg);
-  border-radius: var(--radius-lg, 24rpx);
+  border-radius: var(--radius-lg);
   padding: 48rpx 40rpx 40rpx;
   display: flex;
   flex-direction: column;
@@ -250,14 +251,14 @@ async function handleSubmit() {
 }
 
 .sp-title {
-  font-size: 36rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 12rpx;
 }
 
 .sp-subtitle {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -271,7 +272,7 @@ async function handleSubmit() {
 }
 
 .sp-label {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   font-weight: 500;
   margin-bottom: 12rpx;
@@ -289,7 +290,7 @@ async function handleSubmit() {
 
 .sp-input {
   flex: 1;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   height: 88rpx;
 }
@@ -303,13 +304,13 @@ async function handleSubmit() {
 }
 
 .sp-hint {
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
   margin-bottom: 12rpx;
 }
 
 .sp-error {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--color-danger);
   margin-top: 8rpx;
 }
@@ -337,7 +338,7 @@ async function handleSubmit() {
 }
 
 .sp-btn__text {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--color-on-primary);
   font-weight: 500;
 }

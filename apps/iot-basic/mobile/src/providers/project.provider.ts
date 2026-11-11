@@ -10,7 +10,7 @@ export interface ProjectListState {
   filterStatus: number; // 0=全部 1=正常 2=禁用
 }
 
-class ProjectProvider {
+export class ProjectProvider {
   private state: ProjectListState = {
     list: [],
     pageState: createPageState(),
@@ -18,6 +18,8 @@ class ProjectProvider {
     filterStatus: 0,
   };
   private listeners: Set<(s: ProjectListState) => void> = new Set();
+  /** ownershipCache 按账号和项目缓存负责人判断，避免每次切换列表重复读取项目详情。 */
+  private ownershipCache = new Map<string, boolean>();
 
   getState(): ProjectListState {
     return this.state;
@@ -82,18 +84,56 @@ class ProjectProvider {
 
   async createProject(data: ProjectCreateData): Promise<string> {
     const id = await projectService.create(data);
+    this.ownershipCache.clear();
     await this.loadFirst();
     return id;
   }
 
   async updateProject(data: ProjectUpdateData): Promise<void> {
     await projectService.update(data);
+    this.ownershipCache.clear();
     await this.loadFirst();
   }
 
   async deleteProject(projectID: string): Promise<void> {
     await projectService.delete(projectID);
+    this.ownershipCache.clear();
     await this.loadFirst();
+  }
+
+  /** isOwnerProject 判断项目负责人，项目列表未包含目标时回读详情避免分页误判。 */
+  async isOwnerProject(projectID: string, userID: string): Promise<boolean> {
+    if (!projectID || !userID) return false;
+    const key = `${userID}:${projectID}`;
+    const cached = this.ownershipCache.get(key);
+    if (cached !== undefined) return cached;
+    const listed = this.state.list.find((item) => item.projectID === projectID);
+    if (listed) {
+      const owner = String(listed.adminUserID) === String(userID) && listed.status === 1;
+      this.ownershipCache.set(key, owner);
+      return owner;
+    }
+    try {
+      const project = await projectService.getOne(projectID);
+      const owner = String(project.adminUserID) === String(userID) && project.status === 1;
+      this.ownershipCache.set(key, owner);
+      return owner;
+    } catch {
+      this.ownershipCache.set(key, false);
+      return false;
+    }
+  }
+
+  /** getOwnedProjects 分页读取当前账号负责的正常项目，供分享接收前置检查使用。 */
+  async getOwnedProjects(userID: string): Promise<ProjectEntity[]> {
+    if (!userID) return [];
+    const owned: ProjectEntity[] = [];
+    for (let page = 1; page <= 200; page += 1) {
+      const result = await projectService.getList(page, 100, undefined, 1);
+      owned.push(...result.list.filter((item) => item.status === 1 && item.adminUserID === userID));
+      if (!result.list.length || page * 100 >= result.total) break;
+    }
+    return owned;
   }
 }
 

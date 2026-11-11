@@ -57,6 +57,8 @@ export interface ActionParam {
 }
 
 export interface ThingModelAction {
+  /** funcGroup 区分普通功能1与系统功能2，供分享权限分组。 */
+  funcGroup?: number;
   identifier: string;
   name: string;
   dir: DirType;

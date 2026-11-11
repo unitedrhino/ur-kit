@@ -1,3 +1,4 @@
+<!-- 个人资料展示与编辑：账号为只读登录标识，昵称和头像等资料可编辑。 -->
 <template>
 <app-navigation-bar title="个人资料" :back="true" />
 
@@ -48,6 +49,10 @@
   </view>
 
   <view class="profile-card">
+    <view class="profile-info-row">
+      <text class="profile-info-row__label">账号</text>
+      <text class="profile-info-row__value profile-account">{{user?.userName || '未设置'}}</text>
+    </view>
     <view class="profile-info-row">
       <text class="profile-info-row__label">手机号</text>
       <text class="profile-info-row__value">{{user?.phone || '未绑定'}}</text>
@@ -183,8 +188,8 @@ async function handleSave() {
 </script>
 
 <style lang="scss" scoped>
-.profile-page { flex: 1; min-height: 0; background: var(--page-bg); }
-.profile-card { margin: 16px; padding: 16px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px var(--color-shadow); }
+.profile-page { flex: 1; min-height: 0; background: transparent; }
+.profile-card { margin: 16px; padding: 16px; background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: 0 8px 24px var(--color-shadow); }
 .profile-card--hero { display: flex; align-items: center; gap: 14px; background: linear-gradient(180deg, var(--color-primary-light) 0%, var(--card-bg) 100%); }
 .profile-avatar { width: 68px; height: 68px; border-radius: 50%; overflow: hidden; background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-primary-light) 100%); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .profile-avatar--button { padding: 0; margin: 0; border: 0; line-height: normal; }
@@ -192,25 +197,25 @@ async function handleSave() {
 .profile-avatar__image { width: 100%; height: 100%; display: block; }
 .profile-avatar__text { color: var(--color-on-primary); font-size: 26px; font-weight: 700; }
 .profile-hero__main { flex: 1; min-width: 0; }
-.profile-hero__name { display: block; font-size: 20px; font-weight: 700; color: var(--text-primary); }
-.profile-hero__id { display: block; margin-top: 6px; font-size: 13px; color: var(--text-secondary); }
-.profile-hero__action { color: var(--color-primary); font-size: 13px; }
+.profile-hero__name { display: block; font-size: var(--font-section); font-weight: 700; color: var(--text-primary); }
+.profile-hero__id { display: block; margin-top: 6px; font-size: var(--font-caption); color: var(--text-secondary); }
+.profile-hero__action { color: var(--color-primary); font-size: var(--font-caption); }
 .profile-hero__action-btn { padding: 0; margin: 0; background: transparent; border: 0; line-height: normal; }
 .profile-hero__action-btn::after { border: 0; }
 .profile-field { padding: 14px 0; border-bottom: 1rpx solid var(--border-color); }
 .profile-field:last-child { border-bottom: none; }
-.profile-field__label { display: block; margin-bottom: 10px; color: var(--text-secondary); font-size: 14px; }
-.profile-field__input { font-size: 16px; color: var(--text-primary); }
+.profile-field__label { display: block; margin-bottom: 10px; color: var(--text-secondary); font-size: var(--font-body); }
+.profile-field__input { font-size: var(--font-body); color: var(--text-primary); }
 .profile-sex { display: flex; gap: 10px; }
 .profile-sex__item { flex: 1; height: 40px; border-radius: 12px; background: var(--page-bg); display: flex; align-items: center; justify-content: center; }
 .profile-sex__item--active { background: var(--color-primary-light); color: var(--color-primary); }
-.profile-sex__text { font-size: 14px; }
+.profile-sex__text { font-size: var(--font-body); }
 .profile-info-row { display: flex; justify-content: space-between; align-items: center; padding: 14px 0; border-bottom: 1rpx solid var(--border-color); }
 .profile-info-row:last-child { border-bottom: none; }
-.profile-info-row__label { font-size: 15px; color: var(--text-primary); }
-.profile-info-row__value { max-width: 65%; font-size: 14px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.profile-info-row__label { font-size: var(--font-body); color: var(--text-primary); }
+.profile-info-row__value { max-width: 65%; font-size: var(--font-body); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .profile-submit { margin: 20px 16px; height: 48px; border-radius: 14px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; }
 .profile-submit--disabled { opacity: 0.6; }
 .profile-submit--hover { opacity: 0.9; }
-.profile-submit__text { color: var(--color-on-primary); font-size: 16px; font-weight: 600; }
+.profile-submit__text { color: var(--color-on-primary); font-size: var(--font-body); font-weight: 600; }
 </style>

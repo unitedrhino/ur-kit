@@ -213,7 +213,7 @@ class SceneEditProvider {
   }
 
   removeTrigger(index: number): void {
-    const triggers = this.state.triggers.filter((_, i) => i !== index);
+    const triggers = this.state.triggers.filter((_, i) => i !== index).map((item, order) => ({ ...item, order }));
     this.update({ triggers });
   }
 
@@ -232,7 +232,7 @@ class SceneEditProvider {
   }
 
   removeAction(index: number): void {
-    const actions = this.state.actions.filter((_, i) => i !== index);
+    const actions = this.state.actions.filter((_, i) => i !== index).map((item, order) => ({ ...item, order }));
     this.update({ actions });
   }
 

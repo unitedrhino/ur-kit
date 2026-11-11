@@ -1,11 +1,42 @@
+<!-- 设备详情优先显示面板；共享设备不提供二次分享。 -->
 <template>
-<app-navigation-bar :title="pageTitle" />
+<view class="device-detail-layout" :class="{ 'device-detail-layout--mini': miniWebHost }">
+<!-- #ifndef MP-WEIXIN -->
+<app-navigation-bar v-if="!miniWebHost" :title="pageTitle" />
+<!-- #endif -->
+<!-- #ifdef MP-WEIXIN -->
+<web-view v-if="miniPanelURL" :src="miniPanelURL" @error="handleMiniPanelError" />
+<view v-else-if="miniPanelError" class="detail-panel-error"><text>{{miniPanelError}}</text><button @tap="retryMiniPanel">重新加载面板</button><button @tap="useNativePanel">使用原生控制</button></view>
+<!-- #endif -->
 
-<scroll-view class="detail-page" scroll-y type="list">
+<view class="detail-page">
   <loading v-if="loading" fullscreen text="加载中..." />
 
   <template v-else-if="device">
+    <device-panel-host :product-i-d="device.productID" :device-name="device.deviceName" :active="pageActive" @availability="panelMode = $event" />
+    <scroll-view v-if="panelMode === 'native'" class="detail-native" scroll-y type="list">
+    <view class="detail-native-header">
+      <text>设备控制</text>
+      <view class="detail-settings" role="button" aria-label="设备设置" @tap="handleNavToSettings"><app-icon name="tabler:settings" :size="22" /><text>设置</text></view>
+    </view>
+    <view class="detail-card detail-hero-card">
+      <view class="detail-hero-icon"><image v-if="detailImage" class="detail-hero-image" :src="detailImage" mode="aspectFit" @error="handleDetailImageError" /><app-icon v-else name="tabler:devices" :size="42" color="var(--color-primary)" /></view>
+      <view class="detail-status">
+        <view :class="['detail-status__dot', { 'detail-status__dot--online': device.status === 2, 'detail-status__dot--error': device.status === 4 }]" />
+        <text class="detail-status__text">{{ device.status === 2 ? '在线' : device.status === 1 ? '未激活' : device.status === 4 ? '异常' : '离线' }}</text>
+        <app-icon v-if="device.isShared" name="tabler:share" :size="16" color="var(--color-primary)" aria-label="共享设备" />
+      </view>
+      <text class="detail-device__name">{{ device.deviceAlias || device.deviceName }}</text>
+      <text class="detail-device__product">{{ device.productName || device.deviceAlias || device.deviceName }}</text>
+      <text v-if="controlModel && controlModel.properties.every(item => !item.timestamp)" class="detail-panel-note">设备尚无上报数据，当前值以“—”显示</text>
+    </view>
+    <view v-if="readonlyCard.items.length === 0 && visibleControlItems.length === 0" class="detail-card detail-empty-panel">
+      <text class="detail-section__title">暂无可用控制项</text>
+      <text class="detail-panel-note">该设备暂未提供可展示的功能</text>
+    </view>
+
     <view v-if="readonlyCard.items.length > 0" class="detail-card detail-section">
+      <view class="detail-section__head"><text class="detail-section__title">实时数据</text></view>
       <view class="detail-readonly-grid">
         <view
           v-for="item in readonlyGridItems"
@@ -22,6 +53,7 @@
     </view>
 
     <view v-if="visibleControlItems.length > 0" class="detail-card detail-section">
+      <view class="detail-section__head"><text class="detail-section__title">设备控制</text></view>
       <view class="detail-control-list">
         <template
           v-for="item in visibleControlItems"
@@ -104,7 +136,7 @@
         </view>
         <text class="detail-entry-row__arrow">›</text>
       </view>
-      <view class="detail-entry-row" @tap="handleShare" hover-class="detail-entry-row--hover">
+      <view v-if="device.isShared === false" class="detail-entry-row" @tap="handleShare" hover-class="detail-entry-row--hover">
         <view class="detail-entry-row__info">
           <text class="detail-entry-row__name">设备分享</text>
           <text class="detail-entry-row__desc">分享设备给其他成员</text>
@@ -114,22 +146,25 @@
       <view class="detail-entry-row" @tap="handleNavToSettings" hover-class="detail-entry-row--hover">
         <view class="detail-entry-row__info">
           <text class="detail-entry-row__name">设备设置</text>
-          <text class="detail-entry-row__desc">名称、位置、分享与更多配置</text>
+          <text class="detail-entry-row__desc">{{ device.isShared ? '设备信息与更多配置' : '名称、位置、分享与更多配置' }}</text>
         </view>
         <text class="detail-entry-row__arrow">›</text>
       </view>
     </view>
+    </scroll-view>
   </template>
-</scroll-view>
+</view>
 
+</view>
 </template>
 
 <script setup lang="ts">
 import { useClientDebugPage } from '../../../utils/use-client-debug-page';
 import AppNavigationBar from '../../../components/app-navigation-bar/app-navigation-bar.vue';
+import DevicePanelHost from '../../../components/device-panel-host/device-panel-host.vue';
 import Loading from '../../../components/loading/loading.vue';
-import { computed, onUnmounted, ref } from 'vue';
-import { onLoad, onShow, onUnload } from '@dcloudio/uni-app';
+import { computed, onUnmounted, ref, watch } from 'vue';
+import { onLoad, onShow, onHide, onUnload } from '@dcloudio/uni-app';
 import { deviceDetailProvider } from '../../../providers/device-detail.provider';
 import type { DeviceEntity } from '../../../domain/entities/device.entity';
 import type {
@@ -146,11 +181,68 @@ import {
   type ControlCardUiItem,
 } from '../../../services/device-control-card-ui.service';
 import { getActionParamMemory } from '../../../services/action-param-memory.service';
+import { panelLaunchService } from '../../../services/panel-launch.service';
+import { isMiniPanelWebHost } from '../../../services/mini-panel-navigation.service';
 import { ensurePageReady } from '../../../utils/page-guard';
+import { defaultDeviceImage } from '../../../utils/device-image';
 
+/** miniPanelURL 是一次性入口，生命周期内保留web-view，设置返回不重新签发。 */
+const miniPanelURL = ref('');
+/** miniPanelError 明确显示入口或业务域名失败，不把失败伪装为未绑定。 */
+const miniPanelError = ref('');
+/** miniIdentity 只保存当前详情固定目标，用于重试和显式原生回退。 */
+const miniIdentity = { productID: '', deviceName: '' };
+/** miniClosed 使卸载后的入口响应失效，不能重新创建旧设备窗口。 */
+let miniClosed = false;
+/** miniWebHost 只在第一方交接已校验微信桥后隐藏H5重复导航。 */
+const miniWebHost = isMiniPanelWebHost();
+
+/** openMiniPanel 按当前登录身份解析H5绑定；无绑定才返回原生控制。 */
+async function openMiniPanel(): Promise<boolean> {
+  loading.value = true;
+  miniPanelError.value = '';
+  try {
+    const url = await panelLaunchService.create(miniIdentity.productID, miniIdentity.deviceName);
+    if (miniClosed) return true;
+    miniPanelURL.value = url;
+    return !!url;
+  } catch (cause) {
+    if (!miniClosed) miniPanelError.value = cause instanceof Error ? cause.message : '面板暂时无法打开';
+    return true;
+  } finally { if (!miniClosed) loading.value = false; }
+}
+/** handleMiniPanelError 移除失败容器，明确提示检查微信业务域名后重试。 */
+function handleMiniPanelError(): void {
+  miniPanelURL.value = '';
+  miniPanelError.value = '自定义面板加载失败，请确认网络及微信业务域名配置后重试';
+}
+/** retryMiniPanel 重新签发短票据，不重放已消费的URL。 */
+async function retryMiniPanel(): Promise<void> { if (!(await openMiniPanel())) useNativePanel(); }
+/** useNativePanel 仅在用户明确选择或无绑定时加载原生物模型控制。 */
+function useNativePanel(): void {
+  miniPanelError.value = '';
+  miniPanelURL.value = '';
+  void deviceDetailProvider.load(miniIdentity.productID, miniIdentity.deviceName);
+}
 const device = ref<DeviceEntity | null>(null);
+/** 详情优先产品图片，失败后依次使用默认图和通用图标。 */
+const detailProductImageFailed = ref(false);
+const detailDefaultImageFailed = ref(false);
+const detailDefaultImage = computed(() => device.value ? defaultDeviceImage(device.value.deviceType, device.value.productName, device.value.deviceAlias) : '');
+const detailImage = computed(() => (!detailProductImageFailed.value && device.value?.productImg) || (!detailDefaultImageFailed.value && detailDefaultImage.value) || '');
+watch(() => [device.value?.productID, device.value?.deviceName, device.value?.productImg, device.value?.productName, device.value?.deviceAlias, device.value?.deviceType], () => { detailProductImageFailed.value = false; detailDefaultImageFailed.value = false; });
+/** handleDetailImageError 逐级回退，避免失效图片反复加载。 */
+function handleDetailImageError(): void {
+  if (!detailProductImageFailed.value && device.value?.productImg) detailProductImageFailed.value = true;
+  else detailDefaultImageFailed.value = true;
+}
+
 const controlModel = ref<DeviceControlModel | null>(null);
 const loading = ref(true);
+/** pageActive 通知嵌入宿主隐藏时释放连接，设置返回时恢复。 */
+const pageActive = ref(true);
+/** panelMode 在解析完成前隐藏原生控件，避免重复控制区。 */
+const panelMode = ref<'loading' | 'panel' | 'native'>('loading');
 const unsubscribes: Array<() => void> = [];
 const actionSubmitting = ref<Record<string, boolean>>({});
 const propertyControlRefs = ref(new Map<string, PropertyControlExpose>());
@@ -195,6 +287,10 @@ const pageTitle = computed(() => {
   const currentDevice = device.value;
   return currentDevice ? currentDevice.deviceAlias || currentDevice.deviceName || '设备详情' : '设备详情';
 });
+// #ifdef MP-WEIXIN
+/** 微信详情使用原生导航栏，无绑定的原生控制与加载失败页也保留顶部返回。 */
+watch(pageTitle, (title) => { uni.setNavigationBarTitle({ title }); }, { immediate: true });
+// #endif
 /** READONLY_VALUE_LONG_LIMIT 是只读九宫格值触发“查看详情”的长度阈值，真机两行约容纳 16~17 字符，取 14 覆盖小屏。 */
 const READONLY_VALUE_LONG_LIMIT = 14;
 
@@ -269,6 +365,7 @@ type ReadonlyGridItem = ReadonlyGridPropertyItem | ReadonlyGridMoreItem;
 onLoad(async (query: Record<string, string> | undefined) => {
   const q = query || {};
   const ready = await ensurePageReady('/packageDevice/pages/detail/index', q);
+  if (miniClosed) return;
   if (!ready) {
     loading.value = false;
     return;
@@ -283,14 +380,25 @@ onLoad(async (query: Record<string, string> | undefined) => {
       loading.value = s.loading;
     }),
   );
+  miniIdentity.productID = productID;
+  miniIdentity.deviceName = deviceName;
+  // #ifdef MP-WEIXIN
+  if (await openMiniPanel()) return;
+  // #endif
   deviceDetailProvider.load(productID, deviceName);
 });
 
+onHide(() => { pageActive.value = false; });
+
 onShow(() => {
+  pageActive.value = true;
   actionMemoryVersion.value += 1;
 });
 
 onUnload(() => {
+  miniClosed = true;
+  miniPanelURL.value = "";
+  pageActive.value = false;
   unsubscribes.forEach((fn) => fn());
   deviceDetailProvider.clear();
 });
@@ -487,10 +595,10 @@ function handleNavToDeviceLogs() {
   });
 }
 
-/** handleShare 跳转设备分享页面。 */
+/** handleShare 仅在确认不是收到的共享设备时打开分享管理。 */
 function handleShare() {
   const d = device.value;
-  if (!d) return;
+  if (!d || d.isShared !== false) return;
   uni.navigateTo({
     url: `/packageDevice/pages/share/index?productID=${encodeURIComponent(d.productID)}&deviceName=${encodeURIComponent(d.deviceName)}`,
   });
@@ -507,7 +615,7 @@ function handleNavToCloneMemory() {
 
 /** handleNavToSettings 跳转设备设置页面。 */
 function handleNavToSettings() {
-  const d = device.value;
+  const d = device.value || (miniPanelURL.value ? miniIdentity : null);
   if (!d) return;
   uni.navigateTo({
     url: `/packageDevice/pages/settings/index?productID=${encodeURIComponent(d.productID)}&deviceName=${encodeURIComponent(d.deviceName)}`,
@@ -520,18 +628,31 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 </script>
 
 <style lang="scss" scoped>
+.detail-panel-error { padding:24px; display:flex; flex-direction:column; gap:16px; color:var(--text-secondary); }
+/* 微信电脑端也按移动控制面板展示，真实手机小于430px时占满设备宽度。 */
+.device-detail-layout--mini { width: min(100%, 430px); margin-inline: auto; }
+.device-detail-layout { height: 100vh; height: 100dvh; display: flex; flex-direction: column; overflow: hidden; }
 .detail-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
+.detail-native { flex: 1; min-height: 0; }
+.detail-native-header { display: flex; align-items: center; justify-content: space-between; padding: 8px 16px 0; color: var(--text-secondary); font-size: 14px; }
+.detail-settings { min-height: 44px; display: flex; align-items: center; gap: 6px; color: var(--text-primary); }
 
 .detail-card {
   margin: 16px;
   padding: 18px;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
 }
+
+.detail-panel-note { display: block; margin-top: 10px; font-size: var(--font-caption); color: var(--text-secondary); }
+.detail-empty-panel { padding: 18px; }
 
 .detail-hero-card {
   padding: 20px;
@@ -560,19 +681,19 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 }
 
 .detail-status__text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .detail-device__name {
-  font-size: 20px;
+  font-size: var(--font-section);
   font-weight: 600;
   color: var(--text-primary);
   margin-top: 4px;
 }
 
 .detail-device__product {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 4px;
 }
@@ -590,13 +711,13 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 }
 
 .detail-section__title {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .detail-section__count {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -605,13 +726,11 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
   flex-direction: column;
 }
 
-.detail-action-row:last-child,
-.detail-entry-row:last-child {
+.detail-action-row:last-child {
   border-bottom: none;
 }
 
-.detail-action-row__info,
-.detail-entry-row__info {
+.detail-action-row__info {
   flex: 1;
   min-width: 0;
   display: flex;
@@ -620,14 +739,14 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 
 .detail-action-row__name,
 .detail-entry-row__name {
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .detail-action-row__id,
 .detail-entry-row__desc {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 3px;
 }
@@ -667,7 +786,7 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 
 .detail-readonly-tile__name {
   max-width: 100%;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -677,7 +796,7 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 .detail-readonly-tile__value {
   max-width: 100%;
   margin-top: 6px;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -691,7 +810,7 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 
 .detail-readonly-tile__detail {
   margin-top: 4px;
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 
@@ -710,7 +829,6 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
 }
 
 .detail-action-row--hover,
-.detail-entry-row--hover,
 .detail-action-row__btn--hover {
   opacity: 0.7;
 }
@@ -729,7 +847,7 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
   border-radius: 16px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 13px;
+  font-size: var(--font-caption);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -769,22 +887,29 @@ useClientDebugPage('packageDevice/pages/detail/index', () => loading.value || !d
   }
 }
 
-.detail-entry-card {
-  margin-bottom: 32px;
-}
 
-.detail-entry-row {
-  min-height: 64px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1rpx solid var(--border-color);
-}
+
+
+/* 更多功能使用独立行展示名称、说明和进入箭头，避免 H5 默认块布局挤在一起。 */
+.detail-entry-row { min-height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 12px; border-bottom: 1rpx solid var(--border-color); }
+.detail-entry-row:last-child { border-bottom: 0; }
+.detail-entry-row__info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.detail-entry-row--hover { opacity: 0.7; }
 
 .detail-entry-row__arrow {
-  font-size: 22px;
+  font-size: var(--font-section);
   color: var(--text-placeholder);
 }
 
+
+.detail-hero-card { position: relative; padding: 24px 108px 24px 24px; min-height: 96px; }
+.detail-hero-icon { position: absolute; right: 20px; top: 20px; display: flex; align-items: center; justify-content: center; width: 72px; height: 72px; border-radius: var(--radius-lg); background: var(--color-primary-light); margin-left: 12px; }
+.detail-hero-image { width: 100%; height: 100%; border-radius: var(--radius-lg); }
+.detail-device__name { display: block; font-size: 26px; line-height: 1.35; word-break: break-all; }
+.detail-device__product { display: block; margin-top: 8px; }
+.detail-card { border-radius: var(--radius-lg); }
+.detail-readonly-tile { border-radius: var(--radius-md); padding: 18px 12px; }
+.detail-readonly-tile__value { font-size: 28px; }
+.detail-section__title { font-size: var(--font-section); }
+.detail-page { padding-bottom: calc(24px + env(safe-area-inset-bottom)); }
 </style>

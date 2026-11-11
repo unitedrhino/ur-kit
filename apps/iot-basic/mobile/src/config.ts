@@ -106,12 +106,19 @@ const baseThemeConfig = {
   themeChartGridColor: themeTokens.colorChartGrid,
 };
 
+/** normalizeApiBaseUrl 支持 H5 显式使用网页源站，其他端继续使用注入的地址。 */
 function normalizeApiBaseUrl(value: string, fallback: string): string {
+  if (value === 'same-origin') {
+    // #ifdef H5
+    if (typeof window !== 'undefined' && /^https?:$/.test(window.location.protocol)) return window.location.origin;
+    // #endif
+    return fallback;
+  }
   return value || fallback;
 }
 
 function normalizeTenantApiBaseUrl(value: string, fallback: string): string {
-  return value || fallback;
+  return normalizeApiBaseUrl(value, fallback);
 }
 
 /** normalizeWsBaseUrl 默认让 WS 跟随 API 环境，避免登录 token 和 WS 鉴权落到不同后端。 */

@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view :class="`prop-ctrl ${isReadonly ? 'prop-ctrl--readonly' : ''}`">
   <view class="prop-ctrl__header">
@@ -597,13 +598,13 @@ defineExpose({
 }
 
 .prop-ctrl__label {
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .prop-ctrl__display {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   max-width: 180px;
   text-align: right;
@@ -633,7 +634,7 @@ defineExpose({
   padding: 6px 14px;
   background: var(--color-bg-secondary);
   border-radius: 16px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-primary);
 }
 
@@ -657,7 +658,7 @@ defineExpose({
   padding: 0 12px;
   background: var(--color-bg-secondary);
   border-radius: 6px;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -666,7 +667,7 @@ defineExpose({
   align-items: center;
   justify-content: space-between;
   gap: 8px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -693,7 +694,7 @@ defineExpose({
   padding: 0 12px;
   background: var(--color-bg-secondary);
   border-radius: 6px;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   display: flex;
   align-items: center;
@@ -721,7 +722,7 @@ defineExpose({
   height: 32px;
   padding: 0 12px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -7,14 +7,14 @@ const ts = require('typescript');
 
 /** load 加载生产仓储，仅替换网络与映射边界，不复制项目筛选算法。 */
 function load(app, request) {
-  const source = fs.readFileSync(path.resolve(__dirname, '..', 'src/data/repositories/project.repository.impl.ts'), 'utf8');
+  const source = fs.readFileSync(path.resolve(__dirname, '../../', 'mobile', 'src/data/repositories/project.repository.impl.ts'), 'utf8');
   const js = ts.transpileModule(source, { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2020 } }).outputText;
   const exports = {};
   new Function('require', 'exports', js)(() => ({ request, ProjectMapper: { toEntity: x => x } }), exports);
   return new exports.ProjectRepositoryImpl();
 }
 
-for (const app of ['mobile']) {
+for (const app of ['mobile-uniapp']) {
   test(app + ' 管理员无成员资格时列表为空且缓存详情拒绝', async () => {
     const repo = load(app, async o => {
       if (o.url.endsWith('self/get-one')) return { userID: '1' };
@@ -50,5 +50,27 @@ for (const app of ['mobile']) {
       throw new Error('offline');
     });
     await assert.rejects(repo.getList({ page: 1, size: 20 }), /offline/);
+  });
+}
+
+for (const app of ['mobile-uniapp']) {
+  test(app + ' 本人项目和成员项目并行查询，两个来源完成后才查询最终列表', async () => {
+    let releaseOwned;
+    const owned = new Promise((resolve) => { releaseOwned = resolve; });
+    const calls = [];
+    const repo = load(app, async o => {
+      calls.push(o);
+      if (o.url.endsWith('self/get-one')) return { userID: '1' };
+      if (o.data.adminUserID) return owned;
+      if (o.data.targetID) return { total: 0, list: [] };
+      assert.deepEqual(o.data.projectIDs, ['owned']);
+      return { total: 1, list: [{ projectID: 'owned' }] };
+    });
+    const running = repo.getList({ page: 1, size: 20 });
+    await Promise.resolve(); await Promise.resolve();
+    assert.ok(calls.some(o => o.data.targetID === '1'), '成员查询不应等待本人项目完成');
+    assert.equal(calls.filter(o => o.data.projectIDs).length, 0, '两个来源都完成后才查询项目详情');
+    releaseOwned({ total: 1, list: [{ projectID: 'owned', adminUserID: '1' }] });
+    assert.equal((await running).total, 1);
   });
 }

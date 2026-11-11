@@ -1,8 +1,11 @@
+/** 文件说明：设备查询、绑定和设置入口的业务服务，不缓存或替代平台权限校验。 */
 import { DeviceRepositoryImpl } from '../data/repositories/device.repository.impl';
+import { DeviceNetworkRepository } from '../data/repositories/device-network.repository';
 import { ProductRepositoryImpl } from '../data/repositories/product.repository.impl';
 import type { DeviceEntity } from '../domain/entities/device.entity';
 import type {
   IDeviceRepository,
+  IDeviceNetworkRepository,
   DeviceBindTokenInfo,
   DeviceListParams,
   DeviceUpdateData,
@@ -24,6 +27,8 @@ export class DeviceService {
   constructor(
     private readonly deviceRepo: IDeviceRepository = new DeviceRepositoryImpl(),
     private readonly productRepo: IProductRepository = new ProductRepositoryImpl(),
+    /** networkRepo 只在设备支持 Wi-Fi 时检查入口，开始换网时仍由配网流程重新鉴权。 */
+    private readonly networkRepo: IDeviceNetworkRepository = new DeviceNetworkRepository(),
   ) {}
 
   async getList(params: DeviceListParams): Promise<PageResult<DeviceEntity>> {
@@ -32,6 +37,12 @@ export class DeviceService {
 
   async getDetail(productID: string, deviceName: string): Promise<DeviceEntity> {
     return this.deviceRepo.getOne(productID, deviceName);
+  }
+
+  /** canManageNetwork 仅为 Wi-Fi 或 Wi-Fi+蓝牙 设备查询真实权限；其他网络类型不发请求。 */
+  async canManageNetwork(device: DeviceEntity): Promise<boolean> {
+    if (![2, 7].includes(device.netType ?? 0)) return false;
+    return (await this.networkRepo.authorize(device)).allowed;
   }
 
   async createBindToken(): Promise<DeviceBindTokenInfo> {

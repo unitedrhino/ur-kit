@@ -7,12 +7,12 @@ const ts = require('typescript');
 /** loadControls 编译生产实现，避免字符串检查替代实际行为验证。 */
 function loadControls(app) {
   const mod = { exports: {} };
-  const source = ts.transpileModule(readFileSync(path.resolve(__dirname, '..', 'src/utils/client-debug-controls.ts'), 'utf8'),
+  const source = ts.transpileModule(readFileSync(path.resolve(__dirname, '../../', 'mobile', 'src/utils/client-debug-controls.ts'), 'utf8'),
     { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
   Function('module', 'exports', source)(mod, mod.exports);
   return new mod.exports.ClientDebugControls();
 }
-for (const app of ['mobile']) {
+for (const app of ['mobile-uniapp']) {
   test(app + '：真实页面钩子隐藏后拒绝操作，再显示恢复控件且旧票据失效', async () => {
     const registry = loadControls(app);
     const hooks = { show: [], hide: [], unload: [], unmount: [] };
@@ -23,7 +23,7 @@ for (const app of ['mobile']) {
       './client-debug-controls': { clientDebugControls: registry },
     };
     const mod = { exports: {} };
-    const source = ts.transpileModule(readFileSync(path.resolve(__dirname, '..', 'src/utils/use-client-debug-page.ts'), 'utf8'),
+    const source = ts.transpileModule(readFileSync(path.resolve(__dirname, '../../', 'mobile', 'src/utils/use-client-debug-page.ts'), 'utf8'),
       { compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 } }).outputText;
     Function('module', 'exports', 'require', source)(mod, mod.exports, (name) => {
       assert.ok(mocks[name], name); return mocks[name];
@@ -56,7 +56,7 @@ for (const app of ['mobile']) {
     assert.deepEqual(r.status('wifi'), { registered: false, routeMatches: false });
   });
   test(app + '：生产 Wi-Fi 控件真实更新表单，禁用状态与本地事件一致', async () => {
-    const source = readFileSync(path.resolve(__dirname, '..', 'src/packageBluetooth/pages/wifi/index.vue'), 'utf8')
+    const source = readFileSync(path.resolve(__dirname, '../../', 'mobile', 'src/packageBluetooth/pages/wifi/index.vue'), 'utf8')
       .split('<script setup lang="ts">')[1].split('</script>')[0];
     const ast = ts.createSourceFile('wifi.ts', source, ts.ScriptTarget.Latest, true);
     const deps = {
@@ -67,7 +67,7 @@ for (const app of ['mobile']) {
       handleWifiInputAction: () => {}, handleRetryBluetooth: () => {}, handleSelectWifi: () => {},
       handleSubmit: () => {}, handleBack: () => {}, handleGuideClose: () => {},
     };
-    const names = app === 'mobile' ? ['handleSsidInput', 'handleSsidBlur', 'handlePasswordBlur'] : ['handleSsidInput', 'handlePasswordInput'];
+    const names = app === 'mobile-uniapp' ? ['handleSsidInput', 'handleSsidBlur', 'handlePasswordBlur'] : ['handleSsidInput', 'handlePasswordInput'];
     for (const name of names) {
       const node = ast.statements.find((node) => ts.isFunctionDeclaration(node) && node.name?.text === name);
       assert.ok(node, name);

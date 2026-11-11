@@ -1,3 +1,4 @@
+/** 设备列表状态：项目设备与仅收到分享的设备都可加载，切换上下文时清空订阅。 */
 import { deviceService } from '../services/device.service';
 import type { DeviceEntity } from '../domain/entities/device.entity';
 import type { DeviceListParams } from '../domain/interfaces/device.repository';
@@ -5,6 +6,8 @@ import { createPageState, type PageState } from '../domain/models/page-state.mod
 import { eventBus } from '../utils/event-bus';
 import { realtimeService } from '../services/realtime.service';
 import { currentFamilyProvider, type CurrentFamilyState } from './current-family.provider';
+import { projectProvider } from './project.provider';
+import { authProvider } from './auth.provider';
 
 export interface DeviceListState {
   list: DeviceEntity[];
@@ -51,8 +54,8 @@ class DeviceListProvider {
 
   /** getFamilyContextKey 生成设备列表缓存所属的组织/家庭标识。 */
   private getFamilyContextKey(state = currentFamilyProvider.getState()): string {
-    if (!state.currentTenantCode || !state.projectID) return '';
-    return `${state.currentTenantCode}:${state.projectID}`;
+    if (!state.currentTenantCode) return '';
+    return `${state.currentTenantCode}:${state.projectID || 'shared'}`;
   }
 
   /** resetForContext 切换设备列表所属上下文并清空旧列表与实时订阅。 */
@@ -101,6 +104,14 @@ class DeviceListProvider {
     }
   }
 
+  /** shouldIncludeShared 仅在微信小程序负责人项目中合并收到的分享，H5 保持原查询路径。 */
+  private async shouldIncludeShared(projectID: string): Promise<boolean> {
+    // #ifdef MP-WEIXIN
+    return projectProvider.isOwnerProject(projectID, String(authProvider.getState().user?.userID || ''));
+    // #endif
+    return false;
+  }
+
   async loadFirst(): Promise<void> {
     const contextKey = this.getFamilyContextKey();
     if (!contextKey) {
@@ -114,7 +125,16 @@ class DeviceListProvider {
     const ps = createPageState();
     this.update({ pageState: { ...ps, loading: true } });
     try {
-      const result = await deviceService.getList({ page: 1, size: ps.size, ...this.filter });
+      const family = currentFamilyProvider.getState();
+      const result = await deviceService.getList({
+        page: 1,
+        size: ps.size,
+        ...this.filter,
+        projectID: family.projectID || undefined,
+        sharedOnly: !family.projectID,
+        includeShared: !!family.projectID && await this.shouldIncludeShared(family.projectID),
+      });
+      if (contextKey !== this.getFamilyContextKey()) return;
       this.loadedContextKey = contextKey;
       this.update({
         list: result.list,
@@ -124,6 +144,7 @@ class DeviceListProvider {
       this.unsubscribeAllConn();
       this.subscribeConnChannels(result.list);
     } catch {
+      if (contextKey !== this.getFamilyContextKey()) return;
       this.update({ pageState: { ...ps, loading: false } });
     }
   }
@@ -140,7 +161,16 @@ class DeviceListProvider {
     const nextPage = pageState.page + 1;
     this.update({ pageState: { ...pageState, loading: true } });
     try {
-      const result = await deviceService.getList({ page: nextPage, size: pageState.size, ...this.filter });
+      const family = currentFamilyProvider.getState();
+      const result = await deviceService.getList({
+        page: nextPage,
+        size: pageState.size,
+        ...this.filter,
+        projectID: family.projectID || undefined,
+        sharedOnly: !family.projectID,
+        includeShared: !!family.projectID && await this.shouldIncludeShared(family.projectID),
+      });
+      if (contextKey !== this.getFamilyContextKey()) return;
       this.update({
         list: [...list, ...result.list],
         pageState: { ...pageState, loading: false, page: nextPage, total: result.total, hasMore: result.list.length >= pageState.size },
@@ -148,6 +178,7 @@ class DeviceListProvider {
       // 追加订阅新加载的设备
       this.subscribeConnChannels(result.list);
     } catch {
+      if (contextKey !== this.getFamilyContextKey()) return;
       this.update({ pageState: { ...pageState, loading: false } });
     }
   }

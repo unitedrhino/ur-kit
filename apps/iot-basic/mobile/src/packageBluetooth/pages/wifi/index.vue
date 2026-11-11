@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="changingNetwork ? '更换 Wi-Fi' : '一键配网'" />
 
@@ -89,7 +90,7 @@ import { provisionProvider, type ProvisionProviderState } from '../../../provide
 import { ensurePageReady } from '../../../utils/page-guard'
 import type { BleScanResult } from '../../../domain/models/ble-scan-result.model'
 import type { WifiCredentialSource, WifiOption, WifiPrepareMode } from '../../../domain/models/wifi-credential.model'
-import { ensureBluetoothReady, ensureBluetoothReadyWithGuide } from '../../../utils/ble-readiness'
+import { ensureBluetoothReady, ensureBluetoothReadyWithGuide, supportsBluetoothProvisioning } from '../../../utils/ble-readiness'
 import { eventBus } from '../../../utils/event-bus'
 import { localStorage } from '../../../data/datasources/local-storage.datasource'
 
@@ -129,6 +130,7 @@ function buildScannedDeviceFromQuery(query: Record<string, string | undefined>):
 }
 
 function reasonToText(reason: string | undefined): string {
+  if (reason === 'unsupported') return '请使用微信小程序或 App 完成蓝牙配网'
   switch (reason) {
     case 'system_off': return '系统蓝牙未打开'
     case 'app_unauthorized': return '微信蓝牙权限未授权'
@@ -183,7 +185,7 @@ const filteredWifiList = computed(() => {
 // wifiFailureCode 保存 WiFi 准备失败原因，便于页面区分蜂窝网络和权限问题。
 const wifiFailureCode = ref<ProvisionProviderState['wifiFailureCode']>(undefined)
 // wifiGuideText 根据失败原因展示打开 WiFi 或定位授权的引导文案。
-const wifiGuideText = computed(() => wifiFailureCode.value === 'WIFI_NOT_CONNECTED'
+const wifiGuideText = computed(() => !supportsBluetoothProvisioning() ? '浏览器不支持蓝牙配网，请在微信小程序或 App 中继续' : wifiFailureCode.value === 'WIFI_NOT_CONNECTED'
   ? '当前手机未连接 WiFi，请先打开并连接家庭 WiFi 后返回刷新'
   : '未自动获取到 WiFi 名称，请允许微信定位权限后点此刷新')
 // wifiSelectListHeight 按最多 4 条 WiFi 的高度限制下拉列表，超出后在列表内部滚动。
@@ -272,7 +274,7 @@ async function refreshBluetoothStatus() {
 
 // prepareWifiWithLoading 控制当前页面加载态，退出后不再启动 Wi-Fi 准备。
 async function prepareWifiWithLoading() {
-  if (networkPage.closed) return
+  if (networkPage.closed || !supportsBluetoothProvisioning()) return
   wifiListLoading.value = true
   try {
     await provisionProvider.prepareWifi()
@@ -468,7 +470,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .wifi-page {
@@ -489,7 +491,7 @@ page {
 }
 
 .steps__item {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -503,12 +505,12 @@ page {
   display: flex;
   flex-direction: column;
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 20px 20px 24px;
 }
 
 .card__title {
-  font-size: 22px;
+  font-size: var(--font-section);
   font-weight: 700;
   color: var(--text-primary);
 }
@@ -516,7 +518,7 @@ page {
 .card__desc {
   display: block;
   margin-top: 12px;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.7;
   word-break: break-all;
   color: var(--text-secondary);
@@ -535,7 +537,7 @@ page {
 
 .wifi-refresh__text {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--color-primary);
 }
@@ -549,7 +551,7 @@ page {
 .field__label {
   display: block;
   margin-bottom: 8px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -583,7 +585,7 @@ page {
   height: 46px;
   line-height: 46px;
   background: transparent;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -668,7 +670,7 @@ page {
 .wifi-select-list__name {
   flex: 1;
   min-width: 0;
-  font-size: 15px;
+  font-size: var(--font-body);
   line-height: 1.4;
   word-break: break-all;
   color: var(--text-primary);
@@ -676,7 +678,7 @@ page {
 
 .wifi-select-list__meta {
   margin-left: 12px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -703,14 +705,14 @@ page {
 
 .guide-panel__title {
   margin-bottom: 12px;
-  font-size: 18px;
+  font-size: var(--font-label);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .guide-panel__text {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.6;
   word-break: break-all;
   color: var(--text-secondary);
@@ -738,7 +740,7 @@ page {
 }
 
 .guide-btn__text {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }
@@ -784,7 +786,7 @@ page {
 }
 
 .secondary-btn__text {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -794,7 +796,7 @@ page {
 }
 
 .primary-btn__text {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }
@@ -820,7 +822,7 @@ page {
 
 .bluetooth-banner__text {
   flex: 1;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--color-warning);
 }
 

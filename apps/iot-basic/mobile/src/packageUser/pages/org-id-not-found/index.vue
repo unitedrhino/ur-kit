@@ -31,7 +31,7 @@ function handleBackHome() {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .org-id-not-found-content {
@@ -58,7 +58,7 @@ function handleBackHome() {
 
 .org-id-not-found-title {
   margin-bottom: 10px;
-  font-size: 22px;
+  font-size: var(--font-section);
   font-weight: 700;
   line-height: 1.3;
   color: var(--text-primary);
@@ -68,7 +68,7 @@ function handleBackHome() {
 .org-id-not-found-desc {
   max-width: 260px;
   margin-bottom: 32px;
-  font-size: 15px;
+  font-size: var(--font-body);
   line-height: 1.6;
   color: var(--text-secondary);
   text-align: center;
@@ -90,7 +90,7 @@ function handleBackHome() {
 }
 
 .org-id-not-found-action__text {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }

@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="会话详情" />
 
@@ -95,7 +96,7 @@ function handleScrollToLower(): void {
 .csd-body {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .csd-msg-list {
@@ -138,12 +139,12 @@ function handleScrollToLower(): void {
 }
 
 .csd-bubble__label {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .csd-bubble__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.5;
   color: var(--color-on-primary);
 }
@@ -166,7 +167,7 @@ function handleScrollToLower(): void {
 }
 
 .csd-summary__text {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   background: var(--page-bg);
   padding: 2px 8px;
@@ -180,7 +181,7 @@ function handleScrollToLower(): void {
 }
 
 .csd-load-more text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
 }
 </style>

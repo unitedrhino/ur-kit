@@ -1,3 +1,4 @@
+/** 认证状态与启动恢复，共用进行中的恢复请求供页面守卫等待。 */
 import { authService } from '../services/auth.service';
 import type { UserEntity } from '../domain/entities/user.entity';
 import { eventBus } from '../utils/event-bus';
@@ -37,6 +38,10 @@ class AuthProvider {
 
   private listeners: Set<(state: AuthState) => void> = new Set();
   private authEventsReady = false;
+  /** authRevision 防止已注销或被新登录替换的面板交接恢复旧账号。 */
+  private authRevision = 0;
+  /** pendingRestore 合并应用启动和深链接页面触发的缓存鉴权。 */
+  private pendingRestore: Promise<boolean> | null = null;
 
   getState(): AuthState {
     return this.state;
@@ -58,6 +63,8 @@ class AuthProvider {
 
   /** applyAuthenticatedUser 写入刚通过登录/鉴权流程确认的用户态。 */
   private applyAuthenticatedUser(user: UserEntity): void {
+    this.authRevision += 1;
+    currentFamilyProvider.setUser(String(user.userID || ''));
     this.update({
       user,
       loggedIn: true,
@@ -69,8 +76,10 @@ class AuthProvider {
 
   /** clearSessionState 清空所有和当前账号绑定的前端运行态。 */
   private clearSessionState(): void {
+    this.authRevision += 1;
     webSocketProvider.disconnect();
     currentFamilyProvider.clear('');
+    currentFamilyProvider.setUser('');
     tenantProvider.clear();
     eventBus.emit('auth:logout');
     this.update({ user: null, loggedIn: false, sessionConfirmed: false, postLoginStep: 'home', needSetPassword: false });
@@ -98,6 +107,7 @@ class AuthProvider {
     this.initAuthEvents();
     const loggedIn = authService.isLoggedIn();
     const user = loggedIn ? authService.getCachedUser() : null;
+    currentFamilyProvider.setUser(String(user?.userID || ''));
     this.update({
       user,
       loggedIn,
@@ -111,19 +121,47 @@ class AuthProvider {
   }
 
   /** restoreSession 启动时统一确认缓存 token 是否仍有效。 */
-  async restoreSession(): Promise<boolean> {
+  restoreSession(): Promise<boolean> {
+    if (!this.pendingRestore) {
+      this.pendingRestore = this.restoreCachedSession().finally(() => { this.pendingRestore = null; });
+    }
+    return this.pendingRestore;
+  }
+
+  /** restoreCachedSession 在鉴权返回前保持缓存身份待确认，不提前放行业务页面。 */
+  private async restoreCachedSession(): Promise<boolean> {
     if (!this.state.loggedIn) return false;
+    const revision = this.authRevision;
     this.update({ loading: true });
     try {
-      const user = await authService.getUserInfo();
+      const user = await authService.restorePanelUser(() => revision === this.authRevision);
+      if (revision !== this.authRevision) return false;
       this.applyAuthenticatedUser(user);
       return true;
     } catch {
-      await authService.logout();
-      this.clearSessionState();
+      if (revision === this.authRevision) {
+        await authService.logout(() => revision === this.authRevision);
+        if (revision === this.authRevision) this.clearSessionState();
+      }
       return false;
     } finally {
-      this.update({ loading: false });
+      if (revision === this.authRevision) this.update({ loading: false });
+    }
+  }
+
+  /** restorePanelSession 以一次性交接安装的令牌重新读取真实用户，先清理旧账号运行态。 */
+  async restorePanelSession(isActive: () => boolean = () => true): Promise<void> {
+    this.clearSessionState();
+    const revision = this.authRevision;
+    const isCurrent = (): boolean => isActive() && revision === this.authRevision;
+    try {
+      const user = await authService.restorePanelUser(isCurrent);
+      if (!isCurrent()) throw new Error('登录状态已变化，请重新进入设备');
+      this.applyAuthenticatedUser(user);
+      webSocketProvider.connect(user.token);
+    } catch (error) {
+      if (revision === this.authRevision) this.clearSessionState();
+      throw error;
     }
   }
 

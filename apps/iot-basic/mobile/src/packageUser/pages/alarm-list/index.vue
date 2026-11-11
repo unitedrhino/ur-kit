@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="告警记录" />
 
@@ -74,17 +75,17 @@ onReachBottom(() => {
 
 <style lang="scss" scoped>
 .alarm-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
+  min-height: 0; background: transparent; }
 .alarm-list { padding: 0 16px; }
 .alarm-item { background: var(--card-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
 .alarm-item__header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.alarm-item__level { font-size: 12px; padding: 2px 8px; border-radius: 4px; }
+.alarm-item__level { font-size: var(--font-caption); padding: 2px 8px; border-radius: 4px; }
 .alarm-item__level--1 { background: var(--color-primary-light); color: var(--color-primary); }
 .alarm-item__level--2 { background: var(--color-warning-bg); color: var(--color-warning); }
 .alarm-item__level--3 { background: var(--color-error-bg); color: var(--color-error); }
 .alarm-item__level--4 { background: var(--color-error); color: var(--card-bg); }
-.alarm-item__time { font-size: 12px; color: var(--text-tertiary); }
-.alarm-item__scene { font-size: 14px; color: var(--text-primary); }
-.alarm-end { text-align: center; padding: 16px; font-size: 13px; color: var(--text-tertiary); }
+.alarm-item__time { font-size: var(--font-caption); color: var(--text-tertiary); }
+.alarm-item__scene { font-size: var(--font-body); color: var(--text-primary); }
+.alarm-end { text-align: center; padding: 16px; font-size: var(--font-caption); color: var(--text-tertiary); }
 
 </style>

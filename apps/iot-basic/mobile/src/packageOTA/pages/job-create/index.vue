@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="新建升级任务" />
 
@@ -105,13 +106,13 @@ async function handleSubmit() {
 
 <style lang="scss" scoped>
 .create-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
+  min-height: 0; background: transparent; }
 .form { padding: 16px; }
 .form-item { background: var(--card-bg); border-radius: 12px; padding: 14px 16px; margin-bottom: 10px; }
-.form-item__label { font-size: 14px; color: var(--text-secondary); display: block; margin-bottom: 8px; }
-.form-item__input { font-size: 15px; color: var(--text-primary); width: 100%; }
-.radio-label { font-size: 14px; color: var(--text-primary); margin-right: 24px; }
-.submit-btn { margin-top: 24px; background: var(--color-primary); color: var(--card-bg); border-radius: 24px; font-size: 16px; font-weight: 500; height: 44px; line-height: 44px; }
+.form-item__label { font-size: var(--font-body); color: var(--text-secondary); display: block; margin-bottom: 8px; }
+.form-item__input { font-size: var(--font-body); color: var(--text-primary); width: 100%; }
+.radio-label { font-size: var(--font-body); color: var(--text-primary); margin-right: 24px; }
+.submit-btn { margin-top: 24px; background: var(--color-primary); color: var(--card-bg); border-radius: 24px; font-size: var(--font-body); font-weight: 500; height: 44px; line-height: 44px; }
 .submit-btn[disabled] { opacity: 0.5; }
 
 </style>

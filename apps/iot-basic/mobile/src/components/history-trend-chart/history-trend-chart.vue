@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <!-- 历史属性趋势图组件：通过 qiun-data-charts 渲染属性聚合结果。 -->
 <view class="trend-chart-card">
@@ -95,7 +96,7 @@ const chartOptions = {
   margin: 10px 16px;
   padding: 12px 0 8px;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
 }
 
@@ -115,7 +116,7 @@ const chartOptions = {
   display: block;
   overflow: hidden;
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -126,7 +127,7 @@ const chartOptions = {
   margin-top: 4px;
   overflow: hidden;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -145,7 +146,7 @@ const chartOptions = {
   align-items: center;
   justify-content: center;
   color: var(--text-placeholder);
-  font-size: 13px;
+  font-size: var(--font-caption);
   pointer-events: none;
 }
 </style>

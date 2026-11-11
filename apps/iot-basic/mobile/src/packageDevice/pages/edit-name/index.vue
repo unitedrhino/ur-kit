@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备名" />
 
@@ -136,7 +137,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .en-body {
@@ -159,13 +160,13 @@ page {
 }
 
 .en-field__label {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-bottom: 16rpx;
 }
 
 .en-field__input {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   padding: 16rpx 0;
   border-bottom: 1rpx solid var(--divider);
@@ -188,7 +189,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 
 .en-btn--primary {

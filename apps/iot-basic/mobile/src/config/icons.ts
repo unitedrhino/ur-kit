@@ -1,3 +1,4 @@
+/** 应用图标注册表，包含设备共享状态图形。 */
 import { GENERATED_ICON_DATA_URIS } from './generated-icon-data';
 
 export const ICON_SET_PREFIX = 'tabler';
@@ -21,7 +22,7 @@ export const DEFAULT_ICON_NAME: AppIconName = 'tabler:layout-grid';
 
 export const TAB_BAR_ICONS: TabBarIconOption[] = [
   { pagePath: 'pages/home/index', text: '首页', icon: 'tabler:home' },
-  { pagePath: 'pages/device/index', text: '设备', icon: 'tabler:devices' },
+  { pagePath: 'pages/message/index', text: '消息', icon: 'tabler:message-circle' },
   { pagePath: 'pages/scene/index', text: '场景', icon: 'tabler:home-bolt' },
   { pagePath: 'pages/mine/index', text: '我的', icon: 'tabler:user' },
 ];
@@ -40,7 +41,10 @@ export const COMMON_ICONS = {
   phone: 'tabler:phone',
   refresh: 'tabler:refresh',
   search: 'tabler:search',
+  share: 'tabler:share',
   settings: 'tabler:settings',
+  /** users 用于项目成员入口。 */
+  users: 'tabler:users',
 } as const satisfies Record<string, AppIconName>;
 
 export const SCENE_ICONS = {

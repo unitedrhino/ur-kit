@@ -9,6 +9,14 @@
  */
 
 export interface ThemeTokens {
+  /** 底部导航选中背景。 */
+  colorNavigationContainer: string;
+  /** 底部导航选中色。 */
+  colorNavigation: string;
+  /** 页面中段浅粉渐变。 */
+  colorBackdropRose: string;
+  /** 页面顶部浅蓝渐变。 */
+  colorBackdropTop: string;
   /** 主品牌色，用于按钮、链接、选中态和强调图标。 */
   colorPrimary: string;
   /** 主品牌浅色容器，用于弱强调背景。 */
@@ -55,6 +63,10 @@ export type ThemeEnv = Record<string, string | boolean | undefined>;
 
 /** themeStylePlaceholders 是全局样式中允许出现的主题占位符。 */
 export const themeStylePlaceholders = {
+  colorNavigationContainer: '__MOBILE_UNIAPP_THEME_COLORNAVIGATIONCONTAINER__',
+  colorNavigation: '__MOBILE_UNIAPP_THEME_COLORNAVIGATION__',
+  colorBackdropRose: '__MOBILE_UNIAPP_THEME_COLORBACKDROPROSE__',
+  colorBackdropTop: '__MOBILE_UNIAPP_THEME_COLORBACKDROPTOP__',
   colorPrimary: '__MOBILE_UNIAPP_THEME_COLOR_PRIMARY__',
   colorPrimaryContainer: '__MOBILE_UNIAPP_THEME_COLOR_PRIMARY_CONTAINER__',
   colorOnPrimary: '__MOBILE_UNIAPP_THEME_COLOR_ON_PRIMARY__',
@@ -79,17 +91,21 @@ export const themeStylePlaceholders = {
 
 /** defaultThemeTokens 是联犀默认主题，租户主题通过 VITE_THEME_* 覆盖。 */
 export const defaultThemeTokens: ThemeTokens = {
+  colorNavigationContainer: '#eeebff',
+  colorNavigation: '#6954ff',
+  colorBackdropRose: '#fbe9f1',
+  colorBackdropTop: '#d9edff',
   colorPrimary: '#1677ff',
   colorPrimaryContainer: 'rgba(22, 119, 255, 0.1)',
   colorOnPrimary: '#ffffff',
-  colorTextPrimary: '#1a1a1a',
-  colorTextSecondary: '#666666',
-  colorTextPlaceholder: '#bbbbbb',
+  colorTextPrimary: '#1c2432',
+  colorTextSecondary: '#626d7e',
+  colorTextPlaceholder: '#8993a4',
   colorPageBackground: '#f5f7fa',
   colorSurface: '#ffffff',
   colorSurfaceContainer: '#f7f8fa',
   colorOutlineVariant: '#f0f0f0',
-  colorSuccess: '#52c41a',
+  colorSuccess: '#08b464',
   colorSuccessContainer: '#e8f7ef',
   colorWarning: '#faad14',
   colorWarningContainer: '#fff7e6',
@@ -118,6 +134,10 @@ export function normalizeHexColor(value: string, fallback: string): string {
 /** resolveThemeTokens 统一解析运行时和构建时主题 token。 */
 export function resolveThemeTokens(env: ThemeEnv): ThemeTokens {
   return {
+    colorNavigationContainer: defaultThemeTokens.colorNavigationContainer,
+    colorNavigation: defaultThemeTokens.colorNavigation,
+    colorBackdropRose: defaultThemeTokens.colorBackdropRose,
+    colorBackdropTop: defaultThemeTokens.colorBackdropTop,
     colorPrimary: normalizeHexColor(getEnvString(env, 'VITE_THEME_PRIMARY_COLOR'), defaultThemeTokens.colorPrimary),
     colorPrimaryContainer: getEnvString(env, 'VITE_THEME_PRIMARY_LIGHT_COLOR') || defaultThemeTokens.colorPrimaryContainer,
     colorOnPrimary: normalizeHexColor(getEnvString(env, 'VITE_THEME_ON_PRIMARY_COLOR'), defaultThemeTokens.colorOnPrimary),
@@ -170,6 +190,10 @@ export function createThemeScssAdditionalData(tokens: ThemeTokens): string {
 /** createThemeStyleReplacements 生成全局样式占位符到真实主题 token 的替换表。 */
 export function createThemeStyleReplacements(tokens: ThemeTokens): Record<string, string> {
   return {
+    [themeStylePlaceholders.colorNavigationContainer]: tokens.colorNavigationContainer,
+    [themeStylePlaceholders.colorNavigation]: tokens.colorNavigation,
+    [themeStylePlaceholders.colorBackdropRose]: tokens.colorBackdropRose,
+    [themeStylePlaceholders.colorBackdropTop]: tokens.colorBackdropTop,
     [themeStylePlaceholders.colorPrimary]: tokens.colorPrimary,
     [themeStylePlaceholders.colorPrimaryContainer]: tokens.colorPrimaryContainer,
     [themeStylePlaceholders.colorOnPrimary]: tokens.colorOnPrimary,

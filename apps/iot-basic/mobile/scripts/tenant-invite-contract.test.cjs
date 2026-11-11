@@ -260,6 +260,9 @@ test('theme color config drives global css variables and tabbar selected color',
   assert.match(viteConfig, /colorizeSvg\(icon\.svg,\s*themeTokens\.colorPrimary\)/, 'tabBar active icons should be generated from svg theme token at build time');
   assert.match(tabIcons, /export const tabIconSvgs/, 'tab svg masks should live in a typescript module');
   assert.match(pages, /static\/icons\/tab-home\.png/, 'tabBar should keep mini program stable png paths');
+  assert.match(pages, /static\/icons\/tab-message\.png/, '消息页导航使用构建生成的图标');
+  assert.match(viteConfig, /name: 'tab-message', svg: tabIconSvgs\.message/, '消息图标随主题生成');
+  assert.match(viteConfig, /configResolved\(config\)/, 'H5 和小程序使用各自输出目录');
   assert.deepEqual(scanHardcodedThemeColors(), [], 'business source files should use theme tokens instead of hardcoded colors');
   assert.ok(fs.existsSync(path.join(root, 'src/config/tab-icons.ts')), 'tab icon svg source module should exist');
   assert.ok(!fs.existsSync(path.join(root, 'src/static/icons/tab-home.svg')), 'tab svg should not be a static mini program asset');
@@ -280,7 +283,7 @@ test('single tenant mode ignores invite and organization selection flows', () =>
   assert.match(service, /setRequestTenantCode\(tenant\.code\)/, 'single tenant mode should write the resolved organization code');
   assert.match(service, /openTenantSelectGate\(\)[\s\S]{0,120}isSingleTenantMode\(\)[\s\S]{0,120}openHomeFallback/, 'single tenant mode should not open organization selection');
   assert.match(login, /prepareTenantContextBeforeAuth\(\)/, 'all auth paths should use the shared tenant context preparation');
-  assert.match(mine, /canSwitchTenant && !singleTenantMode/, 'mine page should hide organization switch in single tenant mode');
+  assert.match(mine, /loggedIn && !singleTenantMode/, 'mine page should hide organization switch in single tenant mode');
   assert.match(tenantPage, /singleTenantMode[\s\S]{0,160}switchTab\(\{\s*url:\s*'\/pages\/home\/index'/, 'organization page should return home in single tenant mode');
   assert.match(tenantPage, /v-if="!singleTenantMode" class="tm-toolbar"/, 'invite join toolbar should be hidden in single tenant mode');
   assert.match(familyEdit, /source === 'guard' && !editingID && !singleTenantMode/, 'first family guard should hide organization switch in single tenant mode');

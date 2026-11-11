@@ -1,6 +1,8 @@
 import { setRequestProjectContext } from '../utils/request-context';
 
 const STORAGE_KEY = 'current_family_map';
+/** 按账号和企业保存最近选择，退出登录仅清理运行态。 */
+const HISTORY_KEY = 'current_family_history_by_user';
 
 export interface CurrentFamilySelection {
   projectID: string;
@@ -21,6 +23,7 @@ class CurrentFamilyProvider {
   };
 
   private selectionMap: FamilySelectionMap = {};
+  private userID = '';
 
   private listeners: Set<(s: CurrentFamilyState) => void> = new Set();
 
@@ -34,6 +37,20 @@ class CurrentFamilyProvider {
 
   getSelection(tenantCode: string): CurrentFamilySelection {
     return this.selectionMap[tenantCode] || { projectID: '', projectName: '' };
+  }
+
+  /** setUser 切换账号时只加载该账号的历史项目，避免跨账号串用。 */
+  setUser(userID: string): void {
+    if (this.userID === userID) return;
+    this.userID = userID;
+    this.selectionMap = {};
+    if (userID) {
+      try {
+        const history = JSON.parse(uni.getStorageSync(HISTORY_KEY) || '{}');
+        this.selectionMap = history[userID] || {};
+      } catch { /* 损坏的历史记录按首次访问处理。 */ }
+    }
+    this.syncCurrentState();
   }
 
   subscribe(listener: (s: CurrentFamilyState) => void): () => void {
@@ -78,6 +95,13 @@ class CurrentFamilyProvider {
     }
     this.selectionMap[tenantCode] = { projectID, projectName };
     this.persist();
+    if (this.userID && projectID) {
+      try {
+        const history = JSON.parse(uni.getStorageSync(HISTORY_KEY) || '{}');
+        history[this.userID] = { ...history[this.userID], [tenantCode]: { projectID, projectName } };
+        uni.setStorageSync(HISTORY_KEY, JSON.stringify(history));
+      } catch { /* 本地存储不可用时保留当前运行态。 */ }
+    }
     if (tenantCode === this.state.currentTenantCode) {
       this.syncCurrentState();
     }

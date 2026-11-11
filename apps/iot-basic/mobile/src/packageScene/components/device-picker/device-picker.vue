@@ -1,3 +1,4 @@
+<!-- 场景设备选择弹窗：展示设备图片、状态及当前选择。 -->
 <template>
 <view :class="`picker-mask ${visible ? 'picker-mask--visible' : ''}`" @tap="handleMaskTap" />
 <scroll-view
@@ -12,73 +13,71 @@
           <view class="picker-close" @tap="handleClose"><text>✕</text></view>
         </view>
 
-        <view v-if="!productId" class="picker-empty"><text class="picker-empty__text">请先选择产品</text></view>
-        <view v-else-if="loading" class="picker-empty"><text class="picker-empty__text">加载中...</text></view>
+        <view v-if="loading" class="picker-empty"><text class="picker-empty__text">加载中...</text></view>
+
+        <view v-else-if="error" class="picker-empty" @tap="emit('retry')"><text class="picker-empty__text">{{ error }}，点击重试</text></view>
 
         <template v-else-if="list.length > 0">
           <view
-            v-for="(item, index) in list" :key="item.deviceName"
-            :class="`picker-item ${item.deviceName === selectedName ? 'picker-item--active' : ''}`"
+            v-for="(item, index) in list" :key="item.productID + '::' + item.deviceName"
+            :class="`picker-item ${item.deviceName === selectedName && item.productID === productId ? 'picker-item--active' : ''}`"
             :data-name="item.deviceName"
-            @tap="handleSelect(item.deviceName)"
+            @tap="handleSelect(item)"
             hover-class="picker-item--hover"
           >
+            <view class="picker-item__image">
+              <image v-if="imageFor(item)" :src="imageFor(item)" mode="aspectFit" class="picker-item__image-content" @error="handleImageError(item, imageFor(item))" />
+              <app-icon v-else name="tabler:devices" :size="26" color="var(--color-primary)" />
+            </view>
             <view class="picker-item__info">
               <text class="picker-item__name">{{item.deviceAlias || item.deviceName}}</text>
-              <text class="picker-item__desc">{{item.deviceName}}</text>
+              <text class="picker-item__desc">{{item.productName || item.productID}} · {{item.deviceName}}</text>
             </view>
             <view :class="`picker-item__status ${item.status === 2 ? 'picker-item__status--online' : (item.status === 4 ? 'picker-item__status--error' : '')}`">
               <text>{{item.status === 2 ? '在线' : (item.status === 4 ? '异常' : (item.status === 1 ? '未激活' : '离线'))}}</text>
             </view>
-            <app-icon v-if="item.deviceName === selectedName" class="picker-item__check" name="tabler:check" :size="16" />
+            <app-icon v-if="item.deviceName === selectedName && item.productID === productId" class="picker-item__check" name="tabler:check" :size="16" />
           </view>
         </template>
 
-        <view v-else class="picker-empty"><text class="picker-empty__text">该产品下暂无设备</text></view>
+        <view v-else class="picker-empty"><text class="picker-empty__text">暂无可选择的设备</text></view>
       </scroll-view>
 
 </template>
 
 <script setup lang="ts">
 import AppIcon from '../../../components/app-icon/app-icon.vue';
-import { computed, watch } from 'vue';
+import { computed, reactive } from 'vue';
+import { defaultDeviceImage } from '../../../utils/device-image';
 import type { DeviceEntity } from '../../../domain/entities/device.entity';
 
-interface Props { visible?: boolean; productId?: string; selectedName?: string; devices?: DeviceEntity[]; loading?: boolean }
-const props = withDefaults(defineProps<Props>(), { visible: false, productId: '', selectedName: '', devices: () => [], loading: false });
+interface Props { visible?: boolean; productId?: string; selectedName?: string; devices?: DeviceEntity[]; loading?: boolean; error?: string }
+const props = withDefaults(defineProps<Props>(), { visible: false, productId: '', selectedName: '', devices: () => [], loading: false, error: '' });
 const emit = defineEmits<{
   (e: 'select', payload: { productID: string; deviceName: string; deviceAlias: string; productName: string }): void;
   (e: 'close'): void;
+  (e: 'retry'): void;
 }>();
 
-// list 从统一设备列表中按产品过滤，组件本身不再发起设备接口请求。
-const list = computed(() => {
-  if (!props.productId) return [];
-  return props.devices.filter((device) => device.productID === props.productId);
-});
-const loading = computed(() => props.loading);
-
-// autoSelectOnlyDevice 只有一台可选设备且当前未选择时自动填入，避免产品选完后设备仍为空。
-function autoSelectOnlyDevice(devices: DeviceEntity[]): void {
-  if (props.selectedName || devices.length !== 1) return;
-  const device = devices[0];
-  if (!device) return;
-  emit('select', {
-    productID: device.productID,
-    deviceName: device.deviceName,
-    deviceAlias: device.deviceAlias,
-    productName: device.productName,
-  });
+/** 按设备及图片地址记录加载失败，产品图片更新后可正常重试。 */
+const failedImages = reactive<Record<string, string[]>>({});
+/** imageFor 先展示产品图，再回退到品类默认图或通用图标。 */
+function imageFor(item: DeviceEntity): string {
+  const failed = failedImages[JSON.stringify([item.productID, item.deviceName])] || [];
+  return [item.productImg, defaultDeviceImage(item.deviceType, item.productName, item.deviceAlias)].find(src => !!src && !failed.includes(src)) || '';
+}
+/** handleImageError 仅标记对应设备的失败图片，防止重复加载。 */
+function handleImageError(item: DeviceEntity, src: string): void {
+  if (!src) return;
+  const key = JSON.stringify([item.productID, item.deviceName]);
+  failedImages[key] = [...(failedImages[key] || []), src];
 }
 
-watch([() => props.visible, () => props.productId, list, loading], () => {
-  if (props.visible && props.productId && !loading.value) {
-    autoSelectOnlyDevice(list.value);
-  }
-});
-function handleSelect(deviceName: string) {
-  const item = list.value.find((d) => d.deviceName === deviceName);
-  if (!item) return;
+/** list 直接展示当前项目已加载的设备，使用产品和设备名共同标识。 */
+const list = computed(() => props.devices);
+const loading = computed(() => props.loading);
+
+function handleSelect(item: DeviceEntity) {
   emit('select', {
     productID: item.productID,
     deviceName: item.deviceName,
@@ -117,7 +116,7 @@ function handleMaskTap() { handleClose(); }
   height: 60vh;
   max-height: 85vh;
   background: var(--card-bg);
-  border-radius: 24rpx 24rpx 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding-bottom: env(safe-area-inset-bottom);
   transform: translateY(100%);
   transition: transform 0.28s ease;
@@ -150,7 +149,7 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-title {
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -172,8 +171,12 @@ function handleMaskTap() { handleClose(); }
 .picker-item {
   display: flex;
   align-items: center;
-  padding: 28rpx 32rpx;
-  border-bottom: 1rpx solid var(--color-bg-secondary);
+  gap: 20rpx;
+  margin: 16rpx 24rpx;
+  padding: 20rpx;
+  border: 1rpx solid var(--border-color);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
 }
 
 .picker-item--hover {
@@ -182,33 +185,42 @@ function handleMaskTap() { handleClose(); }
 
 .picker-item--active {
   background: var(--color-primary-light);
+  border-color: var(--color-primary);
 }
+
+.picker-item__image {
+  width: 104rpx; height: 104rpx; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-sm); background: var(--color-bg-secondary); overflow: hidden;
+}
+.picker-item__image-content { width: 100%; height: 100%; }
 
 .picker-item__info {
   flex: 1;
+  min-width: 0;
   display: flex;
   flex-direction: column;
 }
 
 .picker-item__name {
-  font-size: 30rpx;
+  font-size: var(--font-label);
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .picker-item__desc {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 6rpx;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 .picker-item__status {
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   padding: 4rpx 12rpx;
   background: var(--border-color);
   border-radius: 8rpx;
-  margin-right: 12rpx;
+  flex-shrink: 0;
 }
 
 .picker-item__status--online {
@@ -218,7 +230,7 @@ function handleMaskTap() { handleClose(); }
 
 .picker-item__check {
   color: var(--color-primary);
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
 }
 
@@ -229,7 +241,7 @@ function handleMaskTap() { handleClose(); }
 
 .picker-empty__text {
   color: var(--text-secondary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
 }
 
 </style>

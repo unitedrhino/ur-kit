@@ -117,14 +117,23 @@ export class AuthService {
     return this.authRepo.refreshToken();
   }
 
+  /** restorePanelUser 只在交接页面与认证轮次仍有效时保存平台返回的用户。 */
+  async restorePanelUser(isCurrent: () => boolean): Promise<UserEntity> {
+    const user = await this.authRepo.getUserInfo();
+    if (!isCurrent()) throw new Error('登录状态已变化，请重新进入设备');
+    return this.persistUser(user);
+  }
+
   async getUserInfo(): Promise<UserEntity> {
     const user = await this.authRepo.getUserInfo();
     return this.persistUser(user);
   }
 
-  async logout(): Promise<void> {
+  /** logout 在异步登出后确认身份未变化，再清理当前账号缓存。 */
+  async logout(isCurrent: () => boolean = () => true): Promise<void> {
+    if (!isCurrent()) return;
     await this.authRepo.logout();
-    localStorage.remove('user');
+    if (isCurrent()) localStorage.remove('user');
   }
 
   /** 检查当前用户是否需要设置密码（password 为空表示未设置） */

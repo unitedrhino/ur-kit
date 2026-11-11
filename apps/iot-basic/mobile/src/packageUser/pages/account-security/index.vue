@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="账号与安全" :back="true" />
 
@@ -65,14 +66,14 @@ function handleNavTo(url: string) {
 </script>
 
 <style lang="scss" scoped>
-.security-page { flex: 1; min-height: 0; background: var(--page-bg); }
-.security-card { margin: 16px; background: var(--card-bg); border-radius: 16px; overflow: hidden; box-shadow: 0 8px 24px var(--color-shadow); }
+.security-page { flex: 1; min-height: 0; background: transparent; }
+.security-card { margin: 16px; background: var(--card-bg); border-radius: var(--radius-lg); overflow: hidden; box-shadow: 0 8px 24px var(--color-shadow); }
 .security-item { display: flex; align-items: center; gap: 10px; padding: 16px; border-bottom: 1rpx solid var(--border-color); }
 .security-item:last-child { border-bottom: none; }
 .security-item--hover { background: var(--page-bg); }
 .security-item__main { flex: 1; min-width: 0; }
-.security-item__label { display: block; font-size: 15px; color: var(--text-primary); }
-.security-item__value { display: block; margin-top: 5px; font-size: 13px; color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.security-item__status { font-size: 13px; color: var(--color-primary); }
-.security-item__arrow { color: var(--text-tertiary); font-size: 18px; }
+.security-item__label { display: block; font-size: var(--font-body); color: var(--text-primary); }
+.security-item__value { display: block; margin-top: 5px; font-size: var(--font-caption); color: var(--text-secondary); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.security-item__status { font-size: var(--font-caption); color: var(--color-primary); }
+.security-item__arrow { color: var(--text-tertiary); font-size: var(--font-label); }
 </style>

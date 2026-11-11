@@ -1,3 +1,4 @@
+<!-- 设备通用设置集中管理设备能力；收到分享的设备不展示二次分享入口。 -->
 <template>
 <app-navigation-bar title="设备设置" />
 
@@ -26,7 +27,7 @@
       <view class="ds-row" @tap="handleEditArea" hover-class="ds-row--hover">
         <text class="ds-row__label">设备{{TERM.area}}</text>
         <view class="ds-row__right">
-          <text class="ds-row__value">{{areaName || '未设置'}}</text>
+          <text class="ds-row__value">{{areaLoading ? '加载中…' : areaName || '未设置'}}</text>
           <text class="ds-row__arrow">›</text>
         </view>
       </view>
@@ -45,13 +46,20 @@
       </view>
     </view>
 
+    <!-- 控制面板只负责操作设备，通用数据入口集中在这里。 -->
+    <view class="ds-group">
+      <view class="ds-row" @tap="handleNavToHistory" hover-class="ds-row--hover"><text class="ds-row__label">数据分析</text><view class="ds-row__right"><text class="ds-row__arrow">›</text></view></view>
+      <view class="ds-row" @tap="handleNavToDeviceLogs" hover-class="ds-row--hover"><text class="ds-row__label">设备日志</text><view class="ds-row__right"><text class="ds-row__arrow">›</text></view></view>
+      <view v-if="device.cloneID && device.cloneID > 0" class="ds-row" @tap="handleNavToCloneMemory" hover-class="ds-row--hover"><text class="ds-row__label">记忆</text><view class="ds-row__right"><text class="ds-row__arrow">›</text></view></view>
+    </view>
+
     <!-- 操作分组 -->
     <view class="ds-group">
       <view v-if="canChangeNetwork" class="ds-row" @tap="handleChangeNetwork" hover-class="ds-row--hover">
         <text class="ds-row__label">Wi-Fi 管理</text>
         <view class="ds-row__right"><text class="ds-row__value">添加或更换网络</text><text class="ds-row__arrow">›</text></view>
       </view>
-      <view class="ds-row" @tap="handleShare" hover-class="ds-row--hover">
+      <view v-if="device.isShared === false" class="ds-row" @tap="handleShare" hover-class="ds-row--hover">
         <text class="ds-row__label">设备分享</text>
         <view class="ds-row__right">
           <text class="ds-row__arrow">›</text>
@@ -125,7 +133,8 @@ import { computed, ref } from 'vue';
 import { onLoad, onShow, onUnload } from '@dcloudio/uni-app';
 import { deviceService } from '../../../services/device.service';
 import { provisionProvider } from '../../../providers/provision.provider';
-import { DeviceNetworkRepository } from '../../../data/repositories/device-network.repository';
+import { authProvider } from '../../../providers/auth.provider';
+import { getRequestContext } from '../../../utils/request-context';
 import { deviceControlService } from '../../../services/device-control.service';
 import { buildDeviceControlCardUi } from '../../../services/device-control-card-ui.service';
 import { areaService } from '../../../services/area.service';
@@ -143,6 +152,10 @@ const deviceName = ref('');
 const device = ref<DeviceEntity | null>(null);
 const controlModel = ref<DeviceControlModel | null>(null);
 const areaName = ref('');
+/** areaLoading 区分房间尚未返回与设备未设置房间，不阻塞基础设置。 */
+const areaLoading = ref(false);
+/** loadRevision 丢弃返回刷新、设备切换及卸载后的旧请求。 */
+let loadRevision = 0;
 const locationText = ref('未设置');
 const versionLabel = ref('');
 const versionChecking = ref(false);
@@ -190,50 +203,81 @@ interface PropertyControlExpose {
   handleCommitResult?: (payload: { commitSeq: number; success: boolean }) => void;
 }
 
-async function loadDevice() {
+/** loadDevice 先展示平台返回的基础信息，房间、网络权限和系统属性独立加载。 */
+async function loadDevice(): Promise<void> {
+  /** revision 和请求上下文共同阻止跨页面、跨账号或跨企业的迟到响应写回。 */
+  const revision = ++loadRevision;
+  const identity = { productID: productID.value, deviceName: deviceName.value };
+  const context = getRequestContext();
+  const userID = authProvider.getState().user?.userID;
+  /** isCurrent 仅允许本轮、原设备及原身份仍有效时更新界面。 */
+  const isCurrent = (): boolean => {
+    const current = getRequestContext();
+    return !networkPage.closed && revision === loadRevision
+      && productID.value === identity.productID && deviceName.value === identity.deviceName
+      && authProvider.getState().loggedIn && authProvider.getState().user?.userID === userID
+      && current.tenantCode === context.tenantCode && current.projectID === context.projectID;
+  };
   loading.value = true;
   canChangeNetwork.value = false;
+  controlModel.value = null;
+  areaName.value = '';
+  areaLoading.value = false;
+  device.value = null;
   try {
-    const d = await deviceService.getDetail(productID.value, deviceName.value);
-    let an = '';
-    if (d.areaID) {
-      try {
-        const area = await areaService.getOne(d.areaID);
-        an = area.areaName || '';
-      } catch {
-        an = '';
-      }
-    }
+    const d = await deviceService.getDetail(identity.productID, identity.deviceName);
+    if (!isCurrent()) return;
     device.value = d;
-    try {
-      const permission = await new DeviceNetworkRepository().authorize(d);
-      if (!networkPage.closed && device.value?.productID === d.productID && device.value?.deviceName === d.deviceName) {
-        canChangeNetwork.value = permission.allowed && [2, 7].includes(d.netType ?? 0);
-      }
-    } catch { /* 未授权或权限服务不可用时隐藏入口，不影响其他设备设置。 */ }
-    areaName.value = an;
     locationText.value = formatGeoPoint(d.position);
     versionLabel.value = d.version || '未知';
-    await loadSystemProperties(d);
-  } catch (err) {
-    uni.showToast({ title: (err as Error).message || '加载失败', icon: 'none' });
-  } finally {
     loading.value = false;
+    // 各分支只补充自己的区域，任一慢请求或失败均不阻塞名称、日志、分享等入口。
+    void loadAreaName(d, isCurrent);
+    void loadNetworkPermission(d, isCurrent);
+    void loadSystemProperties(d, isCurrent);
+  } catch (err) {
+    if (isCurrent()) uni.showToast({ title: (err as Error).message || '加载失败', icon: 'none' });
+  } finally {
+    if (isCurrent()) loading.value = false;
   }
 }
 
-/** loadSystemProperties 加载系统属性，不阻塞设备基础设置展示。 */
-async function loadSystemProperties(d: DeviceEntity): Promise<void> {
+/** loadAreaName 独立补充已绑定房间；失败时不把未知房间伪装成未设置。 */
+async function loadAreaName(d: DeviceEntity, isCurrent: () => boolean): Promise<void> {
+  if (!d.areaID) return;
+  areaLoading.value = true;
   try {
-    controlModel.value = await deviceControlService.loadControlModel(d);
+    const area = await areaService.getOne(d.areaID);
+    if (isCurrent()) areaName.value = area.areaName || '未命名';
   } catch {
-    controlModel.value = null;
+    if (isCurrent()) areaName.value = '暂时无法获取';
+  } finally {
+    if (isCurrent()) areaLoading.value = false;
+  }
+}
+
+/** loadNetworkPermission 通过服务核验 Wi-Fi 管理入口，失败时继续隐藏。 */
+async function loadNetworkPermission(d: DeviceEntity, isCurrent: () => boolean): Promise<void> {
+  try {
+    const allowed = await deviceService.canManageNetwork(d);
+    if (isCurrent()) canChangeNetwork.value = allowed;
+  } catch { /* 权限服务不可用时不放行，不影响其他设置。 */ }
+}
+
+/** loadSystemProperties 独立加载系统属性，退出或刷新后的旧结果不再写回。 */
+async function loadSystemProperties(d: DeviceEntity, isCurrent: () => boolean): Promise<void> {
+  try {
+    const model = await deviceControlService.loadControlModel(d);
+    if (isCurrent()) controlModel.value = model;
+  } catch {
+    if (isCurrent()) controlModel.value = null;
   }
 }
 
 onLoad(async (options: Record<string, string | undefined> | undefined) => {
   const o = options || {};
   const ready = await ensurePageReady('/packageDevice/pages/settings/index', o);
+  if (networkPage.closed) return;
   if (!ready) {
     loading.value = false;
     return;
@@ -291,9 +335,24 @@ function handleEditLocation() {
   });
 }
 
+/** handleNavToHistory 打开当前设备的数据分析，不依赖控制面板页面实例。 */
+function handleNavToHistory(): void {
+  uni.navigateTo({ url: `/packageDevice/pages/history/index?productID=${encodeURIComponent(productID.value)}&deviceName=${encodeURIComponent(deviceName.value)}` });
+}
+/** handleNavToDeviceLogs 打开当前设备的运行与操作日志。 */
+function handleNavToDeviceLogs(): void {
+  uni.navigateTo({ url: `/packageDevice/pages/logs/index?productID=${encodeURIComponent(productID.value)}&deviceName=${encodeURIComponent(deviceName.value)}` });
+}
+/** handleNavToCloneMemory 仅为有数字分身的设备开放记忆入口。 */
+function handleNavToCloneMemory(): void {
+  if (!device.value?.cloneID) return;
+  uni.navigateTo({ url: `/packageDevice/pages/clone-memory/index?cloneID=${encodeURIComponent(String(device.value.cloneID))}&productID=${encodeURIComponent(productID.value)}&deviceName=${encodeURIComponent(deviceName.value)}` });
+}
+
+/** handleShare 仅在确认不是收到的共享设备时打开分享管理。 */
 function handleShare() {
   const d = device.value;
-  if (!d) return;
+  if (!d || d.isShared !== false) return;
   uni.navigateTo({
     url: `/packageDevice/pages/share/index?productID=${d.productID}&deviceName=${d.deviceName}`,
   });
@@ -492,7 +551,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .ds-page {
@@ -503,7 +562,7 @@ page {
 .ds-group {
   margin: 24rpx 32rpx 0;
   background: var(--card-bg);
-  border-radius: 24rpx;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -522,7 +581,7 @@ page {
 }
 
 .ds-group-head__title {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -556,7 +615,7 @@ page {
 }
 
 .ds-row__label {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -578,7 +637,7 @@ page {
 .ds-row__value {
   flex: 1;
   min-width: 0;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   margin-right: 8rpx;
   text-align: right;
@@ -609,7 +668,7 @@ page {
 }
 
 .ds-row__arrow {
-  font-size: 32rpx;
+  font-size: var(--font-body);
   color: var(--text-tertiary);
   margin-left: 4rpx;
 }

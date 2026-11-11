@@ -3,7 +3,6 @@
 // 依赖方向为 Provider -> Provider / Provider -> Service，符合 Clean Architecture 单向依赖。
 import { authProvider } from './auth.provider';
 import { tenantProvider } from './tenant.provider';
-import { projectProvider } from './project.provider';
 import { currentFamilyProvider } from './current-family.provider';
 import { config } from '../config';
 import type { TenantEntity } from '../domain/entities/tenant.entity';
@@ -22,9 +21,9 @@ import {
   savePendingLaunchTenantCode,
 } from '../utils/tenant-source';
 import { setRequestTenantCode } from '../utils/request-context';
+import { eventBus } from '../utils/event-bus';
 
 const TENANT_SELECT_URL = '/packageUser/pages/tenant-manage/index?mode=select';
-const FAMILY_SELECT_URL = '/packageUser/pages/family-manage/index?mode=select';
 const LOGIN_URL = '/packageUser/pages/login/index';
 const HOME_URL = '/pages/home/index';
 /** ORG_ID_NOT_FOUND_URL 是公开 org-id 校验失败后的提示页地址。 */
@@ -50,7 +49,29 @@ const PUBLIC_PAGES = new Set([
 ]);
 
 class AppContextProvider {
+  /** constructor 在退出登录时撤销本轮导航缓存；后续账号必须重新核验。 */
+  constructor() {
+    eventBus.on('auth:logout', () => { this.readyContext = null; });
+  }
+
   private pendingRoute = '';
+  /** readyContext 是最近通过平台核验的导航上下文，仅保留内存60秒，不作为业务接口授权。 */
+  private readyContext: { key: string; expiresAt: number } | null = null;
+
+  /** contextKey 按账号、令牌、企业和项目隔离导航复用，不持久化或记录令牌。 */
+  private contextKey(): string {
+    const auth = authProvider.getState();
+    const tenant = tenantProvider.getState().current;
+    const family = currentFamilyProvider.getState();
+    return JSON.stringify([auth.user?.userID, auth.user?.token, tenant?.code, family.projectID]);
+  }
+
+  /** rememberReadyContext 仅记住完整成功的守卫；失败立即撤销旧结果。 */
+  private rememberReadyContext(ready: boolean): boolean {
+    this.readyContext = ready ? { key: this.contextKey(), expiresAt: Date.now() + 60_000 } : null;
+    return ready;
+  }
+
 
   getPendingRoute(): string {
     return this.pendingRoute;
@@ -75,7 +96,7 @@ class AppContextProvider {
       return acc;
     }, {});
     // 微信开发者工具调试启动参数时，直接在 Console 输出归一化后的公开 query。
-    console.info('[launch-options] query', normalizedOptions);
+    console.info('[launch-options] query', { ...normalizedOptions, ...(normalizedOptions.ticket ? { ticket: '[REDACTED]' } : {}) });
 
     if (this.isSingleTenantMode()) {
       const ignoredTenantContext = !!parseInviteFromLaunchOptions(normalizedOptions) || !!parseLaunchTenantCode(normalizedOptions);
@@ -96,6 +117,25 @@ class AppContextProvider {
       return true;
     }
     return false;
+  }
+
+  /** openWebLoginFromLaunch 将首页收到的合法票据转到固定确认页，冷启动和后台重新扫码均适用。 */
+  openWebLoginFromLaunch(options?: Record<string, unknown>, launchPath?: string): boolean {
+    // 只接受扫码首页或固定确认页；设置/面板等页面的恢复参数不具备扫码用途。
+    if (!['pages/home/index', 'packageUser/pages/web-login/index'].includes(String(launchPath || '').replace(/^\//, ''))) return false;
+    // 仅接受后端生成的票据，禁止启动参数提供任意重定向地址。
+    const binding = options?.bindTicket;
+    const isBinding = typeof binding === 'string' && /^[a-f0-9]{64}$/.test(binding);
+    const ticket = isBinding ? binding : options?.ticket;
+    if (typeof ticket !== 'string' || !/^[a-f0-9]{64}$/.test(ticket)) return false;
+    /** key 区分微信绑定授权与电脑登录，绑定不能进入平台登录或自动注册。 */
+    const key = isBinding ? 'bindTicket' : 'ticket';
+    const target = `/packageUser/pages/web-login/index?${key}=${encodeURIComponent(ticket)}`;
+    const pages = getCurrentPages();
+    const current = pages[pages.length - 1] as { route?: string; options?: Record<string, string> } | undefined;
+    if (current?.route === 'packageUser/pages/web-login/index' && current.options?.[key] === ticket) return true;
+    uni.reLaunch({ url: target });
+    return true;
   }
 
   /** prepareTenantContextBeforeAuth 在认证请求前准备组织上下文。 */
@@ -126,8 +166,17 @@ class AppContextProvider {
     }
   }
 
-  async ensureReady(targetUrl: string): Promise<boolean> {
+  /** ensureReady 校验导航上下文；tenantsAlreadyLoaded仅用于同次交接已完成的企业查询，项目权限仍核验。 */
+  async ensureReady(targetUrl: string, tenantsAlreadyLoaded = false): Promise<boolean> {
     const targetPath = targetUrl.split('?')[0];
+    // 缓存会话先验证；电脑登录确认只需要有效身份。
+    if (!authProvider.isLoggedIn() && authProvider.getState().loggedIn) {
+      await authProvider.restoreSession();
+    }
+    if (['/packageUser/pages/web-login/index', '/packageDevice/pages/share-accept/index', '/packageUser/pages/project-invite/index'].includes(targetPath) && authProvider.isLoggedIn()) {
+      this.pendingRoute = targetUrl;
+      return true;
+    }
 
     if (!authProvider.isLoggedIn()) {
       // 公开页面（Tab 入口）允许未登录浏览，业务点上再用 ensureLoggedIn 做按钮级守卫
@@ -141,28 +190,41 @@ class AppContextProvider {
 
     this.pendingRoute = targetUrl;
 
+    // 首页、设备详情和设置往返复用刚完成的上下文，管理、选择及邀请流程仍完整刷新。
+    if ([HOME_URL, '/packageDevice/pages/detail/index', '/packageDevice/pages/settings/index'].includes(targetPath)
+      && !getPendingInviteCode() && !getPendingLaunchTenantCode()
+      && this.readyContext?.key === this.contextKey() && Date.now() < this.readyContext.expiresAt) {
+      return true;
+    }
+    this.readyContext = null;
+
     if (this.isSingleTenantMode()) {
       if (!(await this.ensureSingleTenantAvailable())) {
         return false;
       }
-      await tenantProvider.loadTenants();
-      if (!this.ensureSingleTenant()) {
-        return false;
-      }
-      return this.ensureFamily();
+      if (!tenantsAlreadyLoaded) await tenantProvider.loadTenants();
+      if (!authProvider.isLoggedIn()) return false;
+      if (!this.ensureSingleTenant()) return false;
+      const ready = await this.ensureFamily(targetPath);
+      return ['/packageDevice/pages/share-manage/index', '/pages/mine/index'].includes(targetPath) ? ready : this.rememberReadyContext(ready);
     }
 
-    await tenantProvider.loadTenants();
+    if (!tenantsAlreadyLoaded) await tenantProvider.loadTenants();
+    // 组织请求期间收到 401 后不能重新打开组织选择页。
+    if (!authProvider.isLoggedIn()) return false;
 
     if (!(await this.handlePendingInvite())) return false;
+    if (!authProvider.isLoggedIn()) return false;
 
     if (!(await this.handlePendingLaunchTenant())) return false;
+    if (!authProvider.isLoggedIn()) return false;
 
     if (!this.ensureTenant()) {
       return false;
     }
 
-    return this.ensureFamily();
+    const ready = await this.ensureFamily(targetPath);
+    return ['/packageDevice/pages/share-manage/index', '/pages/mine/index'].includes(targetPath) ? ready : this.rememberReadyContext(ready);
   }
 
   /**
@@ -347,6 +409,7 @@ class AppContextProvider {
 
   /** openTenantSelectGate 进入强制组织选择页，清空页面栈避免未选组织时返回业务页。 */
   private openTenantSelectGate(): void {
+    if (!authProvider.isLoggedIn()) return;
     if (this.isSingleTenantMode()) {
       this.openHomeFallback();
       return;
@@ -386,46 +449,51 @@ class AppContextProvider {
     uni.reLaunch({ url: ORG_ID_NOT_FOUND_URL });
   }
 
-  private async ensureFamily(): Promise<boolean> {
+  private async ensureFamily(targetPath: string): Promise<boolean> {
     const currentTenant = tenantProvider.getState().current;
     if (!currentTenant?.code) {
       this.openTenantSelectGate();
       return false;
     }
 
-    await projectProvider.loadFirst();
-    let list = projectProvider.getState().list || [];
-    if (list.length === 0) {
-      const result = await projectService.getList(1, 200);
-      list = result.list || [];
+    // 全局分享和个人页只依赖企业身份，不要求先加入或创建项目。
+    if (['/packageDevice/pages/share-manage/index', '/pages/mine/index'].includes(targetPath)) return true;
+
+    // 不复用列表页的搜索筛选；分页核验历史项目仍可访问且处于正常状态。
+    const currentFamily = currentFamilyProvider.getSelection(currentTenant.code);
+    const firstPage = await projectService.getList(1, 100, undefined, 1);
+    const list = [...(firstPage.list || [])];
+    let restored = list.find((item) => item.projectID === currentFamily.projectID);
+    for (let page = 2; currentFamily.projectID && !restored && list.length < firstPage.total; page++) {
+      const result = await projectService.getList(page, 100, undefined, 1);
+      if (!result.list.length) throw new Error('项目列表未完整加载');
+      list.push(...result.list);
+      restored = result.list.find((item) => item.projectID === currentFamily.projectID);
     }
     if (list.length === 0) {
       const authState = authProvider.getState();
       const suggestedName = suggestFamilyName({
         nickName: authState.user?.nickName,
+        userName: authState.user?.userName,
         tenantName: currentTenant.name,
         existingNames: [],
       });
+      // #ifdef MP-WEIXIN
+      uni.redirectTo({
+        url: `/packageUser/pages/project-entry/index?suggestedName=${encodeURIComponent(suggestedName)}`,
+      });
+      // #endif
+      // #ifndef MP-WEIXIN
       uni.redirectTo({
         url: `/packageUser/pages/family-edit/index?mode=create&source=guard&suggestedName=${encodeURIComponent(suggestedName)}`,
       });
+      // #endif
       return false;
     }
 
-    if (list.length === 1) {
-      currentFamilyProvider.switchFamily(list[0].projectID, list[0].projectName, currentTenant.code);
-      return true;
-    }
-
-    const currentFamily = currentFamilyProvider.getSelection(currentTenant.code);
-    const restored = list.find((item) => item.projectID === currentFamily.projectID);
-    if (restored) {
-      currentFamilyProvider.switchFamily(restored.projectID, restored.projectName, currentTenant.code);
-      return true;
-    }
-
-    uni.redirectTo({ url: FAMILY_SELECT_URL });
-    return false;
+    const selected = restored || list[0];
+    currentFamilyProvider.switchFamily(selected.projectID, selected.projectName, currentTenant.code);
+    return true;
   }
 }
 

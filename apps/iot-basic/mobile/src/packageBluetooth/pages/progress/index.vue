@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="changingNetwork ? '更换 Wi-Fi' : '一键配网'" />
 
@@ -130,7 +131,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .progress-page {
@@ -151,7 +152,7 @@ page {
 }
 
 .steps__item {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -164,7 +165,7 @@ page {
 .visual-card,
 .progress-card {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 20px 20px 24px;
 }
 
@@ -191,7 +192,7 @@ page {
 }
 
 .visual-card__title {
-  font-size: 20px;
+  font-size: var(--font-section);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 8px;
@@ -200,7 +201,7 @@ page {
 .visual-card__desc {
   display: block;
   text-align: center;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.7;
   color: var(--text-secondary);
 }
@@ -215,7 +216,7 @@ page {
 .timeout-tip__text {
   display: block;
   text-align: center;
-  font-size: 13px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--color-warning);
 }
@@ -232,13 +233,13 @@ page {
   margin-top: 14px;
   margin-bottom: 18px;
   padding: 16px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   background: var(--text-primary);
 }
 
 .debug-card__title {
   display: block;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-bg-secondary);
   margin-bottom: 6px;
@@ -246,7 +247,7 @@ page {
 
 .debug-card__desc {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--text-placeholder);
   margin-bottom: 12px;
@@ -257,7 +258,7 @@ page {
 }
 
 .debug-empty__text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-placeholder);
 }
 
@@ -268,7 +269,7 @@ page {
 
 .debug-line {
   display: block;
-  font-size: 11px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   word-break: break-all;
   color: var(--text-placeholder);
@@ -305,7 +306,7 @@ page {
 }
 
 .progress-item__mark {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
 }
 
@@ -330,7 +331,7 @@ page {
 
 .progress-item__title {
   display: block;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 4px;
@@ -338,7 +339,7 @@ page {
 
 .progress-item__desc {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   word-break: break-all;
   color: var(--text-secondary);
@@ -371,7 +372,7 @@ page {
 }
 
 .ghost-btn__text {
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 

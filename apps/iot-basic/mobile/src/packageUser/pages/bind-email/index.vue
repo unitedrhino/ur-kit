@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="绑定邮箱" :back="true" />
 
@@ -127,19 +128,19 @@ async function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-.bind-email-page { flex: 1; min-height: 0; background: var(--page-bg); }
-.bind-email-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px var(--color-shadow); }
+.bind-email-page { flex: 1; min-height: 0; background: transparent; }
+.bind-email-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: 0 8px 24px var(--color-shadow); }
 .bind-email-field { padding: 14px 0; border-bottom: 1rpx solid var(--border-color); }
 .bind-email-field:last-child { border-bottom: none; }
-.bind-email-field__label { display: block; margin-bottom: 10px; font-size: 14px; color: var(--text-secondary); }
-.bind-email-field__input { font-size: 16px; color: var(--text-primary); }
+.bind-email-field__label { display: block; margin-bottom: 10px; font-size: var(--font-body); color: var(--text-secondary); }
+.bind-email-field__input { font-size: var(--font-body); color: var(--text-primary); }
 .bind-email-field--inline { display: flex; align-items: flex-end; gap: 12px; }
 .bind-email-field__main { flex: 1; min-width: 0; }
 .bind-email-code-btn { flex-shrink: 0; min-width: 220rpx; padding: 14px 18px; text-align: center; border-radius: 12px; background: var(--color-primary-light); }
 .bind-email-code-btn--disabled { opacity: 0.55; }
-.bind-email-code-btn__text { font-size: 13px; color: var(--color-primary); }
+.bind-email-code-btn__text { font-size: var(--font-caption); color: var(--color-primary); }
 .bind-email-submit { margin: 20px 16px; height: 48px; border-radius: 14px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; }
 .bind-email-submit--disabled { opacity: 0.6; }
 .bind-email-submit--hover { opacity: 0.9; }
-.bind-email-submit__text { color: var(--color-on-primary); font-size: 16px; font-weight: 600; }
+.bind-email-submit__text { color: var(--color-on-primary); font-size: var(--font-body); font-weight: 600; }
 </style>

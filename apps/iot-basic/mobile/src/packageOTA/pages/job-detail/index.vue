@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="升级任务详情" />
 
@@ -34,6 +35,7 @@
 
     <button class="devices-btn" @tap="handleViewDevices">查看设备列表</button>
   </template>
+  <empty-state v-else text="暂无升级任务详情" />
 </scroll-view>
 
 </template>
@@ -83,15 +85,15 @@ function handleViewDevices() {
 
 <style lang="scss" scoped>
 .detail-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
-.info-card { margin: 16px; background: var(--card-bg); border-radius: 12px; padding: 16px; }
+  min-height: 0; background: transparent; }
+.info-card { margin: 16px; background: var(--card-bg); border-radius: var(--radius-lg); padding: 16px; }
 .info-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--border-color); }
 .info-row:last-child { border-bottom: none; }
-.info-label { font-size: 14px; color: var(--text-secondary); }
-.info-value { font-size: 14px; color: var(--text-primary); font-weight: 500; }
+.info-label { font-size: var(--font-body); color: var(--text-secondary); }
+.info-value { font-size: var(--font-body); color: var(--text-primary); font-weight: 500; }
 .status-1 { color: var(--color-primary); }
 .status-2 { color: var(--color-success); }
 .status-3 { color: var(--color-error); }
-.devices-btn { margin: 16px; background: var(--color-primary); color: var(--card-bg); border-radius: 24px; font-size: 15px; height: 44px; line-height: 44px; }
+.devices-btn { margin: 16px; background: var(--color-primary); color: var(--card-bg); border-radius: 24px; font-size: var(--font-body); height: 44px; line-height: 44px; }
 
 </style>

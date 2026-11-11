@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="通知设置" />
 
@@ -63,13 +64,13 @@ async function handleSubscribe() {
 
 <style lang="scss" scoped>
 .notify-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
+  min-height: 0; background: transparent; }
 .notify-section { margin: 16px; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
 .notify-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1rpx solid var(--divider); }
 .notify-item:last-child { border-bottom: none; }
-.notify-item__label { font-size: 15px; color: var(--text-primary); }
+.notify-item__label { font-size: var(--font-body); color: var(--text-primary); }
 .notify-subscribe { margin: 24px 16px; padding: 14px; text-align: center; background: var(--color-primary); border-radius: 12px; }
 .notify-subscribe--hover { opacity: 0.7; }
-.notify-subscribe__text { color: var(--color-on-primary); font-size: 16px; font-weight: 500; }
+.notify-subscribe__text { color: var(--color-on-primary); font-size: var(--font-body); font-weight: 500; }
 
 </style>

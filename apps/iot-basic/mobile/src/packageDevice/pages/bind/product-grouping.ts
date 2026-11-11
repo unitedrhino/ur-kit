@@ -9,15 +9,36 @@ export interface ProductDisplaySection {
   products: ProductEntity[];
 }
 
-/**
- * Build category tab list. Always appends an "其他" tab at the end.
- */
+/** 根据完整产品列表保留有产品的分类，并将未知分类归入其他。 */
 export function buildCategoryTabs(
   categories: ProductCategoryOption[],
+  products: ProductEntity[],
 ): Array<{ key: string; label: string }> {
-  const tabs = categories.map((c) => ({ key: c.id, label: c.name }));
-  tabs.push({ key: OTHER_CATEGORY_KEY, label: '其他' });
+  const productCategoryIDs = new Set(products.map((product) => product.categoryID));
+  const knownCategoryIDs = new Set(categories.map((category) => category.id));
+  const tabs = categories
+    .filter((category) => productCategoryIDs.has(category.id))
+    .map((category) => ({ key: category.id, label: category.name }));
+  if (products.some((product) => !knownCategoryIDs.has(product.categoryID))) {
+    tabs.push({ key: OTHER_CATEGORY_KEY, label: '其他' });
+  }
   return tabs;
+}
+
+/** 分页读取完整列表；后端提前返回空页或超出上限时报告错误，避免误隐藏分类。 */
+export async function loadAllPages<T>(
+  fetchPage: (page: number, size: number) => Promise<{ list: T[]; total: number }>,
+): Promise<T[]> {
+  const size = 100;
+  const items: T[] = [];
+  for (let page = 1; page <= 200; page += 1) {
+    const result = await fetchPage(page, size);
+    const list = result.list || [];
+    items.push(...list);
+    if (result.total > 0 ? items.length >= result.total : list.length < size) return items;
+    if (list.length === 0) throw new Error('产品列表加载不完整，请重试');
+  }
+  throw new Error('产品列表过多，请联系管理员');
 }
 
 /**

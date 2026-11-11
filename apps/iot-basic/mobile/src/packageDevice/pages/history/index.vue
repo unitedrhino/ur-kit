@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="数据分析" />
 
@@ -299,7 +300,7 @@ onLoad(async (q: any) => {
 .history-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .history-summary {
@@ -309,7 +310,7 @@ onLoad(async (q: any) => {
 .history-summary__name {
   display: block;
   color: var(--text-primary);
-  font-size: 18px;
+  font-size: var(--font-label);
   font-weight: 700;
 }
 
@@ -317,14 +318,14 @@ onLoad(async (q: any) => {
   display: block;
   margin-top: 4px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--font-caption);
 }
 
 .filter-panel {
   margin: 10px 16px;
   padding: 14px 14px 12px;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
 }
 
@@ -343,13 +344,13 @@ onLoad(async (q: any) => {
 .filter-row__label {
   flex-shrink: 0;
   color: var(--text-secondary);
-  font-size: 14px;
+  font-size: var(--font-body);
 }
 
 .filter-row__value {
   min-width: 0;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   text-align: right;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -359,7 +360,7 @@ onLoad(async (q: any) => {
 .filter-input {
   flex: 1;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   text-align: right;
 }
 
@@ -374,7 +375,7 @@ onLoad(async (q: any) => {
   height: 36px;
   line-height: 36px;
   border-radius: var(--radius-sm, 8px);
-  font-size: 14px;
+  font-size: var(--font-body);
 }
 
 .filter-btn--ghost {
@@ -401,7 +402,7 @@ onLoad(async (q: any) => {
   justify-content: space-between;
   margin-bottom: 10px;
   color: var(--text-secondary);
-  font-size: 13px;
+  font-size: var(--font-caption);
 }
 
 .history-item {
@@ -415,7 +416,7 @@ onLoad(async (q: any) => {
 .history-item__id {
   display: block;
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 500;
 }
 
@@ -423,13 +424,13 @@ onLoad(async (q: any) => {
   display: block;
   margin-top: 4px;
   color: var(--text-placeholder);
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .history-item__value {
   max-width: 120px;
   color: var(--color-primary);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   text-align: right;
   overflow: hidden;

@@ -1,29 +1,28 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
   <view class="scene-create-shell">
     <template v-if="viewMode === 'main'">
-      <app-navigation-bar custom-back fallback-url="/pages/scene/index" background="var(--page-bg)" @back="handleGuardedBack" />
+      <app-navigation-bar custom-back fallback-url="/pages/scene/index" @back="handleGuardedBack" />
 
       <scroll-view class="scene-form-page" scroll-y type="list" :show-scrollbar="false" enable-flex>
         <text class="scene-page-title">{{pageTitle}}</text>
 
-        <view v-if="type === 'manual'" class="name-card">
+        <view class="name-card">
           <view class="name-card__icon"><app-icon name="tabler:arrow-down-left" :size="24" /></view>
           <view class="name-card__divider" />
           <input
             class="name-card__input"
             :value="nameInput"
             maxlength="30"
-            placeholder="请输入手动控制名称"
+            :placeholder="type === 'auto' ? '请输入自动化名称' : '请输入手动控制名称'"
+            @input="handleNameInput"
             @blur="handleNameInputBlur"
           />
         </view>
 
         <view v-if="type === 'auto'" class="scene-section">
           <text class="scene-section__title">当以下情况发生</text>
-          <view v-if="triggers.length === 0" class="add-card" hover-class="add-card--hover" @tap="openTriggerSheet">
-            <view class="add-card__icon"><app-icon name="tabler:plus" :size="24" /></view>
-            <text class="add-card__text">添加触发条件</text>
-          </view>
+
           <view
             v-for="(item, index) in triggers"
             :key="`trigger-${index}`"
@@ -37,14 +36,20 @@
             </view>
             <view class="summary-card__delete" @tap.stop="removeTrigger(index)"><text>删除</text></view>
           </view>
+          <view class="add-card" hover-class="add-card--hover" @tap="openTriggerSheet">
+            <view class="add-card__icon"><app-icon name="tabler:plus" :size="24" /></view>
+            <text class="add-card__text">添加触发条件</text>
+          </view>
+        </view>
+
+        <view v-if="type === 'auto'" class="scene-section scene-section--conditions">
+          <text class="scene-section__title">生效条件</text>
+          <view class="add-card" @tap="openConditions"><view class="add-card__icon"><app-icon name="tabler:clock" :size="24" /></view><text class="add-card__text">{{ conditionSummary }}</text></view>
         </view>
 
         <view class="scene-section">
-          <text class="scene-section__title">{{type === 'auto' ? '将设备调整到' : '将设备调整到'}}</text>
-          <view v-if="actions.length === 0" class="add-card" hover-class="add-card--hover" @tap="openActionSheet">
-            <view class="add-card__icon"><app-icon name="tabler:plus" :size="24" /></view>
-            <text class="add-card__text">添加执行动作</text>
-          </view>
+          <text class="scene-section__title">执行以下动作</text>
+
           <view
             v-for="(item, index) in actions"
             :key="`action-${index}`"
@@ -56,7 +61,15 @@
               <text class="summary-card__title">{{actionTitle(item)}}</text>
               <text class="summary-card__desc">{{formatAction(item)}}</text>
             </view>
+            <view v-if="actions.length > 1" class="summary-card__order">
+              <view v-if="index > 0" class="summary-card__order-button" @tap.stop="moveAction(index, 'up')"><text>上移</text></view>
+              <view v-if="index < actions.length - 1" class="summary-card__order-button" @tap.stop="moveAction(index, 'down')"><text>下移</text></view>
+            </view>
             <view class="summary-card__delete" @tap.stop="removeAction(index)"><text>删除</text></view>
+          </view>
+          <view class="add-card" hover-class="add-card--hover" @tap="openActionSheet">
+            <view class="add-card__icon"><app-icon name="tabler:plus" :size="24" /></view>
+            <text class="add-card__text">添加执行动作</text>
           </view>
         </view>
 
@@ -70,11 +83,31 @@
       </view>
     </template>
 
+    <template v-else-if="viewMode === 'extraAction' && draftAction">
+      <scene-action-editor :model-value="draftAction" :current-scene-id="id" @save="saveExtraAction" @cancel="returnToMain" />
+    </template>
+
+    <template v-else-if="viewMode === 'conditions'">
+      <scene-conditions-editor :model-value="conditions" :devices="selectableDevices" :devices-loading="selectableDevicesLoading" :devices-error="selectableDevicesError" @reload-devices="loadSceneDevices" @save="saveConditions" @cancel="returnToMain" />
+    </template>
+
+    <template v-else-if="viewMode === 'weather'">
+      <view class="scene-edit-page">
+        <view class="edit-nav" :style="editNavStyle"><view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:chevron-left" :size="22" /></view></view>
+        <text class="scene-page-title">天气变化时</text>
+        <view class="form-card">
+          <view class="form-row"><text class="form-row__label">监测指标</text><view class="chip-group"><view :class="chipClass(draftTrigger?.weather?.type === 'temp')" @tap="patchWeather({ type: 'temp' })"><text>温度</text></view><view :class="chipClass(draftTrigger?.weather?.type === 'humidity')" @tap="patchWeather({ type: 'humidity' })"><text>湿度</text></view></view></view>
+          <view class="form-row"><text class="form-row__label">比较</text><view class="chip-group"><view :class="chipClass(draftTrigger?.weather?.termType === 'eq')" @tap="patchWeather({ termType: 'eq' })"><text>等于</text></view><view :class="chipClass(draftTrigger?.weather?.termType === 'gt')" @tap="patchWeather({ termType: 'gt' })"><text>大于</text></view><view :class="chipClass(draftTrigger?.weather?.termType === 'lt')" @tap="patchWeather({ termType: 'lt' })"><text>小于</text></view></view></view>
+          <view class="form-row"><text class="form-row__label">数值</text><input class="form-row__input" type="digit" :value="draftTrigger?.weather?.values?.[0] || ''" placeholder="请输入数值" @input="setWeatherValue" /><text class="form-row__unit">{{ draftTrigger?.weather?.type === 'humidity' ? '%' : '℃' }}</text></view>
+        </view>
+        <view class="scene-confirm-bar"><button class="scene-confirm-button" @tap="commitDraftTrigger">确定</button></view>
+      </view>
+    </template>
+
     <template v-else-if="viewMode === 'timer'">
       <view class="scene-edit-page">
         <view class="edit-nav" :style="editNavStyle">
           <view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:x" :size="22" /></view>
-          <view class="edit-nav__action" @tap="commitDraftTrigger"><app-icon name="tabler:check" :size="22" /></view>
         </view>
         <text class="scene-page-title">定时</text>
 
@@ -96,9 +129,13 @@
             <text :class="`timer-card__title ${draftTimerExecType === 'sunRises' ? 'timer-card__title--active' : ''}`">日出</text>
             <view :class="`radio-dot ${draftTimerExecType === 'sunRises' ? 'radio-dot--active' : ''}`" />
           </view>
-          <view v-if="draftTimerExecType === 'sunRises'" class="timer-card__row timer-card__row--inner">
-            <text class="timer-card__label">偏移</text>
-            <input class="timer-card__input" type="number" :value="draftTimerOffsetMinutes" @blur="handleDraftTimerOffsetMinutesBlur" />
+          <view v-if="draftTimerExecType === 'sunRises'" class="timer-offset" @tap.stop>
+            <text class="timer-card__label">执行时间</text>
+            <view class="timer-offset__choices">
+              <view v-for="choice in offsetChoices" :key="choice.value" :class="['timer-offset__choice', { 'timer-offset__choice--active': timerOffsetDirection === choice.value }]" @tap.stop="setTimerOffsetDirection(choice.value)"><text>{{ choice.label }}</text></view>
+            </view>
+            <view v-if="timerOffsetDirection !== 'on'" class="timer-offset__minutes"><input class="timer-card__input" type="number" :value="timerOffsetMagnitude" @blur="handleTimerOffsetMagnitudeBlur" /><text>分钟</text></view>
+            <text class="timer-offset__hint">{{ timerOffsetHint }}</text>
           </view>
         </view>
 
@@ -107,9 +144,13 @@
             <text :class="`timer-card__title ${draftTimerExecType === 'sunSet' ? 'timer-card__title--active' : ''}`">日落</text>
             <view :class="`radio-dot ${draftTimerExecType === 'sunSet' ? 'radio-dot--active' : ''}`" />
           </view>
-          <view v-if="draftTimerExecType === 'sunSet'" class="timer-card__row timer-card__row--inner">
-            <text class="timer-card__label">偏移</text>
-            <input class="timer-card__input" type="number" :value="draftTimerOffsetMinutes" @blur="handleDraftTimerOffsetMinutesBlur" />
+          <view v-if="draftTimerExecType === 'sunSet'" class="timer-offset" @tap.stop>
+            <text class="timer-card__label">执行时间</text>
+            <view class="timer-offset__choices">
+              <view v-for="choice in offsetChoices" :key="choice.value" :class="['timer-offset__choice', { 'timer-offset__choice--active': timerOffsetDirection === choice.value }]" @tap.stop="setTimerOffsetDirection(choice.value)"><text>{{ choice.label }}</text></view>
+            </view>
+            <view v-if="timerOffsetDirection !== 'on'" class="timer-offset__minutes"><input class="timer-card__input" type="number" :value="timerOffsetMagnitude" @blur="handleTimerOffsetMagnitudeBlur" /><text>分钟</text></view>
+            <text class="timer-offset__hint">{{ timerOffsetHint }}</text>
           </view>
         </view>
 
@@ -120,6 +161,7 @@
             <app-icon class="chevron" name="tabler:chevron-right" :size="18" />
           </view>
         </view>
+        <view class="scene-confirm-bar"><button class="scene-confirm-button" @tap="commitDraftTrigger">确定</button></view>
       </view>
     </template>
 
@@ -127,18 +169,12 @@
       <view class="scene-edit-page">
         <view class="edit-nav" :style="editNavStyle">
           <view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:chevron-left" :size="22" /></view>
-          <view class="edit-nav__action" @tap="commitDraftTrigger"><app-icon name="tabler:check" :size="22" /></view>
         </view>
         <text class="scene-page-title">设备发生变化时</text>
         <view class="toolbar-row">
           <text class="toolbar-row__label">选择设备</text>
-          <view class="toolbar-row__pill" @tap="openProductPicker('trigger')"><text>筛选</text></view>
         </view>
         <view class="form-card">
-          <view class="form-row" @tap="openProductPicker('trigger')">
-            <text class="form-row__label">产品</text>
-            <view class="form-row__value"><text>{{draftTrigger?.device?.productName || draftTrigger?.device?.productID || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
-          </view>
           <view class="form-row" @tap="openDevicePicker('trigger')">
             <text class="form-row__label">设备</text>
             <view class="form-row__value"><text>{{draftTrigger?.device?.deviceAlias || draftTrigger?.device?.deviceName || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
@@ -151,15 +187,20 @@
             <text class="form-row__label">比较</text>
             <view class="chip-group">
               <view :class="chipClass(draftTrigger?.device?.termType === 'eq')" @tap="patchDraftTriggerDevice({ termType: 'eq' })"><text>等于</text></view>
-              <view :class="chipClass(draftTrigger?.device?.termType === 'gt')" @tap="patchDraftTriggerDevice({ termType: 'gt' })"><text>大于</text></view>
-              <view :class="chipClass(draftTrigger?.device?.termType === 'lt')" @tap="patchDraftTriggerDevice({ termType: 'lt' })"><text>小于</text></view>
+              <view v-if="!isDiscreteProperty" :class="chipClass(draftTrigger?.device?.termType === 'gt')" @tap="patchDraftTriggerDevice({ termType: 'gt' })"><text>大于</text></view>
+              <view v-if="!isDiscreteProperty" :class="chipClass(draftTrigger?.device?.termType === 'lt')" @tap="patchDraftTriggerDevice({ termType: 'lt' })"><text>小于</text></view>
             </view>
           </view>
           <view class="form-row">
             <text class="form-row__label">值</text>
-            <input class="form-row__input" :value="draftTriggerValue" placeholder="例如 1" @blur="handleDraftTriggerValueBlur" />
+            <view v-if="isDiscreteProperty" class="value-options">
+              <view v-for="option in propertyOptions" :key="option.value" :class="chipClass(String(draftTriggerValue) === option.value)" @tap="selectTriggerOption(option.value)"><text>{{ option.label }}</text></view>
+              <text v-if="!propertyOptions.length" class="value-options__empty">物模型未配置可选值</text>
+            </view>
+            <input v-else class="form-row__input" :value="draftTriggerValue" placeholder="请输入值" @input="handleDraftTriggerValueInput" @blur="handleDraftTriggerValueBlur" />
           </view>
         </view>
+        <view class="scene-confirm-bar"><button class="scene-confirm-button" @tap="commitDraftTrigger">确定</button></view>
       </view>
     </template>
 
@@ -167,14 +208,9 @@
       <view class="scene-edit-page">
         <view class="edit-nav" :style="editNavStyle">
           <view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:chevron-left" :size="22" /></view>
-          <view class="edit-nav__action" @tap="commitDraftTrigger"><app-icon name="tabler:check" :size="22" /></view>
         </view>
         <text class="scene-page-title">持续一段时间后</text>
         <view class="form-card">
-          <view class="form-row" @tap="openProductPicker('trigger')">
-            <text class="form-row__label">产品</text>
-            <view class="form-row__value"><text>{{draftTrigger?.device?.productName || draftTrigger?.device?.productID || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
-          </view>
           <view class="form-row" @tap="openDevicePicker('trigger')">
             <text class="form-row__label">设备</text>
             <view class="form-row__value"><text>{{draftTrigger?.device?.deviceAlias || draftTrigger?.device?.deviceName || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
@@ -184,6 +220,22 @@
             <view class="form-row__value"><text>{{draftTrigger?.device?.dataName || draftTrigger?.device?.dataID || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
           </view>
           <view class="form-row">
+            <text class="form-row__label">比较</text>
+            <view class="chip-group">
+              <view :class="chipClass(draftTrigger?.device?.termType === 'eq')" @tap="patchDraftTriggerDevice({ termType: 'eq' })"><text>等于</text></view>
+              <view v-if="!isDiscreteProperty" :class="chipClass(draftTrigger?.device?.termType === 'gt')" @tap="patchDraftTriggerDevice({ termType: 'gt' })"><text>大于</text></view>
+              <view v-if="!isDiscreteProperty" :class="chipClass(draftTrigger?.device?.termType === 'lt')" @tap="patchDraftTriggerDevice({ termType: 'lt' })"><text>小于</text></view>
+            </view>
+          </view>
+          <view class="form-row">
+            <text class="form-row__label">值</text>
+            <view v-if="isDiscreteProperty" class="value-options">
+              <view v-for="option in propertyOptions" :key="option.value" :class="chipClass(String(draftTriggerValue) === option.value)" @tap="selectTriggerOption(option.value)"><text>{{ option.label }}</text></view>
+              <text v-if="!propertyOptions.length" class="value-options__empty">物模型未配置可选值</text>
+            </view>
+            <input v-else class="form-row__input" :value="draftTriggerValue" placeholder="请输入值" @input="handleDraftTriggerValueInput" @blur="handleDraftTriggerValueBlur" />
+          </view>
+          <view class="form-row">
             <text class="form-row__label">持续</text>
             <view class="form-row__right">
               <input class="form-row__number" type="number" :value="draftDurationValue" @blur="handleDraftDurationValueBlur" />
@@ -191,6 +243,7 @@
             </view>
           </view>
         </view>
+        <view class="scene-confirm-bar"><button class="scene-confirm-button" @tap="commitDraftTrigger">确定</button></view>
       </view>
     </template>
 
@@ -198,18 +251,12 @@
       <view class="scene-edit-page">
         <view class="edit-nav" :style="editNavStyle">
           <view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:chevron-left" :size="22" /></view>
-          <view class="edit-nav__action" @tap="commitDraftAction"><app-icon name="tabler:check" :size="22" /></view>
         </view>
         <text class="scene-page-title">选择要控制的设备</text>
         <view class="toolbar-row">
           <text class="toolbar-row__label">选择设备</text>
-          <view class="toolbar-row__pill" @tap="openProductPicker('action')"><text>筛选</text></view>
         </view>
         <view class="form-card">
-          <view class="form-row" @tap="openProductPicker('action')">
-            <text class="form-row__label">产品</text>
-            <view class="form-row__value"><text>{{draftAction?.device?.productName || draftAction?.device?.productID || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
-          </view>
           <view class="form-row" @tap="openDevicePicker('action')">
             <text class="form-row__label">设备</text>
             <view class="form-row__value"><text>{{draftAction?.device?.deviceAlias || draftAction?.device?.deviceName || '请选择'}}</text><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
@@ -220,7 +267,11 @@
           </view>
           <view class="form-row">
             <text class="form-row__label">值</text>
-            <input class="form-row__input" :value="draftActionValue" placeholder="例如 1" @blur="handleDraftActionValueBlur" />
+            <view v-if="isDiscreteProperty" class="value-options">
+              <view v-for="option in propertyOptions" :key="option.value" :class="chipClass(String(draftActionValue) === option.value)" @tap="selectActionOption(option.value)"><text>{{ option.label }}</text></view>
+              <text v-if="!propertyOptions.length" class="value-options__empty">物模型未配置可选值</text>
+            </view>
+            <input v-else class="form-row__input" :value="draftActionValue" placeholder="请输入值" @input="handleDraftActionValueInput" @blur="handleDraftActionValueBlur" />
           </view>
         </view>
         <view class="bottom-link-card" @tap="fillBatchSwitchAction">
@@ -230,6 +281,7 @@
           </view>
           <app-icon class="chevron" name="tabler:chevron-right" :size="18" />
         </view>
+        <view class="scene-confirm-bar"><button class="scene-confirm-button" @tap="commitDraftAction">确定</button></view>
       </view>
     </template>
 
@@ -237,7 +289,6 @@
       <view class="scene-edit-page scene-edit-page--dim">
         <view class="edit-nav" :style="editNavStyle">
           <view class="edit-nav__action" @tap="returnToMain"><app-icon name="tabler:chevron-left" :size="22" /></view>
-          <view class="edit-nav__action" @tap="commitDraftAction"><app-icon name="tabler:check" :size="22" /></view>
         </view>
         <text class="scene-page-title">延时执行</text>
         <view class="picker-panel">
@@ -294,6 +345,8 @@
         <view class="sheet-option" @tap="addNotifyAction"><app-icon class="sheet-option__icon" name="tabler:bell" :size="22" /><view class="sheet-option__body"><text class="sheet-option__title">通知</text><text class="sheet-option__desc">如：向手机发送某个通知</text></view><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
       </view>
       <view class="sheet-group">
+      </view>
+      <view class="sheet-group">
         <view class="sheet-option" @tap="addSceneAction"><app-icon class="sheet-option__icon" name="tabler:automation" :size="22" /><view class="sheet-option__body"><text class="sheet-option__title">已创建的自动化</text><text class="sheet-option__desc">如：某条自动化或手动控制</text></view><app-icon class="chevron" name="tabler:chevron-right" :size="18" /></view>
       </view>
       <button class="cancel-sheet-button" @tap="closeSheet">取消</button>
@@ -319,7 +372,7 @@
   </view>
 
   <product-picker :visible="productPickerVisible" :selected-id="pickerProductID" :devices="sceneDevices" :loading="deviceListLoading" @select="handleProductSelected" @close="productPickerVisible = false" />
-  <device-picker :visible="devicePickerVisible" :product-id="pickerProductID" :selected-name="pickerDeviceName" :devices="sceneDevices" :loading="deviceListLoading" @select="handleDeviceSelected" @close="devicePickerVisible = false" />
+  <device-picker :visible="devicePickerVisible" :product-id="pickerProductID" :selected-name="pickerDeviceName" :devices="selectableDevices" :loading="selectableDevicesLoading" :error="selectableDevicesError" @retry="loadSceneDevices" @select="handleDeviceSelected" @close="devicePickerVisible = false" />
   <schema-picker :visible="schemaPickerVisible" :product-id="pickerProductID" :schema-type="pickerSchemaType" :selected-id="pickerSchemaID" @select="handleSchemaSelected" @close="schemaPickerVisible = false" />
 </template>
 
@@ -338,11 +391,19 @@ import { createEmptyCondition } from '../../../domain/models/scene-condition.mod
 import ProductPicker from '../../components/product-picker/product-picker.vue';
 import DevicePicker from '../../components/device-picker/device-picker.vue';
 import SchemaPicker from '../../components/schema-picker/schema-picker.vue';
+import SceneConditionsEditor from '../../components/scene-conditions-editor/scene-conditions-editor.vue';
+import SceneActionEditor from '../../components/scene-action-editor/scene-action-editor.vue';
 import { safeNavigateBack } from '../../../utils/navigation';
 import { ensurePageReady } from '../../../utils/page-guard';
+import { deviceService } from '../../../services/device.service';
+import { deviceControlService } from '../../../services/device-control.service';
+import type { ThingModelDefine } from '../../../domain/models/device-control.model';
+import { areaService } from '../../../services/area.service';
+import { authProvider } from '../../../providers/auth.provider';
+import { currentFamilyProvider } from '../../../providers/current-family.provider';
 import { getSystemInfo } from '../../../utils/platform';
 
-type ViewMode = 'main' | 'timer' | 'deviceTrigger' | 'duration' | 'deviceAction' | 'delay';
+type ViewMode = 'main' | 'conditions' | 'extraAction' | 'weather' | 'timer' | 'deviceTrigger' | 'duration' | 'deviceAction' | 'delay';
 type SheetName = '' | 'trigger' | 'action' | 'repeat';
 type PickerTarget = '' | 'trigger' | 'action';
 type SchemaKind = 'property-write' | 'property-read' | 'property-all' | 'event' | 'action';
@@ -366,14 +427,35 @@ const nameInput = computed({
 
 /**
  * 输入框统一采用失焦同步：聚焦输入期间不写响应式 value，避免 setData 回写干扰原生输入框显示
- * （微信小程序 iOS + 第三方输入法下，聚焦时回写会导致粘贴内容不显示）。blur 先于页面内按钮 tap，
- * 提交、确认等读取处拿到的均为最新值；给可写 computed 赋值即触发对应 setter 写回。
+ * （微信小程序 iOS + 第三方输入法下，聚焦时回写会导致粘贴内容不显示）。名称同时保留输入草稿，
+ * 保存入口主动同步，不假定 H5 的 blur 与 tap 顺序；computed setter 负责写回业务模型。
  */
-function handleNameInputBlur(e: any) { nameInput.value = e.detail.value }
-function handleDraftTimerOffsetMinutesBlur(e: any) { draftTimerOffsetMinutes.value = e.detail.value }
-function handleDraftTriggerValueBlur(e: any) { draftTriggerValue.value = e.detail.value }
+/** pendingName 保存正在输入的名称，提交时主动同步，避免 H5 按钮先于 blur 触发。 */
+let pendingName: string | undefined;
+/** handleNameInput 不回写聚焦中的原生输入控件，兼容微信输入法。 */
+function handleNameInput(e: unknown): void {
+  const value = (e as { detail?: { value?: string } }).detail?.value;
+  if (typeof value === 'string') pendingName = value;
+}
+/** flushPendingName 在表单切换和保存前同步名称，避免子页面重新挂载时丢失。 */
+function flushPendingName(): void {
+  if (pendingName !== undefined) nameInput.value = pendingName;
+  pendingName = undefined;
+}
+/** handleNameInputBlur 在失焦时提交名称草稿。 */
+function handleNameInputBlur(e: unknown): void {
+  handleNameInput(e);
+  if (pendingName !== undefined) nameInput.value = pendingName;
+  pendingName = undefined;
+}
+let pendingTriggerValue: string | undefined;
+let pendingActionValue: string | undefined;
+/** 输入只暂存草稿，确认时同步，兼容原生输入法和 H5 自动失焦。 */
+function handleDraftTriggerValueInput(e: any) { pendingTriggerValue = String(e.detail.value ?? ''); }
+function handleDraftActionValueInput(e: any) { pendingActionValue = String(e.detail.value ?? ''); }
+function handleDraftTriggerValueBlur(e: any) { pendingTriggerValue = undefined; draftTriggerValue.value = e.detail.value }
 function handleDraftDurationValueBlur(e: any) { draftDurationValue.value = e.detail.value }
-function handleDraftActionValueBlur(e: any) { draftActionValue.value = e.detail.value }
+function handleDraftActionValueBlur(e: any) { pendingActionValue = undefined; draftActionValue.value = e.detail.value }
 function handleDelayMinutesBlur(e: any) { delayMinutes.value = e.detail.value }
 function handleDelaySecondsBlur(e: any) { delaySeconds.value = e.detail.value }
 
@@ -389,11 +471,6 @@ const devicePickerVisible = ref(false);
 const schemaPickerVisible = ref(false);
 const delayMinutes = ref('0');
 const delaySeconds = ref('30');
-/** 日出/日落偏移分钟数的可写代理：v-model 展示分钟，写回草稿时换算为秒 */
-const draftTimerOffsetMinutes = computed<string | number>({
-  get: () => secondsToMinutes(draftTrigger.value?.timer?.execAdd),
-  set: (value) => patchDraftTimer({ execAdd: Number(value || 0) * 60 }),
-});
 /** 设备触发条件值的可写代理：v-model 写回草稿 values 数组首项 */
 const draftTriggerValue = computed<string>({
   get: () => firstValue(draftTrigger.value?.device?.values),
@@ -426,6 +503,59 @@ const draftActionValue = computed<string>({
 });
 const sceneDevices = ref<DeviceEntity[]>([]);
 const deviceListLoading = ref(false);
+/** 当前设备属性定义：进入编辑页或切换设备、属性时重新读取。 */
+const selectedPropertyDefine = ref<ThingModelDefine | null>(null);
+const propertyDefineLoading = ref(false);
+const propertyDefineError = ref('');
+let propertyDefineRevision = 0;
+const currentPropertyIdentity = computed(() => {
+  const device = viewMode.value === 'deviceAction' ? draftAction.value?.device :
+    (viewMode.value === 'deviceTrigger' || viewMode.value === 'duration') ? draftTrigger.value?.device : null;
+  return { productID: device?.productID || '', dataID: device?.dataID || '' };
+});
+watch(() => [currentPropertyIdentity.value.productID, currentPropertyIdentity.value.dataID, viewMode.value], async () => {
+  const revision = ++propertyDefineRevision;
+  const { productID, dataID } = currentPropertyIdentity.value;
+  selectedPropertyDefine.value = null;
+  propertyDefineError.value = '';
+  propertyDefineLoading.value = !!(productID && dataID);
+  if (!productID || !dataID) return;
+  try {
+    const schema = await deviceControlService.getThingModel(productID);
+    if (revision !== propertyDefineRevision) return;
+    const property = schema.properties.find(item => item.identifier === dataID);
+    if (!property) throw new Error('设备属性不存在，请重新选择');
+    selectedPropertyDefine.value = property.define;
+  } catch (error) {
+    if (revision === propertyDefineRevision) propertyDefineError.value = (error as Error).message || '物模型加载失败';
+  } finally { if (revision === propertyDefineRevision) propertyDefineLoading.value = false; }
+}, { immediate: true });
+const isDiscreteProperty = computed(() => ['bool', 'enum'].includes(selectedPropertyDefine.value?.type || ''));
+/** 属性 mapping 的键是实际写入值，文本仅用于展示。 */
+const propertyOptions = computed(() => {
+  const define = selectedPropertyDefine.value;
+  if (!define || !isDiscreteProperty.value) return [];
+  const mapping = define.type === 'bool' && !Object.keys(define.mapping || {}).length ? { '0': '关', '1': '开' } : (define.mapping || {});
+  return Object.entries(mapping).map(([value, label]) => ({ value, label: String(label) }));
+});
+/** 选择离散值时保留物模型原始键，并使用等于比较。 */
+function selectTriggerOption(value: string): void { pendingTriggerValue = undefined; draftTriggerValue.value = value; patchDraftTriggerDevice({ termType: 'eq' }); }
+function selectActionOption(value: string): void { pendingActionValue = undefined; draftActionValue.value = value; }
+/** preventInvalidProperty 阻止模型未加载或所选离散值失效时提交。 */
+function preventInvalidProperty(value: string): boolean {
+  if (!currentPropertyIdentity.value.dataID) return false;
+  if (propertyDefineLoading.value || propertyDefineError.value || !selectedPropertyDefine.value) {
+    uni.showToast({ title: propertyDefineError.value || '物模型加载中，请稍后重试', icon: 'none' }); return true;
+  }
+  if (isDiscreteProperty.value && !propertyOptions.value.some(option => option.value === value)) {
+    uni.showToast({ title: '请选择有效的属性值', icon: 'none' }); return true;
+  }
+  if (isDiscreteProperty.value && viewMode.value !== 'deviceAction' && draftTrigger.value?.device?.termType && draftTrigger.value.device.termType !== 'eq') {
+    uni.showToast({ title: '请重新选择属性值', icon: 'none' }); return true;
+  }
+  return false;
+}
+
 const weekLabels = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
 // sys 保存当前窗口与微信胶囊位置信息，供自定义编辑导航避让系统区域。
 const sys = getSystemInfo();
@@ -483,6 +613,9 @@ onLoad(async (query) => {
       type: createType,
       name: createType === 'auto' ? '自动化场景' : '',
     });
+    if (query?.source === 'deviceSelection' && createType === 'auto' && typeof query.productID === 'string' && typeof query.deviceName === 'string') {
+      await prepareSelectedDeviceTrigger(query.productID, query.deviceName);
+    }
   }
 });
 
@@ -494,6 +627,16 @@ const pageTitle = computed(() => {
   return type.value === 'auto' ? '创建自动化' : '创建手动控制';
 });
 const buttonText = computed(() => (mode.value === 'edit' ? '保存' : '创建'));
+/** conditionSummary 让用户看到当前已设置的时间范围和附加条件数量。 */
+const conditionSummary = computed(() => {
+  const total = conditions.value.validRanges.length + conditions.value.invalidRanges.length + conditions.value.conditions.terms.length;
+  return total ? `已设置 ${total} 项生效条件` : '设置生效时段与附加条件';
+});
+/** openConditions 编辑草稿，取消不改变原场景。 */
+function openConditions(): void { flushPendingName(); viewMode.value = 'conditions'; }
+/** saveConditions 只在确认后更新场景条件。 */
+function saveConditions(value: SceneCondition): void { sceneEditProvider.updateConditions(value); returnToMain(); }
+
 const canSave = computed(() => {
   if (saving.value) return false;
   if (type.value === 'manual' && !name.value.trim()) return false;
@@ -531,10 +674,12 @@ function cleanup() {
 }
 
 function openTriggerSheet() {
+  flushPendingName();
   activeSheet.value = 'trigger';
 }
 
 function openActionSheet() {
+  flushPendingName();
   activeSheet.value = 'action';
 }
 
@@ -543,6 +688,7 @@ function closeSheet() {
 }
 
 function returnToMain() {
+  pendingTriggerValue = undefined; pendingActionValue = undefined;
   activeSheet.value = '';
   viewMode.value = 'main';
   editingTriggerIndex.value = -1;
@@ -573,6 +719,19 @@ function startDeviceTrigger() {
   viewMode.value = 'deviceTrigger';
 }
 
+/** prepareSelectedDeviceTrigger 重新核对设备与管理资格后预填触发设备，条件仍由用户选择。 */
+async function prepareSelectedDeviceTrigger(productID: string, deviceName: string): Promise<void> {
+  const projectID = currentFamilyProvider.getState().projectID;
+  const userID = authProvider.getState().user?.userID || '';
+  try {
+    const [device, allowed] = await Promise.all([deviceService.getDetail(productID, deviceName), areaService.canManage(projectID, userID)]);
+    if (cleaned || projectID !== currentFamilyProvider.getState().projectID) return;
+    if (!allowed || device.projectID !== projectID || device.isShared !== false) throw new Error('当前设备没有项目管理权限');
+    startDeviceTrigger();
+    patchDraftTriggerDevice({ productID: device.productID, productName: device.productName, deviceName: device.deviceName, deviceAlias: device.deviceAlias });
+  } catch (error) { if (!cleaned) uni.showToast({ title: (error as Error).message || '设备加载失败', icon: 'none' }); }
+}
+
 function startDurationTrigger() {
   closeSheet();
   editingTriggerIndex.value = -1;
@@ -580,14 +739,19 @@ function startDurationTrigger() {
   viewMode.value = 'duration';
 }
 
+/** addWeatherTrigger 编辑天气触发草稿，只有确认后才加入列表。 */
 function addWeatherTrigger() {
-  closeSheet();
-  sceneEditProvider.addTrigger({
-    type: 'weather',
-    order: triggers.value.length,
-    weather: { type: 'temp', termType: 'gt', values: ['24'] },
-  });
+  closeSheet(); editingTriggerIndex.value = -1;
+  draftTrigger.value = { type: 'weather', order: triggers.value.length, weather: { type: 'temp', termType: 'gt', values: ['24'] } };
+  viewMode.value = 'weather';
 }
+/** patchWeather 更新天气指标或比较方式。 */
+function patchWeather(patch: Partial<NonNullable<SceneTrigger['weather']>>): void {
+  if (!draftTrigger.value?.weather) return;
+  draftTrigger.value = { ...draftTrigger.value, weather: { ...draftTrigger.value.weather, ...patch } };
+}
+/** setWeatherValue 保留当前输入，供确认时进行范围校验。 */
+function setWeatherValue(event: any): void { patchWeather({ values: [String(event.detail?.value ?? '')] }); }
 
 function createDeviceTrigger(withDuration: boolean): SceneTrigger {
   return {
@@ -621,18 +785,22 @@ function startDelayAction() {
   viewMode.value = 'delay';
 }
 
+/** 新建通知和场景动作均先配置，取消不写入场景。 */
 function addNotifyAction() {
-  closeSheet();
-  sceneEditProvider.addAction({
-    type: 'notify',
-    order: actions.value.length,
-    notify: { type: 'wxMini', notifyCode: 'ruleScene', userType: 'account', accounts: [] },
-  });
+  closeSheet(); editingActionIndex.value = -1;
+  draftAction.value = { type: 'notify', order: actions.value.length, notify: { type: 'message', notifyCode: 'ruleScene', userType: 'account', accounts: [], params: {} } };
+  viewMode.value = 'extraAction';
 }
-
 function addSceneAction() {
-  closeSheet();
-  sceneEditProvider.addAction({ type: 'scene', order: actions.value.length, scene: { sceneID: '', status: 1 } });
+  closeSheet(); editingActionIndex.value = -1;
+  draftAction.value = { type: 'scene', order: actions.value.length, scene: { sceneID: '', status: 0 } };
+  viewMode.value = 'extraAction';
+}
+/** saveExtraAction 将完整的动作草稿追加或替换原动作。 */
+function saveExtraAction(action: SceneAction): void {
+  if (editingActionIndex.value >= 0) sceneEditProvider.updateAction(editingActionIndex.value, action);
+  else sceneEditProvider.addAction(action);
+  returnToMain();
 }
 
 function createDeviceAction(): SceneAction {
@@ -655,15 +823,18 @@ function editTrigger(index: number) {
   editingTriggerIndex.value = index;
   draftTrigger.value = clone(trigger);
   if (trigger.type === 'timer') viewMode.value = 'timer';
+  else if (trigger.type === 'weather') viewMode.value = 'weather';
   else if (trigger.type === 'device' && trigger.device?.stateKeep?.type === 'duration') viewMode.value = 'duration';
   else if (trigger.type === 'device') viewMode.value = 'deviceTrigger';
 }
 
 function editAction(index: number) {
   const action = actions.value[index];
+  if (action.type === 'alarm') { uni.showToast({ title: '告警动作已停用，请删除该动作', icon: 'none' }); return; }
   editingActionIndex.value = index;
   draftAction.value = clone(action);
   if (action.type === 'device') viewMode.value = 'deviceAction';
+  else if (action.type === 'scene' || action.type === 'notify') viewMode.value = 'extraAction';
   else if (action.type === 'delay') {
     const delay = action.delay || 0;
     delayMinutes.value = String(Math.floor(delay / 60));
@@ -673,8 +844,26 @@ function editAction(index: number) {
 }
 
 function commitDraftTrigger() {
+  if (pendingTriggerValue !== undefined) { draftTriggerValue.value = pendingTriggerValue; pendingTriggerValue = undefined; }
   if (!draftTrigger.value) {
     returnToMain();
+    return;
+  }
+  if (viewMode.value === 'deviceTrigger' || viewMode.value === 'duration') {
+    const device = draftTrigger.value.device;
+    if (!device?.productID || !device.deviceName || !device.dataID) { uni.showToast({ title: '请选择设备和属性', icon: 'none' }); return; }
+    if (!String(draftTriggerValue.value).trim()) { uni.showToast({ title: viewMode.value === 'duration' ? '请输入持续状态的比较值' : '请选择或输入属性值', icon: 'none' }); return; }
+    if (preventInvalidProperty(draftTriggerValue.value)) return;
+  }
+  if (viewMode.value === 'weather') {
+    const weather = draftTrigger.value.weather;
+    const text = weather?.values?.[0] ?? '';
+    const number = Number(text);
+    if (!text.trim() || !Number.isFinite(number) || (weather?.type === 'humidity' && (number < 0 || number > 100))) { uni.showToast({ title: '请输入有效天气数值', icon: 'none' }); return; }
+  }
+  // 持续条件必须有比较值，空值会被后端拒绝且无法判断保持的状态。
+  if (viewMode.value === 'duration' && !firstValue(draftTrigger.value?.device?.values).trim()) {
+    uni.showToast({ title: '请输入持续状态的比较值', icon: 'none' });
     return;
   }
   const next = clone(draftTrigger.value!);
@@ -684,9 +873,16 @@ function commitDraftTrigger() {
 }
 
 function commitDraftAction() {
+  if (pendingActionValue !== undefined) { draftActionValue.value = pendingActionValue; pendingActionValue = undefined; }
   if (!draftAction.value) {
     returnToMain();
     return;
+  }
+  if (viewMode.value === 'deviceAction') {
+    const device = draftAction.value.device;
+    if (!device?.productID || !device.deviceName || !device.dataID) { uni.showToast({ title: '请选择设备和属性', icon: 'none' }); return; }
+    if (!String(draftActionValue.value).trim()) { uni.showToast({ title: '请选择或输入属性值', icon: 'none' }); return; }
+    if (preventInvalidProperty(draftActionValue.value)) return;
   }
   if (draftAction.value.type === 'delay') {
     draftAction.value.delay = Number(delayMinutes.value || 0) * 60 + Number(delaySeconds.value || 0);
@@ -700,6 +896,9 @@ function commitDraftAction() {
 function removeTrigger(index: number) {
   sceneEditProvider.removeTrigger(index);
 }
+
+/** moveAction 按显示顺序调整动作，延时等动作按该顺序保存。 */
+function moveAction(index: number, direction: 'up' | 'down'): void { sceneEditProvider.reorderAction(index, direction); }
 
 function removeAction(index: number) {
   sceneEditProvider.removeAction(index);
@@ -785,13 +984,38 @@ function openProductPicker(target: PickerTarget) {
   productPickerVisible.value = true;
 }
 
+/** 场景设备列表独立分页读取，避免首页筛选或分页遗漏设备。 */
+const selectableDevices = ref<DeviceEntity[]>([]);
+const selectableDevicesLoading = ref(false);
+const selectableDevicesError = ref('');
+let selectableRequest = 0;
+async function loadSceneDevices(): Promise<void> {
+  const revision = ++selectableRequest;
+  const projectID = currentFamilyProvider.getState().projectID;
+  const tenantCode = currentFamilyProvider.getState().currentTenantCode;
+  selectableDevices.value = [];
+  selectableDevicesError.value = '';
+  selectableDevicesLoading.value = true;
+  try {
+    const list: DeviceEntity[] = [];
+    for (let page = 1; ; page++) {
+      if (page > 200) throw new Error('设备数量过多，请稍后重试');
+      const result = await deviceService.getList({ page, size: 100, projectID: projectID || undefined, sharedOnly: !projectID });
+      if (revision !== selectableRequest || currentFamilyProvider.getState().projectID !== projectID || currentFamilyProvider.getState().currentTenantCode !== tenantCode) return;
+      list.push(...result.list);
+      if (list.length >= result.total) break;
+      if (!result.list.length) throw new Error('设备列表未完整加载');
+    }
+    selectableDevices.value = list;
+  } catch (error) {
+    if (revision === selectableRequest) selectableDevicesError.value = (error as Error).message || '设备加载失败';
+  } finally { if (revision === selectableRequest) selectableDevicesLoading.value = false; }
+}
+
 function openDevicePicker(target: PickerTarget) {
   pickerTarget.value = target;
-  if (!pickerProductID.value) {
-    uni.showToast({ title: '请先选择产品', icon: 'none' });
-    return;
-  }
   devicePickerVisible.value = true;
+  void loadSceneDevices();
 }
 
 function openSchemaPicker(target: PickerTarget) {
@@ -816,19 +1040,23 @@ function handleProductSelected(payload: { productID: string; productName: string
 }
 
 function handleDeviceSelected(payload: { productID: string; deviceName: string; deviceAlias: string; productName: string }) {
+  pendingTriggerValue = undefined; pendingActionValue = undefined;
   if (pickerTarget.value === 'trigger') {
-    patchDraftTriggerDevice({ productID: payload.productID, productName: payload.productName, deviceName: payload.deviceName, deviceAlias: payload.deviceAlias });
+    const changed = draftTrigger.value?.device?.productID !== payload.productID;
+    patchDraftTriggerDevice({ productID: payload.productID, productName: payload.productName, deviceName: payload.deviceName, deviceAlias: payload.deviceAlias, ...(changed ? { dataID: '', dataName: '', values: [] } : {}) });
   } else if (draftAction.value?.device) {
-    draftAction.value = { ...draftAction.value, device: { ...draftAction.value.device, productID: payload.productID, productName: payload.productName, deviceName: payload.deviceName, deviceAlias: payload.deviceAlias } };
+    const changed = draftAction.value.device.productID !== payload.productID;
+    draftAction.value = { ...draftAction.value, device: { ...draftAction.value.device, productID: payload.productID, productName: payload.productName, deviceName: payload.deviceName, deviceAlias: payload.deviceAlias, ...(changed ? { dataID: '', dataName: '', value: '', values: [] } : {}) } };
   }
   devicePickerVisible.value = false;
 }
 
 function handleSchemaSelected(payload: { dataID: string; dataName: string; kind: string }) {
+  pendingTriggerValue = undefined; pendingActionValue = undefined;
   if (pickerTarget.value === 'trigger') {
-    patchDraftTriggerDevice({ dataID: payload.dataID, dataName: payload.dataName, values: firstValue(draftTrigger.value?.device?.values) ? draftTrigger.value?.device?.values : [] });
+    patchDraftTriggerDevice({ dataID: payload.dataID, dataName: payload.dataName, values: draftTrigger.value?.device?.dataID === payload.dataID ? draftTrigger.value?.device?.values : [], termType: 'eq' });
   } else if (draftAction.value?.device) {
-    const value = draftAction.value.device.value || '';
+    const value = draftAction.value.device.dataID === payload.dataID ? (draftAction.value.device.value || '') : '';
     draftAction.value = {
       ...draftAction.value,
       device: {
@@ -844,6 +1072,7 @@ function handleSchemaSelected(payload: { dataID: string; dataName: string; kind:
 }
 
 async function handleSave() {
+  flushPendingName();
   if (!canSave.value) {
     uni.showToast({ title: validationErrors.value[0] || '请先补全场景', icon: 'none' });
     return;
@@ -947,7 +1176,7 @@ function formatAction(action: SceneAction): string {
   if (action.type === 'device' && action.device) return `${action.device.deviceAlias || action.device.deviceName || action.device.productName || '请选择设备'} ${action.device.dataName || action.device.dataID || ''}`;
   if (action.type === 'delay') return `延时 ${action.delay || 0} 秒后执行`;
   if (action.type === 'notify') return notifyText(action.notify?.type);
-  if (action.type === 'alarm') return action.alarm?.mode === 'relieve' ? '解除告警' : '触发告警';
+  if (action.type === 'alarm') return '此动作已停用，请删除';
   if (action.type === 'scene') return action.scene?.sceneName || '选择已有场景';
   return '待补全';
 }
@@ -999,6 +1228,30 @@ function compareText(value?: CmpType): string {
   return value ? map[value] || value : '等于';
 }
 
+/** 日出日落偏移以秒存储；正数为延后，负数为提前。 */
+const offsetChoices = [{ value: 'before', label: '提前' }, { value: 'on', label: '准时' }, { value: 'after', label: '延后' }] as const;
+const timerOffsetDirection = computed(() => {
+  const seconds = Number(draftTrigger.value?.timer?.execAdd || 0);
+  return seconds < 0 ? 'before' : seconds > 0 ? 'after' : 'on';
+});
+const timerOffsetMagnitude = computed(() => Math.abs(secondsToMinutes(draftTrigger.value?.timer?.execAdd)));
+const timerOffsetHint = computed(() => {
+  const event = draftTimerExecType.value === 'sunRises' ? '日出' : '日落';
+  if (timerOffsetDirection.value === 'on') return `${event}时执行`;
+  return `${event}${timerOffsetDirection.value === 'before' ? '前' : '后'} ${timerOffsetMagnitude.value} 分钟执行`;
+});
+/** setTimerOffsetDirection 设置提前、准时或延后，默认偏移 5 分钟。 */
+function setTimerOffsetDirection(direction: 'before' | 'on' | 'after'): void {
+  const magnitude = timerOffsetMagnitude.value || 5;
+  patchDraftTimer({ execAdd: direction === 'on' ? 0 : magnitude * 60 * (direction === 'before' ? -1 : 1) });
+}
+/** handleTimerOffsetMagnitudeBlur 将输入分钟转换为带方向的秒数。 */
+function handleTimerOffsetMagnitudeBlur(e: any): void {
+  const minutes = Math.abs(Number(e.detail?.value));
+  if (!Number.isFinite(minutes)) return;
+  patchDraftTimer({ execAdd: Math.round(minutes) * 60 * (timerOffsetDirection.value === 'before' ? -1 : 1) });
+}
+
 function offsetText(value?: number): string {
   if (!value) return '';
   return value > 0 ? `后 ${secondsToMinutes(value)} 分钟` : `前 ${Math.abs(secondsToMinutes(value))} 分钟`;
@@ -1011,11 +1264,24 @@ function notifyText(value?: NotifyType): string {
 </script>
 
 <style lang="scss" scoped>
+.value-options { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; max-width: 75%; }
+.value-options__empty { color: var(--text-secondary); font-size: var(--font-caption); }
+.scene-confirm-bar { padding: 20px 24px calc(20px + env(safe-area-inset-bottom)); }
+.scene-confirm-button { min-height: 48px; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-on-primary); font-size: var(--font-body); }
+
+/* 日出日落的时间偏移以方向和分钟呈现。 */
+.timer-offset { padding: 12px 16px 16px; border-top: 1px solid var(--border-color); }
+.timer-offset__choices { display: flex; gap: 8px; margin-top: 12px; }
+.timer-offset__choice { flex: 1; padding: 9px 4px; text-align: center; border-radius: var(--radius-full); background: var(--color-bg-secondary); color: var(--text-secondary); font-size: var(--font-body); }
+.timer-offset__choice--active { background: var(--color-primary-light); color: var(--color-primary); }
+.timer-offset__minutes { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 12px; color: var(--text-primary); font-size: var(--font-body); }
+.timer-offset__hint { display: block; margin-top: 10px; font-size: var(--font-caption); color: var(--text-secondary); }
+
 .scene-create-shell,
 .scene-form-page,
 .scene-edit-page {
   min-height: 100vh;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .page-back,
@@ -1055,7 +1321,7 @@ function notifyText(value?: NotifyType): string {
 .timer-repeat-card,
 .form-card,
 .bottom-link-card {
-  border-radius: 20rpx;
+  border-radius: var(--radius-lg);
   background: var(--card-bg);
 }
 
@@ -1076,7 +1342,7 @@ function notifyText(value?: NotifyType): string {
   align-items: center;
   justify-content: center;
   color: var(--color-primary);
-  font-size: 42rpx;
+  font-size: var(--font-section);
   font-weight: 700;
 }
 
@@ -1090,7 +1356,7 @@ function notifyText(value?: NotifyType): string {
 .name-card__input {
   flex: 1;
   color: var(--text-primary);
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 650;
 }
 
@@ -1102,7 +1368,7 @@ function notifyText(value?: NotifyType): string {
   display: block;
   margin: 0 24rpx 20rpx;
   color: var(--text-primary);
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 800;
 }
 
@@ -1128,13 +1394,13 @@ function notifyText(value?: NotifyType): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 700;
 }
 
 .add-card__text {
   color: var(--color-primary);
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 
@@ -1156,20 +1422,23 @@ function notifyText(value?: NotifyType): string {
 
 .summary-card__title {
   color: var(--text-primary);
-  font-size: 31rpx;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 
 .summary-card__desc {
   margin-top: 8rpx;
   color: var(--text-secondary);
-  font-size: 25rpx;
+  font-size: var(--font-caption);
   line-height: 1.4;
 }
 
+.summary-card__order { display: flex; flex-wrap: wrap; color: var(--color-primary); font-size: var(--font-caption); }
+.summary-card__order-button { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+
 .summary-card__delete {
   color: var(--text-secondary);
-  font-size: 24rpx;
+  font-size: var(--font-caption);
 }
 
 .scene-form-bottom-space {
@@ -1190,7 +1459,7 @@ function notifyText(value?: NotifyType): string {
   border-radius: 22rpx;
   color: var(--color-on-primary);
   background: var(--color-primary);
-  font-size: 32rpx;
+  font-size: var(--font-body);
   font-weight: 800;
   line-height: 92rpx;
 }
@@ -1230,7 +1499,7 @@ function notifyText(value?: NotifyType): string {
 .timer-repeat-card__label,
 .form-row__label {
   color: var(--text-primary);
-  font-size: 29rpx;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 
@@ -1242,7 +1511,7 @@ function notifyText(value?: NotifyType): string {
 .timer-repeat-card__value,
 .form-row__value {
   color: var(--text-secondary);
-  font-size: 27rpx;
+  font-size: var(--font-body);
 }
 
 .timer-card__input,
@@ -1250,7 +1519,7 @@ function notifyText(value?: NotifyType): string {
 .form-row__number {
   width: 180rpx;
   color: var(--text-primary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
   text-align: right;
 }
 
@@ -1281,7 +1550,7 @@ function notifyText(value?: NotifyType): string {
 
 .chevron {
   color: var(--text-placeholder);
-  font-size: 42rpx;
+  font-size: var(--font-section);
 }
 
 .toolbar-row {
@@ -1293,7 +1562,7 @@ function notifyText(value?: NotifyType): string {
 
 .toolbar-row__label {
   color: var(--text-primary);
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 800;
 }
 
@@ -1307,7 +1576,7 @@ function notifyText(value?: NotifyType): string {
   align-items: center;
   justify-content: center;
   color: var(--text-primary);
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   font-weight: 700;
 }
 
@@ -1326,7 +1595,7 @@ function notifyText(value?: NotifyType): string {
 
 .form-row__unit {
   color: var(--text-secondary);
-  font-size: 26rpx;
+  font-size: var(--font-caption);
 }
 
 .chip-group {
@@ -1344,7 +1613,7 @@ function notifyText(value?: NotifyType): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   font-weight: 700;
 }
 
@@ -1368,7 +1637,7 @@ function notifyText(value?: NotifyType): string {
 .bottom-link-card__title {
   display: block;
   color: var(--text-primary);
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 800;
 }
 
@@ -1376,7 +1645,7 @@ function notifyText(value?: NotifyType): string {
   display: block;
   margin-top: 10rpx;
   color: var(--text-secondary);
-  font-size: 26rpx;
+  font-size: var(--font-caption);
 }
 
 .scene-edit-page--dim {
@@ -1401,14 +1670,14 @@ function notifyText(value?: NotifyType): string {
 
 .picker-panel__title {
   color: var(--text-primary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 
 .picker-panel__value {
   margin-top: 24rpx;
   color: var(--text-secondary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 700;
 }
 
@@ -1429,14 +1698,14 @@ function notifyText(value?: NotifyType): string {
   width: 90rpx;
   height: 72rpx;
   color: var(--text-primary);
-  font-size: 42rpx;
+  font-size: var(--font-section);
   font-weight: 800;
   text-align: center;
 }
 
 .delay-field__unit {
   color: var(--color-primary);
-  font-size: 24rpx;
+  font-size: var(--font-caption);
 }
 
 .overlay {
@@ -1459,7 +1728,7 @@ function notifyText(value?: NotifyType): string {
   max-height: 76vh;
   overflow-y: auto;
   padding: 42rpx 24rpx 24rpx;
-  border-radius: 28rpx;
+  border-radius: var(--radius-lg);
   background: var(--page-bg);
   transform: translateY(120%);
   transition: transform 0.24s ease;
@@ -1473,14 +1742,14 @@ function notifyText(value?: NotifyType): string {
   display: block;
   margin-bottom: 28rpx;
   color: var(--text-primary);
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 900;
   text-align: center;
 }
 
 .sheet-group {
   margin-bottom: 22rpx;
-  border-radius: 18rpx;
+  border-radius: var(--radius-lg);
   overflow: hidden;
   background: var(--card-bg);
 }
@@ -1501,7 +1770,7 @@ function notifyText(value?: NotifyType): string {
   width: 76rpx;
   flex: 0 0 76rpx;
   text-align: center;
-  font-size: 42rpx;
+  font-size: var(--font-section);
 }
 
 .sheet-option__body {
@@ -1513,14 +1782,14 @@ function notifyText(value?: NotifyType): string {
 
 .sheet-option__title {
   color: var(--text-primary);
-  font-size: 32rpx;
+  font-size: var(--font-body);
   font-weight: 900;
 }
 
 .sheet-option__desc {
   margin-top: 8rpx;
   color: var(--text-secondary);
-  font-size: 26rpx;
+  font-size: var(--font-caption);
 }
 
 .cancel-sheet-button {
@@ -1528,7 +1797,7 @@ function notifyText(value?: NotifyType): string {
   border-radius: 22rpx;
   color: var(--text-primary);
   background: var(--border-color);
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 800;
   line-height: 86rpx;
 }
@@ -1540,7 +1809,7 @@ function notifyText(value?: NotifyType): string {
   align-items: center;
   justify-content: space-between;
   color: var(--text-primary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 800;
 }
 
@@ -1566,7 +1835,7 @@ function notifyText(value?: NotifyType): string {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   font-weight: 700;
 }
 
@@ -1585,7 +1854,7 @@ function notifyText(value?: NotifyType): string {
   flex: 1;
   height: 82rpx;
   border-radius: 22rpx;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 800;
   line-height: 82rpx;
 }
@@ -1599,4 +1868,14 @@ function notifyText(value?: NotifyType): string {
   color: var(--color-on-primary);
   background: var(--color-primary);
 }
+
+.scene-create-shell { background: var(--page-gradient); height: 100vh; display: flex; flex-direction: column; }
+.scene-form-page { flex: 1; min-height: 0; height: 0; }
+.scene-page-title { font-size: var(--font-title); line-height: 1.3; margin: 16px 20px 24px; }
+.scene-section { margin-left: 16px; margin-right: 16px; }
+.scene-section__title { font-size: var(--font-section); }
+.summary-card, .name-card, .add-card, .timer-card, .timer-repeat-card, .form-card { border-radius: var(--radius-lg); }
+.fixed-create-bar { background: var(--card-bg); border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 16px 20px calc(16px + env(safe-area-inset-bottom)); box-shadow: 0 -4px 20px var(--color-shadow); }
+.create-button { border-radius: var(--radius-full); font-size: var(--font-label); }
+.summary-card__delete, .edit-nav__action { min-width: 44px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
 </style>

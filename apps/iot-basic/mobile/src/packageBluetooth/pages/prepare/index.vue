@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="changingNetwork ? 'Wi-Fi 管理' : '添加设备'" />
 
@@ -87,7 +88,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .provision-page {
@@ -108,7 +109,7 @@ page {
 }
 
 .steps__item {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -119,13 +120,13 @@ page {
 
 .card {
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 20px;
 }
 
 .hero-card__title {
   display: block;
-  font-size: 22px;
+  font-size: var(--font-section);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 10px;
@@ -133,7 +134,7 @@ page {
 
 .hero-card__desc {
   display: block;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.7;
   word-break: break-all;
   color: var(--text-secondary);
@@ -149,7 +150,7 @@ page {
 }
 
 .guide-box__title {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-primary);
   margin-bottom: 8px;
@@ -157,7 +158,7 @@ page {
 
 .guide-box__text {
   display: block;
-  font-size: 13px;
+  font-size: var(--font-caption);
   line-height: 1.6;
   word-break: break-all;
   color: var(--text-primary);
@@ -199,7 +200,7 @@ page {
 
 .confirm-row__text {
   margin-left: 10px;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -230,7 +231,7 @@ page {
 }
 
 .primary-btn__text {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }

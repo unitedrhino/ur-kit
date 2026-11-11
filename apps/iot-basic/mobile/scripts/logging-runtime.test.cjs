@@ -54,3 +54,13 @@ test('Vue 错误和未处理拒绝保留 stack；敏感字段被脱敏', () => {
   assert.equal(entries.find((item) => item.name === 'request.failure').data.nested.password, '[Filtered]');
   console.error = original;
 });
+
+// 扫码票据和电脑查询凭证不能进入文本、对象或持久化日志。
+test('扫码登录凭证在日志文本及嵌套对象中被过滤', () => {
+ const { logger } = loadLogger();
+ logger.logger.info('auth.wxMiniQr', 'ticket=private-ticket pollToken=private-poll', { ticket: 'private-ticket', nested: { pollToken: 'private-poll' } });
+ const entry = logger.getLogHistory().find((item) => item.name === 'auth.wxMiniQr');
+ assert.equal(entry.message, 'ticket=[Filtered] pollToken=[Filtered]');
+ assert.equal(entry.data.ticket, '[Filtered]');
+ assert.equal(entry.data.nested.pollToken, '[Filtered]');
+});

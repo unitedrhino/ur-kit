@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备版本" />
 
@@ -68,13 +69,13 @@ onUnmounted(() => unsubscribes.forEach((fn) => fn()));
 
 <style lang="scss" scoped>
 .version-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
+  min-height: 0; background: transparent; }
 .device-list { padding: 0 16px; }
 .device-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--card-bg); border-radius: 12px; margin-bottom: 10px; }
 .device-item__left { display: flex; flex-direction: column; gap: 4px; }
-.device-item__name { font-size: 15px; color: var(--text-primary); font-weight: 500; }
-.device-item__ver { font-size: 12px; color: var(--text-secondary); }
-.device-item__status { font-size: 13px; font-weight: 500; }
+.device-item__name { font-size: var(--font-body); color: var(--text-primary); font-weight: 500; }
+.device-item__ver { font-size: var(--font-caption); color: var(--text-secondary); }
+.device-item__status { font-size: var(--font-caption); font-weight: 500; }
 .status-1 { color: var(--text-secondary); }
 .status-2 { color: var(--color-primary); }
 .status-3 { color: var(--color-success); }

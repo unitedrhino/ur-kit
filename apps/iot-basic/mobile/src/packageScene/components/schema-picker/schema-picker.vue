@@ -1,3 +1,4 @@
+<!-- 场景物模型选择器：按读取/控制用途筛选同一产品模型，避免复用旧筛选结果。 -->
 <template>
 <view :class="`picker-mask ${visible ? 'picker-mask--visible' : ''}`" @tap="handleMaskTap" />
 <scroll-view
@@ -63,7 +64,11 @@ const emit = defineEmits<{
   (e: 'close'): void;
 }>();
 
-const items = ref<SchemaItem[]>([]);
+/** 缓存原始模型，切换触发条件与动作时重新按用途筛选。 */
+const schema = ref<ThingModelSchema | null>(null);
+const items = computed(() => schema.value ? filterItems(schema.value) : []);
+/** 请求序号避免切换产品后旧响应覆盖当前选择。 */
+let schemaRequest = 0;
 const loading = ref(false);
 const loadedForProductID = ref('');
 const title = computed(() => {
@@ -77,6 +82,7 @@ const title = computed(() => {
   return map[props.schemaType] || '选择物模型';
 });
 
+/** filterItems 根据当前用途返回可读、可控属性或事件/服务选项。 */
 function filterItems(schema: ThingModelSchema): SchemaItem[] {
   const kind = props.schemaType;
   if (kind === 'event') {
@@ -99,17 +105,23 @@ function filterItems(schema: ThingModelSchema): SchemaItem[] {
     define: p.define as unknown as Record<string, unknown>,
   }));
 }
+/** loadSchema 加载当前产品模型；过期请求不更新内容或加载状态。 */
 async function loadSchema(productID: string) {
-  if (loading.value) return;
+  const request = ++schemaRequest;
   loading.value = true;
+  schema.value = null;
+  loadedForProductID.value = '';
   try {
-    const schema = await deviceControlService.getThingModel(productID);
+    const result = await deviceControlService.getThingModel(productID);
+    if (request !== schemaRequest || props.productId !== productID) return;
+    schema.value = result;
     loadedForProductID.value = productID;
-    items.value = filterItems(schema);
   } catch (err) {
-    uni.showToast({ title: (err as Error).message || '加载物模型失败', icon: 'none' });
+    if (request === schemaRequest && props.productId === productID) {
+      uni.showToast({ title: (err as Error).message || '加载物模型失败', icon: 'none' });
+    }
   } finally {
-    loading.value = false;
+    if (request === schemaRequest) loading.value = false;
   }
 }
 watch([() => props.visible, () => props.productId, () => props.schemaType], () => {
@@ -130,119 +142,6 @@ function handleSelect(dataID: string) {
 }
 function handleClose() { emit('close'); }
 function handleMaskTap() { handleClose(); }
-/* eslint-disable */
-// import { DeviceInteractRepositoryImpl } from '../../../data/repositories/device-interact.repository.impl';
-// import type { ThingModelSchema } from '../../../domain/models/device-control.model';
-// 
-// const interactRepo = new DeviceInteractRepositoryImpl();
-// 
-// type SchemaKind = 'property-write' | 'property-read' | 'property-all' | 'event' | 'action';
-// 
-// interface SchemaItem {
-//   dataID: string;
-//   dataName: string;
-//   kind: 'property' | 'event' | 'action';
-//   mode?: string;
-//   define?: Record<string, unknown>;
-// }
-// 
-// Component({
-//   properties: {
-//     visible: { type: Boolean, value: false },
-//     productID: { type: String, value: '' },
-//     schemaType: { type: String, value: 'property-all' as SchemaKind },
-//     selectedID: { type: String, value: '' },
-//   },
-// 
-//   data: {
-//     items: [] as SchemaItem[],
-//     loading: false,
-//     loadedForProductID: '',
-//     title: '选择物模型',
-//   },
-// 
-//   observers: {
-//     'visible, productID, schemaType'(visible: boolean, productID: string) {
-//       if (visible && productID && this.data.loadedForProductID !== productID) {
-//         this.loadSchema(productID);
-//       }
-//       if (visible) {
-//         this.setData({ title: this.getTitle() });
-//       }
-//     },
-//   },
-// 
-//   methods: {
-//     getTitle(): string {
-//       const map: Record<string, string> = {
-//         'property-write': '选择可控属性',
-//         'property-read': '选择可读属性',
-//         'property-all': '选择属性',
-//         event: '选择事件',
-//         action: '选择物模型服务',
-//       };
-//       return map[this.data.schemaType] || '选择物模型';
-//     },
-// 
-//     async loadSchema(productID: string) {
-//       if (this.data.loading) return;
-//       this.setData({ loading: true });
-//       try {
-//         const schema: ThingModelSchema = await interactRepo.getThingModel(productID);
-//         this.setData({ loadedForProductID: productID, items: this.filterItems(schema) });
-//       } catch (err) {
-//         wx.showToast({ title: (err as Error).message || '加载物模型失败', icon: 'none' });
-//       } finally {
-//         this.setData({ loading: false });
-//       }
-//     },
-// 
-//     filterItems(schema: ThingModelSchema): SchemaItem[] {
-//       const kind = this.data.schemaType as SchemaKind;
-//       if (kind === 'event') {
-//         return (schema.events || []).map((e) => ({ dataID: e.identifier, dataName: e.name, kind: 'event' }));
-//       }
-//       if (kind === 'action') {
-//         return (schema.actions || []).map((a) => ({ dataID: a.identifier, dataName: a.name, kind: 'action' }));
-//       }
-//       const properties = schema.properties || [];
-//       const filtered = properties.filter((p) => {
-//         if (kind === 'property-write') return (p.mode || '').includes('w');
-//         if (kind === 'property-read') return (p.mode || '').includes('r');
-//         return true;
-//       });
-//       return filtered.map((p) => ({
-//         dataID: p.identifier,
-//         dataName: p.name,
-//         kind: 'property',
-//         mode: p.mode,
-//         define: p.define as unknown as Record<string, unknown>,
-//       }));
-//     },
-// 
-//     handleSelect(e: WechatMiniprogram.CustomEvent) {
-//       const dataID = e.currentTarget.dataset.id as string;
-//       const item = this.data.items.find((x) => x.dataID === dataID);
-//       if (!item) return;
-//       this.triggerEvent('select', {
-//         dataID: item.dataID,
-//         dataName: item.dataName,
-//         kind: item.kind,
-//         mode: item.mode || '',
-//         define: item.define || {},
-//       });
-//     },
-// 
-//     handleClose() {
-//       this.triggerEvent('close');
-//     },
-// 
-//     handleMaskTap() {
-//       this.handleClose();
-//     },
-//   },
-// });
-// 
 </script>
 
 <style lang="scss" scoped>
@@ -272,7 +171,7 @@ function handleMaskTap() { handleClose(); }
   height: 60vh;
   max-height: 85vh;
   background: var(--card-bg);
-  border-radius: 24rpx 24rpx 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding-bottom: env(safe-area-inset-bottom);
   transform: translateY(100%);
   transition: transform 0.28s ease;
@@ -305,7 +204,7 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-title {
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -346,20 +245,20 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-item__name {
-  font-size: 30rpx;
+  font-size: var(--font-label);
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .picker-item__desc {
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 6rpx;
 }
 
 .picker-item__check {
   color: var(--color-primary);
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
 }
 
@@ -370,7 +269,7 @@ function handleMaskTap() { handleClose(); }
 
 .picker-empty__text {
   color: var(--text-secondary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
 }
 
 </style>

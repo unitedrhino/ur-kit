@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="sceneName + ' - 执行日志'" />
 
@@ -39,6 +40,7 @@
 </template>
 
 <script setup lang="ts">
+import { timestampMillis } from '../../../utils/timestamp';
 import AppNavigationBar from '../../../components/app-navigation-bar/app-navigation-bar.vue';
 import EmptyState from '../../../components/empty-state/empty-state.vue';
 import Loading from '../../../components/loading/loading.vue';
@@ -56,7 +58,7 @@ interface FormattedLog extends SceneLogEntity {
 
 function formatTime(timestamp: number): string {
   if (!timestamp) return '';
-  const date = new Date(timestamp * 1000);
+  const date = new Date(timestampMillis(timestamp));
   const y = date.getFullYear();
   const M = String(date.getMonth() + 1).padStart(2, '0');
   const d = String(date.getDate()).padStart(2, '0');
@@ -155,7 +157,7 @@ function onLoadMore() {
 .log-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .log-list {
@@ -178,7 +180,7 @@ function onLoadMore() {
 .log-item__status {
   padding: 2px 10px;
   border-radius: 8px;
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .log-item__status--success {
@@ -192,7 +194,7 @@ function onLoadMore() {
 }
 
 .log-item__time {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -203,12 +205,12 @@ function onLoadMore() {
 }
 
 .log-item__type {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
 .log-item__desc {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 4px;
 }
@@ -216,7 +218,7 @@ function onLoadMore() {
 .log-end {
   text-align: center;
   padding: 16px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
 }
 

@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view class="empty-state">
   <view class="empty-state__icon">
@@ -82,7 +83,7 @@ function handleAction() {
 }
 
 .empty-state__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-tertiary);
   text-align: center;
 }
@@ -92,7 +93,7 @@ function handleAction() {
   padding: 8px 24px;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   border-radius: 20px;
 }
 

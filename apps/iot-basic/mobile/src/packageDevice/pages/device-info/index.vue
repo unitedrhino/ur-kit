@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备信息" />
 
@@ -173,7 +174,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .di-page {
@@ -184,7 +185,7 @@ page {
 .di-group {
   margin: 24rpx 32rpx 0;
   background: var(--card-bg);
-  border-radius: 24rpx;
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 
@@ -194,7 +195,7 @@ page {
 }
 
 .di-group-head__title {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   font-weight: 500;
 }
@@ -214,14 +215,14 @@ page {
 
 .di-row__label {
   flex-shrink: 0;
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
 .di-row__value {
   flex: 1;
   min-width: 0;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   text-align: right;
   // 长值(如 SIM 卡号、IP)允许换行展示，不截断。

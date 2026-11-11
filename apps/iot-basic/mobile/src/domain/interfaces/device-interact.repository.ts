@@ -21,6 +21,6 @@ export interface IDeviceInteractRepository {
   propertyControlSend(params: PropertyControlParams): Promise<string>;
   propertyGetReportSend(productID: string, deviceName: string, dataIDs: string[]): Promise<void>;
   actionSend(params: ActionSendParams): Promise<string>;
-  getThingModel(productID: string): Promise<ThingModelSchema>;
+  getThingModel(productID: string, deviceName?: string): Promise<ThingModelSchema>;
   getLatestProperties(productID: string, deviceName: string): Promise<PropertyState[]>;
 }

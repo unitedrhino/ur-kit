@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view :class="`loading ${fullscreen ? 'loading--fullscreen' : ''}`">
   <view class="loading__spinner" :style="spinnerStyle">
@@ -160,7 +161,7 @@ _placeholder();
 
 .loading__text {
   margin-top: 8px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 

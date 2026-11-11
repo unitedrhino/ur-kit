@@ -11,26 +11,33 @@ export class ProjectRepositoryImpl implements IProjectRepository {
     const user = await request<{ userID: string }>({ url: '/api/v1/system/user/self/get-one', data: {} });
     if (!user.userID || String(user.userID) === '0') throw new Error('请重新登录');
     const userID = String(user.userID);
-    const ids = new Set<string>();
-    // 两类来源各自分页，最终交由项目接口应用名称、状态和分页，避免过滤后总数错误。
-    for (const owned of [true, false]) {
-      for (let page = 1; ; page++) {
-        if (page > 200) throw new Error('项目数量较多，请联系管理员');
-        const result = await request<{ total: number; list: Array<{ projectID: string; adminUserID?: string; targetID?: string; authType?: number }> }>({
-          url: owned ? '/api/v1/things/project/info/get-list' : '/api/v1/things/data/project/get-list',
-          omitProjectContext: true,
-          data: { ...(owned ? { adminUserID: userID } : { targetType: 'user', targetID: userID }), page: { page, size: 100 } },
-        });
-        const items = result.list ?? [];
-        for (const item of items) {
-          const belongs = owned ? String(item.adminUserID) === userID
-            : String(item.targetID) === userID && [1, 2, 3, 4].includes(Number(item.authType));
-          if (belongs && item.projectID && String(item.projectID) !== '0') ids.add(String(item.projectID));
-        }
-        if (!items.length || page * 100 >= Number(result.total)) break;
+    // 拥有与明确授权互不依赖，分别分页并行读取；任一失败仍拒绝整个查询。
+    const [ownedIDs, memberIDs] = await Promise.all([
+      this.readProjectIDs(userID, true),
+      this.readProjectIDs(userID, false),
+    ]);
+    return [...new Set([...ownedIDs, ...memberIDs])];
+  }
+
+  /** readProjectIDs 按来源分页读取当前用户的项目编号，不接受其他账号或无效授权。 */
+  private async readProjectIDs(userID: string, owned: boolean): Promise<string[]> {
+    const ids: string[] = [];
+    for (let page = 1; ; page++) {
+      if (page > 200) throw new Error('项目数量较多，请联系管理员');
+      const result = await request<{ total: number; list: Array<{ projectID: string; adminUserID?: string; targetID?: string; authType?: number }> }>({
+        url: owned ? '/api/v1/things/project/info/get-list' : '/api/v1/things/data/project/get-list',
+        omitProjectContext: true,
+        data: { ...(owned ? { adminUserID: userID } : { targetType: 'user', targetID: userID }), page: { page, size: 100 } },
+      });
+      const items = result.list ?? [];
+      for (const item of items) {
+        const belongs = owned ? String(item.adminUserID) === userID
+          : String(item.targetID) === userID && [1, 2, 3, 4].includes(Number(item.authType));
+        if (belongs && item.projectID && String(item.projectID) !== '0') ids.push(String(item.projectID));
       }
+      if (!items.length || page * 100 >= Number(result.total)) break;
     }
-    return [...ids];
+    return ids;
   }
 
   /** getList 仅分页查询本人项目集合；空集合直接返回，禁止空过滤退回所有项目。 */

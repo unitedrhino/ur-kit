@@ -213,14 +213,15 @@ test('device detail page consumes the local card ui adapter and exposes the plan
   assert.match(page, /controlCard/);
   assert.match(page, /isSystemProperty/);
   assert.match(page, /只读属性/);
-  assert.match(page, /设备日志/);
-  // 日志页已实际接入，卡片必须保留导航，不能回退成建设中占位。
-  assert.match(page, /handleNavToDeviceLogs/);
-  assert.match(page, /\/packageDevice\/pages\/logs\/index\?productID=/);
-  assert.doesNotMatch(page, /设备日志建设中/);
-  // 分享已通过专用页面提供，验证真实入口，避免恢复为不存在的旧约定。
-  assert.match(page, /@tap="handleShare"/);
-  assert.match(page, /\/packageDevice\/pages\/share\/index\?productID=/);
+  const settings = read('src/packageDevice/pages/settings/index.vue');
+  // 通用入口集中在设置，详情只展示控制区与设置入口。
+  assert.match(page, /handleNavToSettings/);
+  assert.match(settings, /@tap="handleNavToDeviceLogs"/);
+  assert.match(settings, /\/packageDevice\/pages\/logs\/index\?productID=/);
+  assert.doesNotMatch(settings, /设备日志建设中/);
+  assert.match(settings, /@tap="handleShare"/);
+  assert.match(settings, /\/packageDevice\/pages\/share\/index\?productID=/);
+  assert.match(page, /detail-entry-card/);
 });
 
 test('device detail page renders readonly properties as a nine-cell name value grid', () => {

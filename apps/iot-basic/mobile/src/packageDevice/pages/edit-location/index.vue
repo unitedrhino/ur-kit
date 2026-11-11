@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备位置" />
 
@@ -150,7 +151,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .el-body {
@@ -164,19 +165,19 @@ page {
   flex-direction: column;
   margin: 24rpx 32rpx 0;
   padding: 32rpx;
-  border-radius: 24rpx;
+  border-radius: var(--radius-lg);
   background: var(--card-bg);
 }
 
 .el-card__title {
-  font-size: 36rpx;
+  font-size: var(--font-label);
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .el-card__desc {
   margin-top: 16rpx;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   line-height: 1.6;
   color: var(--text-secondary);
 }
@@ -191,20 +192,20 @@ page {
 }
 
 .el-location__label {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .el-location__value {
   margin-top: 12rpx;
-  font-size: 30rpx;
+  font-size: var(--font-body);
   line-height: 1.5;
   color: var(--text-primary);
 }
 
 .el-location__error {
   margin-top: 12rpx;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--color-warning);
 }
@@ -249,7 +250,7 @@ page {
 }
 
 .el-btn__text {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }

@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="忘记密码" :back="true" />
 
@@ -175,25 +176,25 @@ async function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-.forgot-page { flex: 1; min-height: 0; background: var(--page-bg); }
+.forgot-page { flex: 1; min-height: 0; background: transparent; }
 .forgot-tabs { display: flex; gap: 10px; margin: 16px 16px 0; padding: 4px; border-radius: 14px; background: var(--card-bg); }
 .forgot-tab { flex: 1; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
 .forgot-tab--active { background: var(--color-primary-light); }
-.forgot-tab__text { font-size: 14px; color: var(--text-secondary); }
+.forgot-tab__text { font-size: var(--font-body); color: var(--text-secondary); }
 .forgot-tab--active .forgot-tab__text { color: var(--color-primary); font-weight: 600; }
-.forgot-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px var(--color-shadow); }
+.forgot-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: 0 8px 24px var(--color-shadow); }
 .forgot-field { padding: 14px 0; border-bottom: 1rpx solid var(--border-color); }
 .forgot-field:last-child { border-bottom: none; }
-.forgot-field__label { display: block; margin-bottom: 10px; font-size: 14px; color: var(--text-secondary); }
-.forgot-field__input { font-size: 16px; color: var(--text-primary); }
+.forgot-field__label { display: block; margin-bottom: 10px; font-size: var(--font-body); color: var(--text-secondary); }
+.forgot-field__input { font-size: var(--font-body); color: var(--text-primary); }
 .forgot-field--inline { display: flex; align-items: flex-end; gap: 12px; }
 .forgot-field__main { flex: 1; min-width: 0; }
 .forgot-code-btn { flex-shrink: 0; min-width: 220rpx; padding: 14px 18px; text-align: center; border-radius: 12px; background: var(--color-primary-light); }
 .forgot-code-btn--disabled { opacity: 0.55; }
-.forgot-code-btn__text { font-size: 13px; color: var(--color-primary); }
-.forgot-hint { display: block; margin: 0 16px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+.forgot-code-btn__text { font-size: var(--font-caption); color: var(--color-primary); }
+.forgot-hint { display: block; margin: 0 16px; font-size: var(--font-caption); line-height: 1.6; color: var(--text-secondary); }
 .forgot-submit { margin: 20px 16px; height: 48px; border-radius: 14px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; }
 .forgot-submit--disabled { opacity: 0.6; }
 .forgot-submit--hover { opacity: 0.9; }
-.forgot-submit__text { color: var(--color-on-primary); font-size: 16px; font-weight: 600; }
+.forgot-submit__text { color: var(--color-on-primary); font-size: var(--font-body); font-weight: 600; }
 </style>
