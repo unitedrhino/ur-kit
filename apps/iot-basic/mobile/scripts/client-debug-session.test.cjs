@@ -7,14 +7,14 @@ const ts = require('typescript');
 
 /** loadBridge 隔离原生弹窗与请求，保留生产会话处理代码供时序回放。 */
 function loadBridge(app, options = {}) {
-  const file = path.resolve(__dirname, '..', 'src/services/client-debug.service.ts');
+  const file = path.resolve(__dirname, '../../', 'mobile', 'src/services/client-debug.service.ts');
   const source = ts.transpileModule(readFileSync(file, 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   const mod = { exports: {} };
   // 使用真实注册器验证桥接命令确实调用页面控件，而非只发送成功回执。
   const controlsMod = { exports: {} };
-  const controlsSource = ts.transpileModule(readFileSync(path.resolve(__dirname, '..', 'src/utils/client-debug-controls.ts'), 'utf8'), {
+  const controlsSource = ts.transpileModule(readFileSync(path.resolve(__dirname, '../../', 'mobile', 'src/utils/client-debug-controls.ts'), 'utf8'), {
     compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
   }).outputText;
   Function('module', 'exports', controlsSource)(controlsMod, controlsMod.exports);
@@ -59,7 +59,7 @@ function loadBridge(app, options = {}) {
   }) };
 }
 
-for (const app of ['mobile']) {
+for (const app of ['mobile-uniapp']) {
   test(app + '：原生导航无回调时返回超时，快照能诊断页面注册状态', async () => {
     const h = loadBridge(app);
     h.send('start', 'navigation');
@@ -107,7 +107,7 @@ for (const app of ['mobile']) {
   });
   test(`${app}：真实导航组件随授权显示并点击撤销`, () => {
     const h = loadBridge(app);
-    const file = path.resolve(__dirname, '..', 'src/components/app-navigation-bar/app-navigation-bar.vue');
+    const file = path.resolve(__dirname, '../../', 'mobile', 'src/components/app-navigation-bar/app-navigation-bar.vue');
     const script = readFileSync(file, 'utf8').match(/<script setup lang="ts">([\s\S]*?)<\/script>/)[1];
     const source = ts.transpileModule(script, { compilerOptions: {
       module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022,
@@ -158,7 +158,7 @@ for (const app of ['mobile']) {
     assert.equal(h.refreshes(), 1);
   });
   test(`${app}：所有注册页面保留可取消控制的统一导航`, () => {
-    const root = path.resolve(__dirname, '..', 'src');
+    const root = path.resolve(__dirname, '../../', 'mobile', 'src');
     const config = JSON.parse(readFileSync(path.join(root, 'pages.json'), 'utf8'));
     const pages = [...config.pages.map((page) => page.path),
       ...config.subPackages.flatMap((pack) => pack.pages.map((page) => pack.root + '/' + page.path))];

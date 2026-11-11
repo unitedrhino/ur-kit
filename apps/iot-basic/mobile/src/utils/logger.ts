@@ -24,6 +24,10 @@ export interface HttpLogMeta {
   statusCode?: number;
   apiCode?: number;
   contentType?: string;
+  /** edgeTrace 仅记录网关返回的非敏感请求编号。 */
+  edgeTrace?: string;
+  /** edgeServer 记录网关服务标识，辅助区分回源故障。 */
+  edgeServer?: string;
   responseType?: string;
   responseKeys?: string[];
   responseCodeType?: string;
@@ -66,6 +70,7 @@ const DEFAULT_LOG_STORAGE_KEY = 'mobile_uniapp_log_history_v1';
 const SENSITIVE_KEYS = [
   /^authorization$/,
   /token/,
+  /^ticket$/,
   /password/,
   /signature/,
   /credentialdigest/,
@@ -183,6 +188,7 @@ function sanitizeLogText(value: string): string {
   return value
     .replace(/\bBearer\s+[^\s"']+/gi, 'Bearer [Filtered]')
     .replace(/\b(token|password|codeID|phone|mobile|authorization)(["'\s:=]+)([^&\s"',}]+)/gi, '$1$2[Filtered]')
+    .replace(/\b(ticket|pollToken)(["'\s:=]+)([^&\s"',}]+)/gi, '$1$2[Filtered]')
     .replace(/\b1[3-9]\d{9}\b/g, '[Filtered]');
 }
 

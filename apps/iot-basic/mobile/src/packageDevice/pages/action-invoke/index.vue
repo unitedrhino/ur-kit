@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="action?.name || '执行行为'" />
 
@@ -167,7 +168,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .ai-page {
@@ -184,14 +185,14 @@ page {
 }
 
 .ai-title {
-  font-size: 36rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .ai-subtitle {
   margin-top: 8rpx;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -206,7 +207,7 @@ page {
   display: flex;
   justify-content: center;
   color: var(--text-secondary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
 }
 
 .ai-spacer {
@@ -230,7 +231,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 
 .ai-btn--primary {

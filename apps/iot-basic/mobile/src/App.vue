@@ -1,14 +1,20 @@
+<!-- 应用生命周期：恢复身份、启动上下文，并承接扫码首页票据。 -->
 <script lang="ts">
 import { authProvider } from './providers/auth.provider';
 import { appProvider } from './providers/app.provider';
 import { deviceListProvider } from './providers/device-list.provider';
 import { alarmProvider } from './providers/alarm.provider';
+import { messageProvider } from './providers/message.provider';
 import { webSocketProvider } from './providers/websocket.provider';
 import { tenantProvider } from './providers/tenant.provider';
 import { appContextProvider } from './providers/app-context.provider';
 import { privacyConsentService } from './services/privacy-consent.service';
 import { permissionWarmupService } from './services/permission-warmup.service';
-import { reportGlobalError } from './utils/logger';
+import { logger, reportGlobalError } from './utils/logger';
+// #ifdef H5
+/** panelHandoffLaunch 保留本次H5启动的票据用途；设置返回时初始query仍可能包含已消费的面板票据。 */
+let panelHandoffLaunch = false;
+// #endif
 
 export default {
   onLaunch(options: any) {
@@ -28,6 +34,12 @@ export default {
 
     // 登录态检查 + 恢复
     authProvider.init();
+    // #ifdef H5
+    // 面板交接自行兑换并校验身份，避免旧H5缓存恢复请求与新账号交接并发。
+    if (typeof location !== 'undefined' && location.hash.startsWith('#/packageDevice/pages/panel-entry/index')) { panelHandoffLaunch = true; return; }
+    // #endif
+    // 微信绑定只验证当前微信，不恢复平台会话，避免缓存令牌过期将确认页跳转到登录页。
+    if (typeof options?.query?.bindTicket === 'string' && /^[a-f0-9]{64}$/.test(options.query.bindTicket)) return;
     if (authProvider.getState().loggedIn) {
       void restoreCachedSession(hasInvite);
       return;
@@ -40,6 +52,15 @@ export default {
   },
 
   onShow(options: any) {
+    logger.info('navigation.resume', '应用前台恢复', { launchPath: options?.path || '', route: getCurrentPages().at(-1)?.route || '', entryPolicy: 'explicit-panel-ticket' });
+    // #ifdef H5
+    // 交接完成后仍保留微信面板用途；原生设置返回会重放初始query，不能再把票据识别成电脑登录。
+    if (panelHandoffLaunch || (typeof location !== 'undefined' && location.hash.startsWith('#/packageDevice/pages/panel-entry/index'))) return;
+    // #endif
+    // URL Link的电脑登录/微信绑定只由原生扫码入口承接；H5前台恢复不得解释通用ticket。
+    // #ifndef H5
+    if (appContextProvider.openWebLoginFromLaunch(options?.query, options?.path)) return;
+    // #endif
     const hasInvite = appContextProvider.captureLaunchOptions({
       ...(options?.query || {}),
       scene: options?.scene ? String(options.scene) : undefined,
@@ -70,6 +91,9 @@ export default {
 function initializeAfterLogin(options: { connectWebSocket?: boolean } = {}) {
   deviceListProvider.init();
   alarmProvider.init();
+  messageProvider.init();
+  // 消息接口只依赖当前用户会话，登录成功后立即加载，保证首页消息入口能及时显示未读红点。
+  void messageProvider.loadFirst();
   if (options.connectWebSocket) {
     const authState = authProvider.getState();
     if (authState.sessionConfirmed) {
@@ -110,6 +134,7 @@ function loadAlarmIfTenantReady() {
   const currentTenant = tenantProvider.getState().current;
   if (currentTenant?.code) {
     alarmProvider.loadFirst();
+    messageProvider.loadFirst();
   }
 }
 </script>

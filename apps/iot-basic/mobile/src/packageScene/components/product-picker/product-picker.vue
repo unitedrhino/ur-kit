@@ -107,7 +107,7 @@ function handleMaskTap() { handleClose(); }
   height: 60vh;
   max-height: 85vh;
   background: var(--card-bg);
-  border-radius: 24rpx 24rpx 0 0;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
   padding-bottom: env(safe-area-inset-bottom);
   transform: translateY(100%);
   transition: transform 0.28s ease;
@@ -140,7 +140,7 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-title {
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -189,20 +189,20 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-item__name {
-  font-size: 30rpx;
+  font-size: var(--font-label);
   color: var(--text-primary);
   font-weight: 500;
 }
 
 .picker-item__desc {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 6rpx;
 }
 
 .picker-item__check {
   color: var(--color-primary);
-  font-size: 32rpx;
+  font-size: var(--font-label);
   font-weight: 600;
 }
 
@@ -213,7 +213,7 @@ function handleMaskTap() { handleClose(); }
 
 .picker-empty__text {
   color: var(--text-secondary);
-  font-size: 28rpx;
+  font-size: var(--font-body);
 }
 
 </style>

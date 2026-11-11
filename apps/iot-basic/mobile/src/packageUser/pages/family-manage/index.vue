@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="mode === 'select' ? '选择' + TERM.project : TERM.projectManageTitle" />
 
@@ -49,6 +50,7 @@
       <view class="fm-card__body" @tap="handleSwitchFamily(item)">
         <view class="fm-card__header">
           <text class="fm-card__name">{{item.projectName}}</text>
+          <text :class="`fm-card__role fm-card__role--${item.adminUserID === currentUserID ? 'owner' : 'member'}`">{{ item.adminUserID === currentUserID ? '负责人' : '成员' }}</text>
           <text v-if="item.projectID === currentFamilyID" class="fm-card__badge">当前</text>
           <text v-if="item.status === 2" class="fm-card__status--disabled">{{TERM.statusDisabled}}</text>
         </view>
@@ -61,11 +63,17 @@
         <view class="fm-card__action" @tap.stop="handleRoomManage(item)">
           <text>{{TERM.area}}</text>
         </view>
-        <view class="fm-card__action" @tap.stop="handleEdit(item)">
+        <view class="fm-card__action" @tap.stop="handleMemberManage(item)">
+          <text>成员</text>
+        </view>
+        <view v-if="currentUserID && item.adminUserID === currentUserID" class="fm-card__action" @tap.stop="handleEdit(item)">
           <text>编辑</text>
         </view>
-        <view class="fm-card__action fm-card__action--danger" @tap.stop="handleDelete(item)">
+        <view v-if="currentUserID && item.adminUserID === currentUserID" class="fm-card__action fm-card__action--danger" @tap.stop="handleDelete(item)">
           <text>删除</text>
+        </view>
+        <view v-else-if="currentUserID && item.adminUserID && item.adminUserID !== currentUserID" class="fm-card__action fm-card__action--danger" @tap.stop="handleLeave(item)">
+          <text>{{ leavingProjectID === item.projectID ? '退出中...' : '退出' }}</text>
         </view>
       </view>
     </view>
@@ -103,6 +111,7 @@ import type { ProjectEntity } from '../../../domain/entities/project.entity'
 import { getSystemInfo } from '../../../utils/platform'
 import { suggestFamilyName } from '../../../utils/family-name'
 import { appContextProvider } from '../../../providers/app-context.provider'
+import { familyMemberService } from '../../../services/family-member.service'
 
 const mode = ref<'manage' | 'select'>('manage')
 const projects = ref<ProjectEntity[]>([])
@@ -110,6 +119,10 @@ const loading = ref(true)
 const refreshing = ref(false)
 const hasMore = ref(true)
 const currentFamilyID = ref('')
+/** 当前账号仅可编辑或删除本人负责的家庭。 */
+const currentUserID = ref('')
+/** leavingProjectID 防止重复退出并在当前卡片显示进行中状态。 */
+const leavingProjectID = ref('')
 const searchValue = ref('')
 const filterStatus = ref(0)
 const pageHeight = ref('100vh')
@@ -142,7 +155,7 @@ onLoad((options: Record<string, string | undefined> = {}) => {
   projectProvider.loadFirst()
 })
 
-onShow(() => { projectProvider.loadFirst() })
+onShow(() => { currentUserID.value = authProvider.getState().user?.userID || ''; projectProvider.loadFirst() })
 onUnload(() => { unsubscribes.forEach(fn => fn()) })
 onUnmounted(() => { unsubscribes.forEach(fn => fn()) })
 
@@ -169,6 +182,7 @@ function handleCreate() {
   const tenantState = tenantProvider.getState()
   const suggestedName = suggestFamilyName({
     nickName: authState.user?.nickName,
+    userName: authState.user?.userName,
     tenantName: tenantState.current?.name,
     existingNames: projects.value.map(p => p.projectName),
   })
@@ -176,10 +190,12 @@ function handleCreate() {
 }
 
 function handleEdit(item: ProjectEntity) {
+  if (!item.adminUserID || item.adminUserID !== authProvider.getState().user?.userID) return
   uni.navigateTo({ url: `/packageUser/pages/family-edit/index?projectID=${item.projectID}&projectName=${encodeURIComponent(item.projectName)}` })
 }
 
 async function handleDelete(item: ProjectEntity) {
+  if (!item.adminUserID || item.adminUserID !== authProvider.getState().user?.userID) return
   if (projects.value.length <= 1) { uni.showToast({ title: TERM.projectDeleteLastMsg, icon: 'none', duration: 2500 }); return }
   if (item.deviceCount > 0) { uni.showToast({ title: TERM.projectDeleteBlockDeviceMsg, icon: 'none', duration: 2500 }); return }
   if (item.areaCount > 0) { uni.showToast({ title: TERM.projectDeleteBlockMsg, icon: 'none', duration: 2500 }); return }
@@ -198,6 +214,34 @@ async function handleDelete(item: ProjectEntity) {
   }
 }
 
+/** handleLeave 仅允许非负责人退出本人直接加入的项目，成功后刷新并切换到剩余项目。 */
+async function handleLeave(item: ProjectEntity) {
+  const userID = authProvider.getState().user?.userID || ''
+  if (!userID || item.adminUserID === userID || leavingProjectID.value) return
+  const { confirm } = await uni.showModal({
+    title: '退出项目',
+    content: `退出“${item.projectName}”后将失去该项目的访问权限，项目和设备不会被删除。确定退出吗？`,
+    confirmText: '退出',
+    cancelText: '取消',
+  })
+  if (!confirm) return
+  leavingProjectID.value = item.projectID
+  try {
+    await familyMemberService.leaveSharedFamily(item.projectID, userID)
+    await projectProvider.loadFirst()
+    if (currentFamilyProvider.getState().projectID === item.projectID) {
+      const remaining = projectProvider.getState().list.filter((project) => project.projectID !== item.projectID)
+      if (remaining.length > 0) currentFamilyProvider.switchFamily(remaining[0].projectID, remaining[0].projectName)
+      else currentFamilyProvider.clear()
+    }
+    uni.showToast({ title: '已退出项目', icon: 'success' })
+  } catch (error) {
+    uni.showToast({ title: (error as Error).message || '退出失败', icon: 'none' })
+  } finally {
+    leavingProjectID.value = ''
+  }
+}
+
 function handleSwitchFamily(item: ProjectEntity) {
   currentFamilyProvider.switchFamily(item.projectID, item.projectName)
   if (mode.value === 'select') { appContextProvider.resumePendingRoute('/pages/home/index'); return }
@@ -207,11 +251,15 @@ function handleSwitchFamily(item: ProjectEntity) {
 function handleRoomManage(item: ProjectEntity) {
   uni.navigateTo({ url: `/packageUser/pages/room-manage/index?projectID=${item.projectID}&projectName=${encodeURIComponent(item.projectName)}` })
 }
+
+function handleMemberManage(item: ProjectEntity) {
+  uni.navigateTo({ url: `/packageUser/pages/family-members/index?projectID=${item.projectID}&projectName=${encodeURIComponent(item.projectName)}` })
+}
 </script>
 
 <style lang="scss" scoped>
 .fm-page {
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .fm-bottom-spacer {
@@ -227,7 +275,7 @@ function handleRoomManage(item: ProjectEntity) {
   background: var(--card-bg);
   border-radius: var(--radius-md, 12px);
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -240,7 +288,7 @@ function handleRoomManage(item: ProjectEntity) {
 .fm-filter__tag {
   padding: 4px 14px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   background: var(--card-bg);
 }
@@ -253,7 +301,7 @@ function handleRoomManage(item: ProjectEntity) {
 .fm-card {
   margin: 8px 16px;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 .fm-card--current {
@@ -268,20 +316,28 @@ function handleRoomManage(item: ProjectEntity) {
   gap: 8px;
 }
 .fm-card__name {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
 }
+.fm-card__role {
+  flex-shrink: 0;
+  font-size: var(--font-caption);
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+}
+.fm-card__role--owner { color: var(--color-primary); background: var(--color-primary-light); }
+.fm-card__role--member { color: var(--text-secondary); background: var(--page-bg); }
 .fm-card__badge {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   background: var(--color-primary-light);
   padding: 2px 8px;
   border-radius: 10px;
 }
 .fm-card__status--disabled {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-danger);
   background: var(--color-error-bg);
   padding: 2px 8px;
@@ -293,7 +349,7 @@ function handleRoomManage(item: ProjectEntity) {
   margin-top: 8px;
 }
 .fm-card__stat {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -308,7 +364,7 @@ function handleRoomManage(item: ProjectEntity) {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   border-right: 1rpx solid var(--divider);
 }

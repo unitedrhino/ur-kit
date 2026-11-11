@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="场景详情" />
 
@@ -127,6 +128,7 @@
 </template>
 
 <script setup lang="ts">
+import { timestampMillis } from '../../../utils/timestamp';
 import AppNavigationBar from '../../../components/app-navigation-bar/app-navigation-bar.vue';
 import Loading from '../../../components/loading/loading.vue';
 import SafeArea from '../../../components/safe-area/safe-area.vue';
@@ -154,7 +156,7 @@ function formatScene(s: SceneEntity) {
   const statusTextVal = statusMap[s.status] || '未知'
   let lastRunTimeTextVal = '未执行'
   if (s.lastRunTime) {
-    const d = new Date(s.lastRunTime * 1000)
+    const d = new Date(timestampMillis(s.lastRunTime))
     lastRunTimeTextVal = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')} ${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
   }
   const triggerTextsVal = (s.triggers || []).map((t: any) => {
@@ -272,14 +274,14 @@ async function handleConfirmDelete() {
 .detail-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
   padding-bottom: 32rpx;
 }
 
 /* 导航栏编辑按钮 */
 .nav-edit-btn {
   padding: 8rpx 20rpx;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--color-primary);
 }
 .nav-edit-btn--hover {
@@ -291,7 +293,7 @@ async function handleConfirmDelete() {
   margin: 24rpx 32rpx;
   padding: 32rpx;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
 }
 .info-card__header {
   margin-bottom: 24rpx;
@@ -302,7 +304,7 @@ async function handleConfirmDelete() {
   justify-content: space-between;
 }
 .info-card__name {
-  font-size: 36rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
   flex: 1;
@@ -313,7 +315,7 @@ async function handleConfirmDelete() {
 .info-card__status {
   padding: 4rpx 16rpx;
   border-radius: var(--radius-full, 9999px);
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   flex-shrink: 0;
   margin-left: 16rpx;
 }
@@ -331,7 +333,7 @@ async function handleConfirmDelete() {
 }
 .info-card__desc {
   display: block;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 12rpx;
   line-height: 1.5;
@@ -348,11 +350,11 @@ async function handleConfirmDelete() {
   gap: 8rpx;
 }
 .meta-label {
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 .meta-value {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-primary);
 }
 
@@ -366,7 +368,7 @@ async function handleConfirmDelete() {
   border-top: 1px solid var(--border-color);
 }
 .switch-label {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -399,7 +401,7 @@ async function handleConfirmDelete() {
 .section-card {
   margin: 24rpx 32rpx;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   overflow: hidden;
 }
 .section-card--hover {
@@ -412,16 +414,16 @@ async function handleConfirmDelete() {
   padding: 28rpx 32rpx;
 }
 .section-card__title {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 500;
   color: var(--text-primary);
 }
 .section-card__count {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 .section-card__arrow {
-  font-size: 36rpx;
+  font-size: var(--font-label);
   color: var(--text-secondary);
 }
 .section-card__body {
@@ -457,7 +459,7 @@ async function handleConfirmDelete() {
   background: var(--border-color);
 }
 .flow-text {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -468,7 +470,7 @@ async function handleConfirmDelete() {
   padding: 8rpx 0;
 }
 .condition-text {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -477,19 +479,19 @@ async function handleConfirmDelete() {
   margin: 24rpx 32rpx;
   padding: 24rpx 32rpx;
   background: var(--color-error-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   border-left: 6rpx solid var(--color-error);
 }
 .error-card__title {
   display: block;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   font-weight: 500;
   color: var(--color-error);
   margin-bottom: 8rpx;
 }
 .error-card__reason {
   display: block;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   line-height: 1.5;
 }
@@ -522,7 +524,7 @@ async function handleConfirmDelete() {
   opacity: 0.7;
 }
 .action-btn__text {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 500;
 }
 .action-btn--trigger .action-btn__text {
@@ -556,7 +558,7 @@ async function handleConfirmDelete() {
 }
 .confirm-dialog__title {
   display: block;
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
   text-align: center;
@@ -564,7 +566,7 @@ async function handleConfirmDelete() {
 }
 .confirm-dialog__content {
   display: block;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   text-align: center;
   line-height: 1.6;
@@ -579,7 +581,7 @@ async function handleConfirmDelete() {
   padding: 20rpx;
   text-align: center;
   border-radius: var(--radius-md, 12px);
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 .confirm-btn--cancel {
   background: var(--page-bg);

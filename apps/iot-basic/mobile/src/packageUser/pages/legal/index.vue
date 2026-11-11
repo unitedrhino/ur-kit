@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="title" :back="true" />
 
@@ -52,7 +53,7 @@ function handleLoadError() {
 }
 
 .legal-empty__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-secondary);
 }
 

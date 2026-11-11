@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
   <app-navigation-bar title="绑定手机号" :back="true" />
 
@@ -336,7 +337,7 @@ function notifyAppLoginSuccess() {
 .bind-phone-hero__sub {
   display: block;
   margin-top: 8px;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.6;
   color: var(--text-secondary);
 }
@@ -345,7 +346,7 @@ function notifyAppLoginSuccess() {
   margin: 0 16px 20px;
   padding: 14px 16px 16px;
   background: var(--card-bg);
-  border-radius: 20px;
+  border-radius: var(--radius-lg);
   box-shadow: 0 10px 28px var(--color-shadow);
 }
 
@@ -357,7 +358,7 @@ function notifyAppLoginSuccess() {
 }
 
 .bind-phone-card__hint-text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   line-height: 1.6;
   color: var(--color-primary);
 }
@@ -368,7 +369,7 @@ function notifyAppLoginSuccess() {
 }
 
 .bind-phone-mode-entry__text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   line-height: 1;
   text-decoration: underline;
@@ -386,7 +387,7 @@ function notifyAppLoginSuccess() {
 }
 
 .bind-phone-wx-btn__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 500;
 }
 
@@ -407,7 +408,7 @@ function notifyAppLoginSuccess() {
 .bind-phone-field__label {
   display: block;
   margin-bottom: 6px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -421,7 +422,7 @@ function notifyAppLoginSuccess() {
   background: var(--color-primary-light);
   border: 1px solid var(--color-primary-light);
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 
 .bind-phone-code-btn {
@@ -433,7 +434,7 @@ function notifyAppLoginSuccess() {
   justify-content: center;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .bind-phone-code-btn--disabled {
@@ -468,7 +469,7 @@ function notifyAppLoginSuccess() {
 }
 
 .bind-phone-submit__text {
-  font-size: 15px;
+  font-size: var(--font-body);
 }
 
 .bind-phone-footer {
@@ -477,7 +478,7 @@ function notifyAppLoginSuccess() {
 }
 
 .bind-phone-footer__text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-muted);
 }
 </style>

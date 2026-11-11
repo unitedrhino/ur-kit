@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备分组" />
 
@@ -42,11 +43,11 @@ function handleGroupTap(id: string) {
 
 <style lang="scss" scoped>
 .group-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
+  min-height: 0; background: transparent; }
 .group-list { padding: 16px; }
 .group-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 12px; margin-bottom: 10px; }
 .group-item--hover { opacity: 0.7; }
-.group-item__name { font-size: 15px; color: var(--text-primary); font-weight: 500; }
-.group-item__count { font-size: 13px; color: var(--text-secondary); }
+.group-item__name { font-size: var(--font-body); color: var(--text-primary); font-weight: 500; }
+.group-item__count { font-size: var(--font-caption); color: var(--text-secondary); }
 
 </style>

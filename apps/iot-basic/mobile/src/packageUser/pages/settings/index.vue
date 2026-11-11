@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设置" />
 
@@ -71,12 +72,12 @@ function handleNavTo(url: string) {
 
 <style lang="scss" scoped>
 .settings-page { flex: 1;
-  min-height: 0; background: var(--page-bg); }
-.settings-group { margin: 16px; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
+  min-height: 0; background: transparent; }
+.settings-group { margin: 16px; background: var(--card-bg); border-radius: var(--radius-lg); overflow: hidden; }
 .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 16px; border-bottom: 1rpx solid var(--divider); }
 .settings-item:last-child { border-bottom: none; }
 .settings-item--hover { background: var(--color-bg-secondary); }
-.settings-item__label { font-size: 15px; color: var(--text-primary); }
-.settings-item__arrow { color: var(--text-tertiary); font-size: 18px; }
+.settings-item__label { font-size: var(--font-body); color: var(--text-primary); }
+.settings-item__arrow { color: var(--text-tertiary); font-size: var(--font-label); }
 
 </style>

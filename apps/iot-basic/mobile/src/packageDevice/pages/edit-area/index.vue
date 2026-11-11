@@ -1,9 +1,11 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="`设备${TERM.area}`" />
 
 <scroll-view class="ea-body" scroll-y type="list" :show-scrollbar="false">
   <loading v-if="loading" fullscreen text="加载中..." />
 
+  <view v-else-if="loadError" class="ea-error" @tap="loadList">{{ loadError }} · 点击重试</view>
   <template v-else>
     <!-- 新增 入口 -->
     <view class="ea-list ea-list--top">
@@ -14,18 +16,7 @@
     </view>
 
     <view v-if="list.length > 0" class="ea-list">
-      <view
-        v-for="(item, index) in list" :key="item.areaID"
-        class="ea-item"
-        @tap="handleSelect(item.areaID)"
-        hover-class="ea-item--hover"
-      >
-        <view class="ea-item__main">
-          <app-icon class="ea-item__icon" :name="normalizeAreaIcon(item.areaImg)" :size="'32rpx'" />
-          <text class="ea-item__name">{{item.areaName}}</text>
-        </view>
-        <app-icon class="ea-item__check" v-if="item.areaID === selectedID" name="tabler:check" :size="'32rpx'" />
-      </view>
+      <area-tree :areas="list" :selected-id="selectedID" @select="handleSelect($event.areaID)" />
     </view>
 
     <empty-state v-else :text="`还没有${TERM.area}`" />
@@ -34,8 +25,8 @@
 
 <view class="ea-footer">
   <view
-    :class="`ea-btn ea-btn--primary ${submitting ? 'ea-btn--disabled' : ''}`"
-    @tap="submitting ? null : handleSubmit()"
+    :class="`ea-btn ea-btn--primary ${submitting || loading || loadError ? 'ea-btn--disabled' : ''}`"
+    @tap="submitting || loading || loadError ? null : handleSubmit()"
     hover-class="ea-btn--hover"
   >
     <text>{{submitting ? '保存中...' : '保存'}}</text>
@@ -46,6 +37,7 @@
 
 <script setup lang="ts">
 import AppIcon from '../../../components/app-icon/app-icon.vue';
+import AreaTree from '../../../components/area-tree/area-tree.vue';
 import AppNavigationBar from '../../../components/app-navigation-bar/app-navigation-bar.vue';
 import EmptyState from '../../../components/empty-state/empty-state.vue';
 import Loading from '../../../components/loading/loading.vue';
@@ -54,7 +46,6 @@ import { onLoad, onShow } from '@dcloudio/uni-app';
 import { deviceService } from '../../../services/device.service';
 import { areaService } from '../../../services/area.service';
 import { TERM } from '../../../config/terminology';
-import { normalizeAreaIcon } from '../../../config/area-icons';
 import type { AreaEntity } from '../../../domain/entities/area.entity';
 import { ensurePageReady } from '../../../utils/page-guard';
 
@@ -65,6 +56,8 @@ const projectID = ref('');
 const originalID = ref('');
 const selectedID = ref('');
 const list = ref<AreaEntity[]>([]);
+/** 区域列表失败时禁止提交，避免把不完整数据当成可选范围。 */
+const loadError = ref('');
 const submitting = ref(false);
 
 async function loadList() {
@@ -72,12 +65,22 @@ async function loadList() {
     loading.value = false;
     return;
   }
-  loading.value = true;
+  loading.value = true; loadError.value = '';
   try {
-    const result = await areaService.getList(projectID.value, 1, 100);
-    list.value = result.list;
+    const currentProject = projectID.value;
+    const all: AreaEntity[] = [];
+    for (let page = 1; ; page++) {
+      if (page > 200) throw new Error('区域数量过多，请联系管理员');
+      const result = await areaService.getList(currentProject, page, 100);
+      if (currentProject !== projectID.value) return;
+      all.push(...result.list.filter(area => area.areaID !== '1' && area.areaID !== '2'));
+      if (page * 100 >= result.total) break;
+      if (!result.list.length) throw new Error('区域列表未完整加载');
+    }
+    list.value = all;
   } catch (err) {
-    uni.showToast({ title: (err as Error).message || '加载失败', icon: 'none' });
+    loadError.value = (err as Error).message || '区域加载失败';
+    list.value = [];
   } finally {
     loading.value = false;
   }
@@ -116,7 +119,7 @@ function handleCreate() {
 }
 
 async function handleSubmit() {
-  if (submitting.value) return;
+  if (submitting.value || loading.value || loadError.value) return;
   if (selectedID.value === originalID.value) {
     uni.navigateBack({ delta: 1 });
     return;
@@ -143,8 +146,10 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
+
+.ea-error { padding: 24px 16px; color: var(--text-secondary); font-size: var(--font-body); }
 
 .ea-body {
   flex: 1;
@@ -173,7 +178,7 @@ page {
 }
 
 .ea-item__add-text {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--color-primary);
 }
 
@@ -205,7 +210,7 @@ page {
 }
 
 .ea-item__name {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -230,7 +235,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 
 .ea-btn--primary {

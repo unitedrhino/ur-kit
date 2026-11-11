@@ -68,13 +68,15 @@ function createMpWeixinManifestPlugin(env: MiniProgramManifestEnv): PluginOption
   };
 }
 
-/** 创建 pages 主题覆盖插件，让 tabBar 选中色跟随主题配置。 */
+/** 创建跨端页面主题与导航 PNG 插件，兼容构建输出和 H5 开发服务。 */
 function createPagesThemePlugin(env: ThemeEnv): PluginOption {
   const themeTokens = resolveThemeTokens(env);
-  const outputDir = path.resolve(__dirname, process.env.UNI_OUTPUT_DIR || 'dist/build/mp-weixin');
+  // 取 Vite 实际输出目录，兼容 H5、各小程序端及 UNI_OUTPUT_DIR 覆盖。
+  let outputDir = '';
   const tabBarIcons = [
     { name: 'tab-home', svg: tabIconSvgs.home },
     { name: 'tab-device', svg: tabIconSvgs.device },
+    { name: 'tab-message', svg: tabIconSvgs.message },
     { name: 'tab-scene', svg: tabIconSvgs.scene },
     { name: 'tab-mine', svg: tabIconSvgs.mine },
   ];
@@ -82,6 +84,25 @@ function createPagesThemePlugin(env: ThemeEnv): PluginOption {
   return {
     name: 'mobile-uniapp-pages-theme-env',
     enforce: 'pre',
+    configResolved(config) {
+      outputDir = path.resolve(config.root, config.build.outDir);
+    },
+    configureServer(server) {
+      // H5 开发服务器不执行 writeBundle，按相同主题即时提供导航 PNG。
+      server.middlewares.use(async (req, res, next) => {
+        const match = req.url?.split('?')[0].match(/^\/static\/icons\/(tab-(?:home|device|message|scene|mine))(-active)?\.png$/);
+        const icon = match && tabBarIcons.find((item) => item.name === match[1]);
+        if (!icon) return next();
+        try {
+          const color = match?.[2] ? themeTokens.colorPrimary : '#999999';
+          const png = await sharp(Buffer.from(colorizeSvg(icon.svg, color))).resize(81, 81).png().toBuffer();
+          res.setHeader('Content-Type', 'image/png');
+          res.end(png);
+        } catch (error) {
+          next(error);
+        }
+      });
+    },
     transform(code, id) {
       const cleanId = id.split('?')[0];
       if (!cleanId.endsWith('/pages.json')) return null;
@@ -89,6 +110,7 @@ function createPagesThemePlugin(env: ThemeEnv): PluginOption {
       const pages = JSON.parse(code);
       pages.globalStyle = pages.globalStyle || {};
       pages.globalStyle.backgroundColor = themeTokens.colorPageBackground;
+      pages.globalStyle.navigationBarBackgroundColor = themeTokens.colorPageBackground;
       pages.tabBar = pages.tabBar || {};
       pages.tabBar.color = themeTokens.colorTextPlaceholder;
       pages.tabBar.selectedColor = themeTokens.colorPrimary;
@@ -101,17 +123,19 @@ function createPagesThemePlugin(env: ThemeEnv): PluginOption {
     },
     async writeBundle() {
       const appJsonPath = path.join(outputDir, 'app.json');
-      if (!fs.existsSync(appJsonPath)) return;
-
-      const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
-      appJson.tabBar = appJson.tabBar || {};
-      appJson.tabBar.color = themeTokens.colorTextPlaceholder;
-      appJson.tabBar.selectedColor = themeTokens.colorPrimary;
-      appJson.tabBar.backgroundColor = themeTokens.colorSurface;
-      if (appJson.window) {
-        appJson.window.backgroundColor = themeTokens.colorPageBackground;
+      // 小程序输出主题配置；H5 无 app.json 时仍需要生成导航图标。
+      if (fs.existsSync(appJsonPath)) {
+        const appJson = JSON.parse(fs.readFileSync(appJsonPath, 'utf8'));
+        appJson.tabBar = appJson.tabBar || {};
+        appJson.tabBar.color = themeTokens.colorTextPlaceholder;
+        appJson.tabBar.selectedColor = themeTokens.colorPrimary;
+        appJson.tabBar.backgroundColor = themeTokens.colorSurface;
+        if (appJson.window) {
+          appJson.window.backgroundColor = themeTokens.colorPageBackground;
+          appJson.window.navigationBarBackgroundColor = themeTokens.colorPageBackground;
+        }
+        fs.writeFileSync(appJsonPath, `${JSON.stringify(appJson, null, 2)}\n`);
       }
-      fs.writeFileSync(appJsonPath, `${JSON.stringify(appJson, null, 2)}\n`);
 
       const outputIconDir = path.join(outputDir, 'static/icons');
       fs.mkdirSync(outputIconDir, { recursive: true });
@@ -150,6 +174,7 @@ function createThemeStylePlugin(env: ThemeEnv): PluginOption {
 
 export default defineConfig(({ mode }) => {
   // 所有 uni-app 开发与构建入口共用同一应用锁，拒绝不匹配的合同或共享包快照。
+  execFileSync(process.execPath, [path.resolve(__dirname, 'scripts/verify-mobile-contracts.cjs')], { stdio: 'inherit' });
   execFileSync(process.execPath, [path.resolve(__dirname, '../../../scripts/verify_iot_basic.mjs')], {
     cwd: path.resolve(__dirname, '../../..'),
     stdio: 'inherit',

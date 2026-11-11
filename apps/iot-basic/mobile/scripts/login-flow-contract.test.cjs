@@ -10,6 +10,9 @@ function readFromMobile(relPath) {
   return fs.readFileSync(path.join(root, relPath), 'utf8');
 }
 
+function readFromRepo(relPath) {
+  return fs.readFileSync(path.join(repoRoot, relPath), 'utf8');
+}
 
 test('wechat login probes after agreement and only requests phone when needed', () => {
   const page = readFromMobile('src/packageUser/pages/login/index.vue');

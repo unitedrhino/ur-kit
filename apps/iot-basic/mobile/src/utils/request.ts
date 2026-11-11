@@ -1,3 +1,4 @@
+/** 文件说明：统一平台请求、认证与脱敏日志；非业务HTTP故障不伪装为JSON格式错误或自动重试。 */
 import { config } from '../config';
 import { logger, type HttpLogMeta } from './logger';
 import { getRequestContext } from './request-context';
@@ -58,6 +59,14 @@ function isApiResponse<T = unknown>(value: unknown): value is ApiResponse<T> {
   return typeof payload.code === 'number';
 }
 
+/** unexpectedResponseMessage 为非业务响应区分HTTP超时和格式错误，返回可供用户定位的中文提示。 */
+function unexpectedResponseMessage(statusCode: number): string {
+  if (statusCode === 522) return '服务连接超时（HTTP 522），请稍后重试';
+  if (statusCode >= 500) return `服务暂时不可用（HTTP ${statusCode}），请稍后重试`;
+  if (statusCode >= 400) return `请求未成功（HTTP ${statusCode}），请稍后重试`;
+  return '响应数据格式错误，请稍后重试';
+}
+
 /** describeValueType 返回适合日志记录的值类型名称，不展开具体响应内容。 */
 function describeValueType(value: unknown): string {
   if (value === null) return 'null';
@@ -74,11 +83,19 @@ function getHeaderValue(headers: unknown, key: string): string | undefined {
   return typeof value === 'string' ? value : undefined;
 }
 
-/** summarizeUnexpectedResponse 只记录响应形态，不记录响应正文，便于定位非业务 JSON 响应。 */
+/** safeDiagnosticHeader 限定可记录的网关标识格式，避免日志带入任意响应头。 */
+function safeDiagnosticHeader(headers: unknown, name: string): string | undefined {
+  const value = getHeaderValue(headers, name);
+  return value && /^[a-zA-Z0-9_.:-]{1,128}$/.test(value) ? value : undefined;
+}
+
+/** summarizeUnexpectedResponse 只记录响应形态和网关标识，不记录响应正文。 */
 function summarizeUnexpectedResponse(value: unknown, headers: unknown): Partial<HttpLogMeta> {
   const responseType = describeValueType(value);
   const summary: Partial<HttpLogMeta> = {
     contentType: getHeaderValue(headers, 'content-type'),
+    edgeTrace: safeDiagnosticHeader(headers, 'eo-log-uuid'),
+    edgeServer: safeDiagnosticHeader(headers, 'server'),
     responseType,
   };
 
@@ -148,17 +165,18 @@ function isOnLoginPage(): boolean {
  * - hadToken=true 表示请求时本地存在 token，属于"登录失效"，需要清凭据并跳登录页；
  * - hadToken=false 表示游客浏览阶段，后端拒绝是预期行为，不跳登录、不打扰用户。
  */
-function handleTokenExpired(hadToken: boolean): void {
+function handleTokenExpired(requestToken: string): void {
+  // 迟到的旧请求不能清掉后来登录的新账号，也不能把游客送回登录页。
+  if (!requestToken || getToken() !== requestToken) return;
   uni.removeStorageSync('token');
   uni.removeStorageSync('user');
   localStorage.remove('user');
-  if (!hadToken) return;
   eventBus.emit('auth:token-expired');
   if (redirectingToLogin) return;
   if (isOnLoginPage()) return;
   redirectingToLogin = true;
   uni.showToast({ title: '登录已过期，请重新登录', icon: 'none' });
-  uni.redirectTo({
+  uni.reLaunch({
     url: LOGIN_URL,
     complete: () => {
       redirectingToLogin = false;
@@ -283,7 +301,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
           // - 请求时本地无 token：游客模式，不跳登录，由调用方按需降级；
           // - 请求时本地有 token：会话失效，清凭据并跳登录页。
           const hadToken = !!token;
-          handleTokenExpired(hadToken);
+          handleTokenExpired(token);
           const error = new Error(hadToken ? '登录已过期，请重新登录' : '请先登录');
           recordRequestFailure(error, {
             ...baseMeta,
@@ -295,7 +313,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
         }
         const respData = res.data;
         if (!isApiResponse<T>(respData)) {
-          const error = new Error('响应数据格式错误，请稍后重试');
+          const error = new Error(unexpectedResponseMessage(res.statusCode));
           recordRequestFailure(error, {
             ...baseMeta,
             statusCode: res.statusCode,
@@ -307,7 +325,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<T> {
         }
         const resp = respData;
         if (resp.code === 200) {
-          if (token && confirmsAuthenticatedSession(options.url)) {
+          if (token && getToken() === token && confirmsAuthenticatedSession(options.url)) {
             eventBus.emit('auth:token-confirmed', token);
           }
           recordRequestSuccess({

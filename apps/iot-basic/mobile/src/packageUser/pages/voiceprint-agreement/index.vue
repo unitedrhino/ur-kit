@@ -42,11 +42,11 @@ import SafeArea from '../../../components/safe-area/safe-area.vue';
 </script>
 
 <style lang="scss" scoped>
-.voiceprint-page { flex: 1; min-height: 0; background: var(--page-bg); }
-.voiceprint-card { margin: 16px; padding: 18px; background: var(--card-bg); border-radius: 12px; }
-.voiceprint-title { display: block; font-size: 20px; font-weight: 700; color: var(--text-primary); }
-.voiceprint-updated { display: block; margin-top: 8px; font-size: 13px; color: var(--text-secondary); }
+.voiceprint-page { flex: 1; min-height: 0; background: transparent; }
+.voiceprint-card { margin: 16px; padding: 18px; background: var(--card-bg); border-radius: var(--radius-lg); }
+.voiceprint-title { display: block; font-size: var(--font-section); font-weight: 700; color: var(--text-primary); }
+.voiceprint-updated { display: block; margin-top: 8px; font-size: var(--font-caption); color: var(--text-secondary); }
 .voiceprint-section { margin-top: 20px; }
-.voiceprint-section__title { display: block; font-size: 16px; font-weight: 600; color: var(--text-primary); }
-.voiceprint-section__body { display: block; margin-top: 8px; font-size: 14px; line-height: 1.8; color: var(--text-secondary); }
+.voiceprint-section__title { display: block; font-size: var(--font-body); font-weight: 600; color: var(--text-primary); }
+.voiceprint-section__body { display: block; margin-top: 8px; font-size: var(--font-body); line-height: 1.8; color: var(--text-secondary); }
 </style>

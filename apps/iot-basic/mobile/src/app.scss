@@ -1,6 +1,21 @@
-/* 全局样式（自原 app.wxss 迁移） */
+/* 移动端统一视觉：柔和渐变、可读字号、圆角表面与安全区。 */
 
 page {
+  min-height: 100vh;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  --backdrop-top: __MOBILE_UNIAPP_THEME_COLORBACKDROPTOP__;
+  --backdrop-rose: __MOBILE_UNIAPP_THEME_COLORBACKDROPROSE__;
+  --navigation-active: __MOBILE_UNIAPP_THEME_COLORNAVIGATION__;
+  --navigation-container: __MOBILE_UNIAPP_THEME_COLORNAVIGATIONCONTAINER__;
+  --page-gradient: linear-gradient(165deg, var(--backdrop-top) 0%, var(--backdrop-rose) 34%, var(--page-bg) 68%);
+  --font-caption: 13px;
+  --font-body: 15px;
+  --font-label: 17px;
+  --font-section: 20px;
+  --font-title: 30px;
+  --tabbar-clearance: calc(96px + env(safe-area-inset-bottom));
   --md-sys-color-primary: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY__;
   --md-sys-color-primary-container: __MOBILE_UNIAPP_THEME_COLOR_PRIMARY_CONTAINER__;
   --md-sys-color-on-primary: __MOBILE_UNIAPP_THEME_COLOR_ON_PRIMARY__;
@@ -55,15 +70,16 @@ page {
   --border-color: var(--md-sys-color-outline-variant);
   --divider: var(--md-sys-color-outline-variant);
 
-  --radius-sm: 8px;
-  --radius-md: 12px;
-  --radius-lg: 16px;
+  --radius-sm: 12px;
+  --radius-md: 20px;
+  --radius-lg: 24px;
   --radius-full: 9999px;
 
   font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue', sans-serif;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
-  background: var(--page-bg);
+  background: var(--page-gradient);
+  background-attachment: fixed;
   box-sizing: border-box;
 }
 
@@ -105,3 +121,19 @@ body {
 
 /* Divider */
 .divider { height: 1px; background: var(--border-color); }
+
+/* 统一页面标题与分区；业务页面仍管理自身列表和提交状态。 */
+.mobile-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 16px 20px; }
+.mobile-heading__title { font-size: var(--font-title); font-weight: 700; line-height: 1.25; color: var(--text-primary); }
+.mobile-heading__action { display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: var(--radius-full); background: var(--card-bg); color: var(--color-primary); }
+.mobile-section-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 20px 0 14px; }
+.mobile-section-heading__title { font-size: var(--font-section); font-weight: 650; }
+.mobile-section-heading__link { font-size: var(--font-caption); color: var(--color-primary); padding: 8px 0; }
+.mobile-card-grid { display: flex; flex-wrap: wrap; gap: 12px; }
+.mobile-card-grid > .mobile-card-cell { width: calc(50% - 6px); min-width: 0; }
+.mobile-tab-content { padding-bottom: var(--tabbar-clearance); }
+button { font-size: var(--font-body); }
+button::after { border: none; }
+
+/* scroll-view 默认满宽，内边距必须计入宽度，避免小屏卡片溢出。 */
+view, scroll-view { box-sizing: border-box; }

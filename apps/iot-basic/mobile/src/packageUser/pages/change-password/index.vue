@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="hasPassword ? '修改密码' : '设置密码'" :back="true" />
 
@@ -83,15 +84,15 @@ async function handleSubmit() {
 </script>
 
 <style lang="scss" scoped>
-.change-pwd-page { flex: 1; min-height: 0; background: var(--page-bg); }
-.change-pwd-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: 16px; box-shadow: 0 8px 24px var(--color-shadow); }
+.change-pwd-page { flex: 1; min-height: 0; background: transparent; }
+.change-pwd-card { margin: 16px; padding: 4px 16px; background: var(--card-bg); border-radius: var(--radius-lg); box-shadow: 0 8px 24px var(--color-shadow); }
 .change-pwd-field { padding: 14px 0; border-bottom: 1rpx solid var(--border-color); }
 .change-pwd-field:last-child { border-bottom: none; }
-.change-pwd-field__label { display: block; margin-bottom: 10px; font-size: 14px; color: var(--text-secondary); }
-.change-pwd-field__input { font-size: 16px; color: var(--text-primary); }
-.change-pwd-hint { display: block; margin: 0 16px; font-size: 12px; line-height: 1.6; color: var(--text-secondary); }
+.change-pwd-field__label { display: block; margin-bottom: 10px; font-size: var(--font-body); color: var(--text-secondary); }
+.change-pwd-field__input { font-size: var(--font-body); color: var(--text-primary); }
+.change-pwd-hint { display: block; margin: 0 16px; font-size: var(--font-caption); line-height: 1.6; color: var(--text-secondary); }
 .change-pwd-submit { margin: 20px 16px; height: 48px; border-radius: 14px; background: var(--color-primary); display: flex; align-items: center; justify-content: center; }
 .change-pwd-submit--disabled { opacity: 0.6; }
 .change-pwd-submit--hover { opacity: 0.9; }
-.change-pwd-submit__text { color: var(--color-on-primary); font-size: 16px; font-weight: 600; }
+.change-pwd-submit__text { color: var(--color-on-primary); font-size: var(--font-body); font-weight: 600; }
 </style>

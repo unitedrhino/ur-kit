@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view v-if="visible" class="picker-overlay" @tap="handleMaskTap">
   <view class="picker-panel" @tap.stop="">
@@ -178,7 +179,7 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-title {
-  font-size: 32rpx;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -205,12 +206,12 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-item__name {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
 .picker-item__check {
-  font-size: 32rpx;
+  font-size: var(--font-body);
   color: var(--color-primary);
   font-weight: 600;
 }
@@ -223,7 +224,7 @@ function handleMaskTap() { handleClose(); }
 }
 
 .picker-empty__text {
-  font-size: 28rpx;
+  font-size: var(--font-body);
   color: var(--text-secondary);
 }
 

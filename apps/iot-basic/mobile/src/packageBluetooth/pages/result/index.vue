@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="changingNetwork ? '更换 Wi-Fi' : '一键配网'" />
 
@@ -157,7 +158,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .result-page {
@@ -174,7 +175,7 @@ page {
   flex-direction: column;
   align-items: center;
   background: var(--card-bg);
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   padding: 28px 20px;
 }
 
@@ -213,7 +214,7 @@ page {
 }
 
 .result-title {
-  font-size: 22px;
+  font-size: var(--font-section);
   font-weight: 700;
   color: var(--text-primary);
   margin-bottom: 10px;
@@ -221,14 +222,14 @@ page {
 
 .result-message {
   text-align: center;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 1.7;
   color: var(--text-secondary);
 }
 
 .result-code {
   margin-top: 12px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -237,7 +238,7 @@ page {
   padding: 8px 10px;
   border-radius: 10px;
   background: var(--color-warning-bg);
-  font-size: 12px;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--color-warning);
 }
@@ -272,7 +273,7 @@ page {
 
 .device-location-prompt__text {
   margin-left: 8px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -283,13 +284,13 @@ page {
 }
 
 .tips-card__title {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .tips-card__item {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -328,13 +329,13 @@ page {
 }
 
 .primary-btn__text {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }
 
 .ghost-btn__text {
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 

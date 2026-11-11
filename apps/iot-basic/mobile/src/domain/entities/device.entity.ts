@@ -1,6 +1,9 @@
+/** 设备展示实体，包含真实分享关系标识。 */
 import type { GeoPoint } from '../models/location.model';
 
 export interface DeviceEntity {
+  /** isShared 表示当前账号收到且设备原归属不在当前项目的跨项目分享。 */
+  isShared?: boolean;
   id: string;
   productID: string;
   deviceName: string;

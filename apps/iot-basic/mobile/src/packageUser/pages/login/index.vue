@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view class="login-screen">
   <app-navigation-bar title="登录" :back="true" />
@@ -155,6 +156,17 @@
 
     </view>
   </view>
+  <!-- 未勾选时显示明确的协议确认，链接可独立打开。 -->
+  <view v-if="agreementDialogVisible" class="agreement-mask" @tap.stop>
+    <view class="agreement-dialog" role="dialog" aria-modal="true" aria-labelledby="agreement-title">
+      <text id="agreement-title" class="agreement-dialog__title">用户协议与隐私保护</text>
+      <text class="agreement-dialog__content">请阅读并同意<text v-for="item in legalDocs" :key="item.key" class="agreement-dialog__link" @tap.stop="handleOpenLegalDoc(item.key)">《{{ item.title }}》</text>，同意后继续。</text>
+      <view class="agreement-dialog__actions">
+        <button class="agreement-dialog__cancel" @tap="cancelAgreement">暂不同意</button>
+        <button class="agreement-dialog__confirm" @tap="confirmAgreement">同意并继续</button>
+      </view>
+    </view>
+  </view>
   <privacy-authorization-modal />
 </view>
 
@@ -229,6 +241,10 @@ const sendingPhoneCode = ref(false)
 const phoneCodeCountdown = ref(0)
 const rememberAccount = ref(false)
 const agreedProtocols = ref(false)
+/** 协议弹窗只在用户主动操作时出现，不将关闭视为同意。 */
+const agreementDialogVisible = ref(false)
+/** 同意后继续原操作；微信手机号授权回调不能复用一次性凭证。 */
+let pendingAgreementAction: (() => void) | null = null
 const requiresWxPhoneAuth = ref(false)
 const wxPhoneAuthPurpose = ref<WxPhoneAuthPurpose>('quickLogin')
 /** 微信登录探测已成功但尚未由用户点击进入 */
@@ -315,6 +331,25 @@ function handleToggleAgreement() {
   }
 }
 
+/** requestAgreement 暂存用户原操作，等待明确同意后再执行。 */
+function requestAgreement(action?: () => void) {
+  pendingAgreementAction = action || null
+  agreementDialogVisible.value = true
+}
+/** cancelAgreement 不改变勾选状态，也不执行原操作。 */
+function cancelAgreement() {
+  agreementDialogVisible.value = false
+  pendingAgreementAction = null
+}
+/** confirmAgreement 勾选协议并继续用户主动发起的操作。 */
+function confirmAgreement() {
+  const action = pendingAgreementAction
+  pendingAgreementAction = null
+  agreementDialogVisible.value = false
+  agreedProtocols.value = true
+  action?.()
+}
+
 function handleOpenLegalDoc(key: string) {
   if (!key) return
   uni.navigateTo({ url: `/packageUser/pages/legal/index?key=${key}` })
@@ -344,10 +379,10 @@ function normalizeWxPhoneNumberFailure(errMsg: string) {
   return '获取微信手机号失败'
 }
 
-/** 小程序主操作点击：协议未确认只提示，登录失败后允许用户手动重试。 */
+/** 小程序主操作点击：协议确认后触发登录探测，失败时可手动重试。 */
 function handleWxAutoLoginTap() {
   if (!agreedProtocols.value) {
-    uni.showToast({ title: '请先阅读并勾选协议', icon: 'none' })
+    requestAgreement()
     return
   }
   if (wxAutoLoginRequesting.value || requiresWxPhoneAuth.value) return
@@ -415,7 +450,7 @@ async function attemptWxLogin(resumeAfterSuccess = false) {
 
 async function handleWxQuickLogin(e: any) {
   logWxPhoneNumberCallback('get-phone-number:callback', e)
-  if (!agreedProtocols.value) { uni.showToast({ title: '请先阅读并勾选协议', icon: 'none' }); return }
+  if (!agreedProtocols.value) { requestAgreement(); return }
   const phoneCode = e.detail?.code
   if (!phoneCode) {
     const errMsg = e.detail?.errMsg || ''
@@ -441,7 +476,7 @@ async function handleWxQuickLogin(e: any) {
 /** App 端发送手机号登录验证码，使用 login 场景避免影响绑定手机号流程 */
 async function handleSendPhoneLoginCode() {
   if (phoneCodeCountdown.value > 0 || sendingPhoneCode.value) return
-  if (!agreedProtocols.value) { uni.showToast({ title: '请先阅读并勾选协议', icon: 'none' }); return }
+  if (!agreedProtocols.value) { requestAgreement(() => { void handleSendPhoneLoginCode() }); return }
   if (!isPhone(phoneLoginPhone.value)) { uni.showToast({ title: '请输入正确手机号', icon: 'none' }); return }
   sendingPhoneCode.value = true
   try {
@@ -458,7 +493,7 @@ async function handleSendPhoneLoginCode() {
 
 /** App 端使用手机号、验证码和 codeID 登录，成功后复用统一登录后处理 */
 async function handlePhoneLogin() {
-  if (!agreedProtocols.value) { uni.showToast({ title: '请先阅读并勾选协议', icon: 'none' }); return }
+  if (!agreedProtocols.value) { requestAgreement(() => { void handlePhoneLogin() }); return }
   if (!isPhone(phoneLoginPhone.value)) { uni.showToast({ title: '请输入正确手机号', icon: 'none' }); return }
   if (!phoneLoginCodeID.value) { uni.showToast({ title: '请先获取验证码', icon: 'none' }); return }
   if (!phoneLoginCode.value) { uni.showToast({ title: '请输入验证码', icon: 'none' }); return }
@@ -472,8 +507,28 @@ async function handlePhoneLogin() {
   } finally { loading.value = false }
 }
 
-async function handlePasswordLogin() {
-  if (!agreedProtocols.value) { uni.showToast({ title: '请先阅读并勾选协议', icon: 'none' }); return }
+/** H5 浏览器自动填充可能不触发输入事件，登录时读取屏幕上的实际值。 */
+function syncBrowserAutofill(): void {
+  // #ifdef H5
+  const inputs = document.querySelectorAll<HTMLInputElement>('.login-form__item input')
+  if (inputs.length === 2) {
+    account.value = inputs[0].value
+    password.value = inputs[1].value
+  }
+  // #endif
+}
+
+/** 已勾选时直接登录；未勾选时弹窗确认后继续。 */
+function handlePasswordLogin() {
+  if (loading.value) return
+  syncBrowserAutofill()
+  if (agreedProtocols.value) { void submitPasswordLogin(); return }
+  requestAgreement(() => { void submitPasswordLogin() })
+}
+
+/** submitPasswordLogin 仅在用户已同意协议时提交账号密码。 */
+async function submitPasswordLogin() {
+  if (!agreedProtocols.value) return
   if (!account.value || !password.value) { uni.showToast({ title: '请输入账号和密码', icon: 'none' }); return }
   loading.value = true
   try {
@@ -530,24 +585,35 @@ function clearSavedAccount() {
 </script>
 
 <style lang="scss" scoped>
+/* 协议确认层：保持协议可查看，明确区分同意与取消。 */
+.agreement-mask { position: fixed; inset: 0; z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 24px; background: var(--color-mask); }
+.agreement-dialog { box-sizing: border-box; width: 100%; max-width: 360px; padding: 24px; border-radius: var(--radius-lg); background: var(--card-bg); }
+.agreement-dialog__title { display: block; text-align: center; color: var(--text-primary); font-size: var(--font-label); font-weight: 600; }
+.agreement-dialog__content { display: block; margin-top: 18px; color: var(--text-secondary); font-size: var(--font-body); line-height: 1.8; }
+.agreement-dialog__link { color: var(--color-primary); }
+.agreement-dialog__actions { display: flex; gap: 12px; margin-top: 24px; }
+.agreement-dialog__actions button { flex: 1; margin: 0; padding: 0 8px; min-width: 0; border-radius: var(--radius-full); font-size: var(--font-body); }
+.agreement-dialog__cancel { background: var(--color-bg-secondary); color: var(--text-secondary); }
+.agreement-dialog__confirm { background: var(--color-primary); color: var(--color-on-primary); }
+
 /* 登录页 — 自定义导航栏 + 内容区共同占满整屏 */
 .login-screen {
   min-height: 100vh;
   height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--card-bg);
-  overflow: hidden;
+  background: var(--page-gradient);
+  overflow: auto;
 }
 
-/* 登录内容区 — 白底，不可滚动，填满导航栏下方剩余高度 */
+/* 登录表单允许小屏与键盘场景滚动，品牌区保留可收缩空间。 */
 .login-page {
   flex: 1;
   min-height: 0;
   display: flex;
   flex-direction: column;
-  background: var(--card-bg);
-  overflow: hidden;
+  background: transparent;
+  overflow: auto;
 }
 
 /* ── 品牌区：占满剩余高度，logo 垂直居中 ── */
@@ -578,7 +644,7 @@ function clearSavedAccount() {
 .login-slogan {
   display: block;
   margin-bottom: 18px;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
   line-height: 1.4;
   color: var(--text-secondary);
@@ -592,7 +658,7 @@ function clearSavedAccount() {
 }
 
 .password-forgot {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 
@@ -624,7 +690,7 @@ function clearSavedAccount() {
 }
 
 .legal-check-icon {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
 }
 
@@ -633,12 +699,12 @@ function clearSavedAccount() {
 }
 
 .legal-text__lead {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .legal-text__link {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 
@@ -671,7 +737,7 @@ function clearSavedAccount() {
 
 .login-btn__text {
   color: var(--color-on-primary);
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   line-height: 1;
   white-space: nowrap;
@@ -692,7 +758,7 @@ function clearSavedAccount() {
 }
 
 .wx-auto-login-status__text {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
   line-height: 1.3;
   color: var(--color-primary);
@@ -706,7 +772,7 @@ function clearSavedAccount() {
 }
 
 .login-switch__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--color-primary);
 }
 
@@ -742,14 +808,14 @@ function clearSavedAccount() {
 .phone-login-field__label {
   display: block;
   margin-bottom: 8px;
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .phone-login-field__input {
   width: 100%;
   min-width: 0;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   padding: 0;
   margin: 0;
@@ -772,7 +838,7 @@ function clearSavedAccount() {
 }
 
 .phone-login-code-btn__text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   white-space: nowrap;
 }
@@ -799,7 +865,7 @@ function clearSavedAccount() {
 
 .login-form__label {
   width: 48px;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   flex-shrink: 0;
 }
@@ -808,7 +874,7 @@ function clearSavedAccount() {
   flex: 1;
   width: 0;
   min-width: 0;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   padding: 0;
   margin: 0;
@@ -845,28 +911,28 @@ function clearSavedAccount() {
 }
 
 .remember-check-icon {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
 }
 
 .remember-text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .remember-clear {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 
 .legal-check-icon {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
 }
 
 .legal-text {
   flex: 1;
-  font-size: 12px;
+  font-size: var(--font-caption);
   line-height: 1.6;
   color: var(--text-secondary);
 }

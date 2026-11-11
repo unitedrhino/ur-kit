@@ -19,6 +19,10 @@
       }
     },
     {
+      "path": "pages/message/index",
+      "style": { "navigationStyle": "custom" }
+    },
+    {
       "path": "pages/scene/index",
       "style": {
         "navigationStyle": "custom"
@@ -33,11 +37,15 @@
     {
       "root": "packageDevice",
       "pages": [
-        { "path": "pages/detail/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/panel-entry/index", "style": { "navigationBarTitleText": "设备面板" } },
+        { "path": "pages/panel/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "设备面板" } },
+        { "path": "pages/detail/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "设备详情", "mp-weixin": { "navigationStyle": "default" } } },
         { "path": "pages/history/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/logs/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/bind/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/share-manage/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/share/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/share-accept/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/action-invoke/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/settings/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/device-info/index", "style": { "navigationStyle": "custom" } },
@@ -61,7 +69,8 @@
     {
       "root": "packageUser",
       "pages": [
-        { "path": "pages/login/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/web-login/index", "style": { "navigationStyle": "custom", "navigationBarTitleText": "登录电脑端" } },
+      { "path": "pages/login/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/bind-phone/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/org-id-not-found/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/tenant-manage/index", "style": { "navigationStyle": "custom" } },
@@ -76,7 +85,10 @@
         { "path": "pages/notify-settings/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/voiceprint-agreement/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/family-manage/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/family-members/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/family-edit/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/project-invite/index", "style": { "navigationStyle": "custom" } },
+        { "path": "pages/project-entry/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/room-manage/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/room-edit/index", "style": { "navigationStyle": "custom" } },
         { "path": "pages/legal/index", "style": { "navigationStyle": "custom" } }
@@ -127,10 +139,10 @@
         "selectedIconPath": "static/icons/tab-home-active.png"
       },
       {
-        "pagePath": "pages/device/index",
-        "text": "设备",
-        "iconPath": "static/icons/tab-device.png",
-        "selectedIconPath": "static/icons/tab-device-active.png"
+        "pagePath": "pages/message/index",
+        "text": "消息",
+        "iconPath": "static/icons/tab-message.png",
+        "selectedIconPath": "static/icons/tab-message-active.png"
       },
       {
         "pagePath": "pages/scene/index",

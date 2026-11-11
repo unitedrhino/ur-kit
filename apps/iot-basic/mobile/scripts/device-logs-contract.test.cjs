@@ -11,7 +11,7 @@ const root = path.resolve(__dirname, '..');
 
 /**
  * read 读取 mobile-uniapp 内的源码文件。
- * @param {string} relPath 相对 apps/iot-basic/mobile 的文件路径。
+ * @param {string} relPath 相对 apps/mobile-uniapp 的文件路径。
  * @returns {string} 文件文本内容。
  */
 function read(relPath) {
@@ -20,7 +20,7 @@ function read(relPath) {
 
 /**
  * loadTsModule 将 TypeScript 文件转译为 CommonJS 后加载。
- * @param {string} relPath 相对 apps/iot-basic/mobile 的文件路径。
+ * @param {string} relPath 相对 apps/mobile-uniapp 的文件路径。
  * @returns {Record<string, unknown>} 模块导出对象。
  */
 function loadTsModule(relPath) {
@@ -46,7 +46,7 @@ function loadTsModule(relPath) {
   return module.exports;
 }
 
-test('device logs page is registered in packageDevice and detail entry opens it', () => {
+test('device logs page is registered in packageDevice and settings entry opens it', () => {
   const pages = JSON.parse(read('src/pages.json'));
   const packageDevice = pages.subPackages.find((item) => item.root === 'packageDevice');
   assert.ok(packageDevice, 'packageDevice subpackage should exist');
@@ -55,7 +55,7 @@ test('device logs page is registered in packageDevice and detail entry opens it'
     'packageDevice should register pages/logs/index',
   );
 
-  const detailPage = read('src/packageDevice/pages/detail/index.vue');
+  const detailPage = read('src/packageDevice/pages/settings/index.vue');
   assert.match(detailPage, /handleNavToDeviceLogs/);
   assert.match(detailPage, /\/packageDevice\/pages\/logs\/index\?productID=/);
   assert.doesNotMatch(detailPage, /设备日志建设中/);

@@ -18,7 +18,7 @@ test('device list cards show only the device alias in the former device ID row',
   assert.match(card, /const displayName = computed\(\(\) => props\.deviceAlias \|\| props\.deviceName\)/, 'card title should prefer deviceAlias and fall back to deviceName');
   assert.match(card, /<text class="device-card__name">\{\{displayName\}\}<\/text>/, 'card main row should render the alias-backed display name');
   assert.doesNotMatch(card, /class="device-card__product"/, 'device-card should not render the old second alias/product row');
-  assert.match(card, /\.device-card__info\s*\{[^}]*justify-content:\s*flex-start/, 'single-line card content should start next to the left icon');
+  assert.match(card, /\.device-card__name\s*\{[^}]*-webkit-line-clamp:\s*2/, 'grid cards should allow two lines for long aliases');
   assert.doesNotMatch(card, /\.device-card__info\s*\{[^}]*justify-content:\s*center/, 'device alias should not be centered away from the icon');
   assert.match(home, /:deviceAlias="item\.deviceAlias"/, 'home list should pass deviceAlias into device-card');
   assert.match(device, /:deviceAlias="item\.deviceAlias"/, 'device tab list should pass deviceAlias into device-card');

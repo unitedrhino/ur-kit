@@ -6,7 +6,7 @@
     </view>
     <view
       class="nav-bar__inner"
-      :style="`padding-top: ${statusBarHeight}px; height: ${navBarHeight}px; color: ${color}; background: ${background};`"
+      :style="`padding-top: ${statusBarHeight}px; height: ${statusBarHeight + navBarHeight}px; color: ${color}; background: ${background};`"
     >
       <view class="nav-bar__left" :style="`width: ${leftSlotWidth}px`">
         <template v-if="showBack">
@@ -136,10 +136,11 @@ function handleBack() {
   border-radius: 40rpx;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 24rpx;
+  font-size: var(--font-caption);
 }
 
 .nav-bar {
+  flex-shrink: 0;
   display: flex;
   width: 100vw;
   color: var(--text-primary);
@@ -200,7 +201,7 @@ function handleBack() {
 
 .nav-bar__brand-logo-text {
   color: var(--color-on-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 700;
   line-height: 24px;
 }
@@ -209,7 +210,7 @@ function handleBack() {
   min-width: 0;
   margin-left: 8px;
   color: currentColor;
-  font-size: 17px;
+  font-size: var(--font-label);
   font-weight: 700;
   line-height: 24px;
   overflow: hidden;
@@ -228,7 +229,7 @@ function handleBack() {
 .nav-bar__title {
   width: 100%;
   max-width: 100%;
-  font-size: 17px;
+  font-size: var(--font-label);
   font-weight: bold;
   text-align: center;
   overflow: hidden;

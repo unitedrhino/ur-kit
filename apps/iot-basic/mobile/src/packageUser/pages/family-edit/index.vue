@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="title" />
 
@@ -214,7 +215,7 @@ page {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  background: var(--page-bg);
+  background: var(--page-gradient);
 }
 
 .fe-body {
@@ -239,12 +240,12 @@ page {
 }
 
 .fe-helper__text {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .fe-helper__link {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 
@@ -293,7 +294,7 @@ page {
 
 .fe-location__title {
   display: block;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -301,7 +302,7 @@ page {
 .fe-location__desc {
   display: block;
   margin-top: 8rpx;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--text-secondary);
 }
@@ -309,13 +310,13 @@ page {
 .fe-location__panel {
   margin-top: 20rpx;
   padding: 20rpx;
-  border-radius: 20rpx;
+  border-radius: var(--radius-lg);
   background: var(--color-bg-secondary);
 }
 
 .fe-location__value {
   display: block;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--text-primary);
 }
@@ -323,7 +324,7 @@ page {
 .fe-location__error {
   display: block;
   margin-top: 12rpx;
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   line-height: 1.5;
   color: var(--color-warning);
 }
@@ -354,7 +355,7 @@ page {
 }
 
 .fe-location__btn-text {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   font-weight: 600;
   color: var(--color-primary);
 }
@@ -364,13 +365,13 @@ page {
 }
 
 .fe-field__label {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-bottom: 16rpx;
 }
 
 .fe-field__input {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   padding: 16rpx 0;
 }
@@ -392,7 +393,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 
 .fe-btn--primary {

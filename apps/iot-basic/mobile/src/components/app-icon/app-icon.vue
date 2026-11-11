@@ -1,3 +1,4 @@
+<!-- 跨端图标展示及 App 文本兼容图形。 -->
 <template>
   <!-- #ifdef APP-PLUS -->
   <text
@@ -83,6 +84,7 @@ const ICON_GLYPHS: Record<string, string> = {
   'tabler:search': '⌕',
   'tabler:send': '发',
   'tabler:settings': '⚙',
+  'tabler:share': '↗',
   'tabler:tools-kitchen-2': '厨',
   'tabler:user': '人',
   'tabler:wash-machine': '洗',

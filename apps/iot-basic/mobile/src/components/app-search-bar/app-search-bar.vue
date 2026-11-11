@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view class="app-search-bar">
   <view class="app-search-bar__inner">
@@ -52,14 +53,14 @@ function onConfirm(e: any) {
   align-items: center;
   height: 56px;
   padding: 8px 16px 4px;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .app-search-bar__inner {
   flex: 1;
   display: flex;
   align-items: center;
-  height: 36px;
+  height: 44px;
   background: var(--card-bg);
   border-radius: var(--radius-full, 9999px);
   padding: 0 12px;
@@ -74,11 +75,11 @@ function onConfirm(e: any) {
   flex: 1;
   width: 0;
   min-width: 0;
-  height: 36px;
-  line-height: 36px;
+  height: 44px;
+  line-height: 44px;
   padding: 0;
   margin: 0;
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 </style>

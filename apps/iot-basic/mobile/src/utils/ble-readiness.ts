@@ -17,6 +17,7 @@ import { bleDataSource } from '../data/datasources/bluetooth.datasource';
 import { privacyConsentService } from '../services/privacy-consent.service';
 
 export type BleReadinessReason =
+  | 'unsupported'
   | 'system_off'
   | 'app_unauthorized'
   | 'location_off'
@@ -329,6 +330,7 @@ async function openBluetoothAdapterWithRetry(): Promise<BleReadinessResult> {
  * 失败时返回结构化 reason, 由调用方决定是否调用 showBluetoothNotReadyGuide。
  */
 export async function ensureBluetoothReady(options: BleReadinessOptions = {}): Promise<BleReadinessResult> {
+  if (!supportsBluetoothProvisioning()) return { ok: false, reason: 'unsupported', errMsg: '请使用微信小程序或 App 完成蓝牙配网' };
   if (bleDataSource.isAdapterReady()) {
     bleLogger.debug('readiness', 'skip-adapter-ready');
     return { ok: true };
@@ -350,7 +352,14 @@ export async function ensureBluetoothReady(options: BleReadinessOptions = {}): P
   return pendingBluetoothReady;
 }
 
+/** supportsBluetoothProvisioning 区分提供原生蓝牙 API 的运行端，H5 不尝试原生授权。 */
+export function supportsBluetoothProvisioning(): boolean {
+  return typeof uni.openBluetoothAdapter === 'function';
+}
+
+/** ensureBluetoothReadyInner 先确认运行端能力，再检查原生权限与适配器状态。 */
 async function ensureBluetoothReadyInner(interactive: boolean): Promise<BleReadinessResult> {
+  if (!supportsBluetoothProvisioning()) return { ok: false, reason: 'unsupported', errMsg: '请使用微信小程序或 App 完成蓝牙配网' };
   const sys = safeGetSystemSetting();
   if (sys.bluetoothEnabled === false) {
     bleLogger.warn('readiness', 'systemBluetooth:disabled');
@@ -416,6 +425,8 @@ interface GuideConfig {
 
 function resolveGuideConfig(reason: BleReadinessReason | undefined): GuideConfig {
   switch (reason) {
+    case 'unsupported':
+      return { title: '当前浏览器不支持蓝牙配网', content: '请使用微信小程序或 App 完成设备配网。', confirmText: '知道了', action: () => Promise.resolve(false) };
     case 'system_off':
       return {
         title: '请开启手机蓝牙',

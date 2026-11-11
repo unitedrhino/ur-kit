@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="title" />
 
@@ -151,14 +152,14 @@ page {
 }
 
 .te-field__label {
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-primary);
 }
 
 .te-field__input,
 .te-field__textarea {
   width: 100%;
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
 }
 
@@ -183,7 +184,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 600;
 }
 

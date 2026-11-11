@@ -16,6 +16,10 @@ export const tabIconSvgs = {
   <rect x="33" y="29" width="30" height="37" rx="5" fill="white" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
   <path d="M42 58H54" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
 </svg>`,
+  message: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 81 81" fill="none">
+  <path d="M17 20H64V51H38L25 62V51H17Z" stroke="currentColor" stroke-width="6" stroke-linejoin="round"/>
+  <path d="M27 31H54M27 41H47" stroke="currentColor" stroke-width="5" stroke-linecap="round"/>
+</svg>`,
   scene: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 81 81" fill="none">
   <path d="M19 42.5L40.5 24L62 42.5" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
   <path d="M25 40.5V62H56V40.5" stroke="currentColor" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>

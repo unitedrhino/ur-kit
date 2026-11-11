@@ -88,7 +88,7 @@ onUnmounted(() => {
   width: 100%;
   max-width: 327px;
   padding: 24px 20px 18px;
-  border-radius: 16px;
+  border-radius: var(--radius-lg);
   box-sizing: border-box;
   background: var(--card-bg);
   box-shadow: 0 18px 48px var(--color-shadow);
@@ -97,7 +97,7 @@ onUnmounted(() => {
 .privacy-modal__title {
   display: block;
   margin-bottom: 14px;
-  font-size: 18px;
+  font-size: var(--font-label);
   font-weight: 700;
   line-height: 25px;
   color: var(--text-primary);
@@ -107,19 +107,19 @@ onUnmounted(() => {
 .privacy-modal__body {
   display: block;
   margin-bottom: 22px;
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 22px;
   color: var(--text-secondary);
 }
 
 .privacy-modal__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 22px;
   color: var(--text-secondary);
 }
 
 .privacy-modal__link {
-  font-size: 14px;
+  font-size: var(--font-body);
   line-height: 22px;
   color: var(--color-primary);
 }
@@ -136,7 +136,7 @@ onUnmounted(() => {
   padding: 0 12px;
   border: none;
   border-radius: 22px;
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   line-height: 44px;
   text-align: center;

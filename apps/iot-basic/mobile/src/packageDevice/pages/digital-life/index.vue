@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="数字生命管理" />
 
@@ -227,7 +228,7 @@ function formatTime(value?: number): string {
   flex: 1;
   text-align: center;
   padding: 10px 0;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-secondary);
   position: relative;
 }
@@ -255,7 +256,7 @@ function formatTime(value?: number): string {
 .dl-body {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 /* CloneGroup 信息卡片 */
@@ -263,7 +264,7 @@ function formatTime(value?: number): string {
   margin: 12px 16px;
   padding: 16px;
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
 }
 
 .dl-info-card__header {
@@ -273,13 +274,13 @@ function formatTime(value?: number): string {
 }
 
 .dl-info-card__title {
-  font-size: 17px;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .dl-info-card__tag {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   background: var(--color-primary-light);
   padding: 2px 8px;
@@ -287,7 +288,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-info-card__desc {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 8px;
 }
@@ -298,7 +299,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-section__title {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 12px;
@@ -318,7 +319,7 @@ function formatTime(value?: number): string {
 
 .dl-speaker-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
 }
 
@@ -340,7 +341,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-speaker-card__icon-text {
-  font-size: 18px;
+  font-size: var(--font-label);
 }
 
 .dl-speaker-card__info {
@@ -349,14 +350,14 @@ function formatTime(value?: number): string {
 }
 
 .dl-speaker-card__name {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
   color: var(--text-primary);
   display: block;
 }
 
 .dl-speaker-card__time {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
   margin-top: 4px;
   display: block;
@@ -381,7 +382,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-speaker-card__status-text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -396,7 +397,7 @@ function formatTime(value?: number): string {
 .dl-speaker-card__action-btn {
   padding: 6px 16px;
   border-radius: 6px;
-  font-size: 13px;
+  font-size: var(--font-caption);
 }
 
 .dl-speaker-card__action-btn--delete {
@@ -417,7 +418,7 @@ function formatTime(value?: number): string {
 
 .dl-clone-card {
   background: var(--card-bg);
-  border-radius: 12px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
   display: flex;
   align-items: center;
@@ -436,7 +437,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-clone-card__icon-text {
-  font-size: 18px;
+  font-size: var(--font-label);
 }
 
 .dl-clone-card__info {
@@ -445,14 +446,14 @@ function formatTime(value?: number): string {
 }
 
 .dl-clone-card__name {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
   color: var(--text-primary);
   display: block;
 }
 
 .dl-clone-card__desc {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 4px;
   display: block;
@@ -462,7 +463,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-clone-card__time {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
   margin-top: 4px;
   display: block;
@@ -488,7 +489,7 @@ function formatTime(value?: number): string {
 }
 
 .dl-clone-card__status-text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 

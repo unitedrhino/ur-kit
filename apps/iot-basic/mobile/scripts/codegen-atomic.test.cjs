@@ -20,10 +20,14 @@ function codegenDir() {
   const web = path.join(fixture, 'apps/iot-basic/web');
   fs.mkdirSync(web, { recursive: true });
   fs.writeFileSync(path.join(web, 'package.json'), '{"dependencies":{}}\n');
+  for (const name of ['.env.development', '.env.test', '.env.production']) fs.writeFileSync(path.join(web, name), 'VITE_GLOB_APPNAME=org-iot-client\n');
   fs.mkdirSync(path.join(mobile, 'src/data/openapi'), { recursive: true });
   fs.writeFileSync(path.join(mobile, 'package.json'), '{"type":"commonjs"}\n');
   fs.copyFileSync(path.resolve(__dirname, '../codegen.js'), path.join(mobile, 'codegen.js'));
   const files = {};
+  const mobileContracts = path.join(mobile, 'contracts');
+  fs.mkdirSync(mobileContracts, { recursive: true });
+  const mobileFiles = {};
   for (const name of ['core-api', 'things-api']) {
     const relative = `backend/.swagger/${name}.json`;
     const body = JSON.stringify({
@@ -39,7 +43,10 @@ function codegenDir() {
     });
     fs.writeFileSync(path.join(contracts, `${name}.json`), body);
     files[relative] = createHash('sha256').update(body).digest('hex');
+    fs.writeFileSync(path.join(mobileContracts, `${name}.json`), body);
+    mobileFiles[`${name}.json`] = files[relative];
   }
+  fs.writeFileSync(path.join(mobileContracts, 'manifest.json'), JSON.stringify({ saasCommit: 'a'.repeat(40), files: mobileFiles }));
   fs.writeFileSync(path.join(fixture, 'contracts/manifest.json'), JSON.stringify({ saas_commit: 'a'.repeat(40), files }));
   const verifierDir = path.join(fixture, 'scripts');
   fs.mkdirSync(verifierDir, { recursive: true });
@@ -65,7 +72,7 @@ fs.mkdirSync(output,{recursive:true}); fs.writeFileSync(path.join(output,'client
 if(process.env.MOCK_FAIL_SPEC && path.basename(input)===process.env.MOCK_FAIL_SPEC) process.exit(7);
 `);
   fs.chmodSync(fakeGenerator, 0o755);
-  return { fixture, mobile, contracts, output: path.join(mobile, 'src/data/openapi/generated') };
+  return { fixture, mobile, contracts: mobileContracts, output: path.join(mobile, 'src/data/openapi/generated') };
 }
 
 /** runCodegen 在隔离应用中执行与用户相同的脚本入口并返回状态。 */

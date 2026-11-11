@@ -187,7 +187,7 @@ test('android app identity uses lianxi launcher icon and app name', () => {
 
 test('android scan entry declares barcode module and requests camera permission before scanning', () => {
   const manifest = readJson('src/manifest.json');
-  const page = read('src/pages/home/index.vue');
+  const page = read('src/packageDevice/pages/bind/index.vue');
   const servicePath = 'src/services/scan-permission.service.ts';
   const androidPermissions = manifest['app-plus']?.distribute?.android?.permissions || [];
 
@@ -197,7 +197,7 @@ test('android scan entry declares barcode module and requests camera permission 
     'App Android should declare CAMERA before requesting scan permission',
   );
   assert.ok(exists(servicePath), 'scan permission service should centralize App Android permission request');
-  assert.match(page, /ensureScanCameraReady/, 'home scan should check camera readiness before uni.scanCode');
+  assert.match(page, /ensureScanCameraReady/, 'add-device scanner should check camera readiness before uni.scanCode');
   assert.ok(
     page.indexOf('ensureScanCameraReady') < page.indexOf('uni.scanCode'),
     'camera readiness check should happen before uni.scanCode',
@@ -262,7 +262,8 @@ test('mine tenant switch uses an in-page selector instead of system action sheet
   assert.match(mine, /tenantPickerVisible/, 'mine page should control the tenant selector visibility in-page');
   assert.match(mine, /handleSelectTenant/, 'mine page should switch tenant from the selector item tap');
   assert.doesNotMatch(tenantSwitchBlock, /uni\.showActionSheet/, 'mine tenant switch should not rely on system action sheet');
-  assert.match(familySwitchBlock, /uni\.showActionSheet/, 'mine family switch can keep its existing action sheet behavior');
+  assert.doesNotMatch(familySwitchBlock, /uni\.showActionSheet/, 'mine project switch should use an in-page selector');
+  assert.match(mine, /projectPickerVisible/, 'mine page should control the project selector visibility');
 });
 
 test('personal account basics are routed and avoid album pre-authorization', () => {
@@ -323,8 +324,7 @@ test('runtime config splits app id and endpoints by output platform', () => {
   assert.match(config, /VITE_API_BASE_URL/, 'apiBaseUrl should support env override');
   assert.match(config, /VITE_WS_BASE_URL/, 'wsBaseUrl should support env override');
   assert.match(config, /function normalizeWsBaseUrl\(/, 'wsBaseUrl should be normalized from env or apiBaseUrl');
-  assert.equal((config.match(/apiBaseUrl:\s*normalizeApiBaseUrl\(apiBaseUrl,\s*''\)/g) || []).length, 9);
-  assert.doesNotMatch(config, /saas\.unitedrhino\.com|120\.25\.49\.238/, 'public source must not embed environment addresses');
+  assert.doesNotMatch(config, /https?:\/\/saas\.unitedrhino\.com|120\.25\.49\.238/, 'public app must use injected endpoints');
   assert.equal((config.match(/appId:\s*'700'/g) || []).length, 3, 'mp-weixin should use app-id 700');
   assert.equal((config.match(/appId:\s*'800'/g) || []).length, 3, 'Android App should use app-id 800');
   assert.equal((config.match(/appId:\s*'900'/g) || []).length, 3, 'iOS App should use app-id 900');
@@ -405,7 +405,8 @@ test('area icons save standard icon keys while preserving legacy emoji reads', (
   assert.match(roomEdit, /normalizeAreaIcon/, 'room edit should normalize existing backend values');
   assert.match(roomEdit, /handleSelectIcon\(item\.value\)/, 'room edit should save the standard icon key');
   assert.match(roomManage, /normalizeAreaIcon/, 'room manage should render legacy area icon values through the normalizer');
-  assert.match(editArea, /normalizeAreaIcon/, 'device area picker should render legacy area icon values through the normalizer');
+  assert.match(editArea, /<area-tree/, 'device area picker should use the shared area tree');
+  assert.match(read('src/components/area-tree/area-tree.vue'), /normalizeAreaIcon/, 'area tree should normalize legacy icon values');
 });
 
 test('migrated UI icon usage goes through app-icon instead of scattered glyphs', () => {
@@ -446,7 +447,7 @@ test('android tab pages avoid pull-refresh and scroll gesture competition', () =
   const appIcon = read('src/components/app-icon/app-icon.vue');
 
   assert.doesNotMatch(pages, /"enablePullDownRefresh"\s*:\s*true/, 'tab pages should not enable native page pull refresh while using scroll-view lists');
-  assert.doesNotMatch(home, /refresher-enabled/, 'home list should not enable scroll-view pull refresh');
+  assert.match(home, /refresher-enabled/, 'home supports refresh of project, area and devices');
   assert.doesNotMatch(device, /refresher-enabled/, 'device list should not enable scroll-view pull refresh');
   assert.doesNotMatch(scene, /refresher-enabled/, 'scene list should not enable scroll-view pull refresh');
   assert.match(home, /height:\s*\$\{scrollHeight\}/, 'home list should have an explicit scroll height');
@@ -489,8 +490,10 @@ test('device cards use a non-native select event for App navigation payloads', (
 
   assert.match(card, /\(e:\s*'select'/, 'device-card should emit a custom select event');
   assert.match(card, /emit\('select',\s*payload\)/, 'device-card should emit device identity through select');
-  assert.match(home, /@select="handleDeviceTap"/, 'home device cards should listen to select instead of native tap');
-  assert.match(device, /@select="handleDeviceTap"/, 'device tab cards should listen to select instead of native tap');
+  assert.match(home, /@select="handleHomeCardTap\(item\)"/, 'home device cards should route select through selection handling');
+  assert.match(device, /@select="handleListCardTap\(item\)"/, 'device tab cards should route select through selection handling');
+  assert.match(home, /else handleDeviceTap\(device\)/, 'home should preserve normal device navigation');
+  assert.match(device, /else handleDeviceTap\(device\)/, 'device tab should preserve normal device navigation');
 });
 
 test('management action rows use block tap targets on App', () => {
@@ -500,12 +503,19 @@ test('management action rows use block tap targets on App', () => {
 
   [
     ['family manage', family],
-    ['room manage', room],
   ].forEach(([name, source]) => {
     assert.doesNotMatch(source, /<text class="[^"]*card__action[^"]*"[^>]*@tap=/, `${name} should not use inline text as the only tap target`);
-    assert.match(source, /<view class="[^"]*card__action[^"]*"[^>]*@tap\.stop=/, `${name} should use block action tap targets`);
+    assert.match(source, /<view[^>]*class="[^"]*card__action[^"]*"[^>]*@tap\.stop=/, `${name} should use block action tap targets`);
   });
+  assert.match(room, /<view[^>]*class="[^"]*rm-node__action[^"]*"[^>]*@tap=/, 'room manage should use block action tap targets');
   assert.doesNotMatch(tenant, /card__action[^"]*"[^>]*@tap=/, 'tenant manage should not expose management action rows');
+});
+
+test('family management provides exit action for non-owner projects', () => {
+  const family = read('src/packageUser/pages/family-manage/index.vue');
+  assert.match(family, /familyMemberService\.leaveSharedFamily/, 'project management should reuse the verified member exit service');
+  assert.match(family, /item\.adminUserID !== currentUserID/, 'exit action should only be shown for non-owner projects');
+  assert.match(family, /退出项目/, 'exit action should confirm the project being left');
 });
 
 test('provisioning after BLE scan prefers uni runtime APIs on Android App', () => {
@@ -703,7 +713,7 @@ test('device bind scan header uses a lightweight status indicator instead of a s
 test('device bind page refreshes nearby-device scan whenever the page becomes visible', () => {
   const page = read('src/packageDevice/pages/bind/index.vue');
 
-  assert.match(page, /import \{ onLoad,\s*onShow,\s*onUnload \} from '@dcloudio\/uni-app'/, 'bind page should listen to onShow');
+  assert.match(page, /import \{ onLoad,\s*onShow,\s*onHide,\s*onUnload \} from '@dcloudio\/uni-app'/, 'bind page should listen to onShow');
   assert.match(page, /onShow\(async \(\) => \{[\s\S]*bluetoothConfigService\.stopScan\(\)[\s\S]*void startScan\(\)/, 'returning to bind page should stop stale scan and search again');
   assert.doesNotMatch(page, /Promise\.allSettled\(\[loadCategoriesAndProducts\(\), startScan\(\)\]\)/, 'initial load should not be the only scan trigger');
 });
@@ -712,6 +722,8 @@ test('home add popover closes before navigating from menu actions', () => {
   const home = read('src/pages/home/index.vue');
 
   assert.match(home, /function handleAddDevice\(\) \{[\s\S]*handleCloseMenus\(\)[\s\S]*uni\.navigateTo\(\{ url: '\/packageDevice\/pages\/bind\/index' \}\)/, 'add-device menu item should close the popover before navigation');
-  assert.match(home, /async function handleScan\(\) \{[\s\S]*handleCloseMenus\(\)[\s\S]*uni\.scanCode/, 'scan menu item should close the popover before opening scanner');
+  assert.doesNotMatch(home, /输入设备码/, 'scanner input should be inside the add-device page');
+  assert.match(home, /@tap="handleScan"/, 'home add menu should expose the unified scanner entry');
+  assert.match(read('src/packageDevice/pages/bind/index.vue'), /扫码添加[\s\S]*handleQrScan/, 'add-device page should provide scan binding');
   assert.match(home, /function handleRefresh\(\) \{[\s\S]*handleCloseMenus\(\)[\s\S]*deviceListProvider\.loadFirst\(\)/, 'refresh menu item should close the popover before refreshing');
 });

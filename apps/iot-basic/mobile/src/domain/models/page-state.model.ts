@@ -1,6 +1,8 @@
 export interface PageParams {
   page: number;
   size: number;
+  /** 可选的已读状态筛选：1 已读，2 未读。 */
+  isRead?: number;
 }
 
 export interface PageResult<T> {

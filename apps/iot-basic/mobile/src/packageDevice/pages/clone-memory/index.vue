@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="记忆" />
 
@@ -296,7 +297,7 @@ function handleSessionTap(sessionID: string): void {
   flex: 1;
   text-align: center;
   padding: 10px 0;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-secondary);
 }
 
@@ -312,7 +313,7 @@ function handleSessionTap(sessionID: string): void {
 .cm-body {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .cm-date-filter {
@@ -330,13 +331,13 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-date-filter__label {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-right: 4px;
 }
 
 .cm-date-filter__btn {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   background: var(--page-bg);
   padding: 4px 10px;
@@ -356,7 +357,7 @@ function handleSessionTap(sessionID: string): void {
 .cm-date-filter__summary {
   display: block;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -369,7 +370,7 @@ function handleSessionTap(sessionID: string): void {
 
 .cm-session-card {
   background: var(--card-bg);
-  border-radius: 10px;
+  border-radius: var(--radius-lg);
   padding: 14px 16px;
   display: flex;
   flex-direction: column;
@@ -389,13 +390,13 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-session-card__id {
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 500;
   color: var(--text-primary);
 }
 
 .cm-session-card__channel {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--color-primary);
   background: var(--color-primary-light);
   padding: 2px 8px;
@@ -403,13 +404,13 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-session-card__turns {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .cm-session-card__time,
 .cm-memory-item__time {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
 }
 
@@ -421,7 +422,7 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-memory-profile__label {
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
   display: block;
@@ -429,7 +430,7 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-memory-profile__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   line-height: 1.6;
 }
@@ -444,7 +445,7 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-memory-item__kind {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   background: var(--color-bg-secondary);
   padding: 2px 8px;
@@ -452,7 +453,7 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-memory-item__summary {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   line-height: 1.5;
 }
@@ -463,7 +464,7 @@ function handleSessionTap(sessionID: string): void {
 }
 
 .cm-load-more text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
 }
 </style>

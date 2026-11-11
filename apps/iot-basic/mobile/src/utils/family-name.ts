@@ -1,5 +1,6 @@
 export interface SuggestFamilyNameInput {
   nickName?: string;
+  userName?: string;
   tenantName?: string;
   existingNames?: string[];
 }
@@ -38,10 +39,14 @@ function trimTenantName(value: string): string {
 function buildCandidates(input: SuggestFamilyNameInput): string[] {
   const candidates: string[] = [];
   const nickName = normalizeText(input.nickName);
+  const userName = normalizeText(input.userName);
   const tenantName = trimTenantName(normalizeText(input.tenantName));
 
   if (!isGenericNickname(nickName)) {
-    candidates.push(`${nickName}的家`);
+    candidates.push(nickName);
+  }
+  if (!isGenericNickname(userName) && userName !== nickName) {
+    candidates.push(userName);
   }
   if (tenantName) {
     candidates.push(`${tenantName}空间`);

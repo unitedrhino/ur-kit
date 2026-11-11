@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="声纹录制" />
 
@@ -249,7 +250,7 @@ function formatDuration(seconds: number): string {
 .sr-body {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 /* 录音区域 */
@@ -305,7 +306,7 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-record-btn__text {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -316,13 +317,13 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-duration__label {
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
   display: block;
 }
 
 .sr-duration__value {
-  font-size: 20px;
+  font-size: var(--font-section);
   font-weight: 600;
   color: var(--text-primary);
   margin-top: 4px;
@@ -357,7 +358,7 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-tips__text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-tertiary);
   display: block;
   line-height: 1.6;
@@ -385,7 +386,7 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-form__label {
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   width: 100px;
   flex-shrink: 0;
@@ -393,7 +394,7 @@ function formatDuration(seconds: number): string {
 
 .sr-form__input {
   flex: 1;
-  font-size: 15px;
+  font-size: var(--font-body);
   color: var(--text-primary);
   padding: 8px 0;
 }
@@ -419,7 +420,7 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-submit-btn__text {
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--color-on-primary);
 }
@@ -439,7 +440,7 @@ function formatDuration(seconds: number): string {
 }
 
 .sr-retry__text {
-  font-size: 14px;
+  font-size: var(--font-body);
   color: var(--color-primary);
 }
 </style>

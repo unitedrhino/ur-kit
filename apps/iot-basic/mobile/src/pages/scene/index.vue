@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :brand="true" :back="false" />
 
@@ -8,6 +9,7 @@
   type="list"
   @scrolltolower="onLoadMore"
 >
+  <view class="mobile-heading"><text class="mobile-heading__title">场景联动</text><view class="mobile-heading__action" role="button" aria-label="创建场景" @tap="handleCreate"><app-icon name="tabler:plus" :size="26" /></view></view>
   <!-- 搜索栏 -->
   <app-search-bar
     :modelValue="keyword"
@@ -38,6 +40,7 @@
         @tap="handleSceneTap(item.id)"
         hover-class="scene-card--hover"
       >
+        <view class="scene-card__top">
         <!-- 左侧类型图标 -->
         <view :class="`scene-card__icon scene-card__icon--${item.type || 'manual'}`">
           <app-icon class="scene-card__icon-text" :name="item.type === 'auto' ? 'tabler:bolt' : 'tabler:player-play'" :size="18" />
@@ -77,6 +80,12 @@
             </view>
           </template>
         </view>
+        </view>
+        <view class="scene-card__flow">
+          <text>{{ item.type === 'manual' ? '手动触发' : (item.triggers.length ? item.triggers.length + ' 个触发条件' : '查看触发条件') }}</text>
+          <app-icon name="tabler:chevron-right" :size="18" />
+          <text>{{ item.actions.length ? item.actions.length + ' 个执行动作' : '查看执行动作' }}</text>
+        </view>
       </view>
     </view>
   </template>
@@ -93,9 +102,7 @@
 </scroll-view>
 
 <!-- 浮动添加按钮（列表不为空时显示） -->
-<view v-if="scenes.length > 0" class="scene-fab" @tap="handleCreate" hover-class="scene-fab--hover">
-  <app-icon class="scene-fab__icon" name="tabler:plus" :size="32" color="var(--color-on-primary)" />
-</view>
+
 
 <view v-if="createSheetVisible" class="create-sheet-mask" @tap="closeCreateSheet" />
 <view :class="`create-type-sheet ${createSheetVisible ? 'create-type-sheet--visible' : ''}`">
@@ -113,9 +120,13 @@
   <button class="create-type-sheet__cancel" @tap="closeCreateSheet">取消</button>
 </view>
 
+<mobile-tab-bar active="pages/scene/index" />
+
 </template>
 
 <script setup lang="ts">
+import { timestampMillis } from '../../utils/timestamp';
+import MobileTabBar from '../../components/mobile-tab-bar/mobile-tab-bar.vue';
 import AppIcon from '../../components/app-icon/app-icon.vue';
 import AppNavigationBar from '../../components/app-navigation-bar/app-navigation-bar.vue';
 import AppSearchBar from '../../components/app-search-bar/app-search-bar.vue';
@@ -130,7 +141,7 @@ import { getSystemInfo } from '../../utils/platform';
 
 function formatTime(timestamp: number): string {
   if (!timestamp) return '';
-  const d = new Date(timestamp * 1000);
+  const d = new Date(timestampMillis(timestamp));
   const M = String(d.getMonth() + 1).padStart(2, '0');
   const D = String(d.getDate()).padStart(2, '0');
   const h = String(d.getHours()).padStart(2, '0');
@@ -171,6 +182,9 @@ onLoad(() => {
   );
 });
 onShow(async () => {
+  // #ifdef MP-WEIXIN
+  uni.hideTabBar({ animation: false });
+  // #endif
   const ready = await ensurePageReady('/pages/scene/index');
   if (!ready) {
     loading.value = false;
@@ -223,7 +237,7 @@ function createScene(type: 'manual' | 'auto') {
 // 
 // function formatTime(timestamp: number): string {
 //   if (!timestamp) return '';
-//   const d = new Date(timestamp * 1000);
+//   const d = new Date(timestampMillis(timestamp));
 //   const M = String(d.getMonth() + 1).padStart(2, '0');
 //   const D = String(d.getDate()).padStart(2, '0');
 //   const h = String(d.getHours()).padStart(2, '0');
@@ -344,7 +358,7 @@ function createScene(type: 'manual' | 'auto') {
 .scene-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 /* 顶部添加按钮 */
@@ -382,7 +396,7 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-tab__text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -406,7 +420,7 @@ function createScene(type: 'manual' | 'auto') {
   align-items: center;
   padding: 14px 16px;
   background: var(--card-bg);
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   margin-bottom: 10px;
 }
 
@@ -450,7 +464,7 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-card__name {
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 500;
   color: var(--text-primary);
   overflow: hidden;
@@ -472,13 +486,13 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-card__badge-text {
-  font-size: 10px;
+  font-size: var(--font-caption);
   color: var(--color-error);
 }
 
 .scene-card__desc {
   display: block;
-  font-size: 12px;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin-top: 4px;
   overflow: hidden;
@@ -493,7 +507,7 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-card__meta-text {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--text-placeholder);
 }
 
@@ -522,7 +536,7 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-card__trigger-text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
 }
 
@@ -563,7 +577,7 @@ function createScene(type: 'manual' | 'auto') {
 }
 
 .scene-end__text {
-  font-size: 13px;
+  font-size: var(--font-caption);
   color: var(--text-placeholder);
 }
 
@@ -614,7 +628,7 @@ function createScene(type: 'manual' | 'auto') {
   bottom: 12px;
   z-index: 181;
   padding: 16px 12px calc(12px + env(safe-area-inset-bottom));
-  border-radius: 18px;
+  border-radius: var(--radius-lg);
   background: var(--page-bg);
   box-shadow: 0 -8px 28px var(--color-shadow);
   transform: translateY(110%);
@@ -633,13 +647,13 @@ function createScene(type: 'manual' | 'auto') {
   display: block;
   margin: 0 4px 12px;
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--font-label);
   font-weight: 700;
 }
 
 .create-type-sheet__group {
   overflow: hidden;
-  border-radius: var(--radius-md, 12px);
+  border-radius: var(--radius-lg);
   background: var(--card-bg);
 }
 
@@ -658,7 +672,7 @@ function createScene(type: 'manual' | 'auto') {
 
 .create-type-sheet__title {
   color: var(--text-primary);
-  font-size: 17px;
+  font-size: var(--font-label);
   font-weight: 700;
 }
 
@@ -675,9 +689,20 @@ function createScene(type: 'manual' | 'auto') {
   border-radius: var(--radius-md, 12px);
   color: var(--text-primary);
   background: var(--card-bg);
-  font-size: 16px;
+  font-size: var(--font-body);
   font-weight: 650;
   line-height: 48px;
 }
 
+
+.scene-tabs { padding: 5px; margin: 12px 16px 16px; background: var(--card-bg); border-radius: var(--radius-full); }
+.scene-tab { height: 42px; }
+.scene-tab--active { background: var(--navigation-active); }
+.scene-tab--active .scene-tab__text { color: var(--color-on-primary); }
+.scene-card { display: block; padding: 18px; margin-bottom: 14px; }
+.scene-card__top { display: flex; align-items: center; }
+.scene-card__name { font-size: var(--font-label); font-weight: 650; }
+.scene-card__flow { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 16px; padding: 14px 12px; border-radius: var(--radius-md); background: var(--surface-muted); font-size: var(--font-caption); color: var(--text-secondary); }
+.scene-switch--on { background: var(--color-success); }
+.scene-card__action { min-width: 44px; min-height: 44px; }
 </style>

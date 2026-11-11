@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <view v-if="count > 0" class="badge" :aria-label="`${display}条未读告警`">
   <text class="badge__text">{{display}}</text>
@@ -47,7 +48,7 @@ const display = computed(() => (props.count > props.maxCount ? `${props.maxCount
 }
 
 .badge__text {
-  font-size: 11px;
+  font-size: var(--font-caption);
   color: var(--color-on-primary);
   font-weight: 500;
   line-height: 1;

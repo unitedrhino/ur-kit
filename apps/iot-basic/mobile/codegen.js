@@ -10,7 +10,7 @@ const path = require('node:path');
 // REPO_ROOT 是公开 ur-kit 仓库根目录，用于读取版本化合同和放置临时产物。
 const REPO_ROOT = path.resolve(__dirname, '../../..');
 // CONTRACTS_ROOT 保存固定 SaaS 提交的 OpenAPI 文档与来源清单。
-const CONTRACTS_ROOT = path.join(REPO_ROOT, 'contracts');
+const CONTRACTS_ROOT = path.join(__dirname, 'contracts');
 // OUTPUT_DIR 是应用实际引用的生成客户端目录，仅在完整生成后替换。
 const OUTPUT_DIR = path.join(__dirname, 'src/data/openapi/generated');
 // GENERATOR 是当前 mobile 锁文件安装的 OpenAPI Generator CLI。
@@ -35,12 +35,12 @@ function verifyContracts() {
     stdio: 'inherit',
   });
   const manifest = JSON.parse(fs.readFileSync(path.join(CONTRACTS_ROOT, 'manifest.json'), 'utf8'));
-  if (!/^[0-9a-f]{40}$/.test(manifest.saas_commit || '')) {
+  if (!/^[0-9a-f]{40}$/.test(manifest.saasCommit || '')) {
     throw new Error('合同清单缺少完整 SaaS 来源提交');
   }
   return SPECS.map((spec) => {
-    const relative = `backend/.swagger/${spec.file}`;
-    const input = path.join(CONTRACTS_ROOT, 'source', relative);
+    const relative = spec.file;
+    const input = path.join(CONTRACTS_ROOT, relative);
     const expected = manifest.files?.[relative];
     if (!/^[0-9a-f]{64}$/.test(expected || '') || !fs.existsSync(input)) {
       throw new Error(`合同清单缺少 ${relative}`);

@@ -1,9 +1,11 @@
+<!-- 区域编辑：保存名称、图标和新建时的父级，变更前核验项目管理资格。 -->
 <template>
 <app-navigation-bar :title="title" />
 
 <scroll-view class="re-body" scroll-y :show-scrollbar="false">
   <view class="re-content">
-    <!-- 房间名 行式 input -->
+    <view class="re-intro"><text class="re-intro__title">{{ editingID ? '编辑区域信息' : '创建一个区域' }}</text><text class="re-intro__hint">{{ editingID ? '修改名称或图标，方便识别' : `添加到：${parentAreaName || '项目根区域'}` }}</text></view>
+    <!-- 区域名称和图标用于在层级中识别位置。 -->
     <view class="re-card">
       <view class="re-row">
         <text class="re-row__label">{{TERM.area}}名</text>
@@ -14,6 +16,7 @@
           placeholder-class="re-row__input-ph"
           maxlength="30"
           :focus="true"
+          @input="handleNameInput"
           @blur="handleNameBlur"
         />
       </view>
@@ -28,7 +31,9 @@
         @tap="handleSelectIcon(item.value)"
         hover-class="re-icon--hover"
       >
-        <app-icon class="re-icon__glyph" :name="item.value" :size="'56rpx'" />
+        <app-icon class="re-icon__glyph" :name="item.value" :size="'48rpx'" />
+        <text class="re-icon__label">{{ item.label }}</text>
+        <app-icon v-if="item.value === selectedIcon" class="re-icon__check" name="tabler:check" :size="16" />
       </view>
     </view>
   </view>
@@ -51,6 +56,7 @@ import AppIcon from '../../../components/app-icon/app-icon.vue';
 import AppNavigationBar from '../../../components/app-navigation-bar/app-navigation-bar.vue';
 import { ref, watch } from 'vue'
 import { onLoad } from '@dcloudio/uni-app'
+import { authProvider } from '../../../providers/auth.provider'
 import { areaProvider } from '../../../providers/area.provider'
 import { areaService } from '../../../services/area.service'
 import { TERM } from '../../../config/terminology'
@@ -62,13 +68,18 @@ const icons = ref(AREA_ICONS)
 const title = ref('')
 const projectID = ref('')
 const editingID = ref('')
+/** parentAreaID 是新建区域的目标父级，默认项目根节点。 */
+const parentAreaID = ref('1')
+const parentAreaName = ref('')
 const name = ref('')
 const selectedIcon = ref(AREA_ICON_DEFAULT)
 const submitting = ref(false)
 const canSubmit = ref(false)
 
-/** 名称输入框采用失焦同步：聚焦输入期间不写响应式 value，避免 setData 回写干扰原生输入框显示；blur 先于保存按钮 tap，保存处拿到最新值 */
-function handleNameBlur(e: any) { name.value = e.detail.value }
+/** 输入时只记录草稿，保存时同步，避免原生输入回写打断光标。 */
+let nameDraft = ''
+function handleNameInput(e: any) { nameDraft = e.detail.value; canSubmit.value = !!nameDraft.trim() }
+function handleNameBlur(e: any) { nameDraft = e.detail.value; name.value = nameDraft }
 
 /** 房间名输入变化时同步刷新保存按钮可用状态 */
 watch(name, (next) => {
@@ -80,6 +91,10 @@ onLoad(async (options: Record<string, string | undefined> = {}) => {
   if (!ready) return
   const pid = options.projectID || ''
   const eid = options.areaID || ''
+  parentAreaID.value = options.parentAreaID || '1'
+  parentAreaName.value = decodeURIComponent(options.parentAreaName || '')
+  await areaProvider.initialize(pid, authProvider.getState().user?.userID || '', parentAreaID.value)
+  if (!areaProvider.getState().canManage) { uni.showToast({ title: '没有区域管理权限', icon: 'none' }); return }
   projectID.value = pid
   editingID.value = eid
   title.value = eid ? TERM.areaEditTitle : TERM.areaCreateTitle
@@ -89,6 +104,7 @@ onLoad(async (options: Record<string, string | undefined> = {}) => {
       const area = await areaService.getOne(eid)
       const icon = normalizeAreaIcon(area.areaImg || AREA_ICON_DEFAULT)
       name.value = area.areaName
+      nameDraft = area.areaName
       selectedIcon.value = icon
       canSubmit.value = !!area.areaName.trim()
     } catch (err: unknown) {
@@ -100,7 +116,8 @@ onLoad(async (options: Record<string, string | undefined> = {}) => {
 function handleSelectIcon(icon: string) { selectedIcon.value = normalizeAreaIcon(icon) }
 
 function handleSubmitTap() {
-  if (submitting.value || !canSubmit.value) return
+  name.value = nameDraft
+  if (submitting.value || !nameDraft.trim()) return
   void handleSubmit()
 }
 
@@ -111,10 +128,10 @@ async function handleSubmit() {
   submitting.value = true
   try {
     if (editingID.value) {
-      await areaProvider.updateArea({ areaID: editingID.value, areaName: n })
+      await areaProvider.updateArea({ areaID: editingID.value, areaName: n, areaImg: selectedIcon.value })
       uni.showToast({ title: '已更新', icon: 'success' })
     } else {
-      await areaProvider.createArea({ projectID: projectID.value, areaName: n })
+      await areaProvider.createArea({ projectID: projectID.value, parentAreaID: parentAreaID.value, areaName: n, areaImg: selectedIcon.value })
       uni.showToast({ title: '已创建', icon: 'success' })
     }
     setTimeout(() => uni.navigateBack({ delta: 1 }), 500)
@@ -133,7 +150,7 @@ page {
   height: 100vh;
   width: 100%;
   overflow: hidden;
-  background: var(--page-bg);
+  background: var(--page-gradient);
   box-sizing: border-box;
 }
 
@@ -154,7 +171,7 @@ page {
 /* 行式 input 卡片：左 label 右 input */
 .re-card {
   background: var(--card-bg);
-  border-radius: 24rpx;
+  border-radius: var(--radius-lg);
   width: 100%;
   box-sizing: border-box;
   overflow: hidden;
@@ -171,7 +188,7 @@ page {
 }
 
 .re-row__label {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   flex-shrink: 0;
   margin-right: 24rpx;
@@ -183,7 +200,7 @@ page {
   flex: 1;
   width: 0;
   min-width: 0;
-  font-size: 30rpx;
+  font-size: var(--font-body);
   color: var(--text-primary);
   text-align: right;
   /* 重置 skyline native input 默认内边距 */
@@ -199,7 +216,7 @@ page {
 
 .re-section__title {
   display: block;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
   margin: 40rpx 8rpx 16rpx;
 }
@@ -257,7 +274,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 30rpx;
+  font-size: var(--font-body);
 }
 
 .re-btn--primary {
@@ -274,4 +291,11 @@ page {
   color: var(--color-on-primary);
 }
 
+.re-intro { padding: 8px 4px 18px; }
+.re-intro__title { display: block; font-size: var(--font-section); font-weight: 700; color: var(--text-primary); }
+.re-intro__hint { display: block; margin-top: 6px; font-size: var(--font-caption); color: var(--text-secondary); }
+.re-icon { position: relative; flex-direction: column; gap: 8px; height: 148rpx; }
+.re-icon__label { font-size: var(--font-caption); color: var(--text-secondary); }
+.re-icon__check { position: absolute; right: 8px; top: 8px; color: var(--color-primary); }
+.re-icon--active .re-icon__label { color: var(--color-primary); }
 </style>

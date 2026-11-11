@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar :title="title" :back="mode !== 'select'" />
 
@@ -39,6 +40,7 @@
   </template>
 
   <empty-state v-else text="暂无可用组织" />
+  <view v-if="mode === 'select'" class="tm-exit" @tap="returnHome"><text>返回首页</text></view>
 
   <view class="tm-bottom-spacer" :style="`height: ${bottomSpacerHeight}px;`"></view>
 </scroll-view>
@@ -104,6 +106,9 @@ onShow(() => {
 onUnload(() => { unsubscribes.forEach(fn => fn()) })
 onUnmounted(() => { unsubscribes.forEach(fn => fn()) })
 
+/** 返回公开首页，避免组织不可用或登录失效时被困在选择页。 */
+function returnHome(): void { uni.switchTab({ url: '/pages/home/index' }) }
+
 async function handleSwitchTenant(item: TenantEntity) {
   if (!item?.code || item.code === currentTenantCode.value) return
   if (!tenantProvider.switchTenant(item.code)) return
@@ -144,6 +149,8 @@ page {
   background: var(--color-bg-secondary);
 }
 
+.tm-exit { margin: 24px 16px; padding: 14px; text-align: center; color: var(--color-primary); font-size: var(--font-body); }
+
 .tm-page {
   box-sizing: border-box;
   padding: 24rpx;
@@ -157,13 +164,13 @@ page {
 }
 
 .tm-header__title {
-  font-size: 34rpx;
+  font-size: var(--font-label);
   font-weight: 600;
   color: var(--text-primary);
 }
 
 .tm-header__desc {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -180,7 +187,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 28rpx;
+  font-size: var(--font-body);
   font-weight: 500;
 }
 
@@ -197,7 +204,7 @@ page {
 
 .tm-card {
   background: var(--card-bg);
-  border-radius: 24rpx;
+  border-radius: var(--radius-lg);
   padding: 28rpx;
   margin-bottom: 20rpx;
   border: 2rpx solid transparent;
@@ -222,7 +229,7 @@ page {
 }
 
 .tm-card__name {
-  font-size: 30rpx;
+  font-size: var(--font-body);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -232,7 +239,7 @@ page {
   border-radius: 999rpx;
   background: var(--color-primary);
   color: var(--color-on-primary);
-  font-size: 20rpx;
+  font-size: var(--font-caption);
 }
 
 .tm-card__badge--ghost {
@@ -241,12 +248,12 @@ page {
 }
 
 .tm-card__code {
-  font-size: 22rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
 .tm-card__desc {
-  font-size: 24rpx;
+  font-size: var(--font-caption);
   color: var(--text-secondary);
 }
 
@@ -264,7 +271,7 @@ page {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 26rpx;
+  font-size: var(--font-caption);
   color: var(--color-primary);
 }
 

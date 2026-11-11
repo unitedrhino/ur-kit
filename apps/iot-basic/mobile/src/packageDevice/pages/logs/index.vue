@@ -1,3 +1,4 @@
+<!-- 移动端页面与控件，使用统一主题、字号和圆角规范。 -->
 <template>
 <app-navigation-bar title="设备日志" />
 
@@ -178,7 +179,7 @@ onUnmounted(() => {
 .logs-page {
   flex: 1;
   min-height: 0;
-  background: var(--page-bg);
+  background: transparent;
 }
 
 .logs-filter {
@@ -202,7 +203,7 @@ onUnmounted(() => {
   color: var(--text-secondary);
   background: var(--page-bg);
   border-radius: var(--radius-sm, 8px);
-  font-size: 14px;
+  font-size: var(--font-body);
   text-align: center;
 }
 
@@ -226,7 +227,7 @@ onUnmounted(() => {
   color: var(--text-secondary);
   background: var(--page-bg);
   border-radius: var(--radius-sm, 8px);
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .logs-preset--active {
@@ -248,7 +249,7 @@ onUnmounted(() => {
 .logs-error__text {
   display: block;
   color: var(--color-error);
-  font-size: 13px;
+  font-size: var(--font-caption);
 }
 
 .logs-error__btn {
@@ -259,7 +260,7 @@ onUnmounted(() => {
   color: var(--color-on-primary);
   background: var(--color-primary);
   border-radius: var(--radius-sm, 8px);
-  font-size: 13px;
+  font-size: var(--font-caption);
 }
 
 .logs-date-group {
@@ -275,13 +276,13 @@ onUnmounted(() => {
 
 .logs-date-head__title {
   color: var(--text-primary);
-  font-size: 14px;
+  font-size: var(--font-body);
   font-weight: 700;
 }
 
 .logs-date-head__count {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .logs-item {
@@ -308,7 +309,7 @@ onUnmounted(() => {
 
 .logs-item__time {
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
   font-family: monospace;
 }
 
@@ -318,14 +319,14 @@ onUnmounted(() => {
   color: var(--color-primary);
   background: var(--color-primary-light);
   border-radius: var(--radius-full, 9999px);
-  font-size: 11px;
+  font-size: var(--font-caption);
 }
 
 .logs-item__title {
   display: block;
   margin-top: 8px;
   color: var(--text-primary);
-  font-size: 15px;
+  font-size: var(--font-body);
   font-weight: 600;
 }
 
@@ -334,7 +335,7 @@ onUnmounted(() => {
   display: block;
   margin-top: 5px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
   word-break: break-all;
 }
 
@@ -354,21 +355,21 @@ onUnmounted(() => {
   flex-shrink: 0;
   width: 72px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
 }
 
 .logs-detail__value {
   flex: 1;
   min-width: 0;
   color: var(--text-primary);
-  font-size: 12px;
+  font-size: var(--font-caption);
   word-break: break-all;
 }
 
 .logs-load-more {
   padding: 12px;
   color: var(--text-secondary);
-  font-size: 12px;
+  font-size: var(--font-caption);
   text-align: center;
 }
 </style>

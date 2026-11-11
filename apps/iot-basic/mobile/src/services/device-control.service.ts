@@ -37,7 +37,8 @@ function mergeProperties(schema: ThingModelSchema, latest: PropertyState[]): Pro
         mode: p.mode,
         define: p.define,
         funcGroup: p.funcGroup,
-        value: l ? l.value : null,
+        // 物模型默认值没有采样时间，不应当成设备真实上报值展示。
+        value: l && l.timestamp > 0 ? l.value : null,
         timestamp: l ? l.timestamp : 0,
       };
     });
@@ -80,7 +81,7 @@ export class DeviceControlService {
 
   async loadControlModel(device: DeviceEntity): Promise<DeviceControlModel> {
     const [thingModel, latest] = await Promise.all([
-      this.interactRepo.getThingModel(device.productID),
+      this.interactRepo.getThingModel(device.productID, device.deviceName),
       this.interactRepo.getLatestProperties(device.productID, device.deviceName),
     ]);
     return {
