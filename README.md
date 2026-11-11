@@ -143,7 +143,7 @@ BACKEND_URL="$PLATFORM_URL" pnpm --filter org-iot-client dev
 go run ./protocols/modbus/cmd/demo
 ```
 
-示例在本机启动模拟设备，读取初始值 `42`、写入 `258` 并再次读取，无需连接平台或物理设备。实际设备的 TCP、UDP、串口、TLS、点位类型与持久会话配置见 [Modbus 接入说明](protocols/modbus/README.md)。
+示例在本机启动模拟设备，读取初始值 `42`、写入 `258` 并再次读取。要用联犀 Modbus 网关采集模拟设备，按[网关接入案例](protocols/modbus/README.md#通过网关接入模拟设备)配置产品点位和设备连接，再在平台读回属性。
 
 ## 使用 AI 开发
 

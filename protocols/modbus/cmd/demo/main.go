@@ -1,34 +1,50 @@
-// 本文件运行一个本地 Modbus TCP 设备，并用公开客户端演示寄存器读写。
+// 本文件演示 Modbus TCP 读写，也可为平台网关持续提供模拟设备。
 package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/unitedrhino/ur-kit/protocols/modbus"
 )
 
-// main 启动回环地址模拟设备，读取、写入并再次读取寄存器。
+// main 根据监听参数启动持续运行的模拟设备，或执行一次本地读写演示。
 func main() {
-	if err := run(); err != nil {
+	listen := flag.String("listen", "", "持续运行模拟设备的 TCP 地址，例如 127.0.0.1:15020")
+	flag.Parse()
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if err := run(ctx, *listen); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}
 }
 
-// run 完成本地功能码 3/6 演示，并等待模拟设备结束。
-func run() error {
-	listener, err := net.Listen("tcp", "127.0.0.1:0")
+// run 使用同一组初始寄存器演示读写；指定地址时等待网关连接，直到上下文取消。
+func run(ctx context.Context, listen string) error {
+	address := listen
+	if address == "" {
+		address = "127.0.0.1:0"
+	}
+	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return err
 	}
-	ctx, cancel := context.WithCancel(context.Background())
-	done := make(chan error, 1)
 	initial := make([]uint16, 16)
 	initial[10] = 42
-	go func() { done <- modbus.NewSimulator(initial).Serve(ctx, listener) }()
+	simulator := modbus.NewSimulator(initial)
+	if listen != "" {
+		fmt.Printf("Modbus TCP listening on %s, holding register 10 = 42\n", listener.Addr())
+		return simulator.Serve(ctx, listener)
+	}
+	ctx, cancel := context.WithCancel(ctx)
+	done := make(chan error, 1)
+	go func() { done <- simulator.Serve(ctx, listener) }()
 	defer func() { cancel(); <-done }()
 	client := modbus.Client{Address: listener.Addr().String(), UnitID: 1}
 	before, err := client.ReadHoldingRegisters(ctx, 10, 1)
