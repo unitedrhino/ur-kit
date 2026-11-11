@@ -38,7 +38,7 @@ my-protocol/
 | MQTT 会话与最后活动时间 | [tracking](../../../../things/sdk/protocol/tracking/tracking.go) |
 | 云配置和产品设备同步 | [cloud](../../../../things/sdk/protocol/cloud)、[运行时集成测试](../../../../things/sdk/protocol/cloud/runtime_integration_test.go) |
 | 设备/产品缓存和物模型校验 | [cache](../../../../things/sdk/cache)、[schema](../../../../things/sdk/schema) |
-| Modbus 点位读写和模拟设备 | [Modbus 说明](../../../../protocols/modbus/README.md)、[可运行例子](../../../../protocols/modbus/cmd/demo/main.go) |
+| Modbus 点位读写、模拟设备和网关联调 | [Modbus 说明](../../../../protocols/modbus/README.md)、[网关接入案例](../../../../protocols/modbus/README.md#通过网关接入模拟设备) |
 
 平台接入须由平台管理员提供：Things RPC 的服务发现或连接地址及服务认证方式、NATS 的连接/账号及主题授权、按需提供 Redis、Broker 连接和管理 API 权限。仅有 HTTP 根地址和登录令牌，不能假定可以访问平台内部 RPC、NATS 或 Redis。不要让 AI 伪造 root 元数据绕过服务认证。
 
